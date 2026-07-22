@@ -45,7 +45,7 @@ export class ExpenseList implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly displayedColumns = ['item', 'date', 'bank', 'price', 'source', 'tags', 'actions'];
+  readonly displayedColumns = ['date', 'bank', 'price', 'tracker', 'tags', 'actions'];
   readonly pageSizes = [10, 20, 50];
 
   readonly filterForm = this.formBuilder.group({

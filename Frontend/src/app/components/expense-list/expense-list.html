@@ -153,11 +153,6 @@
 				<p>No expenses yet.</p>
 			} @else {
 				<table mat-table [dataSource]="pagedExpenses" class="expense-table">
-					<ng-container matColumnDef="item">
-						<th mat-header-cell *matHeaderCellDef>Item</th>
-						<td mat-cell *matCellDef="let expense">{{ expense.item }}</td>
-					</ng-container>
-
 					<ng-container matColumnDef="date">
 						<th mat-header-cell *matHeaderCellDef>Date</th>
 						<td mat-cell *matCellDef="let expense">{{ expense.date | date: 'mediumDate' }}</td>
@@ -173,8 +168,8 @@
 						<td mat-cell *matCellDef="let expense">{{ expense.price | currency }}</td>
 					</ng-container>
 
-					<ng-container matColumnDef="source">
-						<th mat-header-cell *matHeaderCellDef>Source</th>
+					<ng-container matColumnDef="tracker">
+						<th mat-header-cell *matHeaderCellDef>Tracker</th>
 						<td mat-cell *matCellDef="let expense">{{ expense.source?.name || '-' }}</td>
 					</ng-container>
 
