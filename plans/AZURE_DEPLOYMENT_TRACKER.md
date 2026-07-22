@@ -27,8 +27,8 @@ Track Azure deployment implementation progress, key decisions, risks, and rollou
 - [ ] Confirm migration execution strategy for cloud
 
 ### 3. Infrastructure as Code
-- [ ] Terraform Lite module structure created (minimal modules)
-- [ ] Terragrunt live structure created (single environment: dev)
+- [x] Terraform Lite module structure created (minimal modules)
+- [x] Terragrunt live structure created (single environment: dev)
 - [ ] Remote state backend created/configured
 - [ ] Dev infrastructure plan successful
 - [ ] Dev infrastructure apply successful
@@ -125,6 +125,8 @@ Track meaningful deployment changes and outcomes.
 | Date | Change | Environment | Outcome | Notes |
 |------|--------|-------------|---------|-------|
 | 2026-07-22 | Tracker file created | N/A | Done | Initial baseline |
+| 2026-07-22 | Terraform Lite scaffold created (modules + live/dev Terragrunt) | dev | Done | Step 1 complete |
+| 2026-07-22 | Remote state strategy wired and bootstrap script added | dev | Done | Step 2 prepared; run bootstrap script to create backend |
 
 ## Risks and Blockers
 
@@ -132,8 +134,8 @@ Track meaningful deployment changes and outcomes.
 |------|--------------|----------|------------|-------|--------|
 
 ## Next Actions (Top 5)
-1. Scaffold Terraform Lite modules and Terragrunt live layout for a single environment.
-2. Create Azure remote state storage and lock strategy.
+1. Run backend bootstrap script to create Azure state resources in your subscription.
+2. Run Terragrunt plan for `foundation`, then `data`, then `app`.
 3. Provision core stack in Australia East (API, frontend host, Azure SQL, Key Vault).
 4. Validate end-to-end expense flows in Azure.
 5. Add CI/CD pipeline with OIDC and a single deployment lane.

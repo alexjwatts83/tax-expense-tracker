@@ -112,6 +112,9 @@ Current filter query params:
 
 - .NET SDK 10
 - Node.js LTS (Volta recommended)
+- Terraform >= 1.6 (for Azure infrastructure)
+- Terragrunt >= 0.60 (for stack orchestration)
+- Azure CLI (for Azure auth and backend bootstrap)
 
 ### Install/Verify Prerequisites
 

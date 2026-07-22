@@ -73,6 +73,25 @@ function Parse-SemVerMajor {
     return [int]$match.Groups[1].Value
 }
 
+function Parse-SemVer {
+    param([string]$VersionText)
+
+    if ([string]::IsNullOrWhiteSpace($VersionText)) {
+        return $null
+    }
+
+    $match = [regex]::Match($VersionText, "(\d+)\.(\d+)\.(\d+)")
+    if (-not $match.Success) {
+        return $null
+    }
+
+    return [version]::new(
+        [int]$match.Groups[1].Value,
+        [int]$match.Groups[2].Value,
+        [int]$match.Groups[3].Value
+    )
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $missing = New-Object System.Collections.Generic.List[string]
 $warnings = New-Object System.Collections.Generic.List[string]
@@ -163,6 +182,77 @@ else {
     Write-Pass "Angular CLI found"
 }
 
+# Terraform 1.6+
+$terraformCmd = Get-Command terraform -ErrorAction SilentlyContinue
+if ($null -eq $terraformCmd) {
+    Write-Fail "Terraform is not installed or not on PATH."
+    $missing.Add("Terraform 1.6+") | Out-Null
+}
+else {
+    $terraformVersionText = Get-CommandVersion -Command "terraform" -Args @("version", "-json")
+    if ($null -ne $terraformVersionText) {
+        try {
+            $terraformVersionJson = $terraformVersionText | ConvertFrom-Json
+            $terraformVersionText = [string]$terraformVersionJson.terraform_version
+        }
+        catch {
+            $terraformVersionText = Get-CommandVersion -Command "terraform" -Args @("version")
+        }
+    }
+    else {
+        $terraformVersionText = Get-CommandVersion -Command "terraform" -Args @("version")
+    }
+
+    $terraformVersion = Parse-SemVer -VersionText $terraformVersionText
+    if ($null -eq $terraformVersion) {
+        Write-Warn "Could not parse Terraform version from '$terraformVersionText'."
+        $warnings.Add("Unable to parse Terraform version") | Out-Null
+    }
+    elseif ($terraformVersion -lt ([version]"1.6.0")) {
+        Write-Fail "Terraform 1.6+ required, found $terraformVersionText."
+        $missing.Add("Terraform 1.6+") | Out-Null
+    }
+    else {
+        Write-Pass "Terraform found ($(Format-Version $terraformVersionText))"
+    }
+}
+
+# Terragrunt 0.60+
+$terragruntCmd = Get-Command terragrunt -ErrorAction SilentlyContinue
+if ($null -eq $terragruntCmd) {
+    Write-Fail "Terragrunt is not installed or not on PATH."
+    $missing.Add("Terragrunt 0.60+") | Out-Null
+}
+else {
+    $terragruntVersionText = Get-CommandVersion -Command "terragrunt" -Args @("--version")
+    $terragruntVersion = Parse-SemVer -VersionText $terragruntVersionText
+    if ($null -eq $terragruntVersion) {
+        Write-Warn "Could not parse Terragrunt version from '$terragruntVersionText'."
+        $warnings.Add("Unable to parse Terragrunt version") | Out-Null
+    }
+    elseif ($terragruntVersion -lt ([version]"0.60.0")) {
+        Write-Fail "Terragrunt 0.60+ required, found $terragruntVersionText."
+        $missing.Add("Terragrunt 0.60+") | Out-Null
+    }
+    else {
+        Write-Pass "Terragrunt found ($(Format-Version $terragruntVersionText))"
+    }
+}
+
+# Azure CLI
+$azCmd = Get-Command az -ErrorAction SilentlyContinue
+if ($null -eq $azCmd) {
+    Write-Fail "Azure CLI is not installed or not on PATH."
+    $missing.Add("Azure CLI") | Out-Null
+}
+else {
+    $azVersion = Get-CommandVersion -Command "az" -Args @("version", "--query", "azure-cli", "-o", "tsv")
+    if ([string]::IsNullOrWhiteSpace($azVersion)) {
+        $azVersion = Get-CommandVersion -Command "az" -Args @("--version")
+    }
+    Write-Pass "Azure CLI found ($(Format-Version $azVersion))"
+}
+
 Write-Section "Project-Specific Checks"
 
 # Local dotnet tool manifest
@@ -214,5 +304,8 @@ Write-Host "  - Install Volta, then run:"
 Write-Host "      volta install node@lts"
 Write-Host "      volta pin node@lts"
 Write-Host "      volta install @angular/cli"
+Write-Host "  - Install Terraform (>= 1.6)"
+Write-Host "  - Install Terragrunt (>= 0.60)"
+Write-Host "  - Install Azure CLI"
 Write-Host ""
 exit 1
