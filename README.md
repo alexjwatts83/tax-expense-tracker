@@ -7,7 +7,10 @@ Tax Expense Tracker is a full-stack app for managing tax-deductible expenses wit
 - DDD/Clean architecture across Domain, Application, Infrastructure, and API layers
 - Soft delete and restore flows for trackers, tags, banks, and expenses
 - Expense filtering (single date, bank, price cap, tracker, tags)
+- Inline expense creation on the Expenses page
+- Manual tag entry with explicit Apply Tags flow (create missing tags, then attach)
 - Dashboard summary totals grouped by bank and source
+- TaxExpense.Item removed end-to-end from domain, API, frontend models, and DB schema
 - Local run automation scripts with robust port handling
 
 ## Tech Stack
@@ -37,7 +40,7 @@ Core entities:
 
 TaxExpense stores:
 
-- Item, Description, Date, Price
+- Description, Date, Price
 - BankId -> Bank
 - SourceId -> Tracker
 - Tags via TaxExpenseTag
@@ -96,7 +99,6 @@ Current filter query params:
 
 - /dashboard
 - /expenses
-- /expenses/new
 - /trackers
 - /tags
 - /banks
@@ -164,6 +166,11 @@ dotnet ef migrations add <MigrationName> --project Backend/TaxExpenseTracker.Inf
 dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api --context AppDbContext
 ```
 
+Recent schema updates:
+
+- `20260722041006_MakeBankEntity` (bank converted from string field to entity relationship)
+- `20260722044559_RemoveExpenseItem` (removed Item column from TaxExpenses)
+
 ## Status
 
 - Phase 1 complete
@@ -171,5 +178,6 @@ dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --s
 - Phase 3 complete
 - DDD/Clean phases A-F complete
 - Bank entity refactor completed end-to-end (backend, frontend, migration, tests)
+- Expense Item field removed end-to-end (backend, frontend, migration, tests)
 
 Open work remains in Phase 4 (deployment, coverage expansion, CSV export, additional trend analytics).

@@ -52,7 +52,6 @@ A web application to track and manage tax-deductible expenses with a focus on fi
 
 ### Tax Expense Table
 - Id (GUID/UUID) - Primary Key
-- Item (string)
 - Description (string)
 - Date (DateTime)
 - BankId (GUID) - Foreign Key to Bank
@@ -190,7 +189,11 @@ Current expense filter query parameters:
 
 - Dashboard with summary cards
 - Expense list with pagination and filters
-- Expense creation form with bank/tracker/tag selectors
+- Inline expense creation on the expenses page
+- Add expense form order: Tracker, Description, Date, Bank, Price, Tags, Add New Tags
+- Filter order aligned to primary data entry fields (Tracker, Date, Bank, Price, Tags)
+- Manual tag create-and-attach flow via Apply Tags action
+- Dedicated expense form remains available with bank/tracker/tag selectors
 - Tracker management with soft delete + undo restore
 - Tag management with soft delete + undo restore
 - Bank management with soft delete + undo restore
@@ -233,6 +236,8 @@ Current expense filter query parameters:
 - [x] Completed
 - [x] Single-date filter refactor completed
 - [x] Bank-as-entity refactor completed end-to-end
+- [x] TaxExpense.Item removed end-to-end and DB migration added
+- [x] Inline add-expense UX implemented on expenses page
 - [x] Local start/stop automation scripts hardened
 
 ### Phase 4: Deployment & Enhancements
@@ -284,4 +289,6 @@ powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scri
 
 - Core product flows are implemented and working locally.
 - Bank is now a dedicated entity integrated through backend, frontend, and migrations.
+- TaxExpense no longer includes an Item field in domain contracts, API payloads, frontend models, or DB schema.
+- Expense creation is available inline on the Expenses page, including manual tag creation before submit.
 - Phase 4 tasks are the primary remaining workstream.
