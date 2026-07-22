@@ -92,12 +92,36 @@ function Parse-SemVer {
     )
 }
 
+function Add-PathIfExists {
+    param([Parameter(Mandatory = $true)][string]$PathToAdd)
+
+    if (-not (Test-Path $PathToAdd)) {
+        return
+    }
+
+    $parts = $env:Path -split ";" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    if ($parts -contains $PathToAdd) {
+        return
+    }
+
+    $env:Path = "$env:Path;$PathToAdd"
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $missing = New-Object System.Collections.Generic.List[string]
 $warnings = New-Object System.Collections.Generic.List[string]
 
 Write-Section "Tax Expense Tracker Prerequisite Check"
 Write-Host "Repository: $repoRoot"
+
+# Normalize PATH for shells that do not auto-include user/machine updates.
+$machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if (-not [string]::IsNullOrWhiteSpace($machinePath) -or -not [string]::IsNullOrWhiteSpace($userPath)) {
+    $env:Path = "$machinePath;$userPath"
+}
+Add-PathIfExists -PathToAdd (Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Links")
+Add-PathIfExists -PathToAdd "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin"
 
 Write-Section "Required Tools"
 

@@ -58,6 +58,22 @@ function Require-Winget {
     }
 }
 
+function Add-PathIfExists {
+    param([Parameter(Mandatory = $true)][string]$PathToAdd)
+
+    if (-not (Test-Path $PathToAdd)) {
+        return
+    }
+
+    $parts = $env:Path -split ";" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    if ($parts -contains $PathToAdd) {
+        return
+    }
+
+    $env:Path = "$env:Path;$PathToAdd"
+    Write-Info "Added to current PATH: $PathToAdd"
+}
+
 Write-Section "Tax Expense Tracker Prerequisite Installer"
 Write-Host "Dry run: $DryRun"
 
@@ -92,11 +108,44 @@ else {
     Write-Pass "Volta already installed"
 }
 
+if (-not (Has-Command "terraform")) {
+    Invoke-Step -Description "Installing Terraform (Hashicorp.Terraform)" -Action {
+        winget install --id Hashicorp.Terraform -e --source winget --accept-source-agreements --accept-package-agreements
+    }
+}
+else {
+    Write-Pass "Terraform already installed"
+}
+
+if (-not (Has-Command "terragrunt")) {
+    Invoke-Step -Description "Installing Terragrunt (Gruntwork.Terragrunt)" -Action {
+        winget install --id Gruntwork.Terragrunt -e --source winget --accept-source-agreements --accept-package-agreements
+    }
+}
+else {
+    Write-Pass "Terragrunt already installed"
+}
+
+if (-not (Has-Command "az")) {
+    Invoke-Step -Description "Installing Azure CLI (Microsoft.AzureCLI)" -Action {
+        winget install --id Microsoft.AzureCLI -e --source winget --accept-source-agreements --accept-package-agreements
+    }
+}
+else {
+    Write-Pass "Azure CLI already installed"
+}
+
 Write-Section "Refreshing PATH"
 Invoke-Step -Description "Refreshing PATH for current session" -Action {
     $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
     $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
     $env:Path = "$machinePath;$userPath"
+
+    # Some winget-installed executables are exposed via WinGet links.
+    Add-PathIfExists -PathToAdd (Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Links")
+
+    # Azure CLI command shim path.
+    Add-PathIfExists -PathToAdd "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin"
 }
 
 Write-Section "Installing Node Toolchain via Volta"
@@ -106,29 +155,64 @@ if ((-not $DryRun) -and (-not (Has-Command "volta"))) {
     exit 1
 }
 
-Invoke-Step -Description "Installing Node LTS via Volta" -Action {
-    volta install node@lts
+$frontendPath = Join-Path (Join-Path $PSScriptRoot "..") "Frontend"
+$frontendPackagePath = Join-Path $frontendPath "package.json"
+
+if (-not (Has-Command "node")) {
+    Invoke-Step -Description "Installing Node LTS via Volta" -Action {
+        volta install node@lts
+    }
+}
+else {
+    Write-Pass "Node.js already installed"
 }
 
-Invoke-Step -Description "Pinning Node LTS for this repository" -Action {
-    Push-Location (Join-Path $PSScriptRoot "..")
+$hasVoltaNodePin = $false
+if (Test-Path $frontendPackagePath) {
     try {
-        volta pin node@lts
+        $packageJson = Get-Content -Path $frontendPackagePath -Raw | ConvertFrom-Json
+        if (($null -ne $packageJson.volta) -and (-not [string]::IsNullOrWhiteSpace($packageJson.volta.node))) {
+            $hasVoltaNodePin = $true
+        }
     }
-    finally {
-        Pop-Location
+    catch {
+        Write-Warn "Could not parse Frontend/package.json. Will attempt to pin Node via Volta."
     }
 }
 
-Invoke-Step -Description "Installing Angular CLI via Volta" -Action {
-    volta install @angular/cli
+if ($hasVoltaNodePin) {
+    Write-Pass "Node version already pinned in Frontend/package.json"
+}
+else {
+    Invoke-Step -Description "Pinning Node LTS for this repository" -Action {
+        if (-not (Test-Path $frontendPackagePath)) {
+            throw "Frontend/package.json not found. Cannot run 'volta pin' safely."
+        }
+
+        Push-Location $frontendPath
+        try {
+            volta pin node@lts
+        }
+        finally {
+            Pop-Location
+        }
+    }
+}
+
+if (-not (Has-Command "ng")) {
+    Invoke-Step -Description "Installing Angular CLI via Volta" -Action {
+        volta install @angular/cli
+    }
+}
+else {
+    Write-Pass "Angular CLI already installed"
 }
 
 Write-Section "Verification"
 
 $missingAfterInstall = New-Object System.Collections.Generic.List[string]
 
-foreach ($cmd in @("git", "dotnet", "volta", "node", "npm", "ng")) {
+foreach ($cmd in @("git", "dotnet", "volta", "node", "npm", "ng", "terraform", "terragrunt", "az")) {
     if (Has-Command $cmd) {
         Write-Pass "$cmd is available"
     }
