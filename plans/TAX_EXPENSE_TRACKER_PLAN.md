@@ -98,29 +98,20 @@ Columns:
 
 ```
 tax-expense-tracker/
+├── TaxExpenseTracker.sln
 ├── Backend/
+│   ├── TaxExpenseTracker.Domain/
+│   │   └── Entities/
+│   ├── TaxExpenseTracker.Application/
+│   │   └── Trackers/
+│   ├── TaxExpenseTracker.Infrastructure/
 │   ├── TaxExpenseTracker.Api/
-│   │   ├── Program.cs
-│   │   ├── appsettings.json
 │   │   ├── Controllers/
-│   │   │   ├── ExpensesController.cs
-│   │   │   ├── TrackersController.cs
-│   │   │   └── TagsController.cs
-│   │   ├── Models/
-│   │   │   ├── TaxExpense.cs
-│   │   │   ├── Tracker.cs
-│   │   │   ├── Tag.cs
-│   │   │   ├── CreateExpenseDto.cs
-│   │   │   ├── ExpenseResponseDto.cs
-│   │   │   └── TagDto.cs
 │   │   ├── Data/
-│   │   │   ├── AppDbContext.cs
-│   │   │   └── Migrations/
-│   │   ├── Services/
-│   │   │   ├── ExpenseService.cs
-│   │   │   ├── TrackerService.cs
-│   │   │   └── TagService.cs
-│   │   └── TaxExpenseTracker.Api.csproj
+│   │   ├── Models/
+│   │   └── Migrations/
+│   ├── TaxExpenseTracker.Tests.Unit/
+│   └── TaxExpenseTracker.Tests.Integration/
 ├── Frontend/
 │   ├── src/
 │   │   ├── app/
@@ -141,6 +132,12 @@ tax-expense-tracker/
 │   ├── package.json
 │   ├── angular.json
 │   └── proxy.conf.json
+├── scripts/
+│   ├── Check-Prerequisites.ps1
+│   └── Install-Prerequisites.ps1
+├── plans/
+│   ├── TAX_EXPENSE_TRACKER_PLAN.md
+│   └── DDD_CLEAN_ARCHITECTURE_PLAN.md
 ├── README.md
 └── .gitignore
 ```
@@ -321,6 +318,16 @@ AppComponent
 - [x] NLog file target configured to `C:/logs/TaxExpenseTracker.Api`
 - [x] Visual Studio solution file added (`TaxExpenseTracker.sln`)
 
+### DDD/Clean Migration Status (In Progress)
+- [x] Added Domain/Application/Infrastructure projects and test projects
+- [x] Moved core entities to Domain
+- [x] Added domain invariants and behavior methods
+- [x] Refactored tracker API slice to use application contracts/service + repository abstraction
+- [x] Added initial unit tests for domain invariants and tracker service
+- [ ] Apply Phase C service/repository pattern to Tag feature
+- [ ] Apply Phase C service/repository/query pattern to Expense feature
+- [ ] Move persistence ownership to Infrastructure layer (Phase D)
+
 ### Phase 2: Frontend Setup (Week 1-2)
 - [x] Initialize Angular project
 - [x] Create services for API communication (Expense, Tracker & Tag services)
@@ -342,7 +349,7 @@ AppComponent
 
 ### Phase 4: Deployment & Enhancement (Week 3)
 - [ ] Cloud deployment setup (no containers)
-- [ ] Testing (unit & integration)
+- [~] Testing (unit & integration) - baseline tests implemented, coverage expansion pending
 - [ ] CSV export functionality (grouped by source and tags)
 - [ ] Charts/graphs for expense trends by tracker and tags
 - [ ] Performance optimization for soft delete queries

@@ -58,23 +58,34 @@ Default trackers from the plan:
 - JB Hifi
 - Office Works
 
-## Planned Project Structure
+## Current Project Structure
 
 ```
 tax-expense-tracker/
 ├── TaxExpenseTracker.sln
 ├── dotnet-tools.json
 ├── Backend/
-│   └── TaxExpenseTracker.Api/
-│       ├── Migrations/
-│       ├── nlog.config
-│       └── appsettings.Production.json
+│   ├── TaxExpenseTracker.Domain/
+│   │   └── Entities/
+│   ├── TaxExpenseTracker.Application/
+│   │   └── Trackers/
+│   ├── TaxExpenseTracker.Infrastructure/
+│   ├── TaxExpenseTracker.Api/
+│   │   ├── Controllers/
+│   │   ├── Data/
+│   │   ├── Models/
+│   │   ├── Migrations/
+│   │   ├── nlog.config
+│   │   └── appsettings.Production.json
+│   ├── TaxExpenseTracker.Tests.Unit/
+│   └── TaxExpenseTracker.Tests.Integration/
 ├── Frontend/
 │   ├── src/
 │   ├── package.json
 │   └── angular.json
 ├── plans/
 │   └── TAX_EXPENSE_TRACKER_PLAN.md
+│   └── DDD_CLEAN_ARCHITECTURE_PLAN.md
 │   └── skills/
 ├── README.md
 └── .gitignore
@@ -137,6 +148,14 @@ tax-expense-tracker/
 - Build services and core components
 - Add Angular Material styling and routing
 
+### DDD/Clean Architecture Migration (In Progress)
+
+- Domain entities extracted to `TaxExpenseTracker.Domain`
+- Domain invariants and behavior methods added for Tracker, Tag, TaxExpense, and TaxExpenseTag
+- Tracker feature moved to an application use-case service and repository abstraction
+- `TrackersController` now delegates orchestration to `ITrackerService`
+- Initial unit coverage added for domain invariants and tracker application service
+
 ### Phase 3: Integration and Polish
 
 - Connect frontend to backend
@@ -151,7 +170,7 @@ tax-expense-tracker/
 
 ## Getting Started
 
-Backend is implemented for Phase 1. Frontend work starts in Phase 2.
+Backend is implemented for Phase 1 and actively being refactored into layered DDD/Clean Architecture. Frontend work is in Phase 2.
 
 ### Prerequisites
 
@@ -188,7 +207,7 @@ powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scri
 powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Check-Prerequisites.ps1"
 ```
 
-### Backend Setup (planned)
+### Backend Setup
 
 ```bash
 cd Backend/TaxExpenseTracker.Api
@@ -227,6 +246,10 @@ Planned Azure deployment approach:
 
 ## Status
 
-Current status: Phase 1 complete and validated, Phase 2 started (Angular app initialized, Angular Material added, core routes and API services scaffolded).
+Current status:
+
+- Phase 1 complete and validated
+- Phase 2 started (Angular app initialized, Angular Material added, core routes and API services scaffolded)
+- DDD/Clean migration in progress: tracker Phase C slice completed (application service + repository abstraction + thin controller)
 
 Source plan: `plans/TAX_EXPENSE_TRACKER_PLAN.md`

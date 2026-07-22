@@ -8,9 +8,10 @@ Refactor the current solution into a layered DDD and Clean Architecture structur
 
 - Domain, Application, and Infrastructure projects have been created and added to the solution.
 - Core domain entities have been extracted to the Domain project.
-- API endpoints and business logic are still mixed in controllers.
+- Tracker API orchestration has been moved to an Application service with repository abstraction.
+- Tag and Expense controllers still contain direct orchestration logic.
 - EF Core DbContext and persistence concerns are still in the API project.
-- Application use cases/handlers are not implemented yet.
+- Application use cases have started with the Tracker slice.
 
 ## Progress Snapshot (2026-07-22)
 
@@ -36,10 +37,9 @@ In progress:
 
 Not started:
 
-1. Phase C Application use cases and validators.
-2. Phase D Infrastructure ownership of DbContext/repositories/migrations.
-3. Phase E API thinning and middleware cleanup.
-4. Phase F full test coverage and CI quality gates.
+1. Phase D Infrastructure ownership of DbContext/repositories/migrations.
+2. Phase E API thinning and middleware cleanup.
+3. Phase F full test coverage and CI quality gates.
 
 ## Target Architecture
 
@@ -184,7 +184,7 @@ Acceptance criteria:
 
 ### Phase F - Testing and Quality Gates
 
-Status: Not started
+Status: In progress (initial coverage)
 
 Deliverables:
 
