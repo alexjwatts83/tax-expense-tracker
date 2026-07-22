@@ -12,7 +12,7 @@ A web application to track and manage tax-deductible expenses with a focus on fi
 - **Framework**: ASP.NET Core Web API
 - **Database**: SQLite (development/initial), upgrade path to PostgreSQL or SQL Server
 - **ORM**: Entity Framework Core
-- **Deployment**: Direct cloud deployment (App Service/Cloud Run) or local host
+- **Deployment**: Direct Azure App Service deployment or local host
 
 ### Frontend
 - **Framework**: Angular (latest LTS)
@@ -22,7 +22,7 @@ A web application to track and manage tax-deductible expenses with a focus on fi
 
 ### Infrastructure
 - **Database**: SQLite file-based (local dev), managed DB for cloud (optional)
-- **Hosting**: Azure App Service, Google Cloud Run, or AWS free-tier options
+- **Hosting**: Azure App Service (API) and Azure Static Web Apps (frontend)
 - **Version Control**: Git
 
 ---
@@ -299,16 +299,16 @@ AppComponent
 ## Development Phases
 
 ### Phase 1: Setup & Core Backend (Week 1)
-- [ ] Create .NET Core API project
-- [ ] Set up SQLite database with EF Core
-- [ ] Create Tracker model with soft delete and DbContext
-- [ ] Create Tag model with soft delete
-- [ ] Create Tax Expense model with foreign key to Tracker and many-to-many to Tags
-- [ ] Implement Tracker CRUD endpoints (with soft delete)
-- [ ] Implement Tag CRUD endpoints (with soft delete)
-- [ ] Implement Expense CRUD endpoints (with Source and Tags relationship)
-- [ ] Add global query filters for soft-deleted records
-- [ ] Add data validation
+- [x] Create .NET Core API project
+- [x] Set up SQLite database with EF Core
+- [x] Create Tracker model with soft delete and DbContext
+- [x] Create Tag model with soft delete
+- [x] Create Tax Expense model with foreign key to Tracker and many-to-many to Tags
+- [x] Implement Tracker CRUD endpoints (with soft delete)
+- [x] Implement Tag CRUD endpoints (with soft delete)
+- [x] Implement Expense CRUD endpoints (with Source and Tags relationship)
+- [x] Add global query filters for soft-deleted records
+- [x] Add data validation
 - [ ] Configure local and cloud appsettings (dev + production)
 
 ### Phase 2: Frontend Setup (Week 1-2)
@@ -339,7 +339,7 @@ AppComponent
 
 ---
 
-## Cloud Deployment & Security (Free Tier Options)
+## Cloud Deployment & Security (Azure)
 
 ### Recommended: Azure App Service Free Tier + Azure SQL
 
@@ -400,43 +400,7 @@ app.UseAuthorization();
 - Include token in all API requests
 - Auto-logout on token expiry (24 hours recommended)
 
-### Alternative: Google Cloud Run (Pay-per-Use)
-
-**Why it's better for infrequent use:**
-- ✅ $0 if invoked <2M times/month (practically free)
-- ✅ Auto-scales to zero when idle
-- ✅ Container-native deployment
-- ✅ Simple CLI deployment
-
-**Setup:**
-```bash
-# Deploy API to App Engine or Cloud Run source deploy
-gcloud app create --region us-central1
-gcloud app deploy
-
-# Build frontend and host on Firebase Hosting or Cloud Storage static site
-ng build --configuration production
-```
-
-**Security with Cloud Run:**
-```yaml
-# cloud-run-security.yaml
-Authentication: 
-  - Google Cloud Identity (free)
-  - Service Account for backend calls
-  - Automatic HTTPS/TLS
-  - CORS protection
-  - Rate limiting available
-```
-
-### Alternative: AWS Free Tier (1 Year)
-
-**Services:**
-- EC2 t2.micro (free 1 year)
-- RDS or DynamoDB (limited free)
-- Cognito (free for up to 50 users)
-
-**API Security Implementation (All Platforms):**
+**API Security Implementation:**
 
 ```csharp
 // 1. Simple API Key Middleware
@@ -470,8 +434,6 @@ public class ApiKeyMiddleware
 
 // 2. Environment Variables (Store Securely)
 // Azure: Configuration -> Connection Strings
-// AWS: Systems Manager Parameter Store
-// Google: Secret Manager
 ```
 
 **Frontend Security:**
@@ -497,7 +459,7 @@ export class ApiKeyInterceptor implements HttpInterceptor {
 }
 ```
 
-### Security Best Practices (All Platforms)
+### Security Best Practices
 
 | Feature | Implementation | Cost |
 |---------|----------------|------|
@@ -507,7 +469,7 @@ export class ApiKeyInterceptor implements HttpInterceptor {
 | **Rate Limiting** | Nginx or cloud provider | Free |
 | **CORS** | Restrict to your domain only | Free |
 | **Firewall Rules** | Cloud provider built-in | Free |
-| **Secrets Management** | Azure Key Vault / AWS Secrets Manager | Free tier |
+| **Secrets Management** | Azure Key Vault | Free tier |
 | **Monitoring** | Application Insights (limited free) | Free |
 
 ### Recommended Security Setup
@@ -539,14 +501,12 @@ Database Security:
 | Platform | Frontend | Backend | Database | Total |
 |----------|----------|---------|----------|-------|
 | **Azure** | Static hosting free tier | Free tier | Free tier* | $0-5 |
-| **Google Cloud Run** | Free (first 2M calls) | Free (first 2M calls) | CloudSQL free tier | $0-1 |
-| **AWS EC2** | Free (1 year) | Free (1 year) | Free (limited) | $0 (year 1) |
 
 *Azure SQL free tier has limitations; use SQLite with blob storage for production
 
 ### Deployment Checklist
 
-- [ ] Choose platform (Azure recommended for simplicity)
+- [ ] Confirm Azure subscription and resource group
 - [ ] Publish API with direct deploy (no container)
 - [ ] Build and host Angular static files
 - [ ] Set up environment variables for secrets

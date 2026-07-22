@@ -29,7 +29,7 @@ Tax Expense Tracker helps you:
 
 ### Infrastructure
 
-- Hosting: Azure App Service, Google Cloud Run, or AWS free-tier options
+- Hosting: Azure App Service (API) and Azure Static Web Apps (frontend)
 - Version Control: Git
 
 ## Core Data Model
@@ -129,7 +129,7 @@ tax-expense-tracker/
 
 ### Phase 4: Deployment and Enhancements
 
-- Deploy to cloud free-tier
+- Deploy to Azure free-tier services
 - Add tests
 - Add CSV export and trend charts
 
@@ -162,14 +162,14 @@ ng serve
 
 ## Security and Deployment Notes
 
-Planned options from the project plan:
+Planned Azure deployment approach:
 
 - Deploy API to Azure App Service free tier
-- Host Angular app as a static site
+- Host Angular app on Azure Static Web Apps
 - Start with API key middleware, with JWT authentication as the recommended next step
 
 ## Status
 
-Current status: Planning phase.
+Current status: Phase 1 started (backend scaffolded, EF Core configured, initial migration created).
 
 Source plan: `plans/TAX_EXPENSE_TRACKER_PLAN.md`
