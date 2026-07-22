@@ -212,9 +212,15 @@ powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scri
 ```bash
 cd Backend/TaxExpenseTracker.Api
 dotnet restore
-dotnet ef database update
 dotnet user-secrets set "Security:ApiKey" "<your-local-dev-api-key>"
 dotnet run
+```
+
+EF migrations are owned by Infrastructure. Use these commands from the repository root:
+
+```bash
+dotnet ef migrations add <MigrationName> --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api
+dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api
 ```
 
 Swagger UI is available in development at /swagger.

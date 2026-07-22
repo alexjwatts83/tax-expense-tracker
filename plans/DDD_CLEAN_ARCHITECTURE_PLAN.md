@@ -174,7 +174,7 @@ Progress:
 3. Done: API composition root now resolves persistence services from Infrastructure.
 4. Done: Moved migrations ownership from API to Infrastructure namespace and assembly.
 5. Done: Removed direct EF queries from `ExpensesController` via application/infrastructure abstractions.
-6. Pending: Add design-time migration workflow documentation and optional factory for EF tooling.
+6. Done: Added design-time migration factory and workflow documentation for EF tooling.
 
 Acceptance criteria:
 
