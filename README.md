@@ -32,6 +32,11 @@ Tax Expense Tracker helps you:
 - Hosting: Azure App Service (API) and Azure Static Web Apps (frontend)
 - Version Control: Git
 
+### Tooling and Observability
+
+- API Docs: Swagger UI (development)
+- Logging: NLog (console + rolling file logs)
+
 ## Core Data Model
 
 Main entities:
@@ -57,14 +62,20 @@ Default trackers from the plan:
 
 ```
 tax-expense-tracker/
+├── TaxExpenseTracker.sln
+├── dotnet-tools.json
 ├── Backend/
 │   └── TaxExpenseTracker.Api/
+│       ├── Migrations/
+│       ├── nlog.config
+│       └── appsettings.Production.json
 ├── Frontend/
 │   ├── src/
 │   ├── package.json
 │   └── angular.json
 ├── plans/
 │   └── TAX_EXPENSE_TRACKER_PLAN.md
+│   └── skills/
 ├── README.md
 └── .gitignore
 ```
@@ -110,10 +121,15 @@ tax-expense-tracker/
 
 ### Phase 1: Setup and Core Backend
 
-- Create ASP.NET Core API
-- Configure EF Core and SQLite
-- Implement Tracker, Tag, Expense models and relationships
-- Implement CRUD endpoints with soft delete
+- Complete
+- ASP.NET Core API scaffolded and running
+- EF Core + SQLite configured with migrations applied
+- Tracker, Tag, Expense, and TaxExpenseTag models implemented
+- CRUD endpoints with soft delete implemented
+- Summary and filter endpoints implemented
+- Local and cloud appsettings configured
+- Development secrets moved to User Secrets
+- Swagger and NLog integrated
 
 ### Phase 2: Frontend Setup
 
@@ -135,7 +151,7 @@ tax-expense-tracker/
 
 ## Getting Started
 
-This repository currently contains planning documents. Use the steps below when scaffolding begins.
+Backend is implemented for Phase 1. Frontend work starts in Phase 2.
 
 ### Prerequisites
 
@@ -149,8 +165,13 @@ This repository currently contains planning documents. Use the steps below when 
 cd Backend/TaxExpenseTracker.Api
 dotnet restore
 dotnet ef database update
+dotnet user-secrets set "Security:ApiKey" "<your-local-dev-api-key>"
 dotnet run
 ```
+
+Swagger UI is available in development at /swagger.
+
+NLog writes rolling files to C:/logs/TaxExpenseTracker.Api.
 
 ### Frontend Setup (planned)
 
@@ -167,9 +188,11 @@ Planned Azure deployment approach:
 - Deploy API to Azure App Service free tier
 - Host Angular app on Azure Static Web Apps
 - Start with API key middleware, with JWT authentication as the recommended next step
+- Store local development secrets in .NET User Secrets
+- Store production secrets in Azure App Service configuration or Azure Key Vault
 
 ## Status
 
-Current status: Phase 1 started (backend scaffolded, EF Core configured, initial migration created).
+Current status: Phase 1 complete and validated (backend scaffolded, EF Core configured, migrations created, local/cloud appsettings configured, User Secrets enabled, Swagger and NLog integrated).
 
 Source plan: `plans/TAX_EXPENSE_TRACKER_PLAN.md`
