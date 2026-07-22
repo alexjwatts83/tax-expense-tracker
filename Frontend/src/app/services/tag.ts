@@ -5,7 +5,7 @@ import { CreateTagRequest, Tag } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class TagService {
-	private readonly apiUrl = 'http://localhost:5000/api/tags';
+	private readonly apiUrl = '/api/tags';
 
 	constructor(private readonly http: HttpClient) {}
 

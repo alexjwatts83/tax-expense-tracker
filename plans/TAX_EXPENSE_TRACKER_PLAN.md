@@ -367,13 +367,13 @@ This implementation plan now embeds the active DDD/Clean workstream. The detaile
 - [x] Add styling (Angular Material)
 
 ### Phase 3: Integration & Polish (Week 2)
-- [ ] Connect frontend to backend API
-- [ ] Implement filters by tracker/source and tags
-- [ ] Add pagination
-- [ ] Add dashboard with summary stats grouped by tracker and tags
+- [x] Connect frontend to backend API
+- [x] Implement filters by tracker/source and tags
+- [x] Add pagination
+- [x] Add dashboard with summary stats grouped by tracker and tags
 - [ ] Implement soft delete UI (soft delete buttons, restore option)
-- [ ] Error handling and user feedback
-- [ ] Configure production build and environment files
+- [x] Error handling and user feedback
+- [x] Configure production build and environment files
 
 ### Phase 4: Deployment & Enhancement (Week 3)
 - [ ] Cloud deployment setup (no containers)

@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateExpenseRequest, Expense } from '../models/api.models';
+import {
+	CreateExpenseRequest,
+	Expense,
+	ExpenseFilterRequest,
+	ExpenseSummary,
+} from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ExpenseService {
-	private readonly apiUrl = 'http://localhost:5000/api/expenses';
+	private readonly apiUrl = '/api/expenses';
 
 	constructor(private readonly http: HttpClient) {}
 
@@ -31,5 +36,43 @@ export class ExpenseService {
 
 	softDelete(id: string): Observable<void> {
 		return this.http.delete<void>(`${this.apiUrl}/${id}`);
+	}
+
+	getSummary(): Observable<ExpenseSummary> {
+		return this.http.get<ExpenseSummary>(`${this.apiUrl}/summary`);
+	}
+
+	filter(request: ExpenseFilterRequest): Observable<Expense[]> {
+		let params = new HttpParams();
+
+		if (request.startDate) {
+			params = params.set('startDate', request.startDate);
+		}
+
+		if (request.endDate) {
+			params = params.set('endDate', request.endDate);
+		}
+
+		if (request.bank) {
+			params = params.set('bank', request.bank);
+		}
+
+		if (request.minPrice !== undefined) {
+			params = params.set('minPrice', request.minPrice);
+		}
+
+		if (request.maxPrice !== undefined) {
+			params = params.set('maxPrice', request.maxPrice);
+		}
+
+		if (request.sourceId) {
+			params = params.set('sourceId', request.sourceId);
+		}
+
+		if (request.tagIds && request.tagIds.length > 0) {
+			params = params.set('tagIds', request.tagIds.join(','));
+		}
+
+		return this.http.get<Expense[]>(`${this.apiUrl}/filter`, { params });
 	}
 }

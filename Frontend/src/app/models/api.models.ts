@@ -43,3 +43,25 @@ export interface CreateTrackerRequest {
 export interface CreateTagRequest {
   name: string;
 }
+
+export interface SummaryGroup {
+  total: number;
+  bank?: string;
+  source?: string;
+}
+
+export interface ExpenseSummary {
+  totalSpent: number;
+  byBank: SummaryGroup[];
+  bySource: SummaryGroup[];
+}
+
+export interface ExpenseFilterRequest {
+  startDate?: string;
+  endDate?: string;
+  bank?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sourceId?: string;
+  tagIds?: string[];
+}

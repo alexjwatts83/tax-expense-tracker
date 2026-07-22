@@ -5,7 +5,7 @@ import { CreateTrackerRequest, Tracker } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class TrackerService {
-	private readonly apiUrl = 'http://localhost:5000/api/trackers';
+	private readonly apiUrl = '/api/trackers';
 
 	constructor(private readonly http: HttpClient) {}
 
