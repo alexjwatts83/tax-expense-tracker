@@ -4,13 +4,14 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
-import { finalize, forkJoin, of, switchMap, take } from 'rxjs';
+import { finalize, forkJoin, of, switchMap, take, timeout } from 'rxjs';
 import { Bank, Expense, Tag, Tracker } from '../../models/api.models';
 import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
@@ -27,6 +28,7 @@ import { TrackerService } from '../../services/tracker';
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
+    MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -81,6 +83,7 @@ export class ExpenseList implements OnInit {
   isCreating = false;
   errorMessage = '';
   infoMessage = '';
+  private lastFilterSignature = '';
 
   ngOnInit(): void {
     this.loadLookups();
@@ -183,22 +186,40 @@ export class ExpenseList implements OnInit {
       tagIds: value.tagIds && value.tagIds.length > 0 ? value.tagIds : undefined,
     };
 
+    const signature = JSON.stringify(request);
+    if (signature === this.lastFilterSignature) {
+      return;
+    }
+
+    this.lastFilterSignature = signature;
+
     this.hasActiveFilters = Object.values(request).some((v) => v !== undefined);
     this.page = 1;
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.expenseService.filter(request).subscribe({
-      next: (expenses) => {
-        this.expenses = expenses;
-        this.updatePagedExpenses();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? 'Unable to apply filters.';
-        this.isLoading = false;
-      },
-    });
+    this.expenseService
+      .filter(request)
+      .pipe(
+        take(1),
+        timeout(15000),
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (expenses) => {
+          this.expenses = expenses;
+          this.updatePagedExpenses();
+        },
+        error: (err) => {
+          this.errorMessage =
+            err?.name === 'TimeoutError'
+              ? 'Filtering timed out. Please try again.'
+              : err?.error?.detail ?? 'Unable to apply filters.';
+        },
+      });
   }
 
   createExpenseInline(): void {
@@ -284,6 +305,7 @@ export class ExpenseList implements OnInit {
       tagIds: [],
     });
 
+    this.lastFilterSignature = '';
     this.hasActiveFilters = false;
     this.page = 1;
     this.lastDeletedExpense = null;

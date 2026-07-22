@@ -14,6 +14,28 @@
 	width: 100%;
 }
 
+.date-pop-inline {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin-top: 0.25rem;
+}
+
+.date-pop-inline input[type='date'] {
+	width: 100%;
+	min-width: 140px;
+}
+
+.date-pop-inline select {
+	width: 100%;
+	min-width: 140px;
+	height: 36px;
+	padding: 0.25rem 0.5rem;
+	border: 1px solid rgba(0, 0, 0, 0.23);
+	border-radius: 4px;
+	background: #fff;
+}
+
 .filter-grid {
 	display: grid;
 	gap: 0.75rem;
@@ -25,6 +47,24 @@
 	display: flex;
 	justify-content: flex-end;
 	gap: 0.5rem;
+}
+
+.table-filter-row td {
+	padding: 0.25rem 0.5rem;
+	vertical-align: top;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.table-filter-row mat-form-field {
+	width: 100%;
+	margin: 0;
+}
+
+.table-filter-actions {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	white-space: nowrap;
 }
 
 .pager {
@@ -59,4 +99,11 @@
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
+}
+
+@media (max-width: 960px) {
+	.table-filter-actions {
+		height: auto;
+		flex-wrap: wrap;
+	}
 }

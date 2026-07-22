@@ -36,7 +36,15 @@
 
 				<mat-form-field>
 					<mat-label>Date</mat-label>
-					<input matInput type="date" formControlName="date" />
+					<input #createDateInput matInput type="date" formControlName="date" />
+					<button
+						mat-icon-button
+						matSuffix
+						type="button"
+						aria-label="Open add expense date calendar"
+						(click)="openDatePicker(createDateInput)">
+						<mat-icon>calendar_month</mat-icon>
+					</button>
 				</mat-form-field>
 
 				<mat-form-field>
@@ -79,82 +87,42 @@
 	</mat-card>
 
 	<mat-card>
-		<mat-card-title>Filters</mat-card-title>
-		<mat-card-content>
-			<form [formGroup]="filterForm" class="filter-grid" (ngSubmit)="applyFilters()">
-				<mat-form-field>
-					<mat-label>Tracker</mat-label>
-					<mat-select formControlName="sourceId">
-						<mat-option value="">All</mat-option>
-						@for (tracker of trackers; track tracker.id) {
-							<mat-option [value]="tracker.id">{{ tracker.name }}</mat-option>
-						}
-					</mat-select>
-				</mat-form-field>
-
-				<mat-form-field>
-					<mat-label>Date</mat-label>
-					<input #dateInput matInput type="date" formControlName="date" />
-					<button
-						mat-icon-button
-						matSuffix
-						type="button"
-						aria-label="Open date calendar"
-						(click)="openDatePicker(dateInput)">
-						<mat-icon>calendar_month</mat-icon>
-					</button>
-				</mat-form-field>
-
-				<mat-form-field>
-					<mat-label>Bank</mat-label>
-					<mat-select formControlName="bankId">
-						<mat-option value="">All</mat-option>
-						@for (bank of banks; track bank.id) {
-							<mat-option [value]="bank.id">{{ bank.name }}</mat-option>
-						}
-					</mat-select>
-				</mat-form-field>
-
-				<mat-form-field>
-					<mat-label>Price</mat-label>
-					<input matInput type="number" step="0.01" formControlName="price" />
-				</mat-form-field>
-
-				<mat-form-field>
-					<mat-label>Tags</mat-label>
-					<mat-select formControlName="tagIds" multiple>
-						@for (tag of tags; track tag.id) {
-							<mat-option [value]="tag.id">{{ tag.name }}</mat-option>
-						}
-					</mat-select>
-				</mat-form-field>
-
-				<div class="filter-actions">
-					<button mat-flat-button color="primary" type="submit">Apply</button>
-					<button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasActiveFilters">Clear</button>
-				</div>
-			</form>
-		</mat-card-content>
-	</mat-card>
-
-	<mat-card>
 		<mat-card-title>Expense Table</mat-card-title>
 		<mat-card-content>
 			@if (isLoading) {
 				<div class="loading">
 					<mat-spinner diameter="32"></mat-spinner>
 				</div>
-			} @else if (pagedExpenses.length === 0) {
-				<p>No expenses yet.</p>
 			} @else {
 				<table mat-table [dataSource]="pagedExpenses" class="expense-table">
+
 					<ng-container matColumnDef="date">
-						<th mat-header-cell *matHeaderCellDef>Date</th>
+						<th mat-header-cell *matHeaderCellDef>
+							<div>Date</div>
+							<div class="date-pop-inline">
+								<input
+									type="date"
+									[value]="filterForm.value.date ?? ''"
+									(change)="filterForm.patchValue({ date: $any($event.target).value || '' }); applyFilters()" />
+							</div>
+						</th>
 						<td mat-cell *matCellDef="let expense">{{ expense.date | date: 'mediumDate' }}</td>
 					</ng-container>
 
 					<ng-container matColumnDef="bank">
-						<th mat-header-cell *matHeaderCellDef>Bank</th>
+						<th mat-header-cell *matHeaderCellDef>
+							<div>Bank</div>
+							<div class="date-pop-inline">
+								<select
+									[value]="filterForm.value.bankId ?? ''"
+									(change)="filterForm.patchValue({ bankId: $any($event.target).value || '' }); applyFilters()">
+									<option value="">All</option>
+									@for (bank of banks; track bank.id) {
+										<option [value]="bank.id">{{ bank.name }}</option>
+									}
+								</select>
+							</div>
+						</th>
 						<td mat-cell *matCellDef="let expense">{{ expense.bank?.name || '-' }}</td>
 					</ng-container>
 
@@ -164,7 +132,19 @@
 					</ng-container>
 
 					<ng-container matColumnDef="tracker">
-						<th mat-header-cell *matHeaderCellDef>Tracker</th>
+						<th mat-header-cell *matHeaderCellDef>
+							<div>Tracker</div>
+							<div class="date-pop-inline">
+								<select
+									[value]="filterForm.value.sourceId ?? ''"
+									(change)="filterForm.patchValue({ sourceId: $any($event.target).value || '' }); applyFilters()">
+									<option value="">All</option>
+									@for (tracker of trackers; track tracker.id) {
+										<option [value]="tracker.id">{{ tracker.name }}</option>
+									}
+								</select>
+							</div>
+						</th>
 						<td mat-cell *matCellDef="let expense">{{ expense.source?.name || '-' }}</td>
 					</ng-container>
 
@@ -195,6 +175,10 @@
 					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 					<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 				</table>
+
+				@if (pagedExpenses.length === 0) {
+					<p>No expenses yet.</p>
+				}
 
 				<div class="pager">
 					<button mat-stroked-button type="button" (click)="previousPage()" [disabled]="page <= 1">Previous</button>
