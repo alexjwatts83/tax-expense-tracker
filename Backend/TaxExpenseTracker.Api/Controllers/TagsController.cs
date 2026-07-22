@@ -1,69 +1,37 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TaxExpenseTracker.Api.Data;
 using TaxExpenseTracker.Api.Models;
-using TaxExpenseTracker.Domain.Entities;
+using TaxExpenseTracker.Application.Tags;
 
 namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/tags")]
-public class TagsController(AppDbContext dbContext) : ControllerBase
+public class TagsController(ITagService tagService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TagDto>>> GetAll(CancellationToken cancellationToken)
     {
-        var tags = await dbContext.Tags
-            .AsNoTracking()
-            .OrderBy(x => x.Name)
-            .Select(x => new TagDto
-            {
-                Id = x.Id,
-                Name = x.Name,
-                CreatedAt = x.CreatedAt
-            })
-            .ToListAsync(cancellationToken);
+        var tags = await tagService.GetAllAsync(cancellationToken);
 
-        return Ok(tags);
+        var response = tags.Select(x => new TagDto
+        {
+            Id = x.Id,
+            Name = x.Name,
+            CreatedAt = x.CreatedAt
+        });
+
+        return Ok(response);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<TagDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var tag = await dbContext.Tags
-            .AsNoTracking()
-            .Where(x => x.Id == id)
-            .Select(x => new TagDto
-            {
-                Id = x.Id,
-                Name = x.Name,
-                CreatedAt = x.CreatedAt
-            })
-            .FirstOrDefaultAsync(cancellationToken);
+        var tag = await tagService.GetByIdAsync(id, cancellationToken);
 
         if (tag is null)
         {
             return NotFound();
         }
-
-        return Ok(tag);
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<TagDto>> Create(CreateTagDto request, CancellationToken cancellationToken)
-    {
-        Tag tag;
-        try
-        {
-            tag = Tag.Create(request.Name);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-
-        dbContext.Tags.Add(tag);
-        await dbContext.SaveChangesAsync(cancellationToken);
 
         var response = new TagDto
         {
@@ -72,28 +40,52 @@ public class TagsController(AppDbContext dbContext) : ControllerBase
             CreatedAt = tag.CreatedAt
         };
 
-        return CreatedAtAction(nameof(GetById), new { id = tag.Id }, response);
+        return Ok(response);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<TagDto>> Create(CreateTagDto request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var tag = await tagService.CreateAsync(new CreateTagCommand(request.Name), cancellationToken);
+
+            var response = new TagDto
+            {
+                Id = tag.Id,
+                Name = tag.Name,
+                CreatedAt = tag.CreatedAt
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = tag.Id }, response);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TagDto>> Update(Guid id, CreateTagDto request, CancellationToken cancellationToken)
     {
-        var tag = await dbContext.Tags.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (tag is null)
-        {
-            return NotFound();
-        }
-
         try
         {
-            tag.Rename(request.Name);
+            var updated = await tagService.UpdateAsync(id, new UpdateTagCommand(request.Name), cancellationToken);
+            if (!updated)
+            {
+                return NotFound();
+            }
         }
         catch (ArgumentException ex)
         {
             return BadRequest(ex.Message);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        var tag = await tagService.GetByIdAsync(id, cancellationToken);
+        if (tag is null)
+        {
+            return NotFound();
+        }
 
         var response = new TagDto
         {
@@ -108,14 +100,11 @@ public class TagsController(AppDbContext dbContext) : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> SoftDelete(Guid id, CancellationToken cancellationToken)
     {
-        var tag = await dbContext.Tags.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (tag is null)
+        var deleted = await tagService.DeleteAsync(id, cancellationToken);
+        if (!deleted)
         {
             return NotFound();
         }
-
-        tag.SoftDelete();
-        await dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();
     }

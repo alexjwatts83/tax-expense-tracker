@@ -32,7 +32,7 @@ Completed:
 In progress:
 
 1. Phase B (domain extraction) is substantially complete; base abstractions still pending.
-2. Phase C (application use cases) has started with tracker slice extraction.
+2. Phase C (application use cases) has progressed through tracker and tag slices.
 3. Phase F (testing) has started with baseline test project scaffolding.
 
 Not started:
@@ -140,7 +140,11 @@ Progress:
 2. Done: Added tracker use-case service (`ITrackerService`, `TrackerService`).
 3. Done: Added tracker repository abstraction in Application and EF-backed repository wiring in API.
 4. Done: Refactored `TrackersController` to delegate orchestration to `ITrackerService`.
-5. Pending: Apply same pattern to Tags and Expenses.
+5. Done: Added tag application contracts (`CreateTagCommand`, `UpdateTagCommand`, `TagReadDto`).
+6. Done: Added tag use-case service (`ITagService`, `TagService`).
+7. Done: Added tag repository abstraction in Application and EF-backed repository wiring in API.
+8. Done: Refactored `TagsController` to delegate orchestration to `ITagService`.
+9. Pending: Apply same pattern to Expenses.
 
 Acceptance criteria:
 
@@ -202,7 +206,8 @@ Progress:
 2. Done: Added `TaxExpenseTracker.Tests.Integration` project.
 3. Done: Added baseline unit and integration smoke tests.
 4. Done: Added initial unit coverage for domain invariants.
-5. Pending: Expand use-case/domain rule coverage and add CI gating.
+5. Done: Added initial unit coverage for tracker and tag application services.
+6. Pending: Expand use-case/domain rule coverage and add CI gating.
 
 Acceptance criteria:
 
