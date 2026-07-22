@@ -31,7 +31,8 @@ Completed:
 In progress:
 
 1. Phase B (domain extraction) is substantially complete; base abstractions still pending.
-2. Phase F (testing) has started with baseline test project scaffolding.
+2. Phase C (application use cases) has started with tracker slice extraction.
+3. Phase F (testing) has started with baseline test project scaffolding.
 
 Not started:
 
@@ -132,6 +133,14 @@ Deliverables:
 2. Move validation rules from controllers into application validators.
 3. Define repository interfaces in Application or Domain (single convention).
 4. Keep DTOs in Application (request/response contracts for use cases).
+
+Progress:
+
+1. Done: Added tracker application contracts (`CreateTrackerCommand`, `UpdateTrackerCommand`, `TrackerReadDto`).
+2. Done: Added tracker use-case service (`ITrackerService`, `TrackerService`).
+3. Done: Added tracker repository abstraction in Application and EF-backed repository wiring in API.
+4. Done: Refactored `TrackersController` to delegate orchestration to `ITrackerService`.
+5. Pending: Apply same pattern to Tags and Expenses.
 
 Acceptance criteria:
 

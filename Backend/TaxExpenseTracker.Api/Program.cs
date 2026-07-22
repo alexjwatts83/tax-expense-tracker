@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using TaxExpenseTracker.Api.Data;
+using TaxExpenseTracker.Application.Trackers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnec
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(defaultConnection));
+
+builder.Services.AddScoped<ITrackerRepository, EfTrackerRepository>();
+builder.Services.AddScoped<ITrackerService, TrackerService>();
 
 var app = builder.Build();
 
