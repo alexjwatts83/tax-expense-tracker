@@ -3,7 +3,6 @@ namespace TaxExpenseTracker.Domain.Entities;
 public class TaxExpense
 {
     public Guid Id { get; set; }
-    public string Item { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime Date { get; set; }
     public Guid BankId { get; set; }
@@ -18,7 +17,6 @@ public class TaxExpense
     public ICollection<TaxExpenseTag> TaxExpenseTags { get; set; } = new List<TaxExpenseTag>();
 
     public static TaxExpense Create(
-        string item,
         string? description,
         DateTime date,
         Guid bankId,
@@ -31,7 +29,6 @@ public class TaxExpense
         return new TaxExpense
         {
             Id = Guid.NewGuid(),
-            Item = NormalizeRequired(item, nameof(Item)),
             Description = NormalizeOptional(description),
             Date = ValidateDate(date),
             BankId = ValidateBankId(bankId),
@@ -44,7 +41,6 @@ public class TaxExpense
     }
 
     public void UpdateDetails(
-        string item,
         string? description,
         DateTime date,
         Guid bankId,
@@ -52,7 +48,6 @@ public class TaxExpense
         Guid sourceId,
         DateTime? utcNow = null)
     {
-        Item = NormalizeRequired(item, nameof(Item));
         Description = NormalizeOptional(description);
         Date = ValidateDate(date);
         BankId = ValidateBankId(bankId);
@@ -71,17 +66,6 @@ public class TaxExpense
     {
         IsDeleted = false;
         UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    private static string NormalizeRequired(string value, string fieldName)
-    {
-        var normalized = value?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            throw new ArgumentException($"{fieldName} is required.", fieldName);
-        }
-
-        return normalized;
     }
 
     private static string NormalizeOptional(string? value)

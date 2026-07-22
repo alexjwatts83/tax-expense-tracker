@@ -19,7 +19,6 @@ export interface Bank {
 
 export interface Expense {
   id: string;
-  item: string;
   description: string;
   date: string;
   bankId: string;
@@ -33,7 +32,6 @@ export interface Expense {
 }
 
 export interface CreateExpenseRequest {
-  item: string;
   description: string;
   date: string;
   bankId: string;

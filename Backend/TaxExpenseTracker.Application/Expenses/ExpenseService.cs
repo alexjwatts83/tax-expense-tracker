@@ -45,7 +45,6 @@ public sealed class ExpenseService : IExpenseService
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
         var expense = TaxExpense.Create(
-            command.Item,
             command.Description,
             command.Date,
             command.BankId,
@@ -88,7 +87,6 @@ public sealed class ExpenseService : IExpenseService
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
         expense.UpdateDetails(
-            command.Item,
             command.Description,
             command.Date,
             command.BankId,
@@ -158,7 +156,6 @@ public sealed class ExpenseService : IExpenseService
     {
         return new ExpenseReadDto(
             expense.Id,
-            expense.Item,
             expense.Description,
             expense.Date,
             expense.BankId,

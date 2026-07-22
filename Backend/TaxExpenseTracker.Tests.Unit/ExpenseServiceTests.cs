@@ -18,7 +18,6 @@ public class ExpenseServiceTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.CreateAsync(new CreateExpenseCommand(
-                "Laptop",
                 "Work machine",
                 DateTime.UtcNow,
                 repository.BankId,
@@ -39,7 +38,6 @@ public class ExpenseServiceTests
         var service = new ExpenseService(repository);
 
         var result = await service.CreateAsync(new CreateExpenseCommand(
-            "  Laptop  ",
             "  Work machine  ",
             DateTime.UtcNow,
             repository.BankId,
@@ -47,7 +45,7 @@ public class ExpenseServiceTests
             repository.SourceId,
             [repository.TagId]));
 
-        Assert.Equal("Laptop", result.Item);
+        Assert.Equal("Work machine", result.Description);
         Assert.Equal(repository.BankId, result.BankId);
         Assert.Single(repository.Expenses);
         Assert.True(repository.SaveChangesCalled);
@@ -65,7 +63,6 @@ public class ExpenseServiceTests
         var service = new ExpenseService(repository);
 
         var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateExpenseCommand(
-            "Item",
             "Desc",
             DateTime.UtcNow,
             repository.BankId,
@@ -97,7 +94,6 @@ public class ExpenseServiceTests
         };
 
         var expense = TaxExpense.Create(
-            "Laptop",
             "Desc",
             DateTime.UtcNow,
             repository.BankId,
@@ -121,11 +117,11 @@ public class ExpenseServiceTests
         var repository = new InMemoryExpenseRepository { SourceExistsResult = true, BankExistsResult = true };
         var now = DateTime.UtcNow;
 
-        var first = TaxExpense.Create("Item A", "Desc", now, repository.BankId, 10m, repository.SourceId);
+        var first = TaxExpense.Create("Desc", now, repository.BankId, 10m, repository.SourceId);
         first.Bank = Bank.Create("ANZ", now);
         first.Source = Tracker.Create("Tracker A", "Source", now);
 
-        var second = TaxExpense.Create("Item B", "Desc", now, Guid.NewGuid(), 30m, repository.SourceId);
+        var second = TaxExpense.Create("Desc", now, Guid.NewGuid(), 30m, repository.SourceId);
         second.Bank = Bank.Create("CBA", now);
         second.Source = Tracker.Create("Tracker B", "Source", now);
 

@@ -57,7 +57,6 @@ export class ExpenseList implements OnInit {
   });
 
   readonly createForm = this.formBuilder.group({
-    item: [''],
     description: [''],
     date: [''],
     bankId: [''],
@@ -141,7 +140,7 @@ export class ExpenseList implements OnInit {
         this.lastDeletedExpense = expense;
         this.expenses = this.expenses.filter((expense) => expense.id !== id);
         this.updatePagedExpenses();
-        this.infoMessage = `Expense "${expense.item}" deleted.`;
+        this.infoMessage = 'Expense deleted.';
       },
       error: (err) => {
         this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete expense.';
@@ -165,7 +164,7 @@ export class ExpenseList implements OnInit {
         );
         this.lastDeletedExpense = null;
         this.updatePagedExpenses();
-        this.infoMessage = `Expense "${expense.item}" restored.`;
+        this.infoMessage = 'Expense restored.';
       },
       error: (err) => {
         this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore expense.';
@@ -205,8 +204,8 @@ export class ExpenseList implements OnInit {
   createExpenseInline(): void {
     const value = this.createForm.value;
 
-    if (!value.item?.trim() || !value.date || !value.bankId || !value.sourceId || Number(value.price) < 0) {
-      this.errorMessage = 'Please provide item, date, bank, tracker, and a non-negative price.';
+    if (!value.date || !value.bankId || !value.sourceId || Number(value.price) < 0) {
+      this.errorMessage = 'Please provide date, bank, tracker, and a non-negative price.';
       return;
     }
 
@@ -222,7 +221,6 @@ export class ExpenseList implements OnInit {
       .pipe(
         switchMap((tagIds) =>
           this.expenseService.create({
-            item: value.item?.trim() ?? '',
             description: value.description?.trim() ?? '',
             date: value.date ?? '',
             bankId: value.bankId ?? '',
@@ -247,7 +245,6 @@ export class ExpenseList implements OnInit {
           }
 
           this.createForm.reset({
-            item: '',
             description: '',
             date: '',
             bankId: '',
@@ -256,7 +253,7 @@ export class ExpenseList implements OnInit {
             tagIds: [],
             manualTags: '',
           });
-          this.infoMessage = `Expense "${createdExpense.item}" created.`;
+          this.infoMessage = 'Expense created.';
         },
         error: (err) => {
           this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create expense.';

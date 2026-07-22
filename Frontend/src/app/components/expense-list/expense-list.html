@@ -21,11 +21,6 @@
 		<mat-card-content>
 			<form [formGroup]="createForm" class="filter-grid" (ngSubmit)="createExpenseInline()">
 				<mat-form-field>
-					<mat-label>Item</mat-label>
-					<input matInput formControlName="item" />
-				</mat-form-field>
-
-				<mat-form-field>
 					<mat-label>Description</mat-label>
 					<input matInput formControlName="description" />
 				</mat-form-field>

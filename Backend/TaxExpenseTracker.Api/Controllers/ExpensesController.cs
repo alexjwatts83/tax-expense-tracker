@@ -35,7 +35,6 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
     {
         var expense = await expenseService.CreateAsync(
             new CreateExpenseCommand(
-                request.Item,
                 request.Description,
                 request.Date,
                 request.BankId,
@@ -53,7 +52,6 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         var expense = await expenseService.UpdateAsync(
             id,
             new UpdateExpenseCommand(
-                request.Item,
                 request.Description,
                 request.Date,
                 request.BankId,
@@ -144,7 +142,6 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         return new ExpenseResponseDto
         {
             Id = expense.Id,
-            Item = expense.Item,
             Description = expense.Description,
             Date = expense.Date,
             BankId = expense.BankId,

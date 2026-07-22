@@ -8,7 +8,6 @@ public sealed record ExpenseTagDto(Guid Id, string Name, DateTime CreatedAt);
 
 public sealed record ExpenseReadDto(
     Guid Id,
-    string Item,
     string Description,
     DateTime Date,
     Guid BankId,
@@ -21,7 +20,6 @@ public sealed record ExpenseReadDto(
     DateTime UpdatedAt);
 
 public sealed record CreateExpenseCommand(
-    string Item,
     string Description,
     DateTime Date,
     Guid BankId,
@@ -30,7 +28,6 @@ public sealed record CreateExpenseCommand(
     IReadOnlyList<Guid> TagIds);
 
 public sealed record UpdateExpenseCommand(
-    string Item,
     string Description,
     DateTime Date,
     Guid BankId,

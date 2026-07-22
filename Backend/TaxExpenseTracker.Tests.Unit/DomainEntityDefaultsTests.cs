@@ -19,7 +19,6 @@ public class DomainEntityDefaultsTests
     {
         var expense = new TaxExpense();
 
-        Assert.Equal(string.Empty, expense.Item);
         Assert.Equal(string.Empty, expense.Description);
         Assert.Equal(Guid.Empty, expense.BankId);
         Assert.NotNull(expense.TaxExpenseTags);
@@ -42,13 +41,13 @@ public class DomainEntityDefaultsTests
     public void TaxExpense_Create_Throws_WhenPriceNegative()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            TaxExpense.Create("Item", "Desc", DateTime.UtcNow, Guid.NewGuid(), -1m, Guid.NewGuid()));
+            TaxExpense.Create("Desc", DateTime.UtcNow, Guid.NewGuid(), -1m, Guid.NewGuid()));
     }
 
     [Fact]
     public void TaxExpense_Create_Throws_WhenDateDefault()
     {
         Assert.Throws<ArgumentException>(() =>
-            TaxExpense.Create("Item", "Desc", default, Guid.NewGuid(), 1m, Guid.NewGuid()));
+            TaxExpense.Create("Desc", default, Guid.NewGuid(), 1m, Guid.NewGuid()));
     }
 }

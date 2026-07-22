@@ -46,7 +46,6 @@ export class ExpenseForm implements OnInit {
 
   constructor() {
     this.form = this.formBuilder.group({
-      item: ['', [Validators.required]],
       description: [''],
       date: ['', [Validators.required]],
       bankId: ['', [Validators.required]],
@@ -100,7 +99,6 @@ export class ExpenseForm implements OnInit {
       .pipe(
         switchMap((tagIds) => {
           const payload = {
-            item: this.form.value.item?.trim() ?? '',
             description: this.form.value.description?.trim() ?? '',
             date: this.form.value.date,
             bankId: this.form.value.bankId,
