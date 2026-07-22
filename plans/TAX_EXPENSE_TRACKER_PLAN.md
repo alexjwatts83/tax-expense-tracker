@@ -318,15 +318,43 @@ AppComponent
 - [x] NLog file target configured to `C:/logs/TaxExpenseTracker.Api`
 - [x] Visual Studio solution file added (`TaxExpenseTracker.sln`)
 
-### DDD/Clean Migration Status (In Progress)
-- [x] Added Domain/Application/Infrastructure projects and test projects
-- [x] Moved core entities to Domain
-- [x] Added domain invariants and behavior methods
-- [x] Refactored tracker API slice to use application contracts/service + repository abstraction
-- [x] Added initial unit tests for domain invariants and tracker service
-- [ ] Apply Phase C service/repository pattern to Tag feature
-- [ ] Apply Phase C service/repository/query pattern to Expense feature
-- [ ] Move persistence ownership to Infrastructure layer (Phase D)
+### DDD/Clean Architecture Implementation Plan (Embedded)
+
+This implementation plan now embeds the active DDD/Clean workstream. The detailed tracker remains in `plans/DDD_CLEAN_ARCHITECTURE_PLAN.md` and this section mirrors execution status.
+
+#### Phase A - Solution and Project Restructure
+- [x] Add Domain/Application/Infrastructure projects
+- [x] Add unit and integration test projects
+- [x] Wire references to enforce dependency direction
+
+#### Phase B - Domain Extraction and Invariants
+- [x] Move Tracker, Tag, TaxExpense, and TaxExpenseTag to Domain
+- [x] Add domain invariants and behavior methods
+- [ ] Add optional base abstractions (entity base/domain events) if needed
+
+#### Phase C - Application Use Cases by Feature Slice
+- [x] Tracker slice: contracts, service, repository abstraction, thin controller
+- [x] Tag slice: contracts, service, repository abstraction, thin controller
+- [x] Expense slice: contracts, service, repository abstraction, thin controller
+- [ ] Add dedicated validators for command/query input where needed
+
+#### Phase D - Infrastructure Ownership of Persistence
+- [x] Move AppDbContext to Infrastructure
+- [x] Move EF repositories to Infrastructure
+- [x] Move migrations ownership to Infrastructure assembly/namespace
+- [x] Add design-time DbContext factory for migration tooling
+- [ ] Continue infrastructure hardening (mapping/config split as needed)
+
+#### Phase E - API Cleanup
+- [ ] Centralize exception handling middleware
+- [ ] Remove duplicated HTTP/error mapping logic
+- [ ] Keep controllers focused on binding/auth/response mapping only
+
+#### Phase F - Testing and Quality Gates
+- [x] Baseline unit and integration test projects established
+- [x] Initial unit tests for domain invariants and application services
+- [ ] Expand coverage for critical use-case paths and edge cases
+- [ ] Add CI quality gates for build/unit/integration tests
 
 ### Phase 2: Frontend Setup (Week 1-2)
 - [x] Initialize Angular project
