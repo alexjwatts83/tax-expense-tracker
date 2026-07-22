@@ -17,19 +17,9 @@ internal static class ExpenseValidation
             throw new ArgumentException("StartDate cannot be after EndDate.", nameof(query));
         }
 
-        if (query.MinPrice.HasValue && query.MinPrice.Value < 0)
+        if (query.Price.HasValue && query.Price.Value < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(query), "MinPrice must be non-negative.");
-        }
-
-        if (query.MaxPrice.HasValue && query.MaxPrice.Value < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(query), "MaxPrice must be non-negative.");
-        }
-
-        if (query.MinPrice.HasValue && query.MaxPrice.HasValue && query.MinPrice > query.MaxPrice)
-        {
-            throw new ArgumentException("MinPrice cannot be greater than MaxPrice.", nameof(query));
+            throw new ArgumentOutOfRangeException(nameof(query), "Price must be non-negative.");
         }
     }
 }

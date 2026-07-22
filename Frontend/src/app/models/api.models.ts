@@ -60,8 +60,7 @@ export interface ExpenseFilterRequest {
   startDate?: string;
   endDate?: string;
   bank?: string;
-  minPrice?: number;
-  maxPrice?: number;
+  price?: number;
   sourceId?: string;
   tagIds?: string[];
 }

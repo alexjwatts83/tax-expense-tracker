@@ -132,14 +132,9 @@ public sealed class EfExpenseRepository : IExpenseRepository
             expenseQuery = expenseQuery.Where(x => x.Bank == trimmedBank);
         }
 
-        if (query.MinPrice.HasValue)
+        if (query.Price.HasValue)
         {
-            expenseQuery = expenseQuery.Where(x => x.Price >= query.MinPrice.Value);
-        }
-
-        if (query.MaxPrice.HasValue)
-        {
-            expenseQuery = expenseQuery.Where(x => x.Price <= query.MaxPrice.Value);
+            expenseQuery = expenseQuery.Where(x => x.Price <= query.Price.Value);
         }
 
         if (query.SourceId.HasValue)

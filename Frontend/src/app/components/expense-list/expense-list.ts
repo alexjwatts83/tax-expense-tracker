@@ -52,8 +52,7 @@ export class ExpenseList implements OnInit {
     startDate: [''],
     endDate: [''],
     bank: [''],
-    minPrice: [''],
-    maxPrice: [''],
+    price: [''],
     sourceId: [''],
     tagIds: [[] as string[]],
   });
@@ -169,8 +168,7 @@ export class ExpenseList implements OnInit {
       startDate: value.startDate || undefined,
       endDate: value.endDate || undefined,
       bank: value.bank?.trim() || undefined,
-      minPrice: value.minPrice ? Number(value.minPrice) : undefined,
-      maxPrice: value.maxPrice ? Number(value.maxPrice) : undefined,
+      price: value.price ? Number(value.price) : undefined,
       sourceId: value.sourceId || undefined,
       tagIds: value.tagIds && value.tagIds.length > 0 ? value.tagIds : undefined,
     };
@@ -198,8 +196,7 @@ export class ExpenseList implements OnInit {
       startDate: '',
       endDate: '',
       bank: '',
-      minPrice: '',
-      maxPrice: '',
+      price: '',
       sourceId: '',
       tagIds: [],
     });

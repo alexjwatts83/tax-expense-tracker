@@ -146,7 +146,6 @@ public class ExpenseServiceTests
             null,
             null,
             null,
-            null,
             []);
 
         await Assert.ThrowsAsync<ArgumentException>(() => service.FilterAsync(query));

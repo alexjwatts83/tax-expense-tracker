@@ -112,8 +112,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         DateTime? startDate,
         DateTime? endDate,
         string? bank,
-        decimal? minPrice,
-        decimal? maxPrice,
+        decimal? price,
         Guid? sourceId,
         string? tagIds,
         CancellationToken cancellationToken)
@@ -121,7 +120,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         var parsedTagIds = ParseTagIds(tagIds);
 
         var expenses = await expenseService.FilterAsync(
-            new ExpenseFilterQuery(startDate, endDate, bank, minPrice, maxPrice, sourceId, parsedTagIds),
+            new ExpenseFilterQuery(startDate, endDate, bank, price, sourceId, parsedTagIds),
             cancellationToken);
 
         return Ok(expenses.Select(MapExpense));

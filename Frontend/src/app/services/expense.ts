@@ -61,12 +61,8 @@ export class ExpenseService {
 			params = params.set('bank', request.bank);
 		}
 
-		if (request.minPrice !== undefined) {
-			params = params.set('minPrice', request.minPrice);
-		}
-
-		if (request.maxPrice !== undefined) {
-			params = params.set('maxPrice', request.maxPrice);
+		if (request.price !== undefined) {
+			params = params.set('price', request.price);
 		}
 
 		if (request.sourceId) {

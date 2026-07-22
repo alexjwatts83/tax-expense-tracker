@@ -39,8 +39,7 @@ public sealed record ExpenseFilterQuery(
     DateTime? StartDate,
     DateTime? EndDate,
     string? Bank,
-    decimal? MinPrice,
-    decimal? MaxPrice,
+    decimal? Price,
     Guid? SourceId,
     IReadOnlyList<Guid> TagIds);
 
