@@ -361,7 +361,7 @@ This implementation plan now embeds the active DDD/Clean workstream. The detaile
 - [x] Create services for API communication (Expense, Tracker & Tag services)
 - [x] Build tracker management component with soft delete support
 - [x] Build tag management component with soft delete support
-- [ ] Build expense list component with source display and tags
+- [x] Build expense list component with source display and tags
 - [ ] Build expense form component with tracker dropdown and tag multi-select
 - [x] Implement routing
 - [x] Add styling (Angular Material)

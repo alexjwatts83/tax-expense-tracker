@@ -9,3 +9,18 @@
 	justify-content: space-between;
 	gap: 1rem;
 }
+
+.expense-table {
+	width: 100%;
+}
+
+.loading {
+	display: flex;
+	justify-content: center;
+	padding: 1rem 0;
+}
+
+.error-message {
+	color: #b3261e;
+	margin: 0;
+}
