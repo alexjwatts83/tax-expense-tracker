@@ -8,7 +8,7 @@ using TaxExpenseTracker.Infrastructure.Data;
 
 #nullable disable
 
-namespace TaxExpenseTracker.Api.Migrations
+namespace TaxExpenseTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260722011409_AddTaxExpenseTagQueryFilter")]

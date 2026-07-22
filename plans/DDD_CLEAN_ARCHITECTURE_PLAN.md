@@ -172,8 +172,9 @@ Progress:
 1. Done: Moved `AppDbContext` to Infrastructure.
 2. Done: Moved EF tracker/tag repository implementations to Infrastructure.
 3. Done: API composition root now resolves persistence services from Infrastructure.
-4. Pending: Move migrations ownership from API to Infrastructure.
-5. Pending: Remove direct EF queries from `ExpensesController` via application/infrastructure abstractions.
+4. Done: Moved migrations ownership from API to Infrastructure namespace and assembly.
+5. Done: Removed direct EF queries from `ExpensesController` via application/infrastructure abstractions.
+6. Pending: Add design-time migration workflow documentation and optional factory for EF tooling.
 
 Acceptance criteria:
 

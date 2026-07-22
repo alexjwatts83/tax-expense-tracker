@@ -21,7 +21,8 @@ var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnec
         "Missing connection string 'DefaultConnection'. Configure ConnectionStrings__DefaultConnection for cloud environments.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(defaultConnection));
+    options.UseSqlite(defaultConnection, sqlite =>
+        sqlite.MigrationsAssembly("TaxExpenseTracker.Infrastructure")));
 
 builder.Services.AddScoped<ITrackerRepository, EfTrackerRepository>();
 builder.Services.AddScoped<ITrackerService, TrackerService>();

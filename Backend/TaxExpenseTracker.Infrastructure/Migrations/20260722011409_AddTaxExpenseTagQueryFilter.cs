@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace TaxExpenseTracker.Api.Migrations
+namespace TaxExpenseTracker.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class AddTaxExpenseTagQueryFilter : Migration
