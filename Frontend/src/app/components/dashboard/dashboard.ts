@@ -1,7 +1,8 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize, take } from 'rxjs';
 import { ExpenseSummary } from '../../models/api.models';
 import { ExpenseService } from '../../services/expense';
 
@@ -13,6 +14,7 @@ import { ExpenseService } from '../../services/expense';
 })
 export class Dashboard implements OnInit {
   private readonly expenseService = inject(ExpenseService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   summary: ExpenseSummary | null = null;
   isLoading = false;
@@ -26,16 +28,23 @@ export class Dashboard implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.expenseService.getSummary().subscribe({
-      next: (summary) => {
-        this.summary = summary;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load dashboard summary. Ensure the API is running.';
-        this.isLoading = false;
-      },
-    });
+    this.expenseService
+      .getSummary()
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (summary) => {
+          this.summary = summary;
+        },
+        error: () => {
+          this.errorMessage = 'Unable to load dashboard summary. Ensure the API is running.';
+        },
+      });
   }
 
   get topTracker(): string {

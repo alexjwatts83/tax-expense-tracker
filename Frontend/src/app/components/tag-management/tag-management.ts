@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { finalize, take } from 'rxjs';
 import { Tag } from '../../models/api.models';
 import { TagService } from '../../services/tag';
 
@@ -30,6 +31,7 @@ import { TagService } from '../../services/tag';
 export class TagManagement implements OnInit {
   private readonly tagService = inject(TagService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly displayedColumns: string[] = ['name', 'createdAt', 'actions'];
 
@@ -53,16 +55,23 @@ export class TagManagement implements OnInit {
     this.errorMessage = '';
     this.infoMessage = '';
 
-    this.tagService.getAll().subscribe({
-      next: (tags) => {
-        this.tags = tags;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load tags. Ensure the API is running.';
-        this.isLoading = false;
-      },
-    });
+    this.tagService
+      .getAll()
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (tags) => {
+          this.tags = tags;
+        },
+        error: () => {
+          this.errorMessage = 'Unable to load tags. Ensure the API is running.';
+        },
+      });
   }
 
   createTag(): void {

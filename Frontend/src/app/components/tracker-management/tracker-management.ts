@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { finalize, take } from 'rxjs';
 import { Tracker } from '../../models/api.models';
 import { TrackerService } from '../../services/tracker';
 
@@ -30,6 +31,7 @@ import { TrackerService } from '../../services/tracker';
 export class TrackerManagement implements OnInit {
   private readonly trackerService = inject(TrackerService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly displayedColumns: string[] = ['name', 'description', 'createdAt', 'actions'];
 
@@ -54,16 +56,23 @@ export class TrackerManagement implements OnInit {
     this.errorMessage = '';
     this.infoMessage = '';
 
-    this.trackerService.getAll().subscribe({
-      next: (trackers) => {
-        this.trackers = trackers;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load trackers. Ensure the API is running.';
-        this.isLoading = false;
-      },
-    });
+    this.trackerService
+      .getAll()
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (trackers) => {
+          this.trackers = trackers;
+        },
+        error: () => {
+          this.errorMessage = 'Unable to load trackers. Ensure the API is running.';
+        },
+      });
   }
 
   createTracker(): void {

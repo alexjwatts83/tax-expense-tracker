@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { finalize, take } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { Expense, Tag, Tracker } from '../../models/api.models';
 import { ExpenseService } from '../../services/expense';
@@ -42,6 +43,7 @@ export class ExpenseList implements OnInit {
   private readonly trackerService = inject(TrackerService);
   private readonly tagService = inject(TagService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly displayedColumns = ['item', 'date', 'bank', 'price', 'source', 'tags', 'actions'];
   readonly pageSizes = [10, 20, 50];
@@ -94,17 +96,24 @@ export class ExpenseList implements OnInit {
     this.errorMessage = '';
     this.infoMessage = '';
 
-    this.expenseService.getAll().subscribe({
-      next: (expenses) => {
-        this.expenses = expenses;
-        this.updatePagedExpenses();
-        this.isLoading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load expenses. Ensure the API is running.';
-        this.isLoading = false;
-      },
-    });
+    this.expenseService
+      .getAll()
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (expenses) => {
+          this.expenses = expenses;
+          this.updatePagedExpenses();
+        },
+        error: () => {
+          this.errorMessage = 'Unable to load expenses. Ensure the API is running.';
+        },
+      });
   }
 
   softDeleteExpense(id: string): void {
