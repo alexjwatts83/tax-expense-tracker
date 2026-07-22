@@ -135,20 +135,19 @@ public class ExpenseServiceTests
     }
 
     [Fact]
-    public async Task FilterAsync_Throws_WhenDateRangeInvalid()
+    public async Task FilterAsync_Throws_WhenPriceIsNegative()
     {
         var repository = new InMemoryExpenseRepository();
         var service = new ExpenseService(repository);
 
         var query = new ExpenseFilterQuery(
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddDays(-1),
             null,
             null,
+            -1m,
             null,
             []);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => service.FilterAsync(query));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.FilterAsync(query));
     }
 
     private sealed class InMemoryExpenseRepository : IExpenseRepository

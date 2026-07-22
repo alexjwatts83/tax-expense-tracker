@@ -49,12 +49,8 @@ export class ExpenseService {
 	filter(request: ExpenseFilterRequest): Observable<Expense[]> {
 		let params = new HttpParams();
 
-		if (request.startDate) {
-			params = params.set('startDate', request.startDate);
-		}
-
-		if (request.endDate) {
-			params = params.set('endDate', request.endDate);
+		if (request.date) {
+			params = params.set('date', request.date);
 		}
 
 		if (request.bank) {

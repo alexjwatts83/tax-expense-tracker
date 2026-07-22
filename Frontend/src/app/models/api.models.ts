@@ -57,8 +57,7 @@ export interface ExpenseSummary {
 }
 
 export interface ExpenseFilterRequest {
-  startDate?: string;
-  endDate?: string;
+  date?: string;
   bank?: string;
   price?: number;
   sourceId?: string;

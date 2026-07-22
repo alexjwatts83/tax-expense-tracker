@@ -116,14 +116,10 @@ public sealed class EfExpenseRepository : IExpenseRepository
                 .ThenInclude(x => x.Tag)
             .AsQueryable();
 
-        if (query.StartDate.HasValue)
+        if (query.Date.HasValue)
         {
-            expenseQuery = expenseQuery.Where(x => x.Date >= query.StartDate.Value);
-        }
-
-        if (query.EndDate.HasValue)
-        {
-            expenseQuery = expenseQuery.Where(x => x.Date <= query.EndDate.Value);
+            var filterDate = query.Date.Value.Date;
+            expenseQuery = expenseQuery.Where(x => x.Date.Date == filterDate);
         }
 
         if (!string.IsNullOrWhiteSpace(query.Bank))

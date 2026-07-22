@@ -12,11 +12,6 @@ internal static class ExpenseValidation
 
     public static void ValidateFilter(ExpenseFilterQuery query)
     {
-        if (query.StartDate.HasValue && query.EndDate.HasValue && query.StartDate > query.EndDate)
-        {
-            throw new ArgumentException("StartDate cannot be after EndDate.", nameof(query));
-        }
-
         if (query.Price.HasValue && query.Price.Value < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(query), "Price must be non-negative.");

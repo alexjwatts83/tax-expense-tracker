@@ -189,16 +189,6 @@ if ($ForceRestart) {
     }
 }
 
-if (-not $frontendRunning) {
-    if ((Get-PortOwners -Ports @(4200)).Count -gt 0) {
-        Write-Host 'Port 4200 is currently in use and frontend is not recognized as already running:' -ForegroundColor Yellow
-        Get-PortOwners -Ports @(4200) | Format-Table -AutoSize
-        throw 'Frontend startup blocked by port 4200 ownership.'
-    }
-
-    Start-FrontendService -FrontendPath $frontendPath
-}
-
 if (-not $backendRunning) {
     if ((Get-PortOwners -Ports @(7152, 5158)).Count -gt 0) {
         Write-Host 'Backend port(s) are currently in use and backend is not recognized as already running:' -ForegroundColor Yellow
@@ -207,6 +197,16 @@ if (-not $backendRunning) {
     }
 
     Start-BackendService -RepoRoot $repoRoot -SolutionPath $solutionPath
+}
+
+if (-not $frontendRunning) {
+    if ((Get-PortOwners -Ports @(4200)).Count -gt 0) {
+        Write-Host 'Port 4200 is currently in use and frontend is not recognized as already running:' -ForegroundColor Yellow
+        Get-PortOwners -Ports @(4200) | Format-Table -AutoSize
+        throw 'Frontend startup blocked by port 4200 ownership.'
+    }
+
+    Start-FrontendService -FrontendPath $frontendPath
 }
 
 Write-Host 'Done. Use:'

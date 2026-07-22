@@ -36,8 +36,7 @@ public sealed record UpdateExpenseCommand(
     IReadOnlyList<Guid> TagIds);
 
 public sealed record ExpenseFilterQuery(
-    DateTime? StartDate,
-    DateTime? EndDate,
+    DateTime? Date,
     string? Bank,
     decimal? Price,
     Guid? SourceId,

@@ -109,8 +109,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
 
     [HttpGet("filter")]
     public async Task<ActionResult<IEnumerable<ExpenseResponseDto>>> Filter(
-        DateTime? startDate,
-        DateTime? endDate,
+        DateTime? date,
         string? bank,
         decimal? price,
         Guid? sourceId,
@@ -120,7 +119,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         var parsedTagIds = ParseTagIds(tagIds);
 
         var expenses = await expenseService.FilterAsync(
-            new ExpenseFilterQuery(startDate, endDate, bank, price, sourceId, parsedTagIds),
+            new ExpenseFilterQuery(date, bank, price, sourceId, parsedTagIds),
             cancellationToken);
 
         return Ok(expenses.Select(MapExpense));

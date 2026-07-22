@@ -49,8 +49,7 @@ export class ExpenseList implements OnInit {
   readonly pageSizes = [10, 20, 50];
 
   readonly filterForm = this.formBuilder.group({
-    startDate: [''],
-    endDate: [''],
+    date: [''],
     bank: [''],
     price: [''],
     sourceId: [''],
@@ -165,8 +164,7 @@ export class ExpenseList implements OnInit {
     const value = this.filterForm.value;
 
     const request = {
-      startDate: value.startDate || undefined,
-      endDate: value.endDate || undefined,
+      date: value.date || undefined,
       bank: value.bank?.trim() || undefined,
       price: value.price ? Number(value.price) : undefined,
       sourceId: value.sourceId || undefined,
@@ -193,8 +191,7 @@ export class ExpenseList implements OnInit {
 
   clearFilters(): void {
     this.filterForm.reset({
-      startDate: '',
-      endDate: '',
+      date: '',
       bank: '',
       price: '',
       sourceId: '',
@@ -205,6 +202,13 @@ export class ExpenseList implements OnInit {
     this.page = 1;
     this.lastDeletedExpense = null;
     this.loadExpenses();
+  }
+
+  openDatePicker(input: HTMLInputElement): void {
+    input.focus();
+
+    const pickerInput = input as HTMLInputElement & { showPicker?: () => void };
+    pickerInput.showPicker?.();
   }
 
   previousPage(): void {
