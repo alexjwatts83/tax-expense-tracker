@@ -1,0 +1,47 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# .NET / ASP.NET Core
+**/bin/
+**/obj/
+**/.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# EF/Core generated or local DB artifacts
+*.db
+*.db-shm
+*.db-wal
+
+# ASP.NET local settings
+**/appsettings.Development.json
+**/secrets.json
+
+# Angular / Node
+**/node_modules/
+**/dist/
+**/.angular/
+**/coverage/
+**/.cache/
+
+# Build / test artifacts
+**/TestResults/
+**/coverage-final.json
+**/*.tsbuildinfo
