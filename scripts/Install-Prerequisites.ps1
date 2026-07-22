@@ -217,9 +217,22 @@ foreach ($cmd in @("git", "dotnet", "volta", "node", "npm", "ng", "terraform", "
         Write-Pass "$cmd is available"
     }
     else {
-        Write-Fail "$cmd is missing"
+        if ($DryRun) {
+            Write-Warn "$cmd is missing in current shell (dry run; no install performed)"
+        }
+        else {
+            Write-Fail "$cmd is missing"
+        }
         $missingAfterInstall.Add($cmd) | Out-Null
     }
+}
+
+if ($DryRun) {
+    Write-Host ""
+    Write-Warn "Dry run mode does not install packages or refresh this session's PATH."
+    Write-Warn "Missing tools above reflect the current shell state only."
+    Write-Pass "Dry run complete. Run without -DryRun to install and then verify prerequisites."
+    exit 0
 }
 
 if ($missingAfterInstall.Count -eq 0) {
