@@ -5,6 +5,15 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plans", "Plans", "{9C8E99A0-2B68-43F6-8C40-1F7924F4E605}"
+	ProjectSection(SolutionItems) = preProject
+		plans\TAX_EXPENSE_TRACKER_PLAN.md = plans\TAX_EXPENSE_TRACKER_PLAN.md
+		plans\skills\README.md = plans\skills\README.md
+		plans\skills\azure-deployment\SKILL.md = plans\skills\azure-deployment\SKILL.md
+		plans\skills\backend\SKILL.md = plans\skills\backend\SKILL.md
+		plans\skills\frontend\SKILL.md = plans\skills\frontend\SKILL.md
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxExpenseTracker.Api", "Backend\TaxExpenseTracker.Api\TaxExpenseTracker.Api.csproj", "{E1E21128-728E-4854-BF25-F7C887C08B18}"
 EndProject
 Global
