@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaxExpenseTracker.Api.Data;
 using TaxExpenseTracker.Api.Models;
+using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Api.Controllers;
 

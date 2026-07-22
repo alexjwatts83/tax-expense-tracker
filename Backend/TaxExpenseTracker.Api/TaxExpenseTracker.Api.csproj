@@ -23,4 +23,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TaxExpenseTracker.Application\TaxExpenseTracker.Application.csproj" />
+    <ProjectReference Include="..\TaxExpenseTracker.Infrastructure\TaxExpenseTracker.Infrastructure.csproj" />
+    <ProjectReference Include="..\TaxExpenseTracker.Domain\TaxExpenseTracker.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

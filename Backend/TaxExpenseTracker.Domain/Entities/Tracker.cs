@@ -1,4 +1,4 @@
-namespace TaxExpenseTracker.Api.Models;
+namespace TaxExpenseTracker.Domain.Entities;
 
 public class Tracker
 {

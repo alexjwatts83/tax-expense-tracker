@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TaxExpenseTracker.Api.Models;
+using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Api.Data;
 
