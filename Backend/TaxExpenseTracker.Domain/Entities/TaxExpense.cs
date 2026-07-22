@@ -6,13 +6,14 @@ public class TaxExpense
     public string Item { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime Date { get; set; }
-    public string Bank { get; set; } = string.Empty;
+    public Guid BankId { get; set; }
     public decimal Price { get; set; }
     public Guid SourceId { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    public Bank? Bank { get; set; }
     public Tracker? Source { get; set; }
     public ICollection<TaxExpenseTag> TaxExpenseTags { get; set; } = new List<TaxExpenseTag>();
 
@@ -20,7 +21,7 @@ public class TaxExpense
         string item,
         string? description,
         DateTime date,
-        string bank,
+        Guid bankId,
         decimal price,
         Guid sourceId,
         DateTime? utcNow = null)
@@ -33,7 +34,7 @@ public class TaxExpense
             Item = NormalizeRequired(item, nameof(Item)),
             Description = NormalizeOptional(description),
             Date = ValidateDate(date),
-            Bank = NormalizeRequired(bank, nameof(Bank)),
+            BankId = ValidateBankId(bankId),
             Price = ValidatePrice(price),
             SourceId = ValidateSourceId(sourceId),
             CreatedAt = now,
@@ -46,7 +47,7 @@ public class TaxExpense
         string item,
         string? description,
         DateTime date,
-        string bank,
+        Guid bankId,
         decimal price,
         Guid sourceId,
         DateTime? utcNow = null)
@@ -54,7 +55,7 @@ public class TaxExpense
         Item = NormalizeRequired(item, nameof(Item));
         Description = NormalizeOptional(description);
         Date = ValidateDate(date);
-        Bank = NormalizeRequired(bank, nameof(Bank));
+        BankId = ValidateBankId(bankId);
         Price = ValidatePrice(price);
         SourceId = ValidateSourceId(sourceId);
         UpdatedAt = utcNow ?? DateTime.UtcNow;
@@ -116,5 +117,15 @@ public class TaxExpense
         }
 
         return sourceId;
+    }
+
+    private static Guid ValidateBankId(Guid bankId)
+    {
+        if (bankId == Guid.Empty)
+        {
+            throw new ArgumentException("BankId is required.", nameof(bankId));
+        }
+
+        return bankId;
     }
 }

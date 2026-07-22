@@ -53,8 +53,8 @@ export class ExpenseService {
 			params = params.set('date', request.date);
 		}
 
-		if (request.bank) {
-			params = params.set('bank', request.bank);
+		if (request.bankId) {
+			params = params.set('bankId', request.bankId);
 		}
 
 		if (request.price !== undefined) {

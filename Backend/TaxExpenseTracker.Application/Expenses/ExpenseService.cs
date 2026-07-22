@@ -36,13 +36,19 @@ public sealed class ExpenseService : IExpenseService
             throw new InvalidOperationException("Source tracker does not exist.");
         }
 
+        var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
+        if (!bankExists)
+        {
+            throw new InvalidOperationException("Bank does not exist.");
+        }
+
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
         var expense = TaxExpense.Create(
             command.Item,
             command.Description,
             command.Date,
-            command.Bank,
+            command.BankId,
             command.Price,
             command.SourceId);
 
@@ -73,13 +79,19 @@ public sealed class ExpenseService : IExpenseService
             throw new InvalidOperationException("Source tracker does not exist.");
         }
 
+        var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
+        if (!bankExists)
+        {
+            throw new InvalidOperationException("Bank does not exist.");
+        }
+
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
         expense.UpdateDetails(
             command.Item,
             command.Description,
             command.Date,
-            command.Bank,
+            command.BankId,
             command.Price,
             command.SourceId);
 
@@ -149,7 +161,10 @@ public sealed class ExpenseService : IExpenseService
             expense.Item,
             expense.Description,
             expense.Date,
-            expense.Bank,
+            expense.BankId,
+            expense.Bank is null
+                ? null
+                : new ExpenseBankDto(expense.Bank.Id, expense.Bank.Name, expense.Bank.CreatedAt),
             expense.Price,
             expense.SourceId,
             expense.Source is null

@@ -2,6 +2,8 @@ namespace TaxExpenseTracker.Application.Expenses;
 
 public sealed record ExpenseSourceDto(Guid Id, string Name, string? Description, DateTime CreatedAt);
 
+public sealed record ExpenseBankDto(Guid Id, string Name, DateTime CreatedAt);
+
 public sealed record ExpenseTagDto(Guid Id, string Name, DateTime CreatedAt);
 
 public sealed record ExpenseReadDto(
@@ -9,7 +11,8 @@ public sealed record ExpenseReadDto(
     string Item,
     string Description,
     DateTime Date,
-    string Bank,
+    Guid BankId,
+    ExpenseBankDto? Bank,
     decimal Price,
     Guid SourceId,
     ExpenseSourceDto? Source,
@@ -21,7 +24,7 @@ public sealed record CreateExpenseCommand(
     string Item,
     string Description,
     DateTime Date,
-    string Bank,
+    Guid BankId,
     decimal Price,
     Guid SourceId,
     IReadOnlyList<Guid> TagIds);
@@ -30,14 +33,14 @@ public sealed record UpdateExpenseCommand(
     string Item,
     string Description,
     DateTime Date,
-    string Bank,
+    Guid BankId,
     decimal Price,
     Guid SourceId,
     IReadOnlyList<Guid> TagIds);
 
 public sealed record ExpenseFilterQuery(
     DateTime? Date,
-    string? Bank,
+    Guid? BankId,
     decimal? Price,
     Guid? SourceId,
     IReadOnlyList<Guid> TagIds);

@@ -7,7 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
-import { Tag, Tracker } from '../../models/api.models';
+import { forkJoin } from 'rxjs';
+import { Bank, Tag, Tracker } from '../../models/api.models';
+import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
 import { TagService } from '../../services/tag';
 import { TrackerService } from '../../services/tracker';
@@ -29,11 +31,13 @@ import { TrackerService } from '../../services/tracker';
 export class ExpenseForm implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly expenseService = inject(ExpenseService);
+  private readonly bankService = inject(BankService);
   private readonly trackerService = inject(TrackerService);
   private readonly tagService = inject(TagService);
   private readonly router = inject(Router);
 
   readonly form: FormGroup;
+  banks: Bank[] = [];
   trackers: Tracker[] = [];
   tags: Tag[] = [];
   isLoadingLookups = false;
@@ -45,7 +49,7 @@ export class ExpenseForm implements OnInit {
       item: ['', [Validators.required]],
       description: [''],
       date: ['', [Validators.required]],
-      bank: ['', [Validators.required]],
+      bankId: ['', [Validators.required]],
       price: [0, [Validators.required, Validators.min(0)]],
       sourceId: ['', [Validators.required]],
       tagIds: [[]],
@@ -60,23 +64,19 @@ export class ExpenseForm implements OnInit {
     this.isLoadingLookups = true;
     this.errorMessage = '';
 
-    this.trackerService.getAll().subscribe({
-      next: (trackers) => {
+    forkJoin({
+      banks: this.bankService.getAll(),
+      trackers: this.trackerService.getAll(),
+      tags: this.tagService.getAll(),
+    }).subscribe({
+      next: ({ banks, trackers, tags }) => {
+        this.banks = banks;
         this.trackers = trackers;
-
-        this.tagService.getAll().subscribe({
-          next: (tags) => {
-            this.tags = tags;
-            this.isLoadingLookups = false;
-          },
-          error: () => {
-            this.errorMessage = 'Unable to load tags.';
-            this.isLoadingLookups = false;
-          },
-        });
+        this.tags = tags;
+        this.isLoadingLookups = false;
       },
       error: () => {
-        this.errorMessage = 'Unable to load trackers.';
+        this.errorMessage = 'Unable to load lookup data.';
         this.isLoadingLookups = false;
       },
     });
@@ -96,7 +96,7 @@ export class ExpenseForm implements OnInit {
       item: this.form.value.item?.trim() ?? '',
       description: this.form.value.description?.trim() ?? '',
       date: this.form.value.date,
-      bank: this.form.value.bank?.trim() ?? '',
+      bankId: this.form.value.bankId,
       price: Number(this.form.value.price),
       sourceId: this.form.value.sourceId,
       tagIds: this.form.value.tagIds ?? [],

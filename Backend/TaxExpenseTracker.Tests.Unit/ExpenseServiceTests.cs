@@ -10,7 +10,8 @@ public class ExpenseServiceTests
     {
         var repository = new InMemoryExpenseRepository
         {
-            SourceExistsResult = false
+            SourceExistsResult = false,
+            BankExistsResult = true,
         };
 
         var service = new ExpenseService(repository);
@@ -20,7 +21,7 @@ public class ExpenseServiceTests
                 "Laptop",
                 "Work machine",
                 DateTime.UtcNow,
-                "ANZ",
+                repository.BankId,
                 1200m,
                 Guid.NewGuid(),
                 [])));
@@ -31,7 +32,8 @@ public class ExpenseServiceTests
     {
         var repository = new InMemoryExpenseRepository
         {
-            SourceExistsResult = true
+            SourceExistsResult = true,
+            BankExistsResult = true,
         };
 
         var service = new ExpenseService(repository);
@@ -40,13 +42,13 @@ public class ExpenseServiceTests
             "  Laptop  ",
             "  Work machine  ",
             DateTime.UtcNow,
-            "  ANZ  ",
+            repository.BankId,
             1200m,
             repository.SourceId,
             [repository.TagId]));
 
         Assert.Equal("Laptop", result.Item);
-        Assert.Equal("ANZ", result.Bank);
+        Assert.Equal(repository.BankId, result.BankId);
         Assert.Single(repository.Expenses);
         Assert.True(repository.SaveChangesCalled);
     }
@@ -56,7 +58,8 @@ public class ExpenseServiceTests
     {
         var repository = new InMemoryExpenseRepository
         {
-            SourceExistsResult = true
+            SourceExistsResult = true,
+            BankExistsResult = true,
         };
 
         var service = new ExpenseService(repository);
@@ -65,7 +68,7 @@ public class ExpenseServiceTests
             "Item",
             "Desc",
             DateTime.UtcNow,
-            "Bank",
+            repository.BankId,
             10m,
             repository.SourceId,
             [repository.TagId]));
@@ -89,14 +92,15 @@ public class ExpenseServiceTests
     {
         var repository = new InMemoryExpenseRepository
         {
-            SourceExistsResult = true
+            SourceExistsResult = true,
+            BankExistsResult = true,
         };
 
         var expense = TaxExpense.Create(
             "Laptop",
             "Desc",
             DateTime.UtcNow,
-            "ANZ",
+            repository.BankId,
             100m,
             repository.SourceId);
         expense.SoftDelete();
@@ -114,13 +118,15 @@ public class ExpenseServiceTests
     [Fact]
     public async Task GetSummaryAsync_ReturnsGroupedTotals()
     {
-        var repository = new InMemoryExpenseRepository { SourceExistsResult = true };
+        var repository = new InMemoryExpenseRepository { SourceExistsResult = true, BankExistsResult = true };
         var now = DateTime.UtcNow;
 
-        var first = TaxExpense.Create("Item A", "Desc", now, "ANZ", 10m, repository.SourceId);
+        var first = TaxExpense.Create("Item A", "Desc", now, repository.BankId, 10m, repository.SourceId);
+        first.Bank = Bank.Create("ANZ", now);
         first.Source = Tracker.Create("Tracker A", "Source", now);
 
-        var second = TaxExpense.Create("Item B", "Desc", now, "CBA", 30m, repository.SourceId);
+        var second = TaxExpense.Create("Item B", "Desc", now, Guid.NewGuid(), 30m, repository.SourceId);
+        second.Bank = Bank.Create("CBA", now);
         second.Source = Tracker.Create("Tracker B", "Source", now);
 
         repository.Expenses.Add(first);
@@ -155,6 +161,8 @@ public class ExpenseServiceTests
         public List<TaxExpense> Expenses { get; } = [];
         public bool SaveChangesCalled { get; private set; }
         public bool SourceExistsResult { get; set; }
+        public bool BankExistsResult { get; set; }
+        public Guid BankId { get; } = Guid.NewGuid();
         public Guid SourceId { get; } = Guid.NewGuid();
         public Guid TagId { get; } = Guid.NewGuid();
 
@@ -166,6 +174,11 @@ public class ExpenseServiceTests
         public Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var expense = Expenses.FirstOrDefault(x => x.Id == id);
+            if (expense is not null && expense.Bank is null)
+            {
+                expense.Bank = Bank.Create("ANZ", DateTime.UtcNow);
+            }
+
             if (expense is not null && expense.Source is null)
             {
                 expense.Source = Tracker.Create("Home Office", "Source", DateTime.UtcNow);
@@ -197,6 +210,11 @@ public class ExpenseServiceTests
             return Task.FromResult(SourceExistsResult && sourceId == SourceId);
         }
 
+        public Task<bool> BankExistsAsync(Guid bankId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(BankExistsResult && bankId == BankId);
+        }
+
         public Task<IReadOnlyList<Guid>> GetExistingTagIdsAsync(IReadOnlyList<Guid> tagIds, CancellationToken cancellationToken = default)
         {
             var valid = tagIds.Where(x => x == TagId).ToList();
@@ -223,7 +241,7 @@ public class ExpenseServiceTests
         public Task<IReadOnlyList<ExpenseTotalByGroup>> GetTotalByBankAsync(CancellationToken cancellationToken = default)
         {
             var rows = Expenses
-                .GroupBy(x => x.Bank)
+                .GroupBy(x => x.Bank?.Name ?? "Unknown")
                 .Select(x => new ExpenseTotalByGroup(x.Key, x.Sum(y => y.Price)))
                 .ToList();
 

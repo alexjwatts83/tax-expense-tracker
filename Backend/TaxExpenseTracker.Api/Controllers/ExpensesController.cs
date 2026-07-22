@@ -38,7 +38,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
                 request.Item,
                 request.Description,
                 request.Date,
-                request.Bank,
+                request.BankId,
                 request.Price,
                 request.SourceId,
                 request.TagIds),
@@ -56,7 +56,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
                 request.Item,
                 request.Description,
                 request.Date,
-                request.Bank,
+                request.BankId,
                 request.Price,
                 request.SourceId,
                 request.TagIds),
@@ -110,7 +110,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
     [HttpGet("filter")]
     public async Task<ActionResult<IEnumerable<ExpenseResponseDto>>> Filter(
         DateTime? date,
-        string? bank,
+        Guid? bankId,
         decimal? price,
         Guid? sourceId,
         string? tagIds,
@@ -119,7 +119,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         var parsedTagIds = ParseTagIds(tagIds);
 
         var expenses = await expenseService.FilterAsync(
-            new ExpenseFilterQuery(date, bank, price, sourceId, parsedTagIds),
+            new ExpenseFilterQuery(date, bankId, price, sourceId, parsedTagIds),
             cancellationToken);
 
         return Ok(expenses.Select(MapExpense));
@@ -147,7 +147,15 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
             Item = expense.Item,
             Description = expense.Description,
             Date = expense.Date,
-            Bank = expense.Bank,
+            BankId = expense.BankId,
+            Bank = expense.Bank is null
+                ? null
+                : new BankDto
+                {
+                    Id = expense.Bank.Id,
+                    Name = expense.Bank.Name,
+                    CreatedAt = expense.Bank.CreatedAt
+                },
             Price = expense.Price,
             SourceId = expense.SourceId,
             Source = expense.Source is null

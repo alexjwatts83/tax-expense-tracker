@@ -17,6 +17,7 @@ public sealed class EfExpenseRepository : IExpenseRepository
     {
         return await _dbContext.TaxExpenses
             .AsNoTracking()
+            .Include(x => x.Bank)
             .Include(x => x.Source)
             .Include(x => x.TaxExpenseTags)
                 .ThenInclude(x => x.Tag)
@@ -30,6 +31,7 @@ public sealed class EfExpenseRepository : IExpenseRepository
     {
         return await _dbContext.TaxExpenses
             .AsNoTracking()
+            .Include(x => x.Bank)
             .Include(x => x.Source)
             .Include(x => x.TaxExpenseTags)
                 .ThenInclude(x => x.Tag)
@@ -54,6 +56,11 @@ public sealed class EfExpenseRepository : IExpenseRepository
     public Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Trackers.AnyAsync(x => x.Id == sourceId, cancellationToken);
+    }
+
+    public Task<bool> BankExistsAsync(Guid bankId, CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Banks.AnyAsync(x => x.Id == bankId, cancellationToken);
     }
 
     public async Task<IReadOnlyList<Guid>> GetExistingTagIdsAsync(IReadOnlyList<Guid> tagIds, CancellationToken cancellationToken = default)
@@ -87,7 +94,8 @@ public sealed class EfExpenseRepository : IExpenseRepository
     public async Task<IReadOnlyList<ExpenseTotalByGroup>> GetTotalByBankAsync(CancellationToken cancellationToken = default)
     {
         var rows = await _dbContext.TaxExpenses
-            .GroupBy(x => x.Bank)
+            .Include(x => x.Bank)
+            .GroupBy(x => x.Bank!.Name)
             .Select(x => new { Group = x.Key, Total = x.Sum(e => e.Price) })
             .OrderByDescending(x => x.Total)
             .ToListAsync(cancellationToken);
@@ -111,6 +119,7 @@ public sealed class EfExpenseRepository : IExpenseRepository
     {
         var expenseQuery = _dbContext.TaxExpenses
             .AsNoTracking()
+            .Include(x => x.Bank)
             .Include(x => x.Source)
             .Include(x => x.TaxExpenseTags)
                 .ThenInclude(x => x.Tag)
@@ -122,10 +131,9 @@ public sealed class EfExpenseRepository : IExpenseRepository
             expenseQuery = expenseQuery.Where(x => x.Date.Date == filterDate);
         }
 
-        if (!string.IsNullOrWhiteSpace(query.Bank))
+        if (query.BankId.HasValue)
         {
-            var trimmedBank = query.Bank.Trim();
-            expenseQuery = expenseQuery.Where(x => x.Bank == trimmedBank);
+            expenseQuery = expenseQuery.Where(x => x.BankId == query.BankId.Value);
         }
 
         if (query.Price.HasValue)

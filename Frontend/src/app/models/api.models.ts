@@ -11,12 +11,19 @@ export interface Tag {
   createdAt: string;
 }
 
+export interface Bank {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface Expense {
   id: string;
   item: string;
   description: string;
   date: string;
-  bank: string;
+  bankId: string;
+  bank?: Bank;
   price: number;
   sourceId: string;
   source?: Tracker;
@@ -29,7 +36,7 @@ export interface CreateExpenseRequest {
   item: string;
   description: string;
   date: string;
-  bank: string;
+  bankId: string;
   price: number;
   sourceId: string;
   tagIds: string[];
@@ -41,6 +48,10 @@ export interface CreateTrackerRequest {
 }
 
 export interface CreateTagRequest {
+  name: string;
+}
+
+export interface CreateBankRequest {
   name: string;
 }
 
@@ -58,7 +69,7 @@ export interface ExpenseSummary {
 
 export interface ExpenseFilterRequest {
   date?: string;
-  bank?: string;
+  bankId?: string;
   price?: number;
   sourceId?: string;
   tagIds?: string[];

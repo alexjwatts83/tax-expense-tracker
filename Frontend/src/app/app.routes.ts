@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { BankManagement } from './components/bank-management/bank-management';
 import { Dashboard } from './components/dashboard/dashboard';
 import { ExpenseDetails } from './components/expense-details/expense-details';
 import { ExpenseForm } from './components/expense-form/expense-form';
@@ -14,4 +15,5 @@ export const routes: Routes = [
 	{ path: 'expenses/:id', component: ExpenseDetails },
 	{ path: 'trackers', component: TrackerManagement },
 	{ path: 'tags', component: TagManagement },
+	{ path: 'banks', component: BankManagement },
 ];

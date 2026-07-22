@@ -25,7 +25,11 @@
 
 				<mat-form-field>
 					<mat-label>Bank</mat-label>
-					<input matInput formControlName="bank" />
+					<mat-select formControlName="bankId">
+						@for (bank of banks; track bank.id) {
+							<mat-option [value]="bank.id">{{ bank.name }}</mat-option>
+						}
+					</mat-select>
 				</mat-form-field>
 
 				<mat-form-field>

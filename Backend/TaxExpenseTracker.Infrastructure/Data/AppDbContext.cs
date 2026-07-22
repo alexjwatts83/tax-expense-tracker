@@ -6,6 +6,7 @@ namespace TaxExpenseTracker.Infrastructure.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<TaxExpense> TaxExpenses => Set<TaxExpense>();
+    public DbSet<Bank> Banks => Set<Bank>();
     public DbSet<Tracker> Trackers => Set<Tracker>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<TaxExpenseTag> TaxExpenseTags => Set<TaxExpenseTag>();
@@ -15,9 +16,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<TaxExpense>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<Bank>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Tracker>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Tag>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TaxExpenseTag>().HasQueryFilter(x => !x.TaxExpense!.IsDeleted && !x.Tag!.IsDeleted);
+
+        modelBuilder.Entity<TaxExpense>()
+            .HasOne(x => x.Bank)
+            .WithMany(x => x.Expenses)
+            .HasForeignKey(x => x.BankId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<TaxExpense>()
             .HasOne(x => x.Source)
@@ -44,6 +52,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(x => x.TagId);
 
         var seedTimestamp = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        modelBuilder.Entity<Bank>().HasData(
+            new Bank { Id = Guid.Parse("f2c328b0-6d89-4b66-8ef4-fcbe9970a1fd"), Name = "ANZ", IsDeleted = false, CreatedAt = seedTimestamp },
+            new Bank { Id = Guid.Parse("4c52ddd3-5208-4385-bf85-c1d3e0402ef4"), Name = "CBA", IsDeleted = false, CreatedAt = seedTimestamp },
+            new Bank { Id = Guid.Parse("69c4e618-d714-4429-b5a2-3a35eb50b343"), Name = "Westpac", IsDeleted = false, CreatedAt = seedTimestamp }
+        );
 
         modelBuilder.Entity<Tracker>().HasData(
             new Tracker { Id = Guid.Parse("e13e64d9-bf27-4232-9af4-b2db537d5faf"), Name = "H&R Block", Description = "Default tracker", IsDeleted = false, CreatedAt = seedTimestamp, UpdatedAt = seedTimestamp },

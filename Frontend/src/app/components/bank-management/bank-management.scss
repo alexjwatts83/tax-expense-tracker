@@ -1,0 +1,30 @@
+.bank-form {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: 1fr;
+}
+
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.bank-table {
+	width: 100%;
+}
+
+.loading {
+	display: flex;
+	justify-content: center;
+	padding: 1.5rem 0;
+}
+
+.error-message {
+	color: #b42318;
+	margin: 0.75rem 0;
+}
+
+.info-message {
+	color: #027a48;
+	margin: 0.75rem 0;
+}

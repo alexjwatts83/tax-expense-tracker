@@ -10,9 +10,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
-import { finalize, take } from 'rxjs';
+import { finalize, forkJoin, take } from 'rxjs';
 import { RouterLink } from '@angular/router';
-import { Expense, Tag, Tracker } from '../../models/api.models';
+import { Bank, Expense, Tag, Tracker } from '../../models/api.models';
+import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
 import { TagService } from '../../services/tag';
 import { TrackerService } from '../../services/tracker';
@@ -39,6 +40,7 @@ import { TrackerService } from '../../services/tracker';
   styleUrl: './expense-list.scss',
 })
 export class ExpenseList implements OnInit {
+  private readonly bankService = inject(BankService);
   private readonly expenseService = inject(ExpenseService);
   private readonly trackerService = inject(TrackerService);
   private readonly tagService = inject(TagService);
@@ -50,12 +52,13 @@ export class ExpenseList implements OnInit {
 
   readonly filterForm = this.formBuilder.group({
     date: [''],
-    bank: [''],
+    bankId: [''],
     price: [''],
     sourceId: [''],
     tagIds: [[] as string[]],
   });
 
+  banks: Bank[] = [];
   expenses: Expense[] = [];
   pagedExpenses: Expense[] = [];
   lastDeletedExpense: Expense | null = null;
@@ -76,14 +79,14 @@ export class ExpenseList implements OnInit {
   }
 
   loadLookups(): void {
-    this.trackerService.getAll().subscribe({
-      next: (trackers) => {
+    forkJoin({
+      banks: this.bankService.getAll(),
+      trackers: this.trackerService.getAll(),
+      tags: this.tagService.getAll(),
+    }).subscribe({
+      next: ({ banks, trackers, tags }) => {
+        this.banks = banks;
         this.trackers = trackers;
-      },
-    });
-
-    this.tagService.getAll().subscribe({
-      next: (tags) => {
         this.tags = tags;
       },
     });
@@ -165,7 +168,7 @@ export class ExpenseList implements OnInit {
 
     const request = {
       date: value.date || undefined,
-      bank: value.bank?.trim() || undefined,
+      bankId: value.bankId || undefined,
       price: value.price ? Number(value.price) : undefined,
       sourceId: value.sourceId || undefined,
       tagIds: value.tagIds && value.tagIds.length > 0 ? value.tagIds : undefined,
@@ -192,7 +195,7 @@ export class ExpenseList implements OnInit {
   clearFilters(): void {
     this.filterForm.reset({
       date: '',
-      bank: '',
+      bankId: '',
       price: '',
       sourceId: '',
       tagIds: [],
