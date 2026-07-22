@@ -8,10 +8,11 @@ Refactor the current solution into a layered DDD and Clean Architecture structur
 
 - Domain, Application, and Infrastructure projects have been created and added to the solution.
 - Core domain entities have been extracted to the Domain project.
-- Tracker API orchestration has been moved to an Application service with repository abstraction.
-- Tag and Expense controllers still contain direct orchestration logic.
-- EF Core DbContext and persistence concerns are still in the API project.
-- Application use cases have started with the Tracker slice.
+- Tracker, Tag, and Expense API orchestration have been moved to Application services with repository abstractions.
+- EF Core DbContext, repositories, and migrations are owned by Infrastructure.
+- API controllers are thin and focused on HTTP concerns.
+- Centralized exception middleware handles API error mapping.
+- CI build and test quality gates are configured.
 
 ## Progress Snapshot (2026-07-22)
 
@@ -31,16 +32,11 @@ Completed:
 
 In progress:
 
-1. Phase B (domain extraction) is substantially complete; base abstractions still pending.
-2. Phase C (application use cases) has progressed through tracker, tag, and expense slices.
-3. Phase D (infrastructure ownership) has started with DbContext and repository relocation.
-4. Phase F (testing) has started with baseline test project scaffolding.
+1. None.
 
 Not started:
 
-1. Phase D Infrastructure ownership of DbContext/repositories/migrations.
-2. Phase E API thinning and middleware cleanup.
-3. Phase F full test coverage and CI quality gates.
+1. None.
 
 ## Target Architecture
 
@@ -94,7 +90,7 @@ Acceptance criteria:
 
 ### Phase B - Domain Extraction
 
-Status: In progress
+Status: Complete
 
 Deliverables:
 
@@ -115,7 +111,7 @@ Progress:
 
 1. Done: Core entities were moved into Domain.
 2. Done: Added invariant checks and behavior methods for Tracker/Tag/TaxExpense/TaxExpenseTag.
-3. Pending: Add optional base abstractions if needed.
+3. Done: Base abstractions evaluated as optional and intentionally deferred to avoid unnecessary complexity.
 
 Acceptance criteria:
 
@@ -124,7 +120,7 @@ Acceptance criteria:
 
 ### Phase C - Application Layer and Use Cases
 
-Status: In progress (scaffolded)
+Status: Complete
 
 Deliverables:
 
@@ -149,7 +145,7 @@ Progress:
 10. Done: Added expense use-case service (`IExpenseService`, `ExpenseService`).
 11. Done: Added expense repository abstraction in Application and EF-backed repository wiring in Infrastructure.
 12. Done: Refactored `ExpensesController` to delegate orchestration to `IExpenseService`.
-13. Pending: Add dedicated application validators for command/query input where needed.
+13. Done: Added dedicated application-level expense query/paging validation helper.
 
 Acceptance criteria:
 
@@ -158,7 +154,7 @@ Acceptance criteria:
 
 ### Phase D - Infrastructure Layer
 
-Status: In progress
+Status: Complete
 
 Deliverables:
 
@@ -183,7 +179,7 @@ Acceptance criteria:
 
 ### Phase E - API Layer Cleanup
 
-Status: Not started
+Status: Complete
 
 Deliverables:
 
@@ -195,6 +191,13 @@ Deliverables:
 3. Add versioning strategy if needed.
 4. Keep Swagger docs accurate and updated.
 
+Progress:
+
+1. Done: Controllers now focus on binding/orchestration/response mapping.
+2. Done: Added centralized API exception handling middleware.
+3. Done: Removed repeated controller exception-to-response mapping code.
+4. Done: Preserved stable route and payload contracts while refactoring.
+
 Acceptance criteria:
 
 1. Controllers mostly orchestrate HTTP concerns.
@@ -202,7 +205,7 @@ Acceptance criteria:
 
 ### Phase F - Testing and Quality Gates
 
-Status: In progress (initial coverage)
+Status: Complete
 
 Deliverables:
 
@@ -222,7 +225,8 @@ Progress:
 4. Done: Added initial unit coverage for domain invariants.
 5. Done: Added initial unit coverage for tracker and tag application services.
 6. Done: Added initial unit coverage for expense application service behavior.
-7. Pending: Expand use-case/domain rule coverage and add CI gating.
+7. Done: Expanded use-case coverage for update/delete/not-found and validation paths.
+8. Done: Added CI workflow for restore/build/test quality gates.
 
 Acceptance criteria:
 

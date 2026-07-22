@@ -18,6 +18,44 @@ public class TagServiceTests
         Assert.True(repository.SaveChangesCalled);
     }
 
+    [Fact]
+    public async Task UpdateAsync_ReturnsFalse_WhenTagMissing()
+    {
+        var repository = new InMemoryTagRepository();
+        var service = new TagService(repository);
+
+        var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateTagCommand("Updated"));
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ReturnsFalse_WhenTagMissing()
+    {
+        var repository = new InMemoryTagRepository();
+        var service = new TagService(repository);
+
+        var result = await service.DeleteAsync(Guid.NewGuid());
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_UpdatesTag_WhenExists()
+    {
+        var repository = new InMemoryTagRepository();
+        var tag = Tag.Create("Old", DateTime.UtcNow);
+        repository.Tags.Add(tag);
+
+        var service = new TagService(repository);
+
+        var result = await service.UpdateAsync(tag.Id, new UpdateTagCommand("  New  "));
+
+        Assert.True(result);
+        Assert.Equal("New", tag.Name);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
     private sealed class InMemoryTagRepository : ITagRepository
     {
         public List<Tag> Tags { get; } = [];

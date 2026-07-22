@@ -51,6 +51,80 @@ public class ExpenseServiceTests
         Assert.True(repository.SaveChangesCalled);
     }
 
+    [Fact]
+    public async Task UpdateAsync_ReturnsNull_WhenExpenseMissing()
+    {
+        var repository = new InMemoryExpenseRepository
+        {
+            SourceExistsResult = true
+        };
+
+        var service = new ExpenseService(repository);
+
+        var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateExpenseCommand(
+            "Item",
+            "Desc",
+            DateTime.UtcNow,
+            "Bank",
+            10m,
+            repository.SourceId,
+            [repository.TagId]));
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ReturnsFalse_WhenExpenseMissing()
+    {
+        var repository = new InMemoryExpenseRepository();
+        var service = new ExpenseService(repository);
+
+        var result = await service.DeleteAsync(Guid.NewGuid());
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task GetSummaryAsync_ReturnsGroupedTotals()
+    {
+        var repository = new InMemoryExpenseRepository { SourceExistsResult = true };
+        var now = DateTime.UtcNow;
+
+        var first = TaxExpense.Create("Item A", "Desc", now, "ANZ", 10m, repository.SourceId);
+        first.Source = Tracker.Create("Tracker A", "Source", now);
+
+        var second = TaxExpense.Create("Item B", "Desc", now, "CBA", 30m, repository.SourceId);
+        second.Source = Tracker.Create("Tracker B", "Source", now);
+
+        repository.Expenses.Add(first);
+        repository.Expenses.Add(second);
+
+        var service = new ExpenseService(repository);
+        var summary = await service.GetSummaryAsync();
+
+        Assert.Equal(40m, summary.TotalSpent);
+        Assert.Equal(2, summary.ByBank.Count);
+        Assert.Equal(2, summary.BySource.Count);
+    }
+
+    [Fact]
+    public async Task FilterAsync_Throws_WhenDateRangeInvalid()
+    {
+        var repository = new InMemoryExpenseRepository();
+        var service = new ExpenseService(repository);
+
+        var query = new ExpenseFilterQuery(
+            DateTime.UtcNow,
+            DateTime.UtcNow.AddDays(-1),
+            null,
+            null,
+            null,
+            null,
+            []);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => service.FilterAsync(query));
+    }
+
     private sealed class InMemoryExpenseRepository : IExpenseRepository
     {
         public List<TaxExpense> Expenses { get; } = [];

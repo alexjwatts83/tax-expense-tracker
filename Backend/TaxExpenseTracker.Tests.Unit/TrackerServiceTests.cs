@@ -19,6 +19,45 @@ public class TrackerServiceTests
         Assert.True(repository.SaveChangesCalled);
     }
 
+    [Fact]
+    public async Task UpdateAsync_ReturnsFalse_WhenTrackerMissing()
+    {
+        var repository = new InMemoryTrackerRepository();
+        var service = new TrackerService(repository);
+
+        var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateTrackerCommand("Name", "Desc"));
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ReturnsFalse_WhenTrackerMissing()
+    {
+        var repository = new InMemoryTrackerRepository();
+        var service = new TrackerService(repository);
+
+        var result = await service.DeleteAsync(Guid.NewGuid());
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_UpdatesTracker_WhenExists()
+    {
+        var repository = new InMemoryTrackerRepository();
+        var tracker = Tracker.Create("Old", "Old desc", DateTime.UtcNow);
+        repository.Trackers.Add(tracker);
+
+        var service = new TrackerService(repository);
+
+        var result = await service.UpdateAsync(tracker.Id, new UpdateTrackerCommand("  New  ", "  New desc  "));
+
+        Assert.True(result);
+        Assert.Equal("New", tracker.Name);
+        Assert.Equal("New desc", tracker.Description);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
     private sealed class InMemoryTrackerRepository : ITrackerRepository
     {
         public List<Tracker> Trackers { get; } = [];
