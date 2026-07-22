@@ -41,6 +41,23 @@ public class TagServiceTests
     }
 
     [Fact]
+    public async Task RestoreAsync_RestoresTag_WhenSoftDeleted()
+    {
+        var repository = new InMemoryTagRepository();
+        var tag = Tag.Create("Equipment", DateTime.UtcNow);
+        tag.SoftDelete();
+        repository.Tags.Add(tag);
+
+        var service = new TagService(repository);
+
+        var result = await service.RestoreAsync(tag.Id);
+
+        Assert.True(result);
+        Assert.False(tag.IsDeleted);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
     public async Task UpdateAsync_UpdatesTag_WhenExists()
     {
         var repository = new InMemoryTagRepository();
@@ -67,6 +84,11 @@ public class TagServiceTests
         }
 
         public Task<Tag?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Tags.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Task<Tag?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Tags.FirstOrDefault(x => x.Id == id));
         }

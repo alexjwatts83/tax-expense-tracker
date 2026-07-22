@@ -25,6 +25,13 @@ public sealed class EfTagRepository : ITagRepository
         return await _dbContext.Tags.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 
+    public async Task<Tag?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Tags
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
+
     public Task AddAsync(Tag tag, CancellationToken cancellationToken = default)
     {
         return _dbContext.Tags.AddAsync(tag, cancellationToken).AsTask();

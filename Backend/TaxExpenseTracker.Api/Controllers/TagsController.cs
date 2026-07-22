@@ -94,4 +94,16 @@ public class TagsController(ITagService tagService) : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/restore")]
+    public async Task<IActionResult> Restore(Guid id, CancellationToken cancellationToken)
+    {
+        var restored = await tagService.RestoreAsync(id, cancellationToken);
+        if (!restored)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
 }

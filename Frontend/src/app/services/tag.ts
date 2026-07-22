@@ -28,4 +28,8 @@ export class TagService {
 	softDelete(id: string): Observable<void> {
 		return this.http.delete<void>(`${this.apiUrl}/${id}`);
 	}
+
+	restore(id: string): Observable<void> {
+		return this.http.post<void>(`${this.apiUrl}/${id}/restore`, {});
+	}
 }

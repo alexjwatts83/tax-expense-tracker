@@ -28,6 +28,15 @@
 		<p class="error-message">{{ errorMessage }}</p>
 	}
 
+	@if (infoMessage) {
+		<p class="info-message">
+			{{ infoMessage }}
+			@if (lastDeletedTracker) {
+				<button mat-button type="button" (click)="undoDeleteTracker()">Undo</button>
+			}
+		</p>
+	}
+
 	<mat-card class="tracker-list-card">
 		<mat-card-title>Trackers</mat-card-title>
 		<mat-card-content>

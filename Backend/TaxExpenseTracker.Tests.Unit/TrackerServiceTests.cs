@@ -42,6 +42,23 @@ public class TrackerServiceTests
     }
 
     [Fact]
+    public async Task RestoreAsync_RestoresTracker_WhenSoftDeleted()
+    {
+        var repository = new InMemoryTrackerRepository();
+        var tracker = Tracker.Create("Home Office", "Desc", DateTime.UtcNow);
+        tracker.SoftDelete();
+        repository.Trackers.Add(tracker);
+
+        var service = new TrackerService(repository);
+
+        var result = await service.RestoreAsync(tracker.Id);
+
+        Assert.True(result);
+        Assert.False(tracker.IsDeleted);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
     public async Task UpdateAsync_UpdatesTracker_WhenExists()
     {
         var repository = new InMemoryTrackerRepository();
@@ -69,6 +86,11 @@ public class TrackerServiceTests
         }
 
         public Task<Tracker?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Trackers.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Task<Tracker?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Trackers.FirstOrDefault(x => x.Id == id));
         }

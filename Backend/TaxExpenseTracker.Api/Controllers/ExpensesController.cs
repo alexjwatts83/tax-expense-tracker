@@ -82,6 +82,18 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:guid}/restore")]
+    public async Task<IActionResult> Restore(Guid id, CancellationToken cancellationToken)
+    {
+        var restored = await expenseService.RestoreAsync(id, cancellationToken);
+        if (!restored)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
     [HttpGet("summary")]
     public async Task<IActionResult> Summary(CancellationToken cancellationToken)
     {

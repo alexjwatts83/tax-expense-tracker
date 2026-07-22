@@ -23,6 +23,15 @@
 		<p class="error-message">{{ errorMessage }}</p>
 	}
 
+	@if (infoMessage) {
+		<p class="info-message">
+			{{ infoMessage }}
+			@if (lastDeletedTag) {
+				<button mat-button type="button" (click)="undoDeleteTag()">Undo</button>
+			}
+		</p>
+	}
+
 	<mat-card class="tag-list-card">
 		<mat-card-title>Tags</mat-card-title>
 		<mat-card-content>

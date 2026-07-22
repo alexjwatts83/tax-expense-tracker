@@ -58,6 +58,7 @@ export class ExpenseList implements OnInit {
 
   expenses: Expense[] = [];
   pagedExpenses: Expense[] = [];
+  lastDeletedExpense: Expense | null = null;
   trackers: Tracker[] = [];
   tags: Tag[] = [];
 
@@ -67,6 +68,7 @@ export class ExpenseList implements OnInit {
 
   isLoading = false;
   errorMessage = '';
+  infoMessage = '';
 
   ngOnInit(): void {
     this.loadLookups();
@@ -90,6 +92,7 @@ export class ExpenseList implements OnInit {
   loadExpenses(): void {
     this.isLoading = true;
     this.errorMessage = '';
+    this.infoMessage = '';
 
     this.expenseService.getAll().subscribe({
       next: (expenses) => {
@@ -106,14 +109,46 @@ export class ExpenseList implements OnInit {
 
   softDeleteExpense(id: string): void {
     this.errorMessage = '';
+    this.infoMessage = '';
+
+    const expense = this.expenses.find((x) => x.id === id);
+    if (!expense) {
+      return;
+    }
 
     this.expenseService.softDelete(id).subscribe({
       next: () => {
+        this.lastDeletedExpense = expense;
         this.expenses = this.expenses.filter((expense) => expense.id !== id);
         this.updatePagedExpenses();
+        this.infoMessage = `Expense "${expense.item}" deleted.`;
       },
-      error: () => {
-        this.errorMessage = 'Unable to delete expense.';
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete expense.';
+      },
+    });
+  }
+
+  undoDeleteExpense(): void {
+    if (!this.lastDeletedExpense) {
+      return;
+    }
+
+    const expense = this.lastDeletedExpense;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.expenseService.restore(expense.id).subscribe({
+      next: () => {
+        this.expenses = [...this.expenses, expense].sort((a, b) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+        this.lastDeletedExpense = null;
+        this.updatePagedExpenses();
+        this.infoMessage = `Expense "${expense.item}" restored.`;
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore expense.';
       },
     });
   }
@@ -162,6 +197,7 @@ export class ExpenseList implements OnInit {
 
     this.hasActiveFilters = false;
     this.page = 1;
+    this.lastDeletedExpense = null;
     this.loadExpenses();
   }
 

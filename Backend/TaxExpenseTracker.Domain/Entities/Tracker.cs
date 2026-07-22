@@ -39,6 +39,12 @@ public class Tracker
         UpdatedAt = utcNow ?? DateTime.UtcNow;
     }
 
+    public void Restore(DateTime? utcNow = null)
+    {
+        IsDeleted = false;
+        UpdatedAt = utcNow ?? DateTime.UtcNow;
+    }
+
     private static string NormalizeRequired(string value, string fieldName)
     {
         var normalized = value?.Trim() ?? string.Empty;

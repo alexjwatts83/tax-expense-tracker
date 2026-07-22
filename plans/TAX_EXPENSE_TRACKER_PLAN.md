@@ -371,7 +371,7 @@ This implementation plan now embeds the active DDD/Clean workstream. The detaile
 - [x] Implement filters by tracker/source and tags
 - [x] Add pagination
 - [x] Add dashboard with summary stats grouped by tracker and tags
-- [ ] Implement soft delete UI (soft delete buttons, restore option)
+- [x] Implement soft delete UI (soft delete buttons, restore option)
 - [x] Error handling and user feedback
 - [x] Configure production build and environment files
 

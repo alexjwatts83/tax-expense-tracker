@@ -111,6 +111,20 @@ public sealed class ExpenseService : IExpenseService
         return true;
     }
 
+    public async Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var expense = await _expenseRepository.GetByIdForRestoreAsync(id, cancellationToken);
+        if (expense is null || !expense.IsDeleted)
+        {
+            return false;
+        }
+
+        expense.Restore();
+        await _expenseRepository.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
     public async Task<ExpenseSummaryDto> GetSummaryAsync(CancellationToken cancellationToken = default)
     {
         var totalSpent = await _expenseRepository.GetTotalSpentAsync(cancellationToken);

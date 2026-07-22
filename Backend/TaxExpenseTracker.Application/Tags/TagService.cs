@@ -67,4 +67,18 @@ public sealed class TagService : ITagService
 
         return true;
     }
+
+    public async Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var tag = await _tagRepository.GetByIdIncludingDeletedAsync(id, cancellationToken);
+        if (tag is null || !tag.IsDeleted)
+        {
+            return false;
+        }
+
+        tag.Restore();
+        await _tagRepository.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
 }

@@ -104,4 +104,16 @@ public class TrackersController(ITrackerService trackerService) : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/restore")]
+    public async Task<IActionResult> Restore(Guid id, CancellationToken cancellationToken)
+    {
+        var restored = await trackerService.RestoreAsync(id, cancellationToken);
+        if (!restored)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
 }

@@ -38,9 +38,11 @@ export class TagManagement implements OnInit {
   });
 
   tags: Tag[] = [];
+  lastDeletedTag: Tag | null = null;
   isLoading = false;
   isSubmitting = false;
   errorMessage = '';
+  infoMessage = '';
 
   ngOnInit(): void {
     this.loadTags();
@@ -49,6 +51,7 @@ export class TagManagement implements OnInit {
   loadTags(): void {
     this.isLoading = true;
     this.errorMessage = '';
+    this.infoMessage = '';
 
     this.tagService.getAll().subscribe({
       next: (tags) => {
@@ -72,11 +75,14 @@ export class TagManagement implements OnInit {
 
     this.isSubmitting = true;
     this.errorMessage = '';
+    this.infoMessage = '';
 
     this.tagService.create({ name }).subscribe({
       next: (created) => {
         this.tags = [created, ...this.tags];
         this.tagForm.reset();
+        this.lastDeletedTag = null;
+        this.infoMessage = 'Tag created.';
         this.isSubmitting = false;
       },
       error: (err) => {
@@ -88,13 +94,42 @@ export class TagManagement implements OnInit {
 
   softDeleteTag(id: string): void {
     this.errorMessage = '';
+    this.infoMessage = '';
+
+    const tag = this.tags.find((x) => x.id === id);
+    if (!tag) {
+      return;
+    }
 
     this.tagService.softDelete(id).subscribe({
       next: () => {
+        this.lastDeletedTag = tag;
         this.tags = this.tags.filter((tag) => tag.id !== id);
+        this.infoMessage = `Tag "${tag.name}" deleted.`;
       },
-      error: () => {
-        this.errorMessage = 'Unable to delete tag.';
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete tag.';
+      },
+    });
+  }
+
+  undoDeleteTag(): void {
+    if (!this.lastDeletedTag) {
+      return;
+    }
+
+    const tag = this.lastDeletedTag;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.tagService.restore(tag.id).subscribe({
+      next: () => {
+        this.tags = [tag, ...this.tags].sort((a, b) => a.name.localeCompare(b.name));
+        this.lastDeletedTag = null;
+        this.infoMessage = `Tag "${tag.name}" restored.`;
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore tag.';
       },
     });
   }

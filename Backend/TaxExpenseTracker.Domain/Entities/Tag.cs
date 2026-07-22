@@ -30,6 +30,11 @@ public class Tag
         IsDeleted = true;
     }
 
+    public void Restore()
+    {
+        IsDeleted = false;
+    }
+
     private static string NormalizeRequired(string value, string fieldName)
     {
         var normalized = value?.Trim() ?? string.Empty;

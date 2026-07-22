@@ -43,6 +43,14 @@ public sealed class EfExpenseRepository : IExpenseRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    public async Task<TaxExpense?> GetByIdForRestoreAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.TaxExpenses
+            .IgnoreQueryFilters()
+            .Include(x => x.TaxExpenseTags)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
     public Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Trackers.AnyAsync(x => x.Id == sourceId, cancellationToken);

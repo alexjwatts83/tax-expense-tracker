@@ -25,6 +25,13 @@ public sealed class EfTrackerRepository : ITrackerRepository
         return await _dbContext.Trackers.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 
+    public async Task<Tracker?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Trackers
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
+
     public Task AddAsync(Tracker tracker, CancellationToken cancellationToken = default)
     {
         return _dbContext.Trackers.AddAsync(tracker, cancellationToken).AsTask();

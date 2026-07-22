@@ -67,4 +67,18 @@ public sealed class TrackerService : ITrackerService
 
         return true;
     }
+
+    public async Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var tracker = await _trackerRepository.GetByIdIncludingDeletedAsync(id, cancellationToken);
+        if (tracker is null || !tracker.IsDeleted)
+        {
+            return false;
+        }
+
+        tracker.Restore();
+        await _trackerRepository.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
 }

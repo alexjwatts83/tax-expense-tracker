@@ -38,6 +38,10 @@ export class ExpenseService {
 		return this.http.delete<void>(`${this.apiUrl}/${id}`);
 	}
 
+	restore(id: string): Observable<void> {
+		return this.http.post<void>(`${this.apiUrl}/${id}/restore`, {});
+	}
+
 	getSummary(): Observable<ExpenseSummary> {
 		return this.http.get<ExpenseSummary>(`${this.apiUrl}/summary`);
 	}

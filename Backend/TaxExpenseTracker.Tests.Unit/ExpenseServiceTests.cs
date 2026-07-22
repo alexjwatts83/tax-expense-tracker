@@ -85,6 +85,33 @@ public class ExpenseServiceTests
     }
 
     [Fact]
+    public async Task RestoreAsync_RestoresExpense_WhenSoftDeleted()
+    {
+        var repository = new InMemoryExpenseRepository
+        {
+            SourceExistsResult = true
+        };
+
+        var expense = TaxExpense.Create(
+            "Laptop",
+            "Desc",
+            DateTime.UtcNow,
+            "ANZ",
+            100m,
+            repository.SourceId);
+        expense.SoftDelete();
+        repository.Expenses.Add(expense);
+
+        var service = new ExpenseService(repository);
+
+        var result = await service.RestoreAsync(expense.Id);
+
+        Assert.True(result);
+        Assert.False(expense.IsDeleted);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
     public async Task GetSummaryAsync_ReturnsGroupedTotals()
     {
         var repository = new InMemoryExpenseRepository { SourceExistsResult = true };
@@ -158,6 +185,11 @@ public class ExpenseServiceTests
         }
 
         public Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Task<TaxExpense?> GetByIdForRestoreAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
         }

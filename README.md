@@ -100,6 +100,7 @@ tax-expense-tracker/
 - POST `/api/trackers`
 - PUT `/api/trackers/{id}`
 - DELETE `/api/trackers/{id}` (soft delete)
+- POST `/api/trackers/{id}/restore`
 
 ### Tags
 
@@ -108,6 +109,7 @@ tax-expense-tracker/
 - POST `/api/tags`
 - PUT `/api/tags/{id}`
 - DELETE `/api/tags/{id}` (soft delete)
+- POST `/api/tags/{id}/restore`
 
 ### Expenses
 
@@ -116,6 +118,7 @@ tax-expense-tracker/
 - POST `/api/expenses`
 - PUT `/api/expenses/{id}`
 - DELETE `/api/expenses/{id}` (soft delete)
+- POST `/api/expenses/{id}/restore`
 - GET `/api/expenses/summary`
 - GET `/api/expenses/filter`
 
@@ -162,6 +165,7 @@ tax-expense-tracker/
 - Connect frontend to backend
 - Add filters, pagination, and dashboard summaries
 - Improve UX with validation and error handling
+- Add soft delete undo (restore) flows for trackers, tags, and expenses
 
 ### Phase 4: Deployment and Enhancements
 
@@ -171,7 +175,7 @@ tax-expense-tracker/
 
 ## Getting Started
 
-Backend is implemented for Phase 1 with DDD/Clean Architecture refactor complete. Frontend work is in Phase 2.
+Backend and frontend integration are implemented through Phase 3, including local proxy-based API usage.
 
 ### Prerequisites
 
@@ -228,7 +232,7 @@ Swagger UI is available in development at /swagger.
 
 NLog writes rolling files to C:/logs/TaxExpenseTracker.Api.
 
-### Frontend Setup (planned)
+### Frontend Setup
 
 ```bash
 volta install node@lts
@@ -236,8 +240,10 @@ volta pin node@lts
 volta install @angular/cli
 cd Frontend
 npm install
-ng serve
+npm start
 ```
+
+The `start` script uses `proxy.conf.json` so frontend API calls to `/api` are proxied to `https://localhost:5001` for local development.
 
 Volta should be the standard Node version manager for this repository to keep team Node versions consistent.
 
@@ -256,7 +262,8 @@ Planned Azure deployment approach:
 Current status:
 
 - Phase 1 complete and validated
-- Phase 2 started (Angular app initialized, Angular Material added, core routes and API services scaffolded)
+- Phase 2 complete (core Angular screens and API services implemented)
+- Phase 3 complete (frontend-backend integration, filters, pagination, dashboard summary, restore flows)
 - DDD/Clean migration complete across phases A-F
 
 Source plan: `plans/TAX_EXPENSE_TRACKER_PLAN.md`

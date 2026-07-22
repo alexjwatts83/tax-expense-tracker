@@ -39,9 +39,11 @@ export class TrackerManagement implements OnInit {
   });
 
   trackers: Tracker[] = [];
+  lastDeletedTracker: Tracker | null = null;
   isLoading = false;
   isSubmitting = false;
   errorMessage = '';
+  infoMessage = '';
 
   ngOnInit(): void {
     this.loadTrackers();
@@ -50,6 +52,7 @@ export class TrackerManagement implements OnInit {
   loadTrackers(): void {
     this.isLoading = true;
     this.errorMessage = '';
+    this.infoMessage = '';
 
     this.trackerService.getAll().subscribe({
       next: (trackers) => {
@@ -74,6 +77,7 @@ export class TrackerManagement implements OnInit {
 
     this.isSubmitting = true;
     this.errorMessage = '';
+    this.infoMessage = '';
 
     this.trackerService
       .create({
@@ -84,6 +88,8 @@ export class TrackerManagement implements OnInit {
         next: (created) => {
           this.trackers = [created, ...this.trackers];
           this.trackerForm.reset();
+          this.lastDeletedTracker = null;
+          this.infoMessage = 'Tracker created.';
           this.isSubmitting = false;
         },
         error: (err) => {
@@ -95,13 +101,42 @@ export class TrackerManagement implements OnInit {
 
   softDeleteTracker(id: string): void {
     this.errorMessage = '';
+    this.infoMessage = '';
+
+    const tracker = this.trackers.find((x) => x.id === id);
+    if (!tracker) {
+      return;
+    }
 
     this.trackerService.softDelete(id).subscribe({
       next: () => {
+        this.lastDeletedTracker = tracker;
         this.trackers = this.trackers.filter((tracker) => tracker.id !== id);
+        this.infoMessage = `Tracker "${tracker.name}" deleted.`;
       },
-      error: () => {
-        this.errorMessage = 'Unable to delete tracker.';
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete tracker.';
+      },
+    });
+  }
+
+  undoDeleteTracker(): void {
+    if (!this.lastDeletedTracker) {
+      return;
+    }
+
+    const tracker = this.lastDeletedTracker;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.trackerService.restore(tracker.id).subscribe({
+      next: () => {
+        this.trackers = [tracker, ...this.trackers].sort((a, b) => a.name.localeCompare(b.name));
+        this.lastDeletedTracker = null;
+        this.infoMessage = `Tracker "${tracker.name}" restored.`;
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore tracker.';
       },
     });
   }
