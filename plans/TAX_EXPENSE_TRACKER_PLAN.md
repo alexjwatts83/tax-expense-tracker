@@ -362,7 +362,7 @@ This implementation plan now embeds the active DDD/Clean workstream. The detaile
 - [x] Build tracker management component with soft delete support
 - [x] Build tag management component with soft delete support
 - [x] Build expense list component with source display and tags
-- [ ] Build expense form component with tracker dropdown and tag multi-select
+- [x] Build expense form component with tracker dropdown and tag multi-select
 - [x] Implement routing
 - [x] Add styling (Angular Material)
 

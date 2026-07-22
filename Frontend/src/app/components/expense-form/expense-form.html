@@ -1,6 +1,10 @@
 <section class="page">
 	<h1>Create Expense</h1>
 
+	@if (errorMessage) {
+		<p class="error-message">{{ errorMessage }}</p>
+	}
+
 	<mat-card>
 		<mat-card-content>
 			<form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
@@ -15,6 +19,11 @@
 				</mat-form-field>
 
 				<mat-form-field>
+					<mat-label>Date</mat-label>
+					<input matInput formControlName="date" type="date" />
+				</mat-form-field>
+
+				<mat-form-field>
 					<mat-label>Bank</mat-label>
 					<input matInput formControlName="bank" />
 				</mat-form-field>
@@ -24,8 +33,28 @@
 					<input matInput formControlName="price" type="number" step="0.01" />
 				</mat-form-field>
 
+				<mat-form-field>
+					<mat-label>Source Tracker</mat-label>
+					<mat-select formControlName="sourceId">
+						@for (tracker of trackers; track tracker.id) {
+							<mat-option [value]="tracker.id">{{ tracker.name }}</mat-option>
+						}
+					</mat-select>
+				</mat-form-field>
+
+				<mat-form-field>
+					<mat-label>Tags</mat-label>
+					<mat-select formControlName="tagIds" multiple>
+						@for (tag of tags; track tag.id) {
+							<mat-option [value]="tag.id">{{ tag.name }}</mat-option>
+						}
+					</mat-select>
+				</mat-form-field>
+
 				<div class="actions">
-					<button mat-flat-button color="primary" type="submit">Save Expense</button>
+					<button mat-flat-button color="primary" type="submit" [disabled]="isLoadingLookups || isSubmitting">
+						{{ isSubmitting ? 'Saving...' : 'Save Expense' }}
+					</button>
 				</div>
 			</form>
 		</mat-card-content>
