@@ -2,3 +2,28 @@
 	display: grid;
 	gap: 1rem;
 }
+
+.tag-form {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.tag-table {
+	width: 100%;
+}
+
+.loading {
+	display: flex;
+	justify-content: center;
+	padding: 1rem 0;
+}
+
+.error-message {
+	color: #b3261e;
+	margin: 0;
+}
