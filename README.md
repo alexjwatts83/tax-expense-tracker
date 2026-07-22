@@ -1,269 +1,175 @@
 # Tax Expense Tracker
 
-A web application to track and manage tax-deductible expenses with a focus on financial organization and reporting.
+Tax Expense Tracker is a full-stack app for managing tax-deductible expenses with soft-delete safety, filtering, and summary reporting.
 
-## Overview
+## Implemented Highlights
 
-Tax Expense Tracker helps you:
+- DDD/Clean architecture across Domain, Application, Infrastructure, and API layers
+- Soft delete and restore flows for trackers, tags, banks, and expenses
+- Expense filtering (single date, bank, price cap, tracker, tags)
+- Dashboard summary totals grouped by bank and source
+- Local run automation scripts with robust port handling
 
-- Record business and tax-deductible expenses
-- Organize expenses by tracker/source and tags
-- Soft delete records safely instead of hard deletion
-- Filter and summarize spending for reporting
-- Prepare for future export and dashboard analytics
-
-## Planned Technology Stack
+## Tech Stack
 
 ### Backend
 
-- Runtime: .NET 10 / C#
-- Framework: ASP.NET Core Web API
-- ORM: Entity Framework Core
-- Database: SQLite (initial), upgrade path to PostgreSQL or SQL Server
+- .NET 10 / ASP.NET Core Web API
+- Entity Framework Core 10 + SQLite
+- NLog logging
+- Swagger in Development
 
 ### Frontend
 
-- Framework: Angular (latest LTS)
-- UI: Angular Material
-- HTTP: Angular HttpClient
+- Angular 22
+- Angular Material
+- HttpClient with local proxy
 
-### Infrastructure
+## Data Model
 
-- Hosting: Azure App Service (API) and Azure Static Web Apps (frontend)
-- Version Control: Git
+Core entities:
 
-### Tooling and Observability
+- Tracker
+- Tag
+- Bank
+- TaxExpense
+- TaxExpenseTag (many-to-many join)
 
-- API Docs: Swagger UI (development)
-- Logging: NLog (console + rolling file logs)
+TaxExpense stores:
 
-## Core Data Model
+- Item, Description, Date, Price
+- BankId -> Bank
+- SourceId -> Tracker
+- Tags via TaxExpenseTag
 
-Main entities:
+Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 
-- Tracker: reference source for expenses (for example, H&R Block, Udemy)
-- Tag: category labels (for example, Deductible, Equipment)
-- TaxExpense: expense record with bank, date, amount, source tracker
-- TaxExpenseTag: junction table for many-to-many TaxExpense and Tag
-
-Soft delete is planned for Tracker, Tag, and TaxExpense using an `IsDeleted` flag and global query filters.
-
-## Seed Data
-
-Default trackers from the plan:
-
-- H&R Block
-- Pluralsight
-- Udemy
-- JB Hifi
-- Office Works
-
-## Current Project Structure
-
-```
-tax-expense-tracker/
-├── TaxExpenseTracker.sln
-├── dotnet-tools.json
-├── Backend/
-│   ├── TaxExpenseTracker.Domain/
-│   │   └── Entities/
-│   ├── TaxExpenseTracker.Application/
-│   │   └── Trackers/
-│   ├── TaxExpenseTracker.Infrastructure/
-│   ├── TaxExpenseTracker.Api/
-│   │   ├── Controllers/
-│   │   ├── Data/
-│   │   ├── Models/
-│   │   ├── Migrations/
-│   │   ├── nlog.config
-│   │   └── appsettings.Production.json
-│   ├── TaxExpenseTracker.Tests.Unit/
-│   └── TaxExpenseTracker.Tests.Integration/
-├── Frontend/
-│   ├── src/
-│   ├── package.json
-│   └── angular.json
-├── plans/
-│   └── TAX_EXPENSE_TRACKER_PLAN.md
-│   └── DDD_CLEAN_ARCHITECTURE_PLAN.md
-│   └── skills/
-├── README.md
-└── .gitignore
-```
-
-## API Surface (Planned)
+## API Endpoints
 
 ### Trackers
 
-- GET `/api/trackers`
-- GET `/api/trackers/{id}`
-- POST `/api/trackers`
-- PUT `/api/trackers/{id}`
-- DELETE `/api/trackers/{id}` (soft delete)
-- POST `/api/trackers/{id}/restore`
+- GET /api/trackers
+- GET /api/trackers/{id}
+- POST /api/trackers
+- PUT /api/trackers/{id}
+- DELETE /api/trackers/{id}
+- POST /api/trackers/{id}/restore
 
 ### Tags
 
-- GET `/api/tags`
-- GET `/api/tags/{id}`
-- POST `/api/tags`
-- PUT `/api/tags/{id}`
-- DELETE `/api/tags/{id}` (soft delete)
-- POST `/api/tags/{id}/restore`
+- GET /api/tags
+- GET /api/tags/{id}
+- POST /api/tags
+- PUT /api/tags/{id}
+- DELETE /api/tags/{id}
+- POST /api/tags/{id}/restore
+
+### Banks
+
+- GET /api/banks
+- GET /api/banks/{id}
+- POST /api/banks
+- PUT /api/banks/{id}
+- DELETE /api/banks/{id}
+- POST /api/banks/{id}/restore
 
 ### Expenses
 
-- GET `/api/expenses`
-- GET `/api/expenses/{id}`
-- POST `/api/expenses`
-- PUT `/api/expenses/{id}`
-- DELETE `/api/expenses/{id}` (soft delete)
-- POST `/api/expenses/{id}/restore`
-- GET `/api/expenses/summary`
-- GET `/api/expenses/filter`
+- GET /api/expenses
+- GET /api/expenses/{id}
+- POST /api/expenses
+- PUT /api/expenses/{id}
+- DELETE /api/expenses/{id}
+- POST /api/expenses/{id}/restore
+- GET /api/expenses/summary
+- GET /api/expenses/filter
 
-## Frontend Feature Plan
+Current filter query params:
 
-- Dashboard with summary cards and charts
-- Tracker management (CRUD + soft delete)
-- Tag management (CRUD + soft delete)
-- Expense list with sorting, filtering, pagination
-- Expense create/edit form with tracker dropdown and tag multi-select
-- Expense details view
+- date (single day)
+- bankId
+- price
+- sourceId
+- tagIds (comma-separated)
 
-## Development Phases
+## Frontend Routes
 
-### Phase 1: Setup and Core Backend
+- /dashboard
+- /expenses
+- /expenses/new
+- /trackers
+- /tags
+- /banks
 
-- Complete
-- ASP.NET Core API scaffolded and running
-- EF Core + SQLite configured with migrations applied
-- Tracker, Tag, Expense, and TaxExpenseTag models implemented
-- CRUD endpoints with soft delete implemented
-- Summary and filter endpoints implemented
-- Local and cloud appsettings configured
-- Development secrets moved to User Secrets
-- Swagger and NLog integrated
-
-### Phase 2: Frontend Setup
-
-- Initialize Angular app
-- Build services and core components
-- Add Angular Material styling and routing
-
-### DDD/Clean Architecture Migration (Completed)
-
-- Domain, Application, and Infrastructure layers established and wired
-- Domain invariants and behavior methods implemented for Tracker, Tag, TaxExpense, and TaxExpenseTag
-- Tracker, Tag, and Expense features moved to application use-case services with repository abstractions
-- Persistence ownership moved to Infrastructure (DbContext, repositories, migrations)
-- API controllers thinned and centralized exception middleware added
-- Unit/integration coverage expanded and CI quality gates added
-
-### Phase 3: Integration and Polish
-
-- Connect frontend to backend
-- Add filters, pagination, and dashboard summaries
-- Improve UX with validation and error handling
-- Add soft delete undo (restore) flows for trackers, tags, and expenses
-
-### Phase 4: Deployment and Enhancements
-
-- Deploy to Azure free-tier services
-- Add tests
-- Add CSV export and trend charts
-
-## Getting Started
-
-Backend and frontend integration are implemented through Phase 3, including local proxy-based API usage.
+## Local Development
 
 ### Prerequisites
 
 - .NET SDK 10
-- Volta
-- Node.js LTS (managed by Volta)
-- Angular CLI
+- Node.js LTS (Volta recommended)
 
-### Prerequisite Scripts
-
-Use the repository scripts to verify and install required tooling.
-
-1. Check prerequisites:
+### Install/Verify Prerequisites
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Check-Prerequisites.ps1"
-```
-
-2. Install missing prerequisites (dry run):
-
-```powershell
 powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1" -DryRun
-```
-
-3. Install missing prerequisites (actual install):
-
-```powershell
 powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1"
 ```
 
-4. Re-run the checker to confirm setup:
+### Start Everything (recommended)
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Check-Prerequisites.ps1"
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Start-Local.ps1"
 ```
 
-### Backend Setup
+Force restart if needed:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Start-Local.ps1" -ForceRestart
+```
+
+Stop services:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Stop-Local.ps1"
+```
+
+Default local URLs:
+
+- Frontend: http://localhost:4200
+- Swagger: https://localhost:7152/swagger
+
+### Manual Backend/Frontend
 
 ```bash
-cd Backend/TaxExpenseTracker.Api
 dotnet restore
-dotnet user-secrets set "Security:ApiKey" "<your-local-dev-api-key>"
-dotnet run
+dotnet run --project Backend/TaxExpenseTracker.Api --launch-profile https
 ```
 
-EF migrations are owned by Infrastructure. Use these commands from the repository root:
-
 ```bash
-dotnet ef migrations add <MigrationName> --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api
-dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api
-```
-
-Swagger UI is available in development at /swagger.
-
-NLog writes rolling files to C:/logs/TaxExpenseTracker.Api.
-
-### Frontend Setup
-
-```bash
-volta install node@lts
-volta pin node@lts
-volta install @angular/cli
 cd Frontend
 npm install
 npm start
 ```
 
-The `start` script uses `proxy.conf.json` so frontend API calls to `/api` are proxied to `https://localhost:5001` for local development.
+Frontend proxy targets https://localhost:7152.
 
-Volta should be the standard Node version manager for this repository to keep team Node versions consistent.
+## EF Migrations
 
-## Security and Deployment Notes
+Migrations are owned by Infrastructure:
 
-Planned Azure deployment approach:
-
-- Deploy API to Azure App Service free tier
-- Host Angular app on Azure Static Web Apps
-- Start with API key middleware, with JWT authentication as the recommended next step
-- Store local development secrets in .NET User Secrets
-- Store production secrets in Azure App Service configuration or Azure Key Vault
+```bash
+dotnet tool restore
+dotnet ef migrations add <MigrationName> --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Infrastructure --context AppDbContext
+dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api --context AppDbContext
+```
 
 ## Status
 
-Current status:
+- Phase 1 complete
+- Phase 2 complete
+- Phase 3 complete
+- DDD/Clean phases A-F complete
+- Bank entity refactor completed end-to-end (backend, frontend, migration, tests)
 
-- Phase 1 complete and validated
-- Phase 2 complete (core Angular screens and API services implemented)
-- Phase 3 complete (frontend-backend integration, filters, pagination, dashboard summary, restore flows)
-- DDD/Clean migration complete across phases A-F
-
-Source plan: `plans/TAX_EXPENSE_TRACKER_PLAN.md`
+Open work remains in Phase 4 (deployment, coverage expansion, CSV export, additional trend analytics).

@@ -8,691 +8,280 @@ A web application to track and manage tax-deductible expenses with a focus on fi
 ## Technology Stack
 
 ### Backend
-- **Runtime**: .NET 10 / C#
-- **Framework**: ASP.NET Core Web API
-- **Database**: SQLite (development/initial), upgrade path to PostgreSQL or SQL Server
-- **ORM**: Entity Framework Core
-- **Deployment**: Direct Azure App Service deployment or local host
+- Runtime: .NET 10 / C#
+- Framework: ASP.NET Core Web API
+- Database: SQLite (current), upgrade path to PostgreSQL or SQL Server
+- ORM: Entity Framework Core
+- Architecture: DDD + Clean Architecture
 
 ### Frontend
-- **Framework**: Angular (latest LTS)
-- **Build Tool**: Angular CLI
-- **Node Version Management**: Volta
-- **Styling**: Angular Material
-- **HTTP Client**: Angular HttpClient
+- Framework: Angular 22
+- Styling: Angular Material
+- HTTP Client: Angular HttpClient
+- Node Version Management: Volta
 
 ### Infrastructure
-- **Database**: SQLite file-based (local dev), managed DB for cloud (optional)
-- **Hosting**: Azure App Service (API) and Azure Static Web Apps (frontend)
-- **Version Control**: Git
+- Hosting target: Azure App Service (API) + Azure Static Web Apps (frontend)
+- Logging: NLog
+- API docs: Swagger (Development)
+- Version Control: Git
 
 ---
 
 ## Data Model
 
 ### Tracker Table (Reference Data)
-```
-Columns:
 - Id (GUID/UUID) - Primary Key
-- Name (string) - Tracker name (e.g., "Home Office", "Business Travel", "Equipment")
-- Description (string) - Tracker description (optional/nullable)
-- IsDeleted (bool) - Soft delete flag (default: false)
-- CreatedAt (DateTime) - Record creation timestamp
-- UpdatedAt (DateTime) - Last modification timestamp
-```
+- Name (string)
+- Description (string, nullable)
+- IsDeleted (bool)
+- CreatedAt (DateTime)
+- UpdatedAt (DateTime)
+
+### Tag Table
+- Id (GUID/UUID) - Primary Key
+- Name (string)
+- IsDeleted (bool)
+- CreatedAt (DateTime)
+
+### Bank Table (Reference Data)
+- Id (GUID/UUID) - Primary Key
+- Name (string)
+- IsDeleted (bool)
+- CreatedAt (DateTime)
+
+### Tax Expense Table
+- Id (GUID/UUID) - Primary Key
+- Item (string)
+- Description (string)
+- Date (DateTime)
+- BankId (GUID) - Foreign Key to Bank
+- Price (decimal)
+- SourceId (GUID) - Foreign Key to Tracker
+- IsDeleted (bool)
+- CreatedAt (DateTime)
+- UpdatedAt (DateTime)
+
+### TaxExpenseTag Table (Junction)
+- Id (GUID/UUID) - Primary Key
+- TaxExpenseId (GUID) - Foreign Key to TaxExpense
+- TagId (GUID) - Foreign Key to Tag
+
+### Relationships
+- TaxExpense -> Tracker: Many-to-One
+- TaxExpense -> Bank: Many-to-One
+- TaxExpense -> Tag: Many-to-Many via TaxExpenseTag
+- Query filtering excludes soft-deleted records by default
 
 ### Seed Data
-**Default Trackers:**
-```
+Default trackers:
 - H&R Block
 - Pluralsight
 - Udemy
 - JB Hifi
 - Office Works
-```
 
-### Tag/Category Table
-```
-Columns:
-- Id (GUID/UUID) - Primary Key
-- Name (string) - Tag/category name (e.g., "Deductible", "Equipment", "Travel")
-- IsDeleted (bool) - Soft delete flag (default: false)
-- CreatedAt (DateTime) - Record creation timestamp
-```
-
-### TaxExpenseTag Table (Junction)
-```
-Columns:
-- Id (GUID/UUID) - Primary Key
-- TaxExpenseId (GUID) - Foreign Key to TaxExpense
-- TagId (GUID) - Foreign Key to Tag
-```
-
-### Tax Expense Table
-```
-Columns:
-- Id (GUID/UUID) - Primary Key
-- Item (string) - Category/name of expense (e.g., "Office Supplies")
-- Description (string) - Detailed description
-- Date (DateTime) - Date of expense
-- Bank (string) - Payment method/bank (e.g., "Chase Visa", "Wells Fargo")
-- Price (decimal) - Amount spent
-- SourceId (GUID) - Foreign Key to Tracker table
-- IsDeleted (bool) - Soft delete flag (default: false)
-- CreatedAt (DateTime) - Record creation timestamp
-- UpdatedAt (DateTime) - Last modification timestamp
-```
-
-### Relationships
-- **TaxExpense -> Tracker**: Many-to-One (Multiple expenses can belong to one tracker/source)
-- **TaxExpense -> Tag**: Many-to-Many (Multiple expenses can have multiple tags)
-- **Query Filtering**: All queries exclude soft-deleted records by default (IsDeleted = false)
-
-### Additional Considerations
-- UserId (for multi-user support in future)
-- Audit trail for soft-deleted records
+Default banks:
+- ANZ
+- CBA
+- Westpac
 
 ---
 
 ## Project Structure
 
-```
+```text
 tax-expense-tracker/
 ├── TaxExpenseTracker.sln
+├── dotnet-tools.json
 ├── Backend/
 │   ├── TaxExpenseTracker.Domain/
 │   │   └── Entities/
 │   ├── TaxExpenseTracker.Application/
-│   │   └── Trackers/
+│   │   ├── Trackers/
+│   │   ├── Tags/
+│   │   ├── Banks/
+│   │   └── Expenses/
 │   ├── TaxExpenseTracker.Infrastructure/
+│   │   ├── Data/
+│   │   └── Migrations/
 │   ├── TaxExpenseTracker.Api/
 │   │   ├── Controllers/
-│   │   ├── Data/
 │   │   ├── Models/
-│   │   └── Migrations/
+│   │   └── Middleware/
 │   ├── TaxExpenseTracker.Tests.Unit/
 │   └── TaxExpenseTracker.Tests.Integration/
 ├── Frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── components/
-│   │   │   │   ├── expense-list/
-│   │   │   │   ├── expense-form/
-│   │   │   │   ├── expense-details/
-│   │   │   │   ├── dashboard/
-│   │   │   │   ├── tracker-management/
-│   │   │   │   └── tag-management/
-│   │   │   ├── services/
-│   │   │   │   ├── expense.service.ts
-│   │   │   │   ├── tracker.service.ts
-│   │   │   │   └── tag.service.ts
-│   │   │   └── app.module.ts
-│   │   ├── index.html
-│   │   └── main.ts
-│   ├── package.json
-│   ├── angular.json
-│   └── proxy.conf.json
+│   └── src/app/
+│       ├── components/
+│       │   ├── dashboard/
+│       │   ├── expense-list/
+│       │   ├── expense-form/
+│       │   ├── expense-details/
+│       │   ├── tracker-management/
+│       │   ├── tag-management/
+│       │   └── bank-management/
+│       ├── services/
+│       │   ├── expense.ts
+│       │   ├── tracker.ts
+│       │   ├── tag.ts
+│       │   └── bank.ts
+│       ├── models/
+│       └── app.routes.ts
 ├── scripts/
 │   ├── Check-Prerequisites.ps1
-│   └── Install-Prerequisites.ps1
+│   ├── Install-Prerequisites.ps1
+│   ├── Start-Local.ps1
+│   └── Stop-Local.ps1
 ├── plans/
 │   ├── TAX_EXPENSE_TRACKER_PLAN.md
 │   └── DDD_CLEAN_ARCHITECTURE_PLAN.md
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
 ---
 
 ## API Endpoints
 
-### Tracker Endpoints (Reference Data)
+### Trackers
+- GET /api/trackers
+- GET /api/trackers/{id}
+- POST /api/trackers
+- PUT /api/trackers/{id}
+- DELETE /api/trackers/{id}
+- POST /api/trackers/{id}/restore
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/trackers` | List all trackers (excluding soft-deleted) |
-| GET | `/api/trackers/{id}` | Get single tracker |
-| POST | `/api/trackers` | Create new tracker |
-| PUT | `/api/trackers/{id}` | Update tracker |
-| DELETE | `/api/trackers/{id}` | Soft delete tracker |
+### Tags
+- GET /api/tags
+- GET /api/tags/{id}
+- POST /api/tags
+- PUT /api/tags/{id}
+- DELETE /api/tags/{id}
+- POST /api/tags/{id}/restore
 
-### Tag Endpoints
+### Banks
+- GET /api/banks
+- GET /api/banks/{id}
+- POST /api/banks
+- PUT /api/banks/{id}
+- DELETE /api/banks/{id}
+- POST /api/banks/{id}/restore
 
-| Method | Endpoint | Purpose |
-|--------|----------|----------|
-| GET | `/api/tags` | List all tags (excluding soft-deleted) |
-| GET | `/api/tags/{id}` | Get single tag |
-| POST | `/api/tags` | Create new tag |
-| PUT | `/api/tags/{id}` | Update tag |
-| DELETE | `/api/tags/{id}` | Soft delete tag |
+### Expenses
+- GET /api/expenses
+- GET /api/expenses/{id}
+- POST /api/expenses
+- PUT /api/expenses/{id}
+- DELETE /api/expenses/{id}
+- POST /api/expenses/{id}/restore
+- GET /api/expenses/summary
+- GET /api/expenses/filter
 
-### Expense Endpoints
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/expenses` | List all expenses (excluding soft-deleted, with pagination) |
-| GET | `/api/expenses/{id}` | Get single expense |
-| POST | `/api/expenses` | Create new expense |
-| PUT | `/api/expenses/{id}` | Update expense |
-| DELETE | `/api/expenses/{id}` | Soft delete expense |
-| GET | `/api/expenses/summary` | Summary statistics (total spent, by bank, etc.) |
-| GET | `/api/expenses/filter` | Filter by date range, bank, amount, tracker, or tags |
-
-### Request/Response Models
-
-**TrackerDto:**
-```json
-{
-  "id": "guid",
-  "name": "Home Office",
-  "description": "Home office deduction expenses",
-  "createdAt": "2024-07-22T10:30:00Z"
-}
-```
-
-**CreateTrackerDto:**
-```json
-{
-  "name": "Home Office",
-  "description": "Home office deduction expenses"
-}
-```
-
-**TagDto:**
-```json
-{
-  "id": "guid",
-  "name": "Deductible",
-  "createdAt": "2024-07-22T10:30:00Z"
-}
-```
-
-**CreateTagDto:**
-```json
-{
-  "name": "Deductible"
-}
-```
-
-**CreateExpenseDto:**
-```json
-{
-  "item": "Office Supplies",
-  "description": "Printer ink and paper",
-  "date": "2024-07-22",
-  "bank": "Chase Visa",
-  "price": 45.99,
-  "sourceId": "tracker-guid",
-  "tagIds": ["tag-guid-1", "tag-guid-2"]
-}
-```
-
-**ExpenseResponse:**
-```json
-{
-  "id": "guid",
-  "item": "Office Supplies",
-  "description": "Printer ink and paper",
-  "date": "2024-07-22",
-  "bank": "Chase Visa",
-  "price": 45.99,
-  "sourceId": "tracker-guid",
-  "source": {
-    "id": "tracker-guid",
-    "name": "Home Office",
-    "description": "Home office deduction expenses"
-  },
-  "tags": [
-    {
-      "id": "tag-guid-1",
-      "name": "Deductible"
-    },
-    {
-      "id": "tag-guid-2",
-      "name": "Equipment"
-    }
-  ],
-  "createdAt": "2024-07-22T10:30:00Z",
-  "updatedAt": "2024-07-22T10:30:00Z"
-}
-```
+Current expense filter query parameters:
+- date (single day)
+- bankId
+- price (max price)
+- sourceId
+- tagIds (comma-separated GUIDs)
 
 ---
 
-## Frontend Components
+## Frontend Features
 
-### Angular Component Hierarchy
-```
-AppComponent
-├── NavbarComponent
-├── DashboardComponent
-│   ├── SummaryCardsComponent
-│   └── ChartComponent (expense trends)
-├── TrackerManagementComponent
-│   ├── TrackerListComponent
-│   └── TrackerFormComponent
-├── TagManagementComponent
-│   ├── TagListComponent
-│   └── TagFormComponent
-├── ExpenseListComponent
-│   ├── ExpenseTableComponent
-│   │   └── ExpenseRowComponent (displays source badge)
-│   └── FilterComponent
-├── ExpenseFormComponent (Create/Edit modal)
-└── ExpenseDetailsComponent
-```
-
-### Key Features
-- **Tracker Management**: Create and manage expense sources/categories with soft delete
-- **Tag Management**: Create and manage expense tags/categories with soft delete
-- **Expense List**: Table view with source badge and tags, sorting, filtering, pagination
-- **Add/Edit Form**: Modal form with tracker dropdown and multi-select tag selector
-- **Dashboard**: Summary statistics grouped by tracker and charts
-- **Filters**: By date range, bank, source/tracker, amount range, and tags
-- **Soft Delete**: All records support soft deletion, accessible via query params if needed
-- **Export**: CSV export functionality (future)
+- Dashboard with summary cards
+- Expense list with pagination and filters
+- Expense creation form with bank/tracker/tag selectors
+- Tracker management with soft delete + undo restore
+- Tag management with soft delete + undo restore
+- Bank management with soft delete + undo restore
+- Snackbar/info/error state handling
 
 ---
 
-## Development Phases
+## DDD/Clean Architecture Status
 
-### Phase 1: Setup & Core Backend (Week 1)
-- [x] Create .NET Core API project
-- [x] Set up SQLite database with EF Core
-- [x] Create Tracker model with soft delete and DbContext
-- [x] Create Tag model with soft delete
-- [x] Create Tax Expense model with foreign key to Tracker and many-to-many to Tags
-- [x] Implement Tracker CRUD endpoints (with soft delete)
-- [x] Implement Tag CRUD endpoints (with soft delete)
-- [x] Implement Expense CRUD endpoints (with Source and Tags relationship)
-- [x] Add global query filters for soft-deleted records
-- [x] Add data validation
-- [x] Configure local and cloud appsettings (dev + production)
+### Phase A - Solution and Project Restructure
+- [x] Completed
 
-### Phase 1 Implementation Status (Completed)
-- [x] EF Core migrations created and applied locally
-- [x] Seed trackers added via DbContext model seeding
-- [x] .NET User Secrets configured for development API key
-- [x] Swagger UI added for development API exploration
-- [x] NLog integrated for console and file logging
-- [x] NLog file target configured to `C:/logs/TaxExpenseTracker.Api`
-- [x] Visual Studio solution file added (`TaxExpenseTracker.sln`)
+### Phase B - Domain Extraction and Invariants
+- [x] Completed
 
-### DDD/Clean Architecture Implementation Plan (Embedded)
+### Phase C - Application Use Cases by Feature Slice
+- [x] Completed (Trackers, Tags, Expenses, Banks)
 
-This implementation plan now embeds the active DDD/Clean workstream. The detailed tracker remains in `plans/DDD_CLEAN_ARCHITECTURE_PLAN.md` and this section mirrors execution status.
+### Phase D - Infrastructure Ownership of Persistence
+- [x] Completed (DbContext, repositories, migrations, design-time factory)
 
-#### Phase A - Solution and Project Restructure
-- [x] Add Domain/Application/Infrastructure projects
-- [x] Add unit and integration test projects
-- [x] Wire references to enforce dependency direction
+### Phase E - API Cleanup
+- [x] Completed (thin controllers + centralized exception middleware)
 
-#### Phase B - Domain Extraction and Invariants
-- [x] Move Tracker, Tag, TaxExpense, and TaxExpenseTag to Domain
-- [x] Add domain invariants and behavior methods
-- [x] Evaluate base abstractions as optional and intentionally defer for now
+### Phase F - Testing and Quality Gates
+- [x] Baseline implemented
+- [~] Coverage expansion ongoing
 
-#### Phase C - Application Use Cases by Feature Slice
-- [x] Tracker slice: contracts, service, repository abstraction, thin controller
-- [x] Tag slice: contracts, service, repository abstraction, thin controller
-- [x] Expense slice: contracts, service, repository abstraction, thin controller
-- [x] Add dedicated validators for command/query input where needed
+---
 
-#### Phase D - Infrastructure Ownership of Persistence
-- [x] Move AppDbContext to Infrastructure
-- [x] Move EF repositories to Infrastructure
-- [x] Move migrations ownership to Infrastructure assembly/namespace
-- [x] Add design-time DbContext factory for migration tooling
-- [x] Continue infrastructure hardening (mapping/config split as needed)
+## Delivery Phases
 
-#### Phase E - API Cleanup
-- [x] Centralize exception handling middleware
-- [x] Remove duplicated HTTP/error mapping logic
-- [x] Keep controllers focused on binding/auth/response mapping only
+### Phase 1: Setup & Core Backend
+- [x] Completed
 
-#### Phase F - Testing and Quality Gates
-- [x] Baseline unit and integration test projects established
-- [x] Initial unit tests for domain invariants and application services
-- [x] Expand coverage for critical use-case paths and edge cases
-- [x] Add CI quality gates for build/unit/integration tests
+### Phase 2: Frontend Setup
+- [x] Completed
 
-### Phase 2: Frontend Setup (Week 1-2)
-- [x] Initialize Angular project
-- [x] Create services for API communication (Expense, Tracker & Tag services)
-- [x] Build tracker management component with soft delete support
-- [x] Build tag management component with soft delete support
-- [x] Build expense list component with source display and tags
-- [x] Build expense form component with tracker dropdown and tag multi-select
-- [x] Implement routing
-- [x] Add styling (Angular Material)
+### Phase 3: Integration & Polish
+- [x] Completed
+- [x] Single-date filter refactor completed
+- [x] Bank-as-entity refactor completed end-to-end
+- [x] Local start/stop automation scripts hardened
 
-### Phase 3: Integration & Polish (Week 2)
-- [x] Connect frontend to backend API
-- [x] Implement filters by tracker/source and tags
-- [x] Add pagination
-- [x] Add dashboard with summary stats grouped by tracker and tags
-- [x] Implement soft delete UI (soft delete buttons, restore option)
-- [x] Error handling and user feedback
-- [x] Configure production build and environment files
-
-### Phase 4: Deployment & Enhancement (Week 3)
+### Phase 4: Deployment & Enhancements
 - [ ] Cloud deployment setup (no containers)
-- [~] Testing (unit & integration) - baseline tests implemented, coverage expansion pending
-- [ ] CSV export functionality (grouped by source and tags)
-- [ ] Charts/graphs for expense trends by tracker and tags
-- [ ] Performance optimization for soft delete queries
+- [~] Expand test coverage (unit + integration)
+- [ ] CSV export functionality
+- [ ] Charts/graphs for trends
+- [ ] Query/performance tuning
 
 ---
 
-## Cloud Deployment & Security (Azure)
+## Local Developer Workflow
 
-### Recommended: Azure App Service Free Tier + Azure SQL
+### Prerequisites
+- .NET SDK 10
+- Node.js LTS (Volta recommended)
 
-**Setup:**
-```bash
-# Create resource group
-az group create --name TaxTrackerRG --location eastus
-
-# Create App Service Plan (Free tier)
-az appservice plan create --name TaxTrackerPlan \
-  --resource-group TaxTrackerRG --sku FREE
-
-# Create API Web App
-az webapp create --resource-group TaxTrackerRG \
-  --plan TaxTrackerPlan --name tax-tracker-api --runtime "DOTNET|10"
-
-# Publish API directly from local machine
-dotnet publish src/TaxExpenseTracker.Api -c Release
-az webapp deploy --resource-group TaxTrackerRG \
-  --name tax-tracker-api --src-path <path-to-publish-zip>
-
-# Host Angular app as static site (Azure Static Web Apps or Blob Static Website)
-ng build --configuration production
-```
-
-**Pros:**
-- ✅ Free tier sufficient for infrequent use
-- ✅ Includes SSL/HTTPS by default
-- ✅ No container setup required
-- ✅ Built-in CI/CD with GitHub Actions
-
-**Security Implementation:**
-
-1. **API Key Protection** (Simple & Effective)
-```csharp
-// Add to Program.cs
-services.AddScoped<ApiKeyMiddleware>();
-
-// Middleware checks X-API-Key header
-app.UseMiddleware<ApiKeyMiddleware>();
-```
-
-2. **JWT Token (Recommended)**
-```csharp
-// Program.cs - Single user authentication
-services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => {
-        options.Authority = "https://your-azure-ad.onmicrosoft.com/";
-        options.Audience = "api://tax-tracker";
-    });
-
-app.UseAuthentication();
-app.UseAuthorization();
-```
-
-3. **Frontend Security**
-- Store JWT token in localStorage
-- Include token in all API requests
-- Auto-logout on token expiry (24 hours recommended)
-
-**API Security Implementation:**
-
-```csharp
-// 1. Simple API Key Middleware
-public class ApiKeyMiddleware
-{
-    private readonly RequestDelegate _next;
-    
-    public ApiKeyMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-    
-    public async Task InvokeAsync(HttpContext context)
-    {
-        if (!context.Request.Headers.TryGetValue("X-API-Key", out var apiKey))
-        {
-            context.Response.StatusCode = 401;
-            return;
-        }
-        
-        var configApiKey = Environment.GetEnvironmentVariable("API_KEY");
-        if (apiKey != configApiKey)
-        {
-            context.Response.StatusCode = 403;
-            return;
-        }
-        
-        await _next(context);
-    }
-}
-
-// 2. Environment Variables (Store Securely)
-// Azure: Configuration -> Connection Strings
-```
-
-**Frontend Security:**
-```typescript
-// environment.prod.ts
-export const environment = {
-  production: true,
-  apiUrl: 'https://tax-tracker.azurewebsites.net/api',
-  apiKey: 'your-secure-api-key'  // Or retrieve from secure endpoint
-};
-
-// Interceptor
-@Injectable()
-export class ApiKeyInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler) {
-    const authReq = req.clone({
-      setHeaders: {
-        'X-API-Key': environment.apiKey
-      }
-    });
-    return next.handle(authReq);
-  }
-}
-```
-
-### Security Best Practices
-
-| Feature | Implementation | Cost |
-|---------|----------------|------|
-| **HTTPS/SSL** | Automatic (all platforms) | Free |
-| **API Key** | Environment variable + header check | Free |
-| **JWT Tokens** | Azure AD / Google Identity | Free |
-| **Rate Limiting** | Nginx or cloud provider | Free |
-| **CORS** | Restrict to your domain only | Free |
-| **Firewall Rules** | Cloud provider built-in | Free |
-| **Secrets Management** | Azure Key Vault | Free tier |
-| **Monitoring** | Application Insights (limited free) | Free |
-
-### Recommended Security Setup
-
-```yaml
-Authentication:
-  Method: API Key + JWT Token combination
-  Flow:
-    1. Login with email/password (one-time setup)
-    2. Backend validates against single hardcoded user
-    3. Returns JWT token (valid 24 hours)
-    4. Frontend includes JWT in all API requests
-    5. API validates JWT on every request
-
-Environment Variables (Cloud Secrets):
-  - API_KEY: Unique identifier
-  - JWT_SECRET: Token signing secret
-  - CONNECTION_STRING: Database connection (with encryption at rest)
-  - ALLOWED_ORIGINS: CORS whitelist (your IP/domain only)
-
-Database Security:
-  - SQLite: Encrypt database file (at-rest encryption)
-  - Enable database backups
-  - No public internet access
-```
-
-### Cost Breakdown (Monthly)
-
-| Platform | Frontend | Backend | Database | Total |
-|----------|----------|---------|----------|-------|
-| **Azure** | Static hosting free tier | Free tier | Free tier* | $0-5 |
-
-*Azure SQL free tier has limitations; use SQLite with blob storage for production
-
-### Deployment Checklist
-
-- [ ] Confirm Azure subscription and resource group
-- [ ] Publish API with direct deploy (no container)
-- [ ] Build and host Angular static files
-- [ ] Set up environment variables for secrets
-- [ ] Implement API Key middleware
-- [ ] Add JWT authentication
-- [ ] Configure CORS (allow only your domain)
-- [ ] Set up automatic HTTPS/SSL
-- [ ] Enable audit logging
-- [ ] Set rate limiting (10 req/sec per user)
-- [ ] Configure database backups
-- [ ] Test from phone on public WiFi
-- [ ] Monitor logs for suspicious activity
-
----
-
-## Database Considerations
-
-### SQLite (Development)
-- **Pros**: File-based, zero configuration, no server needed
-- **Cons**: Limited concurrent writes, not ideal for production scale
-- **File Location**: `./data/expenses.db`
-
-### Migration Path
-- Start with SQLite
-- Migrate to PostgreSQL for production
-- Use Entity Framework Core migrations for consistency
-
-### Initial Migration & Seeding
-```csharp
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-
-// Seed data will be automatically applied via DbContext.OnModelCreating()
-// Default trackers inserted on initial database creation:
-// - H&R Block
-// - Pluralsight
-// - Udemy
-// - JB Hifi
-// - Office Works
-```
-
----
-
-## Key Features to Implement
-
-### MVP (Minimum Viable Product)
-1. ✅ Create/Read/Update/Delete expenses
-2. ✅ View expense list with basic filtering
-3. ✅ Form validation
-4. ✅ Responsive UI
-
-### Phase 2 Enhancements
-1. ⏳ Dashboard with summary cards
-2. ⏳ Monthly/yearly reports
-3. ⏳ Export to CSV
-4. ⏳ Charts and trends visualization
-5. ⏳ Search functionality
-
-### Future Enhancements
-1. Multi-user support with authentication
-2. Receipt image upload/storage
-3. Category management
-4. Recurring expenses
-5. Tax deduction recommendations
-6. Mobile app (React Native)
-7. Integration with accounting software
-
----
-
-## Getting Started Commands
-
-### Prerequisite Scripts
+### Start all local services
 ```powershell
-# Check prerequisites
-powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Check-Prerequisites.ps1"
-
-# Preview prerequisite installation
-powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1" -DryRun
-
-# Install missing prerequisites
-powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1"
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Start-Local.ps1"
 ```
 
-Recommended usage order:
-1. Run `Check-Prerequisites.ps1` first.
-2. If anything fails, run `Install-Prerequisites.ps1 -DryRun`.
-3. Run `Install-Prerequisites.ps1` for installation.
-4. Run `Check-Prerequisites.ps1` again to confirm.
-
-### Backend Setup
-```bash
-cd Backend
-dotnet new webapi -n TaxExpenseTracker.Api
-cd TaxExpenseTracker.Api
-dotnet add package Microsoft.EntityFrameworkCore.Sqlite
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-dotnet run
+Force restart if ports are stuck:
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Start-Local.ps1" -ForceRestart
 ```
 
-### Frontend Setup
-```bash
-volta install node@lts
-volta pin node@lts
-volta install @angular/cli
-ng new TaxExpenseTracker --routing --style=scss
-cd TaxExpenseTracker
-npm install @angular/material
-ng serve
+Stop services:
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Stop-Local.ps1"
 ```
 
-### Local Run
-```bash
-# API
-dotnet run
-
-# Frontend (separate terminal)
-ng serve
-
-# Access API at http://localhost:5000
-# Access Frontend at http://localhost:4200
-```
+### Local URLs
+- Frontend: http://localhost:4200
+- API/Swagger: https://localhost:7152/swagger
 
 ---
 
-## Success Criteria
-- [ ] Expenses can be created, read, updated, and deleted via UI
-- [ ] Data persists in SQLite database
-- [ ] Frontend communicates successfully with API
-- [ ] Application runs locally and via cloud deployment
-- [ ] Responsive design works on desktop and tablet
-- [ ] All form validations work properly
-- [ ] Performance acceptable for 1000+ expense records
+## Deployment & Security Direction (Planned)
+
+- Azure App Service (API) + Azure Static Web Apps (frontend)
+- Environment-based CORS allow list
+- API key and/or JWT authentication layer
+- Store production secrets in app settings/Key Vault
 
 ---
 
-## Questions to Address
-1. **User Authentication**: Will this be single-user or multi-user?
-2. **Data Export**: Need CSV/PDF export for tax filing?
-3. **Reporting**: Need specific tax reports/summaries?
-4. **Notifications**: Email reminders for recurring expenses?
-5. **Mobile Support**: Need native mobile apps?
-6. **Scalability**: Expected user base and expense records?
+## Current Summary
 
+- Core product flows are implemented and working locally.
+- Bank is now a dedicated entity integrated through backend, frontend, and migrations.
+- Phase 4 tasks are the primary remaining workstream.
