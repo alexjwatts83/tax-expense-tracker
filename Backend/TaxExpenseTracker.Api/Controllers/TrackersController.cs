@@ -48,46 +48,32 @@ public class TrackersController(ITrackerService trackerService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TrackerDto>> Create(CreateTrackerDto request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var tracker = await trackerService.CreateAsync(
-                new CreateTrackerCommand(request.Name, request.Description),
-                cancellationToken);
+        var tracker = await trackerService.CreateAsync(
+            new CreateTrackerCommand(request.Name, request.Description),
+            cancellationToken);
 
-            var response = new TrackerDto
-            {
-                Id = tracker.Id,
-                Name = tracker.Name,
-                Description = tracker.Description,
-                CreatedAt = tracker.CreatedAt
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = tracker.Id }, response);
-        }
-        catch (ArgumentException ex)
+        var response = new TrackerDto
         {
-            return BadRequest(ex.Message);
-        }
+            Id = tracker.Id,
+            Name = tracker.Name,
+            Description = tracker.Description,
+            CreatedAt = tracker.CreatedAt
+        };
+
+        return CreatedAtAction(nameof(GetById), new { id = tracker.Id }, response);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TrackerDto>> Update(Guid id, CreateTrackerDto request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var updated = await trackerService.UpdateAsync(
-                id,
-                new UpdateTrackerCommand(request.Name, request.Description),
-                cancellationToken);
+        var updated = await trackerService.UpdateAsync(
+            id,
+            new UpdateTrackerCommand(request.Name, request.Description),
+            cancellationToken);
 
-            if (!updated)
-            {
-                return NotFound();
-            }
-        }
-        catch (ArgumentException ex)
+        if (!updated)
         {
-            return BadRequest(ex.Message);
+            return NotFound();
         }
 
         var tracker = await trackerService.GetByIdAsync(id, cancellationToken);

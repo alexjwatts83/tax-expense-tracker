@@ -4,6 +4,7 @@ using TaxExpenseTracker.Application.Expenses;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Application.Trackers;
 using TaxExpenseTracker.Infrastructure.Data;
+using TaxExpenseTracker.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ApiExceptionHandlingMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {

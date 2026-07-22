@@ -46,39 +46,25 @@ public class TagsController(ITagService tagService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TagDto>> Create(CreateTagDto request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var tag = await tagService.CreateAsync(new CreateTagCommand(request.Name), cancellationToken);
+        var tag = await tagService.CreateAsync(new CreateTagCommand(request.Name), cancellationToken);
 
-            var response = new TagDto
-            {
-                Id = tag.Id,
-                Name = tag.Name,
-                CreatedAt = tag.CreatedAt
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = tag.Id }, response);
-        }
-        catch (ArgumentException ex)
+        var response = new TagDto
         {
-            return BadRequest(ex.Message);
-        }
+            Id = tag.Id,
+            Name = tag.Name,
+            CreatedAt = tag.CreatedAt
+        };
+
+        return CreatedAtAction(nameof(GetById), new { id = tag.Id }, response);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TagDto>> Update(Guid id, CreateTagDto request, CancellationToken cancellationToken)
     {
-        try
+        var updated = await tagService.UpdateAsync(id, new UpdateTagCommand(request.Name), cancellationToken);
+        if (!updated)
         {
-            var updated = await tagService.UpdateAsync(id, new UpdateTagCommand(request.Name), cancellationToken);
-            if (!updated)
-            {
-                return NotFound();
-            }
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
+            return NotFound();
         }
 
         var tag = await tagService.GetByIdAsync(id, cancellationToken);

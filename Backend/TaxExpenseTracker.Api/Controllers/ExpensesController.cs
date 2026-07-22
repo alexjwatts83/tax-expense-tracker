@@ -33,63 +33,41 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ExpenseResponseDto>> Create(CreateExpenseDto request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var expense = await expenseService.CreateAsync(
-                new CreateExpenseCommand(
-                    request.Item,
-                    request.Description,
-                    request.Date,
-                    request.Bank,
-                    request.Price,
-                    request.SourceId,
-                    request.TagIds),
-                cancellationToken);
+        var expense = await expenseService.CreateAsync(
+            new CreateExpenseCommand(
+                request.Item,
+                request.Description,
+                request.Date,
+                request.Bank,
+                request.Price,
+                request.SourceId,
+                request.TagIds),
+            cancellationToken);
 
-            return CreatedAtAction(nameof(GetById), new { id = expense.Id }, MapExpense(expense));
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return CreatedAtAction(nameof(GetById), new { id = expense.Id }, MapExpense(expense));
     }
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ExpenseResponseDto>> Update(Guid id, CreateExpenseDto request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var expense = await expenseService.UpdateAsync(
-                id,
-                new UpdateExpenseCommand(
-                    request.Item,
-                    request.Description,
-                    request.Date,
-                    request.Bank,
-                    request.Price,
-                    request.SourceId,
-                    request.TagIds),
-                cancellationToken);
+        var expense = await expenseService.UpdateAsync(
+            id,
+            new UpdateExpenseCommand(
+                request.Item,
+                request.Description,
+                request.Date,
+                request.Bank,
+                request.Price,
+                request.SourceId,
+                request.TagIds),
+            cancellationToken);
 
-            if (expense is null)
-            {
-                return NotFound();
-            }
+        if (expense is null)
+        {
+            return NotFound();
+        }
 
-            return Ok(MapExpense(expense));
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return Ok(MapExpense(expense));
     }
 
     [HttpDelete("{id:guid}")]

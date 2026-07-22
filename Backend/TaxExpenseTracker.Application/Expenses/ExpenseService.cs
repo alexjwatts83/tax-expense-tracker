@@ -13,10 +13,12 @@ public sealed class ExpenseService : IExpenseService
 
     public async Task<IReadOnlyList<ExpenseReadDto>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        page = Math.Max(page, 1);
-        pageSize = Math.Clamp(pageSize, 1, 100);
+        var (normalizedPage, normalizedPageSize) = ExpenseValidation.NormalizePaging(page, pageSize);
 
-        var expenses = await _expenseRepository.GetPagedWithDetailsAsync((page - 1) * pageSize, pageSize, cancellationToken);
+        var expenses = await _expenseRepository.GetPagedWithDetailsAsync(
+            (normalizedPage - 1) * normalizedPageSize,
+            normalizedPageSize,
+            cancellationToken);
         return expenses.Select(MapExpense).ToList();
     }
 
@@ -120,6 +122,8 @@ public sealed class ExpenseService : IExpenseService
 
     public async Task<IReadOnlyList<ExpenseReadDto>> FilterAsync(ExpenseFilterQuery query, CancellationToken cancellationToken = default)
     {
+        ExpenseValidation.ValidateFilter(query);
+
         var expenses = await _expenseRepository.FilterWithDetailsAsync(query, cancellationToken);
         return expenses.Select(MapExpense).ToList();
     }
