@@ -55,6 +55,18 @@
 					</mat-select>
 				</mat-form-field>
 
+				<mat-form-field>
+					<mat-label>Add New Tags (comma-separated)</mat-label>
+					<input matInput formControlName="manualTags" placeholder="Stationery, Internet" />
+					<mat-hint>Click Apply Tags to create and attach new tags before saving.</mat-hint>
+				</mat-form-field>
+
+				<div class="actions">
+					<button mat-stroked-button type="button" (click)="applyManualTags()" [disabled]="isLoadingLookups || isSubmitting">
+						Apply Tags
+					</button>
+				</div>
+
 				<div class="actions">
 					<button mat-flat-button color="primary" type="submit" [disabled]="isLoadingLookups || isSubmitting">
 						{{ isSubmitting ? 'Saving...' : 'Save Expense' }}

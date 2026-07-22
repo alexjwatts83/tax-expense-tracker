@@ -10,8 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
-import { finalize, forkJoin, take } from 'rxjs';
-import { RouterLink } from '@angular/router';
+import { finalize, forkJoin, of, switchMap, take } from 'rxjs';
 import { Bank, Expense, Tag, Tracker } from '../../models/api.models';
 import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
@@ -34,7 +33,6 @@ import { TrackerService } from '../../services/tracker';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
-    RouterLink,
   ],
   templateUrl: './expense-list.html',
   styleUrl: './expense-list.scss',
@@ -58,6 +56,17 @@ export class ExpenseList implements OnInit {
     tagIds: [[] as string[]],
   });
 
+  readonly createForm = this.formBuilder.group({
+    item: [''],
+    description: [''],
+    date: [''],
+    bankId: [''],
+    price: [0],
+    sourceId: [''],
+    tagIds: [[] as string[]],
+    manualTags: [''],
+  });
+
   banks: Bank[] = [];
   expenses: Expense[] = [];
   pagedExpenses: Expense[] = [];
@@ -70,6 +79,7 @@ export class ExpenseList implements OnInit {
   hasActiveFilters = false;
 
   isLoading = false;
+  isCreating = false;
   errorMessage = '';
   infoMessage = '';
 
@@ -192,6 +202,82 @@ export class ExpenseList implements OnInit {
     });
   }
 
+  createExpenseInline(): void {
+    const value = this.createForm.value;
+
+    if (!value.item?.trim() || !value.date || !value.bankId || !value.sourceId || Number(value.price) < 0) {
+      this.errorMessage = 'Please provide item, date, bank, tracker, and a non-negative price.';
+      return;
+    }
+
+    if (this.isCreating) {
+      return;
+    }
+
+    this.isCreating = true;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.resolveInlineTagIds((value.tagIds ?? []) as string[], this.parseManualTags(value.manualTags))
+      .pipe(
+        switchMap((tagIds) =>
+          this.expenseService.create({
+            item: value.item?.trim() ?? '',
+            description: value.description?.trim() ?? '',
+            date: value.date ?? '',
+            bankId: value.bankId ?? '',
+            price: Number(value.price),
+            sourceId: value.sourceId ?? '',
+            tagIds,
+          }),
+        ),
+        finalize(() => {
+          this.isCreating = false;
+        }),
+      )
+      .subscribe({
+        next: (createdExpense) => {
+          if (this.hasActiveFilters) {
+            this.applyFilters();
+          } else {
+            this.expenses = [createdExpense, ...this.expenses].sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            );
+            this.updatePagedExpenses();
+          }
+
+          this.createForm.reset({
+            item: '',
+            description: '',
+            date: '',
+            bankId: '',
+            price: 0,
+            sourceId: '',
+            tagIds: [],
+            manualTags: '',
+          });
+          this.infoMessage = `Expense "${createdExpense.item}" created.`;
+        },
+        error: (err) => {
+          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create expense.';
+        },
+      });
+  }
+
+  applyInlineTags(): void {
+    this.errorMessage = '';
+
+    const value = this.createForm.value;
+    this.resolveInlineTagIds((value.tagIds ?? []) as string[], this.parseManualTags(value.manualTags)).subscribe({
+      next: (tagIds) => {
+        this.createForm.patchValue({ tagIds, manualTags: '' });
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to apply tags.';
+      },
+    });
+  }
+
   clearFilters(): void {
     this.filterForm.reset({
       date: '',
@@ -242,5 +328,50 @@ export class ExpenseList implements OnInit {
     const start = (this.page - 1) * this.pageSize;
     const end = start + this.pageSize;
     this.pagedExpenses = this.expenses.slice(start, end);
+  }
+
+  private parseManualTags(rawValue: string | null | undefined): string[] {
+    if (!rawValue) {
+      return [];
+    }
+
+    const unique = new Map<string, string>();
+    for (const token of rawValue.split(',')) {
+      const trimmed = token.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      const key = trimmed.toLowerCase();
+      if (!unique.has(key)) {
+        unique.set(key, trimmed);
+      }
+    }
+
+    return [...unique.values()];
+  }
+
+  private resolveInlineTagIds(selectedTagIds: string[], manualTagNames: string[]) {
+    if (manualTagNames.length === 0) {
+      return of([...new Set(selectedTagIds)]);
+    }
+
+    const existingByName = new Map(this.tags.map((tag) => [tag.name.trim().toLowerCase(), tag]));
+    const existingIds = manualTagNames
+      .map((name) => existingByName.get(name.toLowerCase())?.id)
+      .filter((id): id is string => !!id);
+
+    const namesToCreate = manualTagNames.filter((name) => !existingByName.has(name.toLowerCase()));
+    if (namesToCreate.length === 0) {
+      return of([...new Set([...selectedTagIds, ...existingIds])]);
+    }
+
+    return forkJoin(namesToCreate.map((name) => this.tagService.create({ name }))).pipe(
+      switchMap((createdTags) => {
+        this.tags = [...this.tags, ...createdTags].sort((a, b) => a.name.localeCompare(b.name));
+        const createdIds = createdTags.map((tag) => tag.id);
+        return of([...new Set([...selectedTagIds, ...existingIds, ...createdIds])]);
+      }),
+    );
   }
 }
