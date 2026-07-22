@@ -156,8 +156,37 @@ Backend is implemented for Phase 1. Frontend work starts in Phase 2.
 ### Prerequisites
 
 - .NET SDK 10
-- Node.js LTS
+- Volta
+- Node.js LTS (managed by Volta)
 - Angular CLI
+
+### Prerequisite Scripts
+
+Use the repository scripts to verify and install required tooling.
+
+1. Check prerequisites:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Check-Prerequisites.ps1"
+```
+
+2. Install missing prerequisites (dry run):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1" -DryRun
+```
+
+3. Install missing prerequisites (actual install):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1"
+```
+
+4. Re-run the checker to confirm setup:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Check-Prerequisites.ps1"
+```
 
 ### Backend Setup (planned)
 
@@ -176,10 +205,15 @@ NLog writes rolling files to C:/logs/TaxExpenseTracker.Api.
 ### Frontend Setup (planned)
 
 ```bash
+volta install node@lts
+volta pin node@lts
+volta install @angular/cli
 cd Frontend
 npm install
 ng serve
 ```
+
+Volta should be the standard Node version manager for this repository to keep team Node versions consistent.
 
 ## Security and Deployment Notes
 

@@ -17,6 +17,7 @@ A web application to track and manage tax-deductible expenses with a focus on fi
 ### Frontend
 - **Framework**: Angular (latest LTS)
 - **Build Tool**: Angular CLI
+- **Node Version Management**: Volta
 - **Styling**: Angular Material
 - **HTTP Client**: Angular HttpClient
 
@@ -587,6 +588,24 @@ dotnet ef database update
 
 ## Getting Started Commands
 
+### Prerequisite Scripts
+```powershell
+# Check prerequisites
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Check-Prerequisites.ps1"
+
+# Preview prerequisite installation
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1" -DryRun
+
+# Install missing prerequisites
+powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Install-Prerequisites.ps1"
+```
+
+Recommended usage order:
+1. Run `Check-Prerequisites.ps1` first.
+2. If anything fails, run `Install-Prerequisites.ps1 -DryRun`.
+3. Run `Install-Prerequisites.ps1` for installation.
+4. Run `Check-Prerequisites.ps1` again to confirm.
+
 ### Backend Setup
 ```bash
 cd Backend
@@ -600,6 +619,9 @@ dotnet run
 
 ### Frontend Setup
 ```bash
+volta install node@lts
+volta pin node@lts
+volta install @angular/cli
 ng new TaxExpenseTracker --routing --style=scss
 cd TaxExpenseTracker
 npm install @angular/material
