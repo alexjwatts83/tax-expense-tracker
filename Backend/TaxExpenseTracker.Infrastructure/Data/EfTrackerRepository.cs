@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TaxExpenseTracker.Application.Trackers;
 using TaxExpenseTracker.Domain.Entities;
 
-namespace TaxExpenseTracker.Api.Data;
+namespace TaxExpenseTracker.Infrastructure.Data;
 
 public sealed class EfTrackerRepository : ITrackerRepository
 {

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TaxExpenseTracker.Domain.Entities;
 
-namespace TaxExpenseTracker.Api.Data;
+namespace TaxExpenseTracker.Infrastructure.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {

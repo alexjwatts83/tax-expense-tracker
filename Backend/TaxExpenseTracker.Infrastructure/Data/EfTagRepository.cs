@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Domain.Entities;
 
-namespace TaxExpenseTracker.Api.Data;
+namespace TaxExpenseTracker.Infrastructure.Data;
 
 public sealed class EfTagRepository : ITagRepository
 {

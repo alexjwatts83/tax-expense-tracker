@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
-using TaxExpenseTracker.Api.Data;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Application.Trackers;
+using TaxExpenseTracker.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

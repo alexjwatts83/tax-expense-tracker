@@ -33,7 +33,8 @@ In progress:
 
 1. Phase B (domain extraction) is substantially complete; base abstractions still pending.
 2. Phase C (application use cases) has progressed through tracker and tag slices.
-3. Phase F (testing) has started with baseline test project scaffolding.
+3. Phase D (infrastructure ownership) has started with DbContext and repository relocation.
+4. Phase F (testing) has started with baseline test project scaffolding.
 
 Not started:
 
@@ -153,7 +154,7 @@ Acceptance criteria:
 
 ### Phase D - Infrastructure Layer
 
-Status: Not started
+Status: In progress
 
 Deliverables:
 
@@ -161,6 +162,14 @@ Deliverables:
 2. Implement repositories using EF Core.
 3. Keep migrations in Infrastructure or a dedicated migrations project.
 4. Add mapping between Domain and persistence models if needed.
+
+Progress:
+
+1. Done: Moved `AppDbContext` to Infrastructure.
+2. Done: Moved EF tracker/tag repository implementations to Infrastructure.
+3. Done: API composition root now resolves persistence services from Infrastructure.
+4. Pending: Move migrations ownership from API to Infrastructure.
+5. Pending: Remove direct EF queries from `ExpensesController` via application/infrastructure abstractions.
 
 Acceptance criteria:
 
