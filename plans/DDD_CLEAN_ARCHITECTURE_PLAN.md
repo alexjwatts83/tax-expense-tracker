@@ -25,10 +25,12 @@ Completed:
    - TaxExpenseTag
 4. API was rewired to compile against Domain entities.
 5. Solution build passes after the layering bootstrap.
+6. Domain-level invariant methods were added to core entities.
+7. API create/update/delete flows now call domain behavior methods.
 
 In progress:
 
-1. Phase B (domain extraction) is partially complete; invariants and abstractions pending.
+1. Phase B (domain extraction) is substantially complete; base abstractions still pending.
 2. Phase F (testing) has started with baseline test project scaffolding.
 
 Not started:
@@ -110,7 +112,7 @@ Deliverables:
 Progress:
 
 1. Done: Core entities were moved into Domain.
-2. Pending: Add explicit domain invariants (guard clauses/value objects).
+2. Done: Added invariant checks and behavior methods for Tracker/Tag/TaxExpense/TaxExpenseTag.
 3. Pending: Add optional base abstractions if needed.
 
 Acceptance criteria:
@@ -190,7 +192,8 @@ Progress:
 1. Done: Added `TaxExpenseTracker.Tests.Unit` project.
 2. Done: Added `TaxExpenseTracker.Tests.Integration` project.
 3. Done: Added baseline unit and integration smoke tests.
-4. Pending: Expand use-case/domain rule coverage and add CI gating.
+4. Done: Added initial unit coverage for domain invariants.
+5. Pending: Expand use-case/domain rule coverage and add CI gating.
 
 Acceptance criteria:
 

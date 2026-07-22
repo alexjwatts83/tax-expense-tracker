@@ -25,4 +25,30 @@ public class DomainEntityDefaultsTests
         Assert.NotNull(expense.TaxExpenseTags);
         Assert.Empty(expense.TaxExpenseTags);
     }
+
+    [Fact]
+    public void Tracker_Create_Throws_WhenNameMissing()
+    {
+        Assert.Throws<ArgumentException>(() => Tracker.Create("   ", null));
+    }
+
+    [Fact]
+    public void Tag_Create_Throws_WhenNameMissing()
+    {
+        Assert.Throws<ArgumentException>(() => Tag.Create(""));
+    }
+
+    [Fact]
+    public void TaxExpense_Create_Throws_WhenPriceNegative()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            TaxExpense.Create("Item", "Desc", DateTime.UtcNow, "Bank", -1m, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void TaxExpense_Create_Throws_WhenDateDefault()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            TaxExpense.Create("Item", "Desc", default, "Bank", 1m, Guid.NewGuid()));
+    }
 }

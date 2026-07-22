@@ -64,24 +64,25 @@ public class ExpensesController(AppDbContext dbContext) : ControllerBase
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        var expense = new TaxExpense
+        TaxExpense expense;
+        try
         {
-            Id = Guid.NewGuid(),
-            Item = request.Item.Trim(),
-            Description = request.Description.Trim(),
-            Date = request.Date,
-            Bank = request.Bank.Trim(),
-            Price = request.Price,
-            SourceId = request.SourceId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsDeleted = false,
-            TaxExpenseTags = validTagIds.Select(tagId => new TaxExpenseTag
-            {
-                Id = Guid.NewGuid(),
-                TagId = tagId
-            }).ToList()
-        };
+            expense = TaxExpense.Create(
+                request.Item,
+                request.Description,
+                request.Date,
+                request.Bank,
+                request.Price,
+                request.SourceId);
+
+            expense.TaxExpenseTags = validTagIds
+                .Select(tagId => TaxExpenseTag.Create(expense.Id, tagId))
+                .ToList();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         dbContext.TaxExpenses.Add(expense);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -119,23 +120,25 @@ public class ExpensesController(AppDbContext dbContext) : ControllerBase
             .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        expense.Item = request.Item.Trim();
-        expense.Description = request.Description.Trim();
-        expense.Date = request.Date;
-        expense.Bank = request.Bank.Trim();
-        expense.Price = request.Price;
-        expense.SourceId = request.SourceId;
-        expense.UpdatedAt = DateTime.UtcNow;
+        try
+        {
+            expense.UpdateDetails(
+                request.Item,
+                request.Description,
+                request.Date,
+                request.Bank,
+                request.Price,
+                request.SourceId);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         expense.TaxExpenseTags.Clear();
         foreach (var tagId in validTagIds)
         {
-            expense.TaxExpenseTags.Add(new TaxExpenseTag
-            {
-                Id = Guid.NewGuid(),
-                TaxExpenseId = expense.Id,
-                TagId = tagId
-            });
+            expense.TaxExpenseTags.Add(TaxExpenseTag.Create(expense.Id, tagId));
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -159,8 +162,7 @@ public class ExpensesController(AppDbContext dbContext) : ControllerBase
             return NotFound();
         }
 
-        expense.IsDeleted = true;
-        expense.UpdatedAt = DateTime.UtcNow;
+        expense.SoftDelete();
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();

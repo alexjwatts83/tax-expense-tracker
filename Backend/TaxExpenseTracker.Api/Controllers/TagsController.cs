@@ -52,18 +52,15 @@ public class TagsController(AppDbContext dbContext) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TagDto>> Create(CreateTagDto request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
+        Tag tag;
+        try
         {
-            return BadRequest("Tag name is required.");
+            tag = Tag.Create(request.Name);
         }
-
-        var tag = new Tag
+        catch (ArgumentException ex)
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name.Trim(),
-            CreatedAt = DateTime.UtcNow,
-            IsDeleted = false
-        };
+            return BadRequest(ex.Message);
+        }
 
         dbContext.Tags.Add(tag);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -81,18 +78,21 @@ public class TagsController(AppDbContext dbContext) : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TagDto>> Update(Guid id, CreateTagDto request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            return BadRequest("Tag name is required.");
-        }
-
         var tag = await dbContext.Tags.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (tag is null)
         {
             return NotFound();
         }
 
-        tag.Name = request.Name.Trim();
+        try
+        {
+            tag.Rename(request.Name);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var response = new TagDto
@@ -114,7 +114,7 @@ public class TagsController(AppDbContext dbContext) : ControllerBase
             return NotFound();
         }
 
-        tag.IsDeleted = true;
+        tag.SoftDelete();
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();

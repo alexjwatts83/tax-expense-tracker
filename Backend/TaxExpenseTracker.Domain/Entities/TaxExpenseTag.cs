@@ -8,4 +8,24 @@ public class TaxExpenseTag
 
     public TaxExpense? TaxExpense { get; set; }
     public Tag? Tag { get; set; }
+
+    public static TaxExpenseTag Create(Guid taxExpenseId, Guid tagId)
+    {
+        if (taxExpenseId == Guid.Empty)
+        {
+            throw new ArgumentException("TaxExpenseId is required.", nameof(taxExpenseId));
+        }
+
+        if (tagId == Guid.Empty)
+        {
+            throw new ArgumentException("TagId is required.", nameof(tagId));
+        }
+
+        return new TaxExpenseTag
+        {
+            Id = Guid.NewGuid(),
+            TaxExpenseId = taxExpenseId,
+            TagId = tagId,
+        };
+    }
 }

@@ -54,20 +54,15 @@ public class TrackersController(AppDbContext dbContext) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TrackerDto>> Create(CreateTrackerDto request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
+        Tracker tracker;
+        try
         {
-            return BadRequest("Tracker name is required.");
+            tracker = Tracker.Create(request.Name, request.Description);
         }
-
-        var tracker = new Tracker
+        catch (ArgumentException ex)
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name.Trim(),
-            Description = request.Description?.Trim(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsDeleted = false
-        };
+            return BadRequest(ex.Message);
+        }
 
         dbContext.Trackers.Add(tracker);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -86,20 +81,20 @@ public class TrackersController(AppDbContext dbContext) : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TrackerDto>> Update(Guid id, CreateTrackerDto request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-        {
-            return BadRequest("Tracker name is required.");
-        }
-
         var tracker = await dbContext.Trackers.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (tracker is null)
         {
             return NotFound();
         }
 
-        tracker.Name = request.Name.Trim();
-        tracker.Description = request.Description?.Trim();
-        tracker.UpdatedAt = DateTime.UtcNow;
+        try
+        {
+            tracker.Rename(request.Name, request.Description);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -123,8 +118,7 @@ public class TrackersController(AppDbContext dbContext) : ControllerBase
             return NotFound();
         }
 
-        tracker.IsDeleted = true;
-        tracker.UpdatedAt = DateTime.UtcNow;
+        tracker.SoftDelete();
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return NoContent();
