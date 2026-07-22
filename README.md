@@ -227,6 +227,6 @@ Planned Azure deployment approach:
 
 ## Status
 
-Current status: Phase 1 complete and validated (backend scaffolded, EF Core configured, migrations created, local/cloud appsettings configured, User Secrets enabled, Swagger and NLog integrated).
+Current status: Phase 1 complete and validated, Phase 2 started (Angular app initialized, Angular Material added, core routes and API services scaffolded).
 
 Source plan: `plans/TAX_EXPENSE_TRACKER_PLAN.md`

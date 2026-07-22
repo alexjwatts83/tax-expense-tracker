@@ -1,0 +1,10 @@
+.page {
+	display: grid;
+	gap: 1rem;
+}
+
+.cards {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}

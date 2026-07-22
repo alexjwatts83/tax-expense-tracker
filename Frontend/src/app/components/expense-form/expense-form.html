@@ -1,0 +1,33 @@
+<section class="page">
+	<h1>Create Expense</h1>
+
+	<mat-card>
+		<mat-card-content>
+			<form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+				<mat-form-field>
+					<mat-label>Item</mat-label>
+					<input matInput formControlName="item" />
+				</mat-form-field>
+
+				<mat-form-field>
+					<mat-label>Description</mat-label>
+					<input matInput formControlName="description" />
+				</mat-form-field>
+
+				<mat-form-field>
+					<mat-label>Bank</mat-label>
+					<input matInput formControlName="bank" />
+				</mat-form-field>
+
+				<mat-form-field>
+					<mat-label>Price</mat-label>
+					<input matInput formControlName="price" type="number" step="0.01" />
+				</mat-form-field>
+
+				<div class="actions">
+					<button mat-flat-button color="primary" type="submit">Save Expense</button>
+				</div>
+			</form>
+		</mat-card-content>
+	</mat-card>
+</section>

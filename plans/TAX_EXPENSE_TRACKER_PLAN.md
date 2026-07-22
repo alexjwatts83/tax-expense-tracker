@@ -322,14 +322,14 @@ AppComponent
 - [x] Visual Studio solution file added (`TaxExpenseTracker.sln`)
 
 ### Phase 2: Frontend Setup (Week 1-2)
-- [ ] Initialize Angular project
-- [ ] Create services for API communication (Expense, Tracker & Tag services)
+- [x] Initialize Angular project
+- [x] Create services for API communication (Expense, Tracker & Tag services)
 - [ ] Build tracker management component with soft delete support
 - [ ] Build tag management component with soft delete support
 - [ ] Build expense list component with source display and tags
 - [ ] Build expense form component with tracker dropdown and tag multi-select
-- [ ] Implement routing
-- [ ] Add styling (Angular Material)
+- [x] Implement routing
+- [x] Add styling (Angular Material)
 
 ### Phase 3: Integration & Polish (Week 2)
 - [ ] Connect frontend to backend API
