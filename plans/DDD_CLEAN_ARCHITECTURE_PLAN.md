@@ -32,7 +32,7 @@ Completed:
 In progress:
 
 1. Phase B (domain extraction) is substantially complete; base abstractions still pending.
-2. Phase C (application use cases) has progressed through tracker and tag slices.
+2. Phase C (application use cases) has progressed through tracker, tag, and expense slices.
 3. Phase D (infrastructure ownership) has started with DbContext and repository relocation.
 4. Phase F (testing) has started with baseline test project scaffolding.
 
@@ -145,7 +145,11 @@ Progress:
 6. Done: Added tag use-case service (`ITagService`, `TagService`).
 7. Done: Added tag repository abstraction in Application and EF-backed repository wiring in API.
 8. Done: Refactored `TagsController` to delegate orchestration to `ITagService`.
-9. Pending: Apply same pattern to Expenses.
+9. Done: Added expense application contracts (`CreateExpenseCommand`, `UpdateExpenseCommand`, `ExpenseReadDto`, `ExpenseSummaryDto`).
+10. Done: Added expense use-case service (`IExpenseService`, `ExpenseService`).
+11. Done: Added expense repository abstraction in Application and EF-backed repository wiring in Infrastructure.
+12. Done: Refactored `ExpensesController` to delegate orchestration to `IExpenseService`.
+13. Pending: Add dedicated application validators for command/query input where needed.
 
 Acceptance criteria:
 
@@ -216,7 +220,8 @@ Progress:
 3. Done: Added baseline unit and integration smoke tests.
 4. Done: Added initial unit coverage for domain invariants.
 5. Done: Added initial unit coverage for tracker and tag application services.
-6. Pending: Expand use-case/domain rule coverage and add CI gating.
+6. Done: Added initial unit coverage for expense application service behavior.
+7. Pending: Expand use-case/domain rule coverage and add CI gating.
 
 Acceptance criteria:
 

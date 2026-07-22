@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
+using TaxExpenseTracker.Application.Expenses;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Application.Trackers;
 using TaxExpenseTracker.Infrastructure.Data;
@@ -26,6 +27,8 @@ builder.Services.AddScoped<ITrackerRepository, EfTrackerRepository>();
 builder.Services.AddScoped<ITrackerService, TrackerService>();
 builder.Services.AddScoped<ITagRepository, EfTagRepository>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<IExpenseRepository, EfExpenseRepository>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 var app = builder.Build();
 
