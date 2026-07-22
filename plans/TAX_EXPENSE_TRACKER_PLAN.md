@@ -191,7 +191,9 @@ Current expense filter query parameters:
 - Expense list with pagination and filters
 - Inline expense creation on the expenses page
 - Add expense form order: Tracker, Description, Date, Bank, Price, Tags, Add New Tags
-- Filter order aligned to primary data entry fields (Tracker, Date, Bank, Price, Tags)
+- Table-header filters on expense list (Date, Bank, Tracker, Tags) using Angular Material controls
+- Header-level clear-filters action in the Actions column
+- Filter request de-duplication and stale-response protection to prevent reset/race issues
 - Manual tag create-and-attach flow via Apply Tags action
 - Dedicated expense form remains available with bank/tracker/tag selectors
 - Tracker management with soft delete + undo restore
@@ -291,4 +293,5 @@ powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scri
 - Bank is now a dedicated entity integrated through backend, frontend, and migrations.
 - TaxExpense no longer includes an Item field in domain contracts, API payloads, frontend models, or DB schema.
 - Expense creation is available inline on the Expenses page, including manual tag creation before submit.
+- Expense table filtering now runs from Material controls embedded in table headers, with a clear action and race-safe response handling.
 - Phase 4 tasks are the primary remaining workstream.

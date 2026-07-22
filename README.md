@@ -9,6 +9,9 @@ Tax Expense Tracker is a full-stack app for managing tax-deductible expenses wit
 - Expense filtering (single date, bank, price cap, tracker, tags)
 - Inline expense creation on the Expenses page
 - Manual tag entry with explicit Apply Tags flow (create missing tags, then attach)
+- Expense table header filters using Angular Material controls for date, bank, tracker, and tags
+- Clear-filters icon in the Actions header to reset filter inputs and reload full table data
+- Filter request guard logic to avoid stale/in-flight filter responses overriding cleared results
 - Dashboard summary totals grouped by bank and source
 - TaxExpense.Item removed end-to-end from domain, API, frontend models, and DB schema
 - Local run automation scripts with robust port handling
