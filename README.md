@@ -148,13 +148,14 @@ tax-expense-tracker/
 - Build services and core components
 - Add Angular Material styling and routing
 
-### DDD/Clean Architecture Migration (In Progress)
+### DDD/Clean Architecture Migration (Completed)
 
-- Domain entities extracted to `TaxExpenseTracker.Domain`
-- Domain invariants and behavior methods added for Tracker, Tag, TaxExpense, and TaxExpenseTag
-- Tracker feature moved to an application use-case service and repository abstraction
-- `TrackersController` now delegates orchestration to `ITrackerService`
-- Initial unit coverage added for domain invariants and tracker application service
+- Domain, Application, and Infrastructure layers established and wired
+- Domain invariants and behavior methods implemented for Tracker, Tag, TaxExpense, and TaxExpenseTag
+- Tracker, Tag, and Expense features moved to application use-case services with repository abstractions
+- Persistence ownership moved to Infrastructure (DbContext, repositories, migrations)
+- API controllers thinned and centralized exception middleware added
+- Unit/integration coverage expanded and CI quality gates added
 
 ### Phase 3: Integration and Polish
 
@@ -170,7 +171,7 @@ tax-expense-tracker/
 
 ## Getting Started
 
-Backend is implemented for Phase 1 and actively being refactored into layered DDD/Clean Architecture. Frontend work is in Phase 2.
+Backend is implemented for Phase 1 with DDD/Clean Architecture refactor complete. Frontend work is in Phase 2.
 
 ### Prerequisites
 
@@ -256,6 +257,6 @@ Current status:
 
 - Phase 1 complete and validated
 - Phase 2 started (Angular app initialized, Angular Material added, core routes and API services scaffolded)
-- DDD/Clean migration in progress: tracker Phase C slice completed (application service + repository abstraction + thin controller)
+- DDD/Clean migration complete across phases A-F
 
 Source plan: `plans/TAX_EXPENSE_TRACKER_PLAN.md`
