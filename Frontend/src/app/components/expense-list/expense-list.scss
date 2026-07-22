@@ -14,6 +14,11 @@
 	width: 100%;
 }
 
+.expense-table .price-header-top {
+	align-items: flex-start;
+	padding-top: 0.75rem;
+}
+
 .date-pop-inline {
 	display: flex;
 	flex-direction: column;
@@ -24,6 +29,12 @@
 .date-pop-inline input[type='date'] {
 	width: 100%;
 	min-width: 140px;
+	height: 36px;
+	padding: 0.25rem 0.5rem;
+	border: 1px solid rgba(0, 0, 0, 0.23);
+	border-radius: 4px;
+	background: #fff;
+	box-sizing: border-box;
 }
 
 .date-pop-inline select {
@@ -34,6 +45,7 @@
 	border: 1px solid rgba(0, 0, 0, 0.23);
 	border-radius: 4px;
 	background: #fff;
+	box-sizing: border-box;
 }
 
 .filter-grid {
