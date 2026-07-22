@@ -26,26 +26,14 @@
 	margin-top: 0.25rem;
 }
 
-.date-pop-inline input[type='date'] {
+.header-filter-field {
 	width: 100%;
 	min-width: 140px;
-	height: 36px;
-	padding: 0.25rem 0.5rem;
-	border: 1px solid rgba(0, 0, 0, 0.23);
-	border-radius: 4px;
-	background: #fff;
-	box-sizing: border-box;
 }
 
-.date-pop-inline select {
+.header-tags-filter-field {
 	width: 100%;
-	min-width: 140px;
-	height: 36px;
-	padding: 0.25rem 0.5rem;
-	border: 1px solid rgba(0, 0, 0, 0.23);
-	border-radius: 4px;
-	background: #fff;
-	box-sizing: border-box;
+	min-width: 160px;
 }
 
 .filter-grid {

@@ -80,10 +80,13 @@ export class ExpenseList implements OnInit {
   hasActiveFilters = false;
 
   isLoading = false;
+  isFiltering = false;
   isCreating = false;
   errorMessage = '';
   infoMessage = '';
-  private lastFilterSignature = '';
+  private inFlightFilterSignature: string | null = null;
+  private lastAppliedFilterSignature = '';
+  private filterRequestVersion = 0;
 
   ngOnInit(): void {
     this.loadLookups();
@@ -105,6 +108,10 @@ export class ExpenseList implements OnInit {
   }
 
   loadExpenses(): void {
+    // Invalidate any in-flight filter request so stale responses are ignored.
+    this.filterRequestVersion += 1;
+    this.inFlightFilterSignature = null;
+
     this.isLoading = true;
     this.errorMessage = '';
     this.infoMessage = '';
@@ -187,15 +194,16 @@ export class ExpenseList implements OnInit {
     };
 
     const signature = JSON.stringify(request);
-    if (signature === this.lastFilterSignature) {
+    if (signature === this.inFlightFilterSignature || signature === this.lastAppliedFilterSignature) {
       return;
     }
 
-    this.lastFilterSignature = signature;
+    this.inFlightFilterSignature = signature;
+    const requestVersion = ++this.filterRequestVersion;
 
     this.hasActiveFilters = Object.values(request).some((v) => v !== undefined);
     this.page = 1;
-    this.isLoading = true;
+    this.isFiltering = true;
     this.errorMessage = '';
 
     this.expenseService
@@ -204,12 +212,18 @@ export class ExpenseList implements OnInit {
         take(1),
         timeout(15000),
         finalize(() => {
-          this.isLoading = false;
+          this.isFiltering = false;
+          this.inFlightFilterSignature = null;
           this.cdr.detectChanges();
         }),
       )
       .subscribe({
         next: (expenses) => {
+          if (requestVersion !== this.filterRequestVersion) {
+            return;
+          }
+
+          this.lastAppliedFilterSignature = signature;
           this.expenses = expenses;
           this.updatePagedExpenses();
         },
@@ -305,7 +319,10 @@ export class ExpenseList implements OnInit {
       tagIds: [],
     });
 
-    this.lastFilterSignature = '';
+    this.inFlightFilterSignature = null;
+    this.lastAppliedFilterSignature = '';
+    // Invalidate in-flight filter responses before loading the full table.
+    this.filterRequestVersion += 1;
     this.hasActiveFilters = false;
     this.page = 1;
     this.lastDeletedExpense = null;
