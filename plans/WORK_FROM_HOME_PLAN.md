@@ -9,7 +9,7 @@ Add a work-from-home and leave tracking feature that lets users record time away
 1. Phase 1 - Domain and Persistence Foundation: Complete
 2. Phase 2 - Entry Management Use Cases: Complete
 3. Phase 3 - Weekly and Monthly Reporting: In Progress
-4. Phase 4 - Public Holiday CSV Import: Pending
+4. Phase 4 - Public Holiday CSV Import: In Progress
 5. Phase 5 - API and Frontend Delivery: In Progress
 6. Phase 6 - Hardening and Polish: Pending
 
@@ -73,6 +73,16 @@ The user will be able to:
 2. The import should validate required columns before saving.
 3. Imported holidays should be visible in the week/month views.
 4. The system should handle duplicate holiday rows safely.
+
+#### CSV Template (Current)
+
+1. Required headers: `Date`, `Name`.
+2. Supported alias headers:
+   - Date: `HolidayDate`, `Holiday_Date`
+   - Name: `HolidayName`, `Holiday_Name`
+3. Supported date formats: `yyyy-MM-dd`, `dd/MM/yyyy`, `d/M/yyyy`.
+4. Duplicate rows in the same file are skipped.
+5. Rows already present in the database (same date + name) are skipped.
 
 ## Proposed Data Model
 
@@ -338,13 +348,13 @@ Allow users to import public holidays from CSV and reuse that data in reporting.
 
 #### Backlog Items
 
-- [ ] Define the CSV column template.
-- [ ] Add import command or endpoint for holiday CSV upload.
-- [ ] Parse CSV rows and validate required columns.
-- [ ] Validate holiday date formats and reject malformed rows.
-- [ ] Deduplicate duplicate holiday rows safely.
-- [ ] Store imported holidays with a source label if useful.
-- [ ] Add tests for valid imports, invalid rows, and duplicates.
+- [x] Define the CSV column template.
+- [x] Add import command or endpoint for holiday CSV upload.
+- [x] Parse CSV rows and validate required columns.
+- [x] Validate holiday date formats and reject malformed rows.
+- [x] Deduplicate duplicate holiday rows safely.
+- [x] Store imported holidays with a source label if useful.
+- [x] Add tests for valid imports, invalid rows, and duplicates.
 
 #### Exit Criteria
 

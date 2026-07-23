@@ -21,6 +21,7 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - WFH/leave repositories and application services implemented and wired in DI
 - WFH and leave API endpoints added for CRUD, restore, and optional date-range querying
 - WFH and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
+- Public holiday API endpoints added for list and CSV import with validation and duplicate handling
 - Public holiday seed data for 2026/2027 added via EF migration
 - Shared entity base abstractions introduced (`IEntity`, `Entity`, `SoftDeletableEntity`, `AuditableEntity`, `AuditableSoftDeletableEntity`)
 - Shared generic repository abstractions introduced (`IRepository<T>`, `ISoftDeleteRepository<T>`)
@@ -29,7 +30,6 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 ## Planned Enhancements
 
 - Holiday overlap markers in weekly/monthly summaries
-- Public holiday import API endpoints and validation
 - Angular screens for work-from-home and leave entry management
 - Public holiday CSV import workflow and validation
 - Duplicate-entry-per-day business rule finalization and enforcement
@@ -134,6 +134,12 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - POST /api/leave/{id}/restore
 - GET /api/leave/summary?view=week|month&date=YYYY-MM-DD
 
+### Public Holidays
+
+- GET /api/public-holidays
+- GET /api/public-holidays?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
+- POST /api/public-holidays/import (multipart/form-data file upload)
+
 Current filter query params:
 
 - date (single day)
@@ -227,7 +233,7 @@ Recent schema updates:
 - Phase 1 - Domain and Persistence Foundation: Complete
 - Phase 2 - Entry Management Use Cases: Complete
 - Phase 3 - Weekly and Monthly Reporting: In Progress
-- Phase 4 - Public Holiday CSV Import: Pending
+- Phase 4 - Public Holiday CSV Import: In Progress
 - Phase 5 - API and Frontend Delivery: In Progress
 - Phase 6 - Hardening and Polish: Pending
 - DDD/Clean phases A-F complete

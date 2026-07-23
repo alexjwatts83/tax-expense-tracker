@@ -3,6 +3,7 @@ using NLog.Web;
 using TaxExpenseTracker.Application.Banks;
 using TaxExpenseTracker.Application.Expenses;
 using TaxExpenseTracker.Application.Leave;
+using TaxExpenseTracker.Application.PublicHolidays;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Application.Trackers;
 using TaxExpenseTracker.Application.WorkFromHome;
@@ -64,6 +65,8 @@ builder.Services.AddScoped<IWorkFromHomeRepository, EfWorkFromHomeRepository>();
 builder.Services.AddScoped<IWorkFromHomeService, WorkFromHomeService>();
 builder.Services.AddScoped<ILeaveRepository, EfLeaveRepository>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
+builder.Services.AddScoped<IPublicHolidayRepository, EfPublicHolidayRepository>();
+builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 
 var app = builder.Build();
 
