@@ -275,21 +275,21 @@ Expose application use cases for creating and managing WFH and leave entries.
 
 #### Backlog Items
 
-- [ ] Add create WFH entry command and handler/service.
-- [ ] Add update WFH entry command and handler/service.
-- [ ] Add delete WFH entry command and handler/service.
-- [ ] Add get-by-id query for WFH entries.
-- [ ] Add list/query support for WFH entries within a date range.
+- [x] Add create WFH entry command and handler/service.
+- [x] Add update WFH entry command and handler/service.
+- [x] Add delete WFH entry command and handler/service.
+- [x] Add get-by-id query for WFH entries.
+- [x] Add list/query support for WFH entries within a date range.
 - [ ] Enforce one WFH entry per date if that rule is confirmed.
-- [ ] Validate full day, half day, and specific-hours WFH inputs.
-- [ ] Add create leave command and handler/service.
-- [ ] Add update leave command and handler/service.
-- [ ] Add delete leave command and handler/service.
-- [ ] Add get-by-id query for leave entries.
-- [ ] Add list/query support for leave entries within a date range.
+- [x] Validate full day, half day, and specific-hours WFH inputs.
+- [x] Add create leave command and handler/service.
+- [x] Add update leave command and handler/service.
+- [x] Add delete leave command and handler/service.
+- [x] Add get-by-id query for leave entries.
+- [x] Add list/query support for leave entries within a date range.
 - [ ] Enforce one leave entry per date if that rule is confirmed.
-- [ ] Validate full day, half day, and specific-hours leave inputs.
-- [ ] Add unit tests for hour conversion and validation rules.
+- [x] Validate full day, half day, and specific-hours leave inputs.
+- [x] Add unit tests for hour conversion and validation rules.
 
 #### Exit Criteria
 

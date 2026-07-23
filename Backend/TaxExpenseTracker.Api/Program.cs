@@ -2,8 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using TaxExpenseTracker.Application.Banks;
 using TaxExpenseTracker.Application.Expenses;
+using TaxExpenseTracker.Application.Leave;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Application.Trackers;
+using TaxExpenseTracker.Application.WorkFromHome;
 using TaxExpenseTracker.Infrastructure.Data;
 using TaxExpenseTracker.Api.Middleware;
 
@@ -58,6 +60,10 @@ builder.Services.AddScoped<IBankRepository, EfBankRepository>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddScoped<IExpenseRepository, EfExpenseRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IWorkFromHomeRepository, EfWorkFromHomeRepository>();
+builder.Services.AddScoped<IWorkFromHomeService, WorkFromHomeService>();
+builder.Services.AddScoped<ILeaveRepository, EfLeaveRepository>();
+builder.Services.AddScoped<ILeaveService, LeaveService>();
 
 var app = builder.Build();
 
