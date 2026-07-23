@@ -7,7 +7,6 @@ public class TaxExpense : AuditableSoftDeletableEntity
     public Guid BankId { get; set; }
     public decimal Price { get; set; }
     public Guid SourceId { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Bank? Bank { get; set; }
     public Tracker? Source { get; set; }
@@ -70,31 +69,19 @@ public class TaxExpense : AuditableSoftDeletableEntity
 
     private static DateTime ValidateDate(DateTime date)
     {
-        if (date == default)
-        {
-            throw new ArgumentException("Date is required.", nameof(date));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;
     }
 
     private static Guid ValidateSourceId(Guid sourceId)
     {
-        if (sourceId == Guid.Empty)
-        {
-            throw new ArgumentException("SourceId is required.", nameof(sourceId));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(sourceId, Guid.Empty, nameof(sourceId));
         return sourceId;
     }
 
     private static Guid ValidateBankId(Guid bankId)
     {
-        if (bankId == Guid.Empty)
-        {
-            throw new ArgumentException("BankId is required.", nameof(bankId));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(bankId, Guid.Empty, nameof(bankId));
         return bankId;
     }
 }

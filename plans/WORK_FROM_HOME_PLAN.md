@@ -4,6 +4,15 @@
 
 Add a work-from-home and leave tracking feature that lets users record time away from the office, review entries by week or month, and import public holidays from a CSV file.
 
+## Current Progress Snapshot
+
+1. Phase 1 - Domain and Persistence Foundation: Complete
+2. Phase 2 - Entry Management Use Cases: Complete
+3. Phase 3 - Weekly and Monthly Reporting: Pending
+4. Phase 4 - Public Holiday CSV Import: Pending
+5. Phase 5 - API and Frontend Delivery: Pending
+6. Phase 6 - Hardening and Polish: Pending
+
 ## User Outcomes
 
 The user will be able to:
@@ -221,10 +230,11 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Next Actions
 
-1. Confirm whether the feature should live inside the current tax tracker app or as a separate module.
-2. Confirm the CSV column template for public holidays.
-3. Decide whether duplicate entries per day are allowed.
-4. Add the first domain entities and DTOs once the rules are locked down.
+1. Implement API controllers and DTOs for WFH and leave.
+2. Implement weekly/monthly summary queries and API endpoints.
+3. Define and implement the public holiday CSV template and import endpoint.
+4. Finalize and enforce duplicate-entry-per-day rules.
+5. Deliver Angular UI flows for WFH/leave entry and summary views.
 
 ## Phased Implementation Backlog
 
@@ -255,10 +265,10 @@ Create the core data model and storage foundation for WFH entries, leave entries
 - [x] Add EF Core mappings and migrations for WFH entries.
 - [x] Add EF Core mappings and migrations for leave entries.
 - [x] Add EF Core mappings and migrations for public holidays.
-- [ ] Add repository abstractions or application ports for WFH entries.
-- [ ] Add repository abstractions or application ports for leave entries.
+- [x] Add repository abstractions or application ports for WFH entries.
+- [x] Add repository abstractions or application ports for leave entries.
 - [ ] Add repository abstractions or application ports for public holidays.
-- [ ] Add seed/sample holiday data only if required for local development.
+- [x] Add seed/sample holiday data only if required for local development.
 
 #### Exit Criteria
 

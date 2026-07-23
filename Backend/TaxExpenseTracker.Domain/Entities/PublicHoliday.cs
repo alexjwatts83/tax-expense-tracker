@@ -33,23 +33,14 @@ public class PublicHoliday : Entity
 
     private static DateTime ValidateDate(DateTime date)
     {
-        if (date == default)
-        {
-            throw new ArgumentException("Holiday date is required.", nameof(date));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;
     }
 
     private static string NormalizeRequired(string value, string fieldName)
     {
-        var normalized = value?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            throw new ArgumentException($"{fieldName} is required.", fieldName);
-        }
-
-        return normalized;
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, fieldName);
+        return value.Trim();
     }
 
     private static string? NormalizeOptional(string? value)

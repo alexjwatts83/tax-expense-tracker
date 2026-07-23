@@ -6,7 +6,6 @@ public class WorkFromHomeEntry : AuditableSoftDeletableEntity
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }
     public string? Notes { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public static WorkFromHomeEntry Create(
         DateTime workDate,
@@ -56,11 +55,7 @@ public class WorkFromHomeEntry : AuditableSoftDeletableEntity
 
     private static DateTime ValidateDate(DateTime date)
     {
-        if (date == default)
-        {
-            throw new ArgumentException("Work date is required.", nameof(date));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;
     }
 

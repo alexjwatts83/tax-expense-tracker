@@ -1,18 +1,18 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public abstract class AuditableSoftDeletableEntity : SoftDeletableEntity
+public abstract class AuditableSoftDeletableEntity : AuditableEntity, ISoftDeletableEntity
 {
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsDeleted { get; set; }
 
-    public override void SoftDelete(DateTime? utcNow = null)
+    public virtual void SoftDelete(DateTime? utcNow = null)
     {
-        base.SoftDelete(utcNow);
+        IsDeleted = true;
         UpdatedAt = utcNow ?? DateTime.UtcNow;
     }
 
-    public override void Restore(DateTime? utcNow = null)
+    public virtual void Restore(DateTime? utcNow = null)
     {
-        base.Restore(utcNow);
+        IsDeleted = false;
         UpdatedAt = utcNow ?? DateTime.UtcNow;
     }
 }

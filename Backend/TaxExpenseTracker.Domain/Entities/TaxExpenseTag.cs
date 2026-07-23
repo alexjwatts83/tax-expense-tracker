@@ -10,15 +10,8 @@ public class TaxExpenseTag : Entity
 
     public static TaxExpenseTag Create(Guid taxExpenseId, Guid tagId)
     {
-        if (taxExpenseId == Guid.Empty)
-        {
-            throw new ArgumentException("TaxExpenseId is required.", nameof(taxExpenseId));
-        }
-
-        if (tagId == Guid.Empty)
-        {
-            throw new ArgumentException("TagId is required.", nameof(tagId));
-        }
+        ArgumentOutOfRangeException.ThrowIfEqual(taxExpenseId, Guid.Empty, nameof(taxExpenseId));
+        ArgumentOutOfRangeException.ThrowIfEqual(tagId, Guid.Empty, nameof(tagId));
 
         return new TaxExpenseTag
         {

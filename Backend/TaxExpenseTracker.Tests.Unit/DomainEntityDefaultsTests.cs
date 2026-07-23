@@ -47,7 +47,7 @@ public class DomainEntityDefaultsTests
     [Fact]
     public void TaxExpense_Create_Throws_WhenDateDefault()
     {
-        Assert.Throws<ArgumentException>(() =>
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
             TaxExpense.Create("Desc", default, Guid.NewGuid(), 1m, Guid.NewGuid()));
     }
 }

@@ -6,7 +6,6 @@ public class LeaveEntry : AuditableSoftDeletableEntity
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }
     public string? Notes { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public static LeaveEntry Create(
         DateTime leaveDate,
@@ -56,11 +55,7 @@ public class LeaveEntry : AuditableSoftDeletableEntity
 
     private static DateTime ValidateDate(DateTime date)
     {
-        if (date == default)
-        {
-            throw new ArgumentException("Leave date is required.", nameof(date));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;
     }
 

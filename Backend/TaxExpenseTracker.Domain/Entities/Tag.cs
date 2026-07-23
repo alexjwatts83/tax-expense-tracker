@@ -25,12 +25,7 @@ public class Tag : SoftDeletableEntity
 
     private static string NormalizeRequired(string value, string fieldName)
     {
-        var normalized = value?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            throw new ArgumentException($"{fieldName} is required.", fieldName);
-        }
-
-        return normalized;
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, fieldName);
+        return value.Trim();
     }
 }
