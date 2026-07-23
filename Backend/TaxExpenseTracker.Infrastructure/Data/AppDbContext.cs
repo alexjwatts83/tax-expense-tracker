@@ -20,7 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<TaxExpense>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<WorkLocationEntry>()
-            .ToTable("WorkFromHomeEntries")
+            .ToTable("WorkLocationEntries")
             .HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LeaveEntry>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Bank>().HasQueryFilter(x => !x.IsDeleted);

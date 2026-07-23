@@ -16,6 +16,7 @@ Last Updated: 2026-07-23
 7. 2026-07-23: Resolved API staticwebassets build failure by removing recursively generated nested Backend output folders under project directories.
 8. 2026-07-23: Full validation passed: dotnet build TaxExpenseTracker.sln, dotnet test TaxExpenseTracker.Tests.Unit, and npm --prefix Frontend run build.
 9. 2026-07-23: Removed legacy compatibility routes (/api/work-from-home and /work-from-home) as Phase 5 cleanup.
+10. 2026-07-23: Completed optional DB rename by mapping and migrating WorkFromHomeEntries table to WorkLocationEntries.
 
 ## Goal
 
@@ -31,8 +32,7 @@ In Scope:
 5. Build and test validation.
 
 Out of Scope (for this phase):
-1. Immediate database table rename from WorkFromHomeEntries.
-2. Breaking removal of legacy routes in the same release.
+1. Breaking removal of legacy routes in the same release.
 
 ## Progress Snapshot
 
@@ -105,7 +105,7 @@ Out of Scope (for this phase):
 
 1. Remove legacy API route after adoption period.
 2. Remove frontend legacy redirect.
-3. Optionally rename DB table and constraints via dedicated migration:
+3. Rename DB table and constraints via dedicated migration:
 	- WorkFromHomeEntries -> WorkLocationEntries
 
 ## Risks and Mitigations
