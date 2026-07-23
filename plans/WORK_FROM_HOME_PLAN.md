@@ -1,0 +1,387 @@
+# Work From Home and Leave Tracker Plan
+
+## Goal
+
+Add a work-from-home and leave tracking feature that lets users record time away from the office, review entries by week or month, and import public holidays from a CSV file.
+
+## User Outcomes
+
+The user will be able to:
+
+1. Enter a date worked from home.
+2. Enter a date for leave.
+3. Select a full day, half day, or a specific number of hours for either entry type.
+4. View work-from-home and leave entries grouped by week or month.
+5. Import public holidays from a CSV file.
+
+## Scope
+
+### In Scope
+
+1. Create and manage work-from-home entries.
+2. Create and manage leave entries.
+3. Support three time entry modes:
+   - Full day = 7.6 hours
+   - Half day = 3.8 hours
+   - Specific hours = user-defined decimal hours
+4. Provide calendar-style or table-style views for weekly and monthly summaries.
+5. Import public holidays from CSV and store them for reference during reporting.
+
+### Out of Scope for First Pass
+
+1. Payroll export.
+2. Per-project or per-client time allocation.
+3. Approval workflows.
+4. Recurring work-from-home schedules.
+
+## Functional Requirements
+
+### Entry Capture
+
+1. Users can create a work-from-home or leave entry for a selected date.
+2. Users can choose one of three entry types:
+   - Full day = 7.6 hours
+   - Half day = 3.8 hours
+   - Specific hours = editable numeric value
+3. The UI should prevent duplicate entries for the same date and category unless the product explicitly supports multiple entries per day later.
+4. The entry form should default to the current date and full day unless otherwise configured.
+
+### Views and Reporting
+
+1. Weekly view should show entries grouped by ISO week or a clearly documented week start convention.
+2. Monthly view should show entries grouped by month with totals.
+3. Each view should display:
+   - total WFH hours
+   - total leave hours
+   - number of WFH days
+   - number of leave days
+   - holiday overlap indicators where applicable
+4. Users should be able to move forward/backward by week or month.
+
+### Public Holiday Import
+
+1. Users can upload a CSV file containing public holiday dates.
+2. The import should validate required columns before saving.
+3. Imported holidays should be visible in the week/month views.
+4. The system should handle duplicate holiday rows safely.
+
+## Proposed Data Model
+
+### WorkFromHomeEntry
+
+- Id (GUID/UUID) - Primary Key
+- WorkDate (DateOnly or DateTime)
+- EntryType (FullDay, HalfDay, SpecificHours)
+- HoursWorked (decimal)
+- Notes (string, nullable)
+- IsDeleted (bool, optional if soft delete is needed)
+- CreatedAt (DateTime)
+- UpdatedAt (DateTime)
+
+### LeaveEntry
+
+- Id (GUID/UUID) - Primary Key
+- LeaveDate (DateOnly or DateTime)
+- EntryType (FullDay, HalfDay, SpecificHours)
+- HoursWorked (decimal)
+- Notes (string, nullable)
+- IsDeleted (bool, optional if soft delete is needed)
+- CreatedAt (DateTime)
+- UpdatedAt (DateTime)
+
+### PublicHoliday
+
+- Id (GUID/UUID) - Primary Key
+- HolidayDate (DateOnly or DateTime)
+- Name (string)
+- Source (string, nullable)
+- IsImported (bool)
+- CreatedAt (DateTime)
+
+#### Seed Data
+
+Seed the initial public holiday records with the following known holidays:
+
+- New Year's Day - Thursday 1 January 2026
+- New Year's Day - Friday 1 January 2027
+- Australia Day - Monday 26 January 2026
+- Australia Day - Tuesday 26 January 2027
+- Good Friday - Friday 3 April 2026
+- Good Friday - Friday 26 March 2027
+- Easter Saturday - Saturday 4 April 2026
+- Easter Saturday - Saturday 27 March 2027
+- Easter Sunday - Sunday 5 April 2026
+- Easter Sunday - Sunday 28 March 2027
+- Easter Monday - Monday 6 April 2026
+- Easter Monday - Monday 29 March 2027
+- Anzac Day - Saturday 25 April 2026
+- Anzac Day - Sunday 25 April 2027
+- Additional Day - Monday 27 April 2026
+- Additional Day - Monday 26 April 2027
+- King's Birthday - Monday 8 June 2026
+- King's Birthday - Monday 14 June 2027
+- Bank Holiday - Monday 3 August 2026
+- Bank Holiday - Monday 2 August 2027
+- Labour Day - Monday 5 October 2026
+- Labour Day - Monday 4 October 2027
+- Christmas Day - Friday 25 December 2026
+- Christmas Day - Saturday 25 December 2027
+- Additional Day - Monday 27 December 2027
+- Boxing Day - Saturday 26 December 2026
+- Boxing Day - Sunday 26 December 2027
+- Additional Day - Monday 28 December 2026
+- Additional Day - Tuesday 28 December 2027
+
+## Business Rules
+
+1. Full day always resolves to 7.6 hours.
+2. Half day always resolves to 3.8 hours.
+3. Specific hours must be greater than 0 and should probably cap at a sensible daily maximum.
+4. Public holiday dates should not be counted as regular WFH or leave days in summaries unless the product defines a special rule later.
+5. CSV import should reject invalid dates and missing mandatory columns.
+
+## API Shape
+
+### WFH Entries
+
+- GET /api/work-from-home
+- GET /api/work-from-home/{id}
+- POST /api/work-from-home
+- PUT /api/work-from-home/{id}
+- DELETE /api/work-from-home/{id}
+- GET /api/work-from-home/summary?view=week|month&date=YYYY-MM-DD
+
+### Leave Entries
+
+- GET /api/leave
+- GET /api/leave/{id}
+- POST /api/leave
+- PUT /api/leave/{id}
+- DELETE /api/leave/{id}
+- GET /api/leave/summary?view=week|month&date=YYYY-MM-DD
+
+### Holiday Import
+
+- GET /api/public-holidays
+- POST /api/public-holidays/import
+- DELETE /api/public-holidays/{id}
+
+## Frontend Features
+
+1. Add a WFH entry form with date picker and entry type selector.
+2. Add a leave entry form with the same day-part options.
+3. Add a weekly/monthly summary page with navigation controls.
+4. Highlight public holidays in the summary views.
+5. Add a CSV import screen or dialog for holiday files.
+6. Show validation feedback for duplicate dates, invalid hours, and bad CSV rows.
+
+## Implementation Phases
+
+### Phase 1 - Domain and Persistence
+
+1. Add WFH entry and public holiday entities.
+2. Add leave entry entity.
+3. Add persistence and migrations.
+4. Add validation rules for hours and dates.
+
+### Phase 2 - Application Use Cases
+
+1. Add create/update/delete/query services for WFH entries.
+2. Add create/update/delete/query services for leave entries.
+3. Add summary queries for week and month views.
+4. Add holiday import use case with CSV parsing and validation.
+
+### Phase 3 - API and UI
+
+1. Add controllers and DTOs.
+2. Add frontend screens and components.
+3. Wire up weekly/monthly navigation and holiday highlighting.
+
+### Phase 4 - Testing
+
+1. Unit test hour conversion and validation rules.
+2. Integration test summary queries and CSV import.
+3. Add UI-level coverage for entry creation and report views.
+
+## Risks and Mitigations
+
+1. Risk: ambiguous week boundaries.
+   Mitigation: define and document the week start rule before implementation.
+2. Risk: CSV files vary in column naming and date format.
+   Mitigation: support one strict template first and document it clearly.
+3. Risk: reporting logic becomes inconsistent with holiday handling.
+   Mitigation: centralize summary calculations in the application layer.
+
+## Acceptance Criteria
+
+1. Users can record WFH entries as full day, half day, or specific hours.
+2. Weekly and monthly views display totals correctly.
+3. Public holidays can be imported from CSV and shown in reports.
+4. Invalid dates, hours, and CSV rows are rejected with clear feedback.
+
+## Next Actions
+
+1. Confirm whether the feature should live inside the current tax tracker app or as a separate module.
+2. Confirm the CSV column template for public holidays.
+3. Decide whether duplicate entries per day are allowed.
+4. Add the first domain entities and DTOs once the rules are locked down.
+
+## Phased Implementation Backlog
+
+Use this section as the delivery backlog for the same feature set described above.
+
+### Backlog Rules
+
+1. Keep full-day hours at 7.6.
+2. Keep half-day hours at 3.8.
+3. Treat specific-hours entries as user-entered decimal hours.
+4. Treat public holiday import as a separate capability with its own validation and storage.
+5. Build summaries on top of the saved entries and holiday data, not by duplicating logic in the UI.
+6. Apply the same full-day, half-day, and specific-hours rules to both WFH and leave.
+
+### Phase 1 - Domain and Persistence Foundation
+
+#### Goal
+
+Create the core data model and storage foundation for WFH entries, leave entries, and public holidays.
+
+#### Backlog Items
+
+- [ ] Define `WorkFromHomeEntry` domain entity.
+- [ ] Define `LeaveEntry` domain entity.
+- [ ] Define `PublicHoliday` domain entity.
+- [ ] Add value rules for entry type and hours conversion.
+- [ ] Decide whether duplicate entries per day are allowed.
+- [ ] Add EF Core mappings and migrations for WFH entries.
+- [ ] Add EF Core mappings and migrations for leave entries.
+- [ ] Add EF Core mappings and migrations for public holidays.
+- [ ] Add repository abstractions or application ports for WFH entries.
+- [ ] Add repository abstractions or application ports for leave entries.
+- [ ] Add repository abstractions or application ports for public holidays.
+- [ ] Add seed/sample holiday data only if required for local development.
+
+#### Exit Criteria
+
+- Core entities persist successfully.
+- A WFH entry can be created and retrieved from storage.
+- A leave entry can be created and retrieved from storage.
+- A public holiday can be saved and retrieved from storage.
+
+### Phase 2 - Entry Management Use Cases
+
+#### Goal
+
+Expose application use cases for creating and managing WFH and leave entries.
+
+#### Backlog Items
+
+- [ ] Add create WFH entry command and handler/service.
+- [ ] Add update WFH entry command and handler/service.
+- [ ] Add delete WFH entry command and handler/service.
+- [ ] Add get-by-id query for WFH entries.
+- [ ] Add list/query support for WFH entries within a date range.
+- [ ] Enforce one WFH entry per date if that rule is confirmed.
+- [ ] Validate full day, half day, and specific-hours WFH inputs.
+- [ ] Add create leave command and handler/service.
+- [ ] Add update leave command and handler/service.
+- [ ] Add delete leave command and handler/service.
+- [ ] Add get-by-id query for leave entries.
+- [ ] Add list/query support for leave entries within a date range.
+- [ ] Enforce one leave entry per date if that rule is confirmed.
+- [ ] Validate full day, half day, and specific-hours leave inputs.
+- [ ] Add unit tests for hour conversion and validation rules.
+
+#### Exit Criteria
+
+- Users can create, edit, delete, and retrieve WFH entries.
+- Users can create, edit, delete, and retrieve leave entries.
+- Invalid dates and invalid hours are rejected before persistence.
+
+### Phase 3 - Weekly and Monthly Reporting
+
+#### Goal
+
+Add summary views that let users review WFH and leave time by week and month.
+
+#### Backlog Items
+
+- [ ] Define week grouping convention and document it.
+- [ ] Add weekly summary query.
+- [ ] Add monthly summary query.
+- [ ] Add totals for WFH hours and WFH days recorded.
+- [ ] Add totals for leave hours and leave days recorded.
+- [ ] Add holiday markers in summary results.
+- [ ] Add previous/next period navigation inputs to summary queries.
+- [ ] Add integration tests for weekly and monthly rollups.
+
+#### Exit Criteria
+
+- Weekly and monthly summaries return correct totals.
+- Holiday dates are visible in summary output.
+- Leave summaries return correct totals.
+
+### Phase 4 - Public Holiday CSV Import
+
+#### Goal
+
+Allow users to import public holidays from CSV and reuse that data in reporting.
+
+#### Backlog Items
+
+- [ ] Define the CSV column template.
+- [ ] Add import command or endpoint for holiday CSV upload.
+- [ ] Parse CSV rows and validate required columns.
+- [ ] Validate holiday date formats and reject malformed rows.
+- [ ] Deduplicate duplicate holiday rows safely.
+- [ ] Store imported holidays with a source label if useful.
+- [ ] Add tests for valid imports, invalid rows, and duplicates.
+
+#### Exit Criteria
+
+- A CSV file can be imported successfully.
+- Bad input returns clear validation feedback.
+
+### Phase 5 - API and Frontend Delivery
+
+#### Goal
+
+Expose the feature through the API and Angular UI.
+
+#### Backlog Items
+
+- [ ] Add WFH entry DTOs and controller endpoints.
+- [ ] Add leave DTOs and controller endpoints.
+- [ ] Add holiday import DTOs and controller endpoints.
+- [ ] Add WFH entry form with date picker and entry type selector.
+- [ ] Add leave entry form with date picker and entry type selector.
+- [ ] Add weekly/monthly summary page or panel.
+- [ ] Add CSV import screen or dialog for holidays.
+- [ ] Highlight public holidays in the UI.
+- [ ] Add form validation and error messaging.
+- [ ] Add smoke tests or lightweight UI coverage for the main flows.
+
+#### Exit Criteria
+
+- Users can complete the full WFH and leave workflow from the UI.
+- API contracts are stable and documented.
+
+### Phase 6 - Hardening and Polish
+
+#### Goal
+
+Stabilize the feature with edge-case handling and usability improvements.
+
+#### Backlog Items
+
+- [ ] Confirm how holidays affect totals and display logic.
+- [ ] Confirm whether leave and WFH share the same summary views or separate views.
+- [ ] Decide whether notes are required or optional.
+- [ ] Add empty-state handling for no entries and no holidays.
+- [ ] Add paging or filtering if the data volume grows.
+- [ ] Review date handling for time zone consistency.
+- [ ] Add documentation for the CSV template and week/month rules.
+
+#### Exit Criteria
+
+- Feature behavior is documented and predictable.
+- Common edge cases are handled without ambiguity.

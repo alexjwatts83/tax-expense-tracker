@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plans", "Plans", "{9C8E99A0-2B68-43F6-8C40-1F7924F4E605}"
 	ProjectSection(SolutionItems) = preProject
 		plans\TAX_EXPENSE_TRACKER_PLAN.md = plans\TAX_EXPENSE_TRACKER_PLAN.md
+		plans\WORK_FROM_HOME_PLAN.md = plans\WORK_FROM_HOME_PLAN.md
 		plans\skills\README.md = plans\skills\README.md
 		plans\skills\azure-deployment\SKILL.md = plans\skills\azure-deployment\SKILL.md
 		plans\skills\backend\SKILL.md = plans\skills\backend\SKILL.md

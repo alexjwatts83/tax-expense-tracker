@@ -16,6 +16,13 @@ Tax Expense Tracker is a full-stack app for managing tax-deductible expenses wit
 - TaxExpense.Item removed end-to-end from domain, API, frontend models, and DB schema
 - Local run automation scripts with robust port handling
 
+## Planned Enhancements
+
+- Work-from-home and leave tracking with full-day, half-day, and specific-hours entry modes
+- Weekly and monthly views for work-from-home and leave summaries
+- Public holiday CSV import and seeded public holiday reference data
+- Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
+
 ## Tech Stack
 
 ### Backend
