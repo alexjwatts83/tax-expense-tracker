@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
-import { DayEntrySummary, DayEntryType, LeaveEntry } from '../../models/api.models';
+import { DayEntrySummary, DayEntryType, LeaveEntry, LeaveType } from '../../models/api.models';
 import { LeaveService } from '../../services/leave';
 import { toLocalDateInputValue } from '../../utils/date';
 
@@ -35,12 +35,16 @@ export class LeaveManagement implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly displayedColumns: string[] = ['leaveDate', 'entryType', 'hoursWorked', 'notes', 'actions'];
+  readonly displayedColumns: string[] = ['leaveDate', 'leaveType', 'entryType', 'hoursWorked', 'notes', 'actions'];
   readonly pageSizes = [10, 20, 50];
   readonly entryTypeOptions = [
     { value: DayEntryType.FullDay, label: 'Full Day' },
     { value: DayEntryType.HalfDay, label: 'Half Day' },
     { value: DayEntryType.SpecificHours, label: 'Specific Hours' },
+  ];
+  readonly leaveTypeOptions = [
+    { value: LeaveType.Annual, label: 'Annual Leave' },
+    { value: LeaveType.Sick, label: 'Sick Leave' },
   ];
   readonly summaryViewOptions = [
     { value: 'week', label: 'Week' },
@@ -49,6 +53,7 @@ export class LeaveManagement implements OnInit {
 
   readonly entryForm = this.formBuilder.group({
     leaveDate: [this.today(), Validators.required],
+    leaveType: [LeaveType.Annual, Validators.required],
     entryType: [DayEntryType.FullDay, Validators.required],
     specificHours: [null as number | null],
     notes: [''],
@@ -156,6 +161,7 @@ export class LeaveManagement implements OnInit {
     this.leaveService
       .create({
         leaveDate: value.leaveDate ?? this.today(),
+        leaveType: value.leaveType ?? LeaveType.Annual,
         entryType: value.entryType ?? DayEntryType.FullDay,
         specificHours: value.entryType === DayEntryType.SpecificHours ? value.specificHours : null,
         notes: value.notes?.trim() || null,
@@ -172,6 +178,7 @@ export class LeaveManagement implements OnInit {
           this.updatePagedEntries();
           this.entryForm.patchValue({
             leaveDate: this.today(),
+            leaveType: LeaveType.Annual,
             entryType: DayEntryType.FullDay,
             specificHours: null,
             notes: '',
@@ -236,6 +243,10 @@ export class LeaveManagement implements OnInit {
 
   formatEntryType(entryType: DayEntryType): string {
     return this.entryTypeOptions.find((x) => x.value === entryType)?.label ?? 'Unknown';
+  }
+
+  formatLeaveType(leaveType: LeaveType): string {
+    return this.leaveTypeOptions.find((x) => x.value === leaveType)?.label ?? 'Unknown';
   }
 
   applyFilters(): void {

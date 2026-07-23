@@ -1,10 +1,14 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TaxExpenseTracker.Infrastructure.Data;
 
 #nullable disable
 
 namespace TaxExpenseTracker.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260723110000_AddLeaveTypeToLeaveEntries")]
     public partial class AddLeaveTypeToLeaveEntries : Migration
     {
         /// <inheritdoc />

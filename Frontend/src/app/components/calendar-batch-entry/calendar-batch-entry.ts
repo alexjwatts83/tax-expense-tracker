@@ -15,6 +15,7 @@ import {
   DayEntryType,
   LeaveEntry,
   LeaveBatchCreateResult,
+  LeaveType,
   WorkLocationType,
   WorkLocationEntry,
   WorkLocationBatchCreateResult,
@@ -35,6 +36,8 @@ interface CalendarDayRowVm {
   originalEntryType: DayEntryType;
   specificHours: number | null;
   originalSpecificHours: number | null;
+  leaveType: LeaveType;
+  originalLeaveType: LeaveType;
   leaveId: string | null;
   workLocationId: string | null;
   isHoliday: boolean;
@@ -75,6 +78,11 @@ export class CalendarBatchEntry implements OnInit {
     { value: DayEntryType.FullDay, label: 'Full Day' },
     { value: DayEntryType.HalfDay, label: 'Half Day' },
     { value: DayEntryType.SpecificHours, label: 'Specific Hours' },
+  ];
+
+  readonly leaveTypeOptions = [
+    { value: LeaveType.Annual, label: 'Annual Leave' },
+    { value: LeaveType.Sick, label: 'Sick Leave' },
   ];
 
   readonly categoryOptions: Array<{ value: DayCategory; label: string }> = [
@@ -169,6 +177,7 @@ export class CalendarBatchEntry implements OnInit {
       row.category = row.originalCategory;
       row.entryType = row.originalEntryType;
       row.specificHours = row.originalSpecificHours;
+      row.leaveType = row.originalLeaveType;
     }
 
     this.infoMessage = 'All pending changes were reverted.';
@@ -201,8 +210,16 @@ export class CalendarBatchEntry implements OnInit {
     if (category === 'none') {
       row.entryType = DayEntryType.FullDay;
       row.specificHours = null;
+      row.leaveType = row.originalLeaveType;
+    } else if (category === 'leave' && row.originalCategory !== 'leave') {
+      row.leaveType = LeaveType.Annual;
     }
 
+    this.clearRowResult(row);
+  }
+
+  onLeaveTypeChange(row: CalendarDayRowVm, leaveType: LeaveType): void {
+    row.leaveType = leaveType;
     this.clearRowResult(row);
   }
 
@@ -314,6 +331,7 @@ export class CalendarBatchEntry implements OnInit {
         row,
         payload: {
           leaveDate: row.dateIso,
+          leaveType: row.leaveType,
           entryType: row.entryType,
           specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
           notes: null,
@@ -355,6 +373,7 @@ export class CalendarBatchEntry implements OnInit {
         id: row.leaveId as string,
         payload: {
           leaveDate: row.dateIso,
+          leaveType: row.leaveType,
           entryType: row.entryType,
           specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
           notes: null,
@@ -604,7 +623,9 @@ export class CalendarBatchEntry implements OnInit {
     const toDate = this.toDateIso(this.endOfMonth(this.monthAnchor));
 
     forkJoin({
-      holidays: this.publicHolidayService.getAll({ fromDate, toDate }),
+      holidays: this.publicHolidayService.getAll({ fromDate, toDate }).pipe(
+        catchError(() => of([])),
+      ),
       leave: this.leaveService.getAll({ fromDate, toDate }),
       wfh: this.workLocationService.getAll({ fromDate, toDate }),
     })
@@ -628,13 +649,8 @@ export class CalendarBatchEntry implements OnInit {
           this.rows = this.buildWeekdayRows(this.monthAnchor, holidayMap, leaveByDate, wfhByDate);
         },
         error: () => {
-          this.rows = this.buildWeekdayRows(
-            this.monthAnchor,
-            new Map<string, string>(),
-            new Map<string, LeaveEntry>(),
-            new Map<string, WorkLocationEntry>(),
-          );
-          this.errorMessage = 'Unable to load public holidays. Holiday day-locking may be incomplete until API is available.';
+          this.rows = [];
+          this.errorMessage = 'Unable to load calendar entries.';
         },
       });
   }
@@ -670,6 +686,7 @@ export class CalendarBatchEntry implements OnInit {
         originalEntryType === DayEntryType.SpecificHours
           ? (leaveEntry?.hoursWorked ?? wfhEntry?.hoursWorked ?? null)
           : null;
+      const originalLeaveType = leaveEntry?.leaveType ?? LeaveType.Annual;
 
       rows.push({
         dateIso,
@@ -681,6 +698,8 @@ export class CalendarBatchEntry implements OnInit {
         originalEntryType,
         specificHours: originalSpecificHours,
         originalSpecificHours,
+        leaveType: originalLeaveType,
+        originalLeaveType,
         leaveId: leaveEntry?.id ?? null,
         workLocationId: wfhEntry?.id ?? null,
         isHoliday: Boolean(holidayName),
@@ -757,6 +776,10 @@ export class CalendarBatchEntry implements OnInit {
 
     if (row.entryType === DayEntryType.SpecificHours) {
       return row.specificHours !== row.originalSpecificHours;
+    }
+
+    if (row.category === 'leave' && row.leaveType !== row.originalLeaveType) {
+      return true;
     }
 
     return false;
@@ -838,6 +861,7 @@ export class CalendarBatchEntry implements OnInit {
     row.originalCategory = row.category;
     row.originalEntryType = row.entryType;
     row.originalSpecificHours = row.entryType === DayEntryType.SpecificHours ? row.specificHours : null;
+    row.originalLeaveType = row.leaveType;
 
     if (row.category === 'none') {
       row.leaveId = null;

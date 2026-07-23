@@ -37,6 +37,24 @@ public class LeaveServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_UsesProvidedLeaveType_WhenSpecified()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var entry = LeaveEntry.Create(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        repository.Entries.Add(entry);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var updated = await service.UpdateAsync(
+            entry.Id,
+            new UpdateLeaveCommand(new DateTime(2026, 3, 11), DayEntryType.HalfDay, null, null, LeaveType.Sick));
+
+        Assert.True(updated);
+        Assert.Equal(LeaveType.Sick, entry.LeaveType);
+        Assert.Equal(new DateTime(2026, 3, 11), entry.LeaveDate);
+    }
+
+    [Fact]
     public async Task CreateAsync_UsesHalfDayHours_WhenEntryTypeHalfDay()
     {
         var repository = new InMemoryLeaveRepository();
@@ -284,6 +302,25 @@ public class LeaveServiceTests
         Assert.Equal(0, result.SkippedCount);
         Assert.Equal(0, result.FailedCount);
         Assert.Empty(result.Results);
+    }
+
+    [Fact]
+    public async Task BatchCreateAsync_UsesProvidedLeaveType_ForCreatedEntry()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateLeaveCommand(new DateTime(2026, 4, 9), DayEntryType.FullDay, null, null, LeaveType.Sick),
+        ]);
+
+        Assert.Single(result.Results);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(LeaveType.Sick, result.Results[0].LeaveType);
+        Assert.Single(repository.Entries);
+        Assert.Equal(LeaveType.Sick, repository.Entries[0].LeaveType);
     }
 
     [Fact]

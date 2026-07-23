@@ -85,6 +85,20 @@
 												</mat-radio-group>
 											</div>
 
+										@if (!dayCell.isHoliday && dayCell.category === 'leave') {
+											<mat-form-field appearance="outline">
+												<mat-label>Leave Type</mat-label>
+												<mat-select
+													[value]="dayCell.leaveType"
+													(selectionChange)="onLeaveTypeChange(dayCell, $event.value)"
+													[attr.aria-label]="'Leave type for ' + dayCell.dayLabel">
+													@for (option of leaveTypeOptions; track option.value) {
+														<mat-option [value]="option.value">{{ option.label }}</mat-option>
+													}
+												</mat-select>
+											</mat-form-field>
+										}
+
 											<mat-form-field appearance="outline">
 												<mat-label>Entry Type</mat-label>
 												<mat-select

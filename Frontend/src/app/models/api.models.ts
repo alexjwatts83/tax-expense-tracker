@@ -86,6 +86,11 @@ export enum DayEntryType {
   SpecificHours = 3,
 }
 
+export enum LeaveType {
+  Annual = 1,
+  Sick = 2,
+}
+
 export enum WorkLocationType {
   Wfh = 1,
   Office = 2,
@@ -157,6 +162,7 @@ export interface WorkLocationBatchCreateResult {
 export interface LeaveEntry {
   id: string;
   leaveDate: string;
+  leaveType: LeaveType;
   entryType: DayEntryType;
   hoursWorked: number;
   notes?: string | null;
@@ -166,6 +172,7 @@ export interface LeaveEntry {
 
 export interface CreateLeaveRequest {
   leaveDate: string;
+  leaveType: LeaveType;
   entryType: DayEntryType;
   specificHours?: number | null;
   notes?: string | null;
@@ -177,6 +184,7 @@ export interface LeaveBatchCreateRequest {
 
 export interface LeaveBatchItemResult {
   leaveDate: string;
+  leaveType: LeaveType;
   entryType: DayEntryType;
   specificHours?: number | null;
   notes?: string | null;

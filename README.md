@@ -148,6 +148,11 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - POST /api/leave/{id}/restore
 - GET /api/leave/summary?view=week|month&date=YYYY-MM-DD
 
+`/api/leave` payloads include a `leaveType` field:
+
+- `1` = Annual Leave
+- `2` = Sick Leave
+
 ### Public Holidays
 
 - GET /api/public-holidays

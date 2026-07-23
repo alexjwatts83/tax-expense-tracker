@@ -18,8 +18,8 @@ This should mirror how Work Location evolved to support multiple types (WFH and 
 1. Phase 1 - Domain Model and Contracts: Complete
 2. Phase 2 - Application and API Integration: Complete
 3. Phase 3 - Persistence and Migration: Complete
-4. Phase 4 - Frontend UX and Models: Not Started
-5. Phase 5 - Tests, Validation, and Documentation: Not Started
+4. Phase 4 - Frontend UX and Models: In Progress
+5. Phase 5 - Tests, Validation, and Documentation: In Progress
 
 ## Progress Tracking
 
@@ -27,6 +27,8 @@ This should mirror how Work Location evolved to support multiple types (WFH and 
 | --- | --- | --- | --- | --- |
 | 2026-07-23 | Team | Plan created with end-to-end change scope and rollout steps. | Planning | Complete |
 | 2026-07-23 | Copilot | Implemented LeaveType through domain, API, and migration layers; backend build and unit tests passed. | Backend | Complete |
+| 2026-07-23 | Copilot | Added frontend LeaveType model, leave form selector, leave list column, and calendar batch leave type handling. | Frontend | In Progress |
+| 2026-07-23 | Copilot | Added/updated backend leave service unit coverage for explicit LeaveType create, update, and batch flows; targeted unit tests and frontend build passed. | Validation | In Progress |
 
 ## Proposed Design
 
@@ -129,12 +131,17 @@ Exit Criteria:
 
 ### Phase 4 - Frontend UX and Models
 
-Status: [ ] Not Started
+Status: [~] In Progress
 
 1. Add LeaveType enum/type to frontend models.
 2. Add Leave Type selector to leave-management form.
 3. Display Leave Type in leave list/table.
 4. Include LeaveType in calendar batch leave payloads.
+
+Progress:
+1. Frontend shared models now include LeaveType.
+2. Leave management exposes Leave Type in the form and table.
+3. Calendar batch leave rows carry LeaveType through create/update payloads.
 
 Exit Criteria:
 1. User can create/edit Annual and Sick leave entries.
@@ -142,12 +149,17 @@ Exit Criteria:
 
 ### Phase 5 - Tests, Validation, and Documentation
 
-Status: [ ] Not Started
+Status: [~] In Progress
 
 1. Add/update unit tests for domain and service behavior with both leave types.
 2. Run backend build + unit tests + integration tests.
 3. Run frontend build and manual smoke checks.
 4. Update README and relevant plans after implementation.
+
+Progress:
+1. Backend unit tests now cover explicit LeaveType create, update, and batch cases.
+2. Frontend build passes.
+3. Manual smoke checks and README updates remain.
 
 Exit Criteria:
 1. All tests and builds pass.
