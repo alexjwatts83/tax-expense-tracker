@@ -2,7 +2,7 @@
 
 Tax Expense Tracker is a full-stack app for managing tax-deductible expenses with soft-delete safety, filtering, and summary reporting.
 
-It also has a documented roadmap for work-location (WFH/Office), leave, and public-holiday tracking in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md).
+It also has documented planning for work-location (WFH/Office), leave, and public-holiday tracking in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md), with rename delivery tracked in [plans/WORK_LOCATION_RENAME_PLAN.md](plans/WORK_LOCATION_RENAME_PLAN.md).
 
 ## Implemented Highlights
 
@@ -249,6 +249,7 @@ Recent schema updates:
 - `20260722044559_RemoveExpenseItem` (removed Item column from TaxExpenses)
 - `20260723003927_AddWfhLeaveAndPublicHolidays` (added WFH/leave/public-holiday tables and holiday seed data)
 - `20260723044046_AddWorkLocationToWorkFromHome` (added `WorkLocation` column to work-location entries for WFH/Office support)
+- `20260723050557_RenameWorkFromHomeEntriesToWorkLocationEntries` (renamed work-location table and primary key to canonical naming)
 
 ## Status
 
