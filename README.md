@@ -26,12 +26,14 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Shared entity base abstractions introduced (`IEntity`, `Entity`, `SoftDeletableEntity`, `AuditableEntity`, `AuditableSoftDeletableEntity`)
 - Shared generic repository abstractions introduced (`IRepository<T>`, `ISoftDeleteRepository<T>`)
 - Domain guard clauses standardized with `ThrowIfNullOrWhiteSpace` and `ThrowIfEqual`
+- Domain/application clock handling standardized on required `TimeProvider`
+- Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
 
 ## Planned Enhancements
 
 - Holiday overlap markers in weekly/monthly summaries
 - Angular screens for work-from-home and leave entry management
-- Public holiday CSV import workflow and validation
+- Public holiday CSV import UI workflow
 - Duplicate-entry-per-day business rule finalization and enforcement
 - Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
 
@@ -140,6 +142,14 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - GET /api/public-holidays?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
 - POST /api/public-holidays/import (multipart/form-data file upload)
 
+Current public holiday CSV rules:
+
+- Required headers: `Date`, `Name`
+- Accepted header aliases: `HolidayDate`, `Holiday_Date`, `HolidayName`, `Holiday_Name`
+- Accepted date formats: `yyyy-MM-dd`, `dd/MM/yyyy`, `d/M/yyyy`, `yyyy/M/d`
+- Duplicate rows in the same file are skipped
+- Existing rows with the same date and name are skipped
+
 Current filter query params:
 
 - date (single day)
@@ -240,6 +250,7 @@ Recent schema updates:
 - Bank entity refactor completed end-to-end (backend, frontend, migration, tests)
 - Expense Item field removed end-to-end (backend, frontend, migration, tests)
 - Domain and repository abstraction refactors completed (shared entity and repository interfaces)
-- Unit tests passing: 37/37
+- TimeProvider refactor completed across domain and application services
+- Unit tests passing: 42/42
 
 Open work remains across phases 3-6, focused on reporting, CSV import, API/frontend delivery, and hardening.

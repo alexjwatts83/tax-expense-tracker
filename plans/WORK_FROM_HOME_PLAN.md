@@ -164,26 +164,30 @@ Seed the initial public holiday records with the following known holidays:
 ### WFH Entries
 
 - GET /api/work-from-home
+- GET /api/work-from-home?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
 - GET /api/work-from-home/{id}
 - POST /api/work-from-home
 - PUT /api/work-from-home/{id}
 - DELETE /api/work-from-home/{id}
+- POST /api/work-from-home/{id}/restore
 - GET /api/work-from-home/summary?view=week|month&date=YYYY-MM-DD
 
 ### Leave Entries
 
 - GET /api/leave
+- GET /api/leave?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
 - GET /api/leave/{id}
 - POST /api/leave
 - PUT /api/leave/{id}
 - DELETE /api/leave/{id}
+- POST /api/leave/{id}/restore
 - GET /api/leave/summary?view=week|month&date=YYYY-MM-DD
 
 ### Holiday Import
 
 - GET /api/public-holidays
+- GET /api/public-holidays?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
 - POST /api/public-holidays/import
-- DELETE /api/public-holidays/{id}
 
 ## Frontend Features
 
@@ -240,11 +244,11 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Next Actions
 
-1. Implement API controllers and DTOs for WFH and leave.
-2. Implement weekly/monthly summary queries and API endpoints.
-3. Define and implement the public holiday CSV template and import endpoint.
-4. Finalize and enforce duplicate-entry-per-day rules.
-5. Deliver Angular UI flows for WFH/leave entry and summary views.
+1. Add holiday markers into WFH and leave summary responses.
+2. Add integration tests for summary queries and public holiday import endpoints.
+3. Finalize and enforce duplicate-entry-per-day rules.
+4. Deliver Angular UI flows for WFH/leave entry, summary views, and holiday import.
+5. Decide how holidays affect totals versus display-only markers.
 
 ## Phased Implementation Backlog
 
@@ -277,7 +281,7 @@ Create the core data model and storage foundation for WFH entries, leave entries
 - [x] Add EF Core mappings and migrations for public holidays.
 - [x] Add repository abstractions or application ports for WFH entries.
 - [x] Add repository abstractions or application ports for leave entries.
-- [ ] Add repository abstractions or application ports for public holidays.
+- [x] Add repository abstractions or application ports for public holidays.
 - [x] Add seed/sample holiday data only if required for local development.
 
 #### Exit Criteria
@@ -371,7 +375,7 @@ Expose the feature through the API and Angular UI.
 
 - [x] Add WFH entry DTOs and controller endpoints.
 - [x] Add leave DTOs and controller endpoints.
-- [ ] Add holiday import DTOs and controller endpoints.
+- [x] Add holiday import DTOs and controller endpoints.
 - [ ] Add WFH entry form with date picker and entry type selector.
 - [ ] Add leave entry form with date picker and entry type selector.
 - [ ] Add weekly/monthly summary page or panel.
