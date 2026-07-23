@@ -48,6 +48,42 @@ public class WorkFromHomeController(IWorkFromHomeService workFromHomeService) : 
         return CreatedAtAction(nameof(GetById), new { id = entry.Id }, MapWorkFromHome(entry));
     }
 
+    [HttpPost("batch")]
+    public async Task<ActionResult<WorkFromHomeBatchResultDto>> BatchCreate(
+        CreateWorkFromHomeBatchDto request,
+        CancellationToken cancellationToken)
+    {
+        var commands = (request.Items ?? [])
+            .Select(x => new CreateWorkFromHomeCommand(
+                x.WorkDate,
+                x.EntryType,
+                x.SpecificHours,
+                x.Notes))
+            .ToList();
+
+        var result = await workFromHomeService.BatchCreateAsync(commands, cancellationToken);
+
+        return Ok(new WorkFromHomeBatchResultDto
+        {
+            TotalRequested = result.TotalRequested,
+            CreatedCount = result.CreatedCount,
+            SkippedCount = result.SkippedCount,
+            FailedCount = result.FailedCount,
+            Results = result.Results
+                .Select(x => new WorkFromHomeBatchItemResultDto
+                {
+                    WorkDate = x.WorkDate,
+                    EntryType = x.EntryType,
+                    SpecificHours = x.SpecificHours,
+                    Notes = x.Notes,
+                    Status = x.Status,
+                    Message = x.Message,
+                    Entry = x.Entry is null ? null : MapWorkFromHome(x.Entry),
+                })
+                .ToList(),
+        });
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<WorkFromHomeDto>> Update(Guid id, CreateWorkFromHomeDto request, CancellationToken cancellationToken)
     {

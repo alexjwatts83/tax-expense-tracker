@@ -48,6 +48,42 @@ public class LeaveController(ILeaveService leaveService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = entry.Id }, MapLeave(entry));
     }
 
+    [HttpPost("batch")]
+    public async Task<ActionResult<LeaveBatchResultDto>> BatchCreate(
+        CreateLeaveBatchDto request,
+        CancellationToken cancellationToken)
+    {
+        var commands = (request.Items ?? [])
+            .Select(x => new CreateLeaveCommand(
+                x.LeaveDate,
+                x.EntryType,
+                x.SpecificHours,
+                x.Notes))
+            .ToList();
+
+        var result = await leaveService.BatchCreateAsync(commands, cancellationToken);
+
+        return Ok(new LeaveBatchResultDto
+        {
+            TotalRequested = result.TotalRequested,
+            CreatedCount = result.CreatedCount,
+            SkippedCount = result.SkippedCount,
+            FailedCount = result.FailedCount,
+            Results = result.Results
+                .Select(x => new LeaveBatchItemResultDto
+                {
+                    LeaveDate = x.LeaveDate,
+                    EntryType = x.EntryType,
+                    SpecificHours = x.SpecificHours,
+                    Notes = x.Notes,
+                    Status = x.Status,
+                    Message = x.Message,
+                    Entry = x.Entry is null ? null : MapLeave(x.Entry),
+                })
+                .ToList(),
+        });
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<LeaveDto>> Update(Guid id, CreateLeaveDto request, CancellationToken cancellationToken)
     {

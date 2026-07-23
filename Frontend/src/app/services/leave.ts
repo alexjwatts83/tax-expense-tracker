@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
 	CreateLeaveRequest,
+	LeaveBatchCreateRequest,
+	LeaveBatchCreateResult,
 	DateRangeRequest,
 	DayEntrySummary,
 	LeaveEntry,
@@ -25,6 +27,10 @@ export class LeaveService {
 
 	create(payload: CreateLeaveRequest): Observable<LeaveEntry> {
 		return this.http.post<LeaveEntry>(this.apiUrl, payload);
+	}
+
+	createBatch(payload: LeaveBatchCreateRequest): Observable<LeaveBatchCreateResult> {
+		return this.http.post<LeaveBatchCreateResult>(`${this.apiUrl}/batch`, payload);
 	}
 
 	update(id: string, payload: CreateLeaveRequest): Observable<LeaveEntry> {

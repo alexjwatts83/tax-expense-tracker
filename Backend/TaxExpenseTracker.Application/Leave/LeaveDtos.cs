@@ -22,3 +22,19 @@ public sealed record UpdateLeaveCommand(
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes);
+
+public sealed record BatchCreateLeaveResult(
+    int TotalRequested,
+    int CreatedCount,
+    int SkippedCount,
+    int FailedCount,
+    IReadOnlyList<BatchCreateLeaveItemResult> Results);
+
+public sealed record BatchCreateLeaveItemResult(
+    DateTime LeaveDate,
+    DayEntryType EntryType,
+    decimal? SpecificHours,
+    string? Notes,
+    string Status,
+    string? Message,
+    LeaveReadDto? Entry);

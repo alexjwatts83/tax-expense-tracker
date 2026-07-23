@@ -20,7 +20,7 @@ Current WFH and Leave flows are entry-by-entry. Users need a faster way to plan 
 ### Current Progress Snapshot
 
 1. Phase 1 - UX Skeleton and Routing: [x] Complete
-2. Phase 2 - Batch API Contract: [ ] Not Started
+2. Phase 2 - Batch API Contract: [x] Complete
 3. Phase 3 - End-to-End Submission: [ ] Not Started
 4. Phase 4 - Quality and Hardening: [ ] Not Started
 
@@ -37,8 +37,8 @@ Current WFH and Leave flows are entry-by-entry. Users need a faster way to plan 
 2. [x] Month weekday renderer implemented (Monday-Friday only).
 3. [x] Per-day selector implemented (None/WFH/Leave).
 4. [x] Per-day entry type and hours validation implemented.
-5. [ ] Batch payload contract finalized.
-6. [ ] Batch API implemented and wired.
+5. [x] Batch payload contract finalized.
+6. [x] Batch API implemented and wired.
 7. [ ] Result summary and retry UX implemented.
 8. [ ] Frontend unit tests added.
 9. [ ] Backend unit tests added.
@@ -53,6 +53,7 @@ Use this section to log implementation updates in chronological order.
 | 2026-07-23 | Team | Plan created and tracking scaffold added. | Planning | Complete |
 | 2026-07-23 | Team | Product decisions confirmed for endpoint split, editable entries, public holiday lock, and Full Day default. | Planning | Complete |
 | 2026-07-23 | Team | Phase 1 started and completed: route + navbar link added, weekday calendar rows implemented, editable per-day state with Full Day default and specific-hours validation, holiday-lock behavior wired via holiday lookup. | Phase 1 | Complete |
+| 2026-07-23 | Team | Phase 2 completed: added separate WFH/Leave batch endpoints, batch DTO contracts, non-throwing mixed-result handling (created/skipped/failed), public holiday lock enforcement, and unit coverage for mixed batch outcomes. | Phase 2 | Complete |
 
 ## User Outcomes
 
@@ -249,7 +250,7 @@ Status: [x] Complete
 
 ### Phase 2 - Batch API Contract
 
-Status: [ ] Not Started
+Status: [x] Complete
 
 1. Implement separate batch endpoints for WFH and Leave.
 2. Implement DTOs and application command.

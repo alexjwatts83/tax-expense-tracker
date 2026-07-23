@@ -162,6 +162,34 @@ public class LeaveServiceTests
         Assert.Equal("Regional Holiday", summary.Holidays[1].Name);
     }
 
+    [Fact]
+    public async Task BatchCreateAsync_ReturnsMixedResults_ForCreatedSkippedAndFailedItems()
+    {
+        var repository = new InMemoryLeaveRepository();
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 14), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 13), "Public Holiday", "Seed", false, TestTime.TimeProvider));
+
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.HalfDay, null, null),
+            new CreateLeaveCommand(new DateTime(2026, 3, 13), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateTime(2026, 3, 14), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateTime(2026, 3, 15), DayEntryType.SpecificHours, null, null),
+        ]);
+
+        Assert.Equal(5, result.TotalRequested);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(2, result.SkippedCount);
+        Assert.Equal(2, result.FailedCount);
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate.Date == new DateTime(2026, 3, 12));
+        Assert.Contains(result.Results, x => x.Status == "FailedConflict" && x.LeaveDate.Date == new DateTime(2026, 3, 13));
+        Assert.Contains(result.Results, x => x.Status == "FailedValidation" && x.LeaveDate.Date == new DateTime(2026, 3, 15));
+    }
+
     private sealed class InMemoryPublicHolidayRepository : IPublicHolidayRepository
     {
         public List<PublicHoliday> Holidays { get; } = [];

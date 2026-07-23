@@ -6,6 +6,11 @@ namespace TaxExpenseTracker.Application.Leave;
 
 public sealed class LeaveService : ILeaveService
 {
+    private const string StatusCreated = "Created";
+    private const string StatusSkippedDuplicate = "SkippedDuplicate";
+    private const string StatusFailedValidation = "FailedValidation";
+    private const string StatusFailedConflict = "FailedConflict";
+
     private readonly ILeaveRepository _leaveRepository;
     private readonly IPublicHolidayRepository _publicHolidayRepository;
     private readonly TimeProvider _timeProvider;
@@ -59,6 +64,125 @@ public sealed class LeaveService : ILeaveService
         await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         return ToReadDto(entry);
+    }
+
+    public async Task<BatchCreateLeaveResult> BatchCreateAsync(
+        IReadOnlyList<CreateLeaveCommand> commands,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(commands);
+
+        if (commands.Count == 0)
+        {
+            return new BatchCreateLeaveResult(0, 0, 0, 0, []);
+        }
+
+        var minDate = commands.Min(x => x.LeaveDate).Date;
+        var maxDate = commands.Max(x => x.LeaveDate).Date;
+        var holidays = await _publicHolidayRepository.GetByDateRangeAsync(minDate, maxDate, cancellationToken);
+        var holidayDates = holidays
+            .Select(x => x.HolidayDate.Date)
+            .ToHashSet();
+
+        var seenDates = new HashSet<DateTime>();
+        var results = new List<BatchCreateLeaveItemResult>(commands.Count);
+        var createdCount = 0;
+        var skippedCount = 0;
+
+        foreach (var command in commands)
+        {
+            var leaveDate = command.LeaveDate.Date;
+
+            if (holidayDates.Contains(leaveDate))
+            {
+                results.Add(new BatchCreateLeaveItemResult(
+                    leaveDate,
+                    command.EntryType,
+                    command.SpecificHours,
+                    command.Notes,
+                    StatusFailedConflict,
+                    "Cannot create leave on a public holiday.",
+                    null));
+                continue;
+            }
+
+            if (!seenDates.Add(leaveDate))
+            {
+                skippedCount += 1;
+                results.Add(new BatchCreateLeaveItemResult(
+                    leaveDate,
+                    command.EntryType,
+                    command.SpecificHours,
+                    command.Notes,
+                    StatusSkippedDuplicate,
+                    "This batch already includes an entry for the same date.",
+                    null));
+                continue;
+            }
+
+            var existsForDate = await _leaveRepository.ExistsForDateAsync(leaveDate, cancellationToken: cancellationToken);
+            if (existsForDate)
+            {
+                skippedCount += 1;
+                results.Add(new BatchCreateLeaveItemResult(
+                    leaveDate,
+                    command.EntryType,
+                    command.SpecificHours,
+                    command.Notes,
+                    StatusSkippedDuplicate,
+                    "A leave entry already exists for this date.",
+                    null));
+                continue;
+            }
+
+            try
+            {
+                var entry = LeaveEntry.Create(leaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
+                await _leaveRepository.AddAsync(entry, cancellationToken);
+                await _leaveRepository.SaveChangesAsync(cancellationToken);
+
+                createdCount += 1;
+                results.Add(new BatchCreateLeaveItemResult(
+                    leaveDate,
+                    command.EntryType,
+                    command.SpecificHours,
+                    command.Notes,
+                    StatusCreated,
+                    null,
+                    ToReadDto(entry)));
+            }
+            catch (ArgumentException ex)
+            {
+                results.Add(new BatchCreateLeaveItemResult(
+                    leaveDate,
+                    command.EntryType,
+                    command.SpecificHours,
+                    command.Notes,
+                    StatusFailedValidation,
+                    ex.Message,
+                    null));
+            }
+            catch (InvalidOperationException ex)
+            {
+                results.Add(new BatchCreateLeaveItemResult(
+                    leaveDate,
+                    command.EntryType,
+                    command.SpecificHours,
+                    command.Notes,
+                    StatusFailedConflict,
+                    ex.Message,
+                    null));
+            }
+        }
+
+        var failedCount = results.Count - createdCount - skippedCount;
+
+        return new BatchCreateLeaveResult(
+            commands.Count,
+            createdCount,
+            skippedCount,
+            failedCount,
+            results);
     }
 
     public async Task<bool> UpdateAsync(Guid id, UpdateLeaveCommand command, CancellationToken cancellationToken = default)

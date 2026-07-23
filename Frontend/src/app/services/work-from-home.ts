@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
 	CreateWorkFromHomeRequest,
+	WorkFromHomeBatchCreateRequest,
+	WorkFromHomeBatchCreateResult,
 	DateRangeRequest,
 	DayEntrySummary,
 	WorkFromHomeEntry,
@@ -25,6 +27,10 @@ export class WorkFromHomeService {
 
 	create(payload: CreateWorkFromHomeRequest): Observable<WorkFromHomeEntry> {
 		return this.http.post<WorkFromHomeEntry>(this.apiUrl, payload);
+	}
+
+	createBatch(payload: WorkFromHomeBatchCreateRequest): Observable<WorkFromHomeBatchCreateResult> {
+		return this.http.post<WorkFromHomeBatchCreateResult>(`${this.apiUrl}/batch`, payload);
 	}
 
 	update(id: string, payload: CreateWorkFromHomeRequest): Observable<WorkFromHomeEntry> {

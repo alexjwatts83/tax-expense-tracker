@@ -22,3 +22,19 @@ public sealed record UpdateWorkFromHomeCommand(
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes);
+
+public sealed record BatchCreateWorkFromHomeResult(
+    int TotalRequested,
+    int CreatedCount,
+    int SkippedCount,
+    int FailedCount,
+    IReadOnlyList<BatchCreateWorkFromHomeItemResult> Results);
+
+public sealed record BatchCreateWorkFromHomeItemResult(
+    DateTime WorkDate,
+    DayEntryType EntryType,
+    decimal? SpecificHours,
+    string? Notes,
+    string Status,
+    string? Message,
+    WorkFromHomeReadDto? Entry);

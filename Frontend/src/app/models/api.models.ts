@@ -124,6 +124,28 @@ export interface CreateWorkFromHomeRequest {
   notes?: string | null;
 }
 
+export interface WorkFromHomeBatchCreateRequest {
+  items: CreateWorkFromHomeRequest[];
+}
+
+export interface WorkFromHomeBatchItemResult {
+  workDate: string;
+  entryType: DayEntryType;
+  specificHours?: number | null;
+  notes?: string | null;
+  status: string;
+  message?: string | null;
+  entry?: WorkFromHomeEntry | null;
+}
+
+export interface WorkFromHomeBatchCreateResult {
+  totalRequested: number;
+  createdCount: number;
+  skippedCount: number;
+  failedCount: number;
+  results: WorkFromHomeBatchItemResult[];
+}
+
 export interface LeaveEntry {
   id: string;
   leaveDate: string;
@@ -139,6 +161,28 @@ export interface CreateLeaveRequest {
   entryType: DayEntryType;
   specificHours?: number | null;
   notes?: string | null;
+}
+
+export interface LeaveBatchCreateRequest {
+  items: CreateLeaveRequest[];
+}
+
+export interface LeaveBatchItemResult {
+  leaveDate: string;
+  entryType: DayEntryType;
+  specificHours?: number | null;
+  notes?: string | null;
+  status: string;
+  message?: string | null;
+  entry?: LeaveEntry | null;
+}
+
+export interface LeaveBatchCreateResult {
+  totalRequested: number;
+  createdCount: number;
+  skippedCount: number;
+  failedCount: number;
+  results: LeaveBatchItemResult[];
 }
 
 export interface PublicHoliday {

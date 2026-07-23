@@ -8,6 +8,7 @@ public interface IWorkFromHomeService
     Task<IReadOnlyList<WorkFromHomeReadDto>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default);
     Task<WorkFromHomeReadDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<WorkFromHomeReadDto> CreateAsync(CreateWorkFromHomeCommand command, CancellationToken cancellationToken = default);
+    Task<BatchCreateWorkFromHomeResult> BatchCreateAsync(IReadOnlyList<CreateWorkFromHomeCommand> commands, CancellationToken cancellationToken = default);
     Task<bool> UpdateAsync(Guid id, UpdateWorkFromHomeCommand command, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default);
