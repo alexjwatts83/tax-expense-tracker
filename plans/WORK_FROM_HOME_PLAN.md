@@ -156,7 +156,7 @@ Seed the initial public holiday records with the following known holidays:
 1. Full day always resolves to 7.6 hours.
 2. Half day always resolves to 3.8 hours.
 3. Specific hours must be greater than 0 and should probably cap at a sensible daily maximum.
-4. Public holiday dates should not be counted as regular WFH or leave days in summaries unless the product defines a special rule later.
+4. Public holiday dates are shown as display-only markers and do not change WFH or leave totals or day counts.
 5. CSV import should reject invalid dates and missing mandatory columns.
 
 ## API Shape
@@ -243,10 +243,10 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Next Actions
 
-1. Decide how holidays affect totals versus display-only markers.
-2. Add empty-state and validation UX for the new flows.
-3. Decide whether notes are required or optional.
-4. Review date handling for time zone consistency.
+1. Add empty-state and validation UX for the new flows.
+2. Decide whether notes are required or optional.
+3. Review date handling for time zone consistency.
+4. Decide whether paging or filtering is needed as time-entry volume grows.
 
 ## Phased Implementation Backlog
 
@@ -394,6 +394,7 @@ Stabilize the feature with edge-case handling and usability improvements.
 #### Backlog Items
 
 - [ ] Confirm how holidays affect totals and display logic.
+- [x] Confirm how holidays affect totals and display logic.
 - [x] Confirm whether leave and WFH share the same summary views or separate views.
 - [ ] Decide whether notes are required or optional.
 - [ ] Add empty-state handling for no entries and no holidays.

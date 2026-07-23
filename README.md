@@ -21,6 +21,7 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - WFH/leave repositories and application services implemented and wired in DI
 - WFH and leave API endpoints added for CRUD, restore, and optional date-range querying
 - WFH and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
+- Holiday markers are display-only and do not alter WFH/Leave totals or day counts
 - Public holiday API endpoints added for list and CSV import with validation and duplicate handling
 - Public holiday seed data for 2026/2027 added via EF migration
 - Shared entity base abstractions introduced (`IEntity`, `Entity`, `SoftDeletableEntity`, `AuditableEntity`, `AuditableSoftDeletableEntity`)

@@ -1,25 +1,52 @@
 import { Routes } from '@angular/router';
-import { BankManagement } from './components/bank-management/bank-management';
-import { Dashboard } from './components/dashboard/dashboard';
-import { ExpenseDetails } from './components/expense-details/expense-details';
-import { ExpenseForm } from './components/expense-form/expense-form';
-import { ExpenseList } from './components/expense-list/expense-list';
-import { PublicHolidayManagement } from './components/public-holiday-management/public-holiday-management';
-import { TagManagement } from './components/tag-management/tag-management';
-import { TimeTracking } from './components/time-tracking/time-tracking';
-import { TrackerManagement } from './components/tracker-management/tracker-management';
 
 export const routes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-	{ path: 'dashboard', component: Dashboard },
-	{ path: 'expenses', component: ExpenseList },
-	{ path: 'expenses/new', component: ExpenseForm },
-	{ path: 'expenses/:id', component: ExpenseDetails },
-	{ path: 'time-tracking', component: TimeTracking },
+	{
+		path: 'dashboard',
+		loadComponent: () =>
+			import('./components/dashboard/dashboard').then((m) => m.Dashboard),
+	},
+	{
+		path: 'expenses',
+		loadComponent: () =>
+			import('./components/expense-list/expense-list').then((m) => m.ExpenseList),
+	},
+	{
+		path: 'expenses/new',
+		loadComponent: () =>
+			import('./components/expense-form/expense-form').then((m) => m.ExpenseForm),
+	},
+	{
+		path: 'expenses/:id',
+		loadComponent: () =>
+			import('./components/expense-details/expense-details').then((m) => m.ExpenseDetails),
+	},
+	{
+		path: 'time-tracking',
+		loadComponent: () =>
+			import('./components/time-tracking/time-tracking').then((m) => m.TimeTracking),
+	},
 	{ path: 'work-from-home', redirectTo: 'time-tracking', pathMatch: 'full' },
 	{ path: 'leave', redirectTo: 'time-tracking', pathMatch: 'full' },
-	{ path: 'trackers', component: TrackerManagement },
-	{ path: 'tags', component: TagManagement },
-	{ path: 'banks', component: BankManagement },
-	{ path: 'public-holidays', component: PublicHolidayManagement },
+	{
+		path: 'trackers',
+		loadComponent: () =>
+			import('./components/tracker-management/tracker-management').then((m) => m.TrackerManagement),
+	},
+	{
+		path: 'tags',
+		loadComponent: () =>
+			import('./components/tag-management/tag-management').then((m) => m.TagManagement),
+	},
+	{
+		path: 'banks',
+		loadComponent: () =>
+			import('./components/bank-management/bank-management').then((m) => m.BankManagement),
+	},
+	{
+		path: 'public-holidays',
+		loadComponent: () =>
+			import('./components/public-holiday-management/public-holiday-management').then((m) => m.PublicHolidayManagement),
+	},
 ];
