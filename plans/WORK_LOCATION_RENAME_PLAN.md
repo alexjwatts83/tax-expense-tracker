@@ -18,6 +18,7 @@ Last Updated: 2026-07-23
 9. 2026-07-23: Removed legacy compatibility routes (/api/work-from-home and /work-from-home) as Phase 5 cleanup.
 10. 2026-07-23: Completed optional DB rename by mapping and migrating WorkFromHomeEntries table to WorkLocationEntries.
 11. 2026-07-23: Ran integration and unit regression tests after DB rename migration; all tests passed.
+12. 2026-07-23: Applied all pending EF migrations successfully to local database using Infrastructure startup project.
 
 ## Goal
 

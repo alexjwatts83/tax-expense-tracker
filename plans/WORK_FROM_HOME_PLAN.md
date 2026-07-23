@@ -1,5 +1,8 @@
 # Work Location and Leave Tracker Plan
 
+Last Updated: 2026-07-23
+Plan Status: Complete (Delivered)
+
 ## Goal
 
 Add a work-location (WFH/Office) and leave tracking feature that lets users record time by location or leave, review entries by week or month, and import public holidays from a CSV file.
@@ -9,9 +12,16 @@ Add a work-location (WFH/Office) and leave tracking feature that lets users reco
 1. Phase 1 - Domain and Persistence Foundation: Complete
 2. Phase 2 - Entry Management Use Cases: Complete
 3. Phase 3 - Weekly and Monthly Reporting: Complete
-4. Phase 4 - Public Holiday CSV Import: In Progress
-5. Phase 5 - API and Frontend Delivery: In Progress
-6. Phase 6 - Hardening and Polish: Pending
+4. Phase 4 - Public Holiday CSV Import: Complete
+5. Phase 5 - API and Frontend Delivery: Complete
+6. Phase 6 - Hardening and Polish: Complete
+
+## Completion Notes
+
+1. Canonical API and frontend route naming now uses Work Location terminology.
+2. Legacy compatibility routes have been removed after transition.
+3. Work-location persistence naming has been finalized in the database via table rename migration.
+4. Detailed rename rollout and migration notes are tracked in `plans/WORK_LOCATION_RENAME_PLAN.md`.
 
 ## User Outcomes
 

@@ -1,6 +1,6 @@
 # Azure Deployment Tracker
 
-Last Updated: 2026-07-22
+Last Updated: 2026-07-23
 Owner: 
 Environment Scope: dev (single environment)
 
@@ -52,6 +52,10 @@ Scope for first pass:
 - [ ] EF migrations applied in dev
 - [ ] Seed/default data strategy validated
 - [ ] Backup/rollback process documented
+
+Execution note:
+- For local CLI migration commands in this repository, use Infrastructure as startup project.
+- Deployed API still runs `Database.Migrate()` at startup, so rollout should keep migration ordering explicit during release windows.
 
 ### 6. CI/CD
 - [ ] GitHub OIDC federation configured

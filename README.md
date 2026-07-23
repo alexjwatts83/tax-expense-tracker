@@ -21,6 +21,8 @@ It also has documented planning for work-location (WFH/Office), leave, and publi
 - Work-location/leave repositories and application services implemented and wired in DI
 - Work-location and leave API endpoints added for CRUD, restore, and optional date-range querying
 - Work-location and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
+- Work-location canonicalization completed end-to-end (legacy `/api/work-from-home` and `/work-from-home` routes removed)
+- Work-location persistence table renamed to canonical `WorkLocationEntries` via EF migration
 - Holiday markers are display-only and do not alter work-location/leave totals or day counts
 - Public holiday API endpoints added for list and CSV import with validation and duplicate handling
 - Public holiday seed data for 2026/2027 added via EF migration
@@ -241,8 +243,13 @@ Migrations are owned by Infrastructure:
 ```bash
 dotnet tool restore
 dotnet ef migrations add <MigrationName> --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Infrastructure --context AppDbContext
-dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api --context AppDbContext
+dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Infrastructure --context AppDbContext
 ```
+
+Notes:
+
+- API startup also applies pending migrations at runtime via `Database.Migrate()`.
+- For local CLI migration execution in this repo, use Infrastructure as the startup project (API does not reference EF Design package).
 
 Recent schema updates:
 
@@ -254,17 +261,12 @@ Recent schema updates:
 
 ## Status
 
-- Phase 1 - Domain and Persistence Foundation: Complete
-- Phase 2 - Entry Management Use Cases: Complete
-- Phase 3 - Weekly and Monthly Reporting: Complete
-- Phase 4 - Public Holiday CSV Import: In Progress
-- Phase 5 - API and Frontend Delivery: Near Complete
-- Phase 6 - Hardening and Polish: Pending
+- Work-location rename plan complete across backend, frontend, routing, and persistence naming
+- Canonical work-location routes active and legacy compatibility routes removed
+- DB migration chain includes work-location column addition and table rename to `WorkLocationEntries`
 - DDD/Clean phases A-F complete
-- Bank entity refactor completed end-to-end (backend, frontend, migration, tests)
-- Expense Item field removed end-to-end (backend, frontend, migration, tests)
-- Domain and repository abstraction refactors completed (shared entity and repository interfaces)
-- TimeProvider refactor completed across domain and application services
-- Unit tests passing: 59/59
+- Backend and frontend builds passing
+- Unit tests passing: 61/61
+- Integration tests passing: 1/1
 
-Open work remains across phases 3-6, focused on reporting, CSV import, API/frontend delivery, and hardening.
+Current roadmap and backlog remain tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md) and [plans/WORK_LOCATION_RENAME_PLAN.md](plans/WORK_LOCATION_RENAME_PLAN.md).

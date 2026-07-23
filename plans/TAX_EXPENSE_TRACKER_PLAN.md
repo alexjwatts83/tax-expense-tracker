@@ -1,5 +1,7 @@
 # Tax Expense Tracker - Project Plan
 
+Last Updated: 2026-07-23
+
 ## Project Overview
 A web application to track and manage tax-deductible expenses with a focus on financial organization and reporting.
 
@@ -296,4 +298,8 @@ powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scri
 - TaxExpense no longer includes an Item field in domain contracts, API payloads, frontend models, or DB schema.
 - Expense creation is available inline on the Expenses page, including manual tag creation before submit.
 - Expense table filtering now runs from Material controls embedded in table headers, with a clear action and race-safe response handling.
-- Phase 4 tasks are the primary remaining workstream.
+- Work-location and leave flows are implemented end-to-end with canonical Work Location naming.
+- Legacy work-from-home compatibility routes were removed after transition.
+- Work-location persistence table naming finalized via migration to `WorkLocationEntries`.
+- Current automated validation baseline: unit tests 61/61 passing, integration tests 1/1 passing.
+- Remaining work is primarily cloud deployment and non-core enhancements in Phase 4.

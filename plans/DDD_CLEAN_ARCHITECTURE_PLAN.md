@@ -14,7 +14,7 @@ Refactor the current solution into a layered DDD and Clean Architecture structur
 - Centralized exception middleware handles API error mapping.
 - CI build and test quality gates are configured.
 
-## Progress Snapshot (2026-07-22)
+## Progress Snapshot (2026-07-23)
 
 Completed:
 
@@ -228,6 +228,7 @@ Progress:
 6. Done: Added initial unit coverage for expense application service behavior.
 7. Done: Expanded use-case coverage for update/delete/not-found and validation paths.
 8. Done: Added CI workflow for restore/build/test quality gates.
+10. Done: Extended expense service regression coverage for post-create/post-update reload failure paths.
 
 Acceptance criteria:
 
