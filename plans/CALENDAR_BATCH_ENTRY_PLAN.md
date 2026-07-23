@@ -65,6 +65,7 @@ Use this section to log implementation updates in chronological order.
 | 2026-07-23 | Team | One-shot continuation pass completed: added Current Month action and today highlighting in calendar UI, plus backend batch edge-case tests for empty payload handling and soft-deleted date reuse for leave/WFH services. | Post First Pass | Complete |
 | 2026-07-23 | Team | Extended WFH model to support Work Location (WFH/Office), updated calendar batch selector to include Office, and wired API/frontend payloads plus migration/documentation updates. | Post First Pass | Complete |
 | 2026-07-23 | Team | Work-location rename rollout finalized: canonical `/api/work-locations` naming only, legacy compatibility routes removed, and persistence table renamed to `WorkLocationEntries`. | Post First Pass | Complete |
+| 2026-07-23 | Team | Updated calendar batch Office-selected row styling to a green theme so Office entries stand out clearly from WFH and Leave selections. | Post First Pass | Complete |
 
 ## User Outcomes
 
