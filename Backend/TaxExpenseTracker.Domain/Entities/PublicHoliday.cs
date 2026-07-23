@@ -13,8 +13,9 @@ public class PublicHoliday : Entity
         string name,
         string? source,
         bool isImported,
-        DateTime? utcNow = null)
+        TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         return new PublicHoliday
         {
             Id = Guid.NewGuid(),
@@ -22,7 +23,7 @@ public class PublicHoliday : Entity
             Name = NormalizeRequired(name, nameof(Name)),
             Source = NormalizeOptional(source),
             IsImported = isImported,
-            CreatedAt = utcNow ?? DateTime.UtcNow,
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
         };
     }
 

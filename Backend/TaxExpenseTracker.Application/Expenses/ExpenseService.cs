@@ -5,10 +5,12 @@ namespace TaxExpenseTracker.Application.Expenses;
 public sealed class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public ExpenseService(IExpenseRepository expenseRepository)
+    public ExpenseService(IExpenseRepository expenseRepository, TimeProvider timeProvider)
     {
         _expenseRepository = expenseRepository;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IReadOnlyList<ExpenseReadDto>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
@@ -49,7 +51,8 @@ public sealed class ExpenseService : IExpenseService
             command.Date,
             command.BankId,
             command.Price,
-            command.SourceId);
+            command.SourceId,
+            _timeProvider);
 
         expense.TaxExpenseTags = validTagIds
             .Select(tagId => TaxExpenseTag.Create(expense.Id, tagId))
@@ -91,7 +94,8 @@ public sealed class ExpenseService : IExpenseService
             command.Date,
             command.BankId,
             command.Price,
-            command.SourceId);
+            command.SourceId,
+            _timeProvider);
 
         expense.TaxExpenseTags.Clear();
         foreach (var tagId in validTagIds)
@@ -115,7 +119,7 @@ public sealed class ExpenseService : IExpenseService
             return false;
         }
 
-        expense.SoftDelete();
+        expense.SoftDelete(_timeProvider);
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -129,7 +133,7 @@ public sealed class ExpenseService : IExpenseService
             return false;
         }
 
-        expense.Restore();
+        expense.Restore(_timeProvider);
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
         return true;

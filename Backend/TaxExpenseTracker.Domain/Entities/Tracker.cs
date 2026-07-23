@@ -7,9 +7,10 @@ public class Tracker : AuditableSoftDeletableEntity
 
     public ICollection<TaxExpense> Expenses { get; set; } = new List<TaxExpense>();
 
-    public static Tracker Create(string name, string? description, DateTime? utcNow = null)
+    public static Tracker Create(string name, string? description, TimeProvider timeProvider)
     {
-        var now = utcNow ?? DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        var now = timeProvider.GetUtcNow().UtcDateTime;
 
         return new Tracker
         {
@@ -22,11 +23,12 @@ public class Tracker : AuditableSoftDeletableEntity
         };
     }
 
-    public void Rename(string name, string? description, DateTime? utcNow = null)
+    public void Rename(string name, string? description, TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         Name = NormalizeRequired(name, nameof(Name));
         Description = NormalizeOptional(description);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
+        UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
 
     private static string NormalizeRequired(string value, string fieldName)

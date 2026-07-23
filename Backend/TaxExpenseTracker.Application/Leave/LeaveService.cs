@@ -6,10 +6,12 @@ namespace TaxExpenseTracker.Application.Leave;
 public sealed class LeaveService : ILeaveService
 {
     private readonly ILeaveRepository _leaveRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public LeaveService(ILeaveRepository leaveRepository)
+    public LeaveService(ILeaveRepository leaveRepository, TimeProvider timeProvider)
     {
         _leaveRepository = leaveRepository;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IReadOnlyList<LeaveReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -41,7 +43,7 @@ public sealed class LeaveService : ILeaveService
 
     public async Task<LeaveReadDto> CreateAsync(CreateLeaveCommand command, CancellationToken cancellationToken = default)
     {
-        var entry = LeaveEntry.Create(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes);
+        var entry = LeaveEntry.Create(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
 
         await _leaveRepository.AddAsync(entry, cancellationToken);
         await _leaveRepository.SaveChangesAsync(cancellationToken);
@@ -57,7 +59,7 @@ public sealed class LeaveService : ILeaveService
             return false;
         }
 
-        entry.Update(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes);
+        entry.Update(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
         await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -71,7 +73,7 @@ public sealed class LeaveService : ILeaveService
             return false;
         }
 
-        entry.SoftDelete();
+        entry.SoftDelete(_timeProvider);
         await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -85,7 +87,7 @@ public sealed class LeaveService : ILeaveService
             return false;
         }
 
-        entry.Restore();
+        entry.Restore(_timeProvider);
         await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         return true;

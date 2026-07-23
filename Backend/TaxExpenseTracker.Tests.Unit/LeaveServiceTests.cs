@@ -10,7 +10,7 @@ public class LeaveServiceTests
     public async Task CreateAsync_UsesFullDayHours_WhenEntryTypeFullDay()
     {
         var repository = new InMemoryLeaveRepository();
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, "  Annual leave  "));
 
@@ -23,7 +23,7 @@ public class LeaveServiceTests
     public async Task CreateAsync_UsesHalfDayHours_WhenEntryTypeHalfDay()
     {
         var repository = new InMemoryLeaveRepository();
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 11), DayEntryType.HalfDay, null, null));
 
@@ -34,7 +34,7 @@ public class LeaveServiceTests
     public async Task CreateAsync_UsesSpecificHours_WhenEntryTypeSpecificHours()
     {
         var repository = new InMemoryLeaveRepository();
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.SpecificHours, 6.25m, null));
 
@@ -45,11 +45,11 @@ public class LeaveServiceTests
     public async Task GetByDateRangeAsync_ReturnsMatchingEntries()
     {
         var repository = new InMemoryLeaveRepository();
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 1), DayEntryType.FullDay, null, null));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 20), DayEntryType.FullDay, null, null));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 20), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
 
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         var result = await service.GetByDateRangeAsync(new DateTime(2026, 3, 10), new DateTime(2026, 3, 31));
 
@@ -61,7 +61,7 @@ public class LeaveServiceTests
     public async Task DeleteAsync_ReturnsFalse_WhenEntryMissing()
     {
         var repository = new InMemoryLeaveRepository();
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         var result = await service.DeleteAsync(Guid.NewGuid());
 
@@ -72,11 +72,11 @@ public class LeaveServiceTests
     public async Task RestoreAsync_RestoresSoftDeletedEntry()
     {
         var repository = new InMemoryLeaveRepository();
-        var entry = LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null);
-        entry.SoftDelete();
+        var entry = LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        entry.SoftDelete(TestTime.TimeProvider);
         repository.Entries.Add(entry);
 
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         var result = await service.RestoreAsync(entry.Id);
 
@@ -89,9 +89,9 @@ public class LeaveServiceTests
     public async Task UpdateAsync_Throws_WhenSpecificHoursMissingForSpecificHoursType()
     {
         var repository = new InMemoryLeaveRepository();
-        var entry = LeaveEntry.Create(new DateTime(2026, 4, 2), DayEntryType.FullDay, null, null);
+        var entry = LeaveEntry.Create(new DateTime(2026, 4, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(entry);
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateTime(2026, 4, 3), DayEntryType.SpecificHours, null, null)));
@@ -101,11 +101,11 @@ public class LeaveServiceTests
     public async Task GetSummaryAsync_Month_ReturnsTotalsWithinMonthWindow()
     {
         var repository = new InMemoryLeaveRepository();
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 3), DayEntryType.FullDay, null, null));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 20), DayEntryType.SpecificHours, 2.5m, null));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 20), DayEntryType.SpecificHours, 2.5m, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
 
-        var service = new LeaveService(repository);
+        var service = new LeaveService(repository, TestTime.TimeProvider);
 
         var summary = await service.GetSummaryAsync(SummaryView.Month, new DateTime(2026, 3, 8));
 

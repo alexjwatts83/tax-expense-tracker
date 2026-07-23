@@ -12,9 +12,10 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
-        DateTime? utcNow = null)
+        TimeProvider timeProvider)
     {
-        var now = utcNow ?? DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        var now = timeProvider.GetUtcNow().UtcDateTime;
 
         return new LeaveEntry
         {
@@ -34,13 +35,14 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
-        DateTime? utcNow = null)
+        TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         LeaveDate = ValidateDate(leaveDate);
         EntryType = ValidateEntryType(entryType);
         HoursWorked = ResolveHours(entryType, specificHours);
         Notes = NormalizeOptional(notes);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
+        UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
 
     private static DayEntryType ValidateEntryType(DayEntryType entryType)

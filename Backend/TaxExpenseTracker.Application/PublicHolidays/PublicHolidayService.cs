@@ -6,10 +6,12 @@ namespace TaxExpenseTracker.Application.PublicHolidays;
 public sealed class PublicHolidayService : IPublicHolidayService
 {
     private readonly IPublicHolidayRepository _publicHolidayRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public PublicHolidayService(IPublicHolidayRepository publicHolidayRepository)
+    public PublicHolidayService(IPublicHolidayRepository publicHolidayRepository, TimeProvider timeProvider)
     {
         _publicHolidayRepository = publicHolidayRepository;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IReadOnlyList<PublicHolidayReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -76,7 +78,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
                 continue;
             }
 
-            var holiday = PublicHoliday.Create(row.Date, row.Name, normalizedSource, true);
+            var holiday = PublicHoliday.Create(row.Date, row.Name, normalizedSource, true, _timeProvider);
             await _publicHolidayRepository.AddAsync(holiday, cancellationToken);
             existingKeys.Add(key);
             added++;

@@ -6,10 +6,12 @@ namespace TaxExpenseTracker.Application.WorkFromHome;
 public sealed class WorkFromHomeService : IWorkFromHomeService
 {
     private readonly IWorkFromHomeRepository _workFromHomeRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public WorkFromHomeService(IWorkFromHomeRepository workFromHomeRepository)
+    public WorkFromHomeService(IWorkFromHomeRepository workFromHomeRepository, TimeProvider timeProvider)
     {
         _workFromHomeRepository = workFromHomeRepository;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IReadOnlyList<WorkFromHomeReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -41,7 +43,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
 
     public async Task<WorkFromHomeReadDto> CreateAsync(CreateWorkFromHomeCommand command, CancellationToken cancellationToken = default)
     {
-        var entry = WorkFromHomeEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes);
+        var entry = WorkFromHomeEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
 
         await _workFromHomeRepository.AddAsync(entry, cancellationToken);
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
@@ -57,7 +59,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             return false;
         }
 
-        entry.Update(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes);
+        entry.Update(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -71,7 +73,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             return false;
         }
 
-        entry.SoftDelete();
+        entry.SoftDelete(_timeProvider);
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -85,7 +87,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             return false;
         }
 
-        entry.Restore();
+        entry.Restore(_timeProvider);
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
 
         return true;

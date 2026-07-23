@@ -53,6 +53,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(defaultConnection, sqlite =>
         sqlite.MigrationsAssembly("TaxExpenseTracker.Infrastructure")));
 
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.AddScoped<ITrackerRepository, EfTrackerRepository>();
 builder.Services.AddScoped<ITrackerService, TrackerService>();
 builder.Services.AddScoped<ITagRepository, EfTagRepository>();

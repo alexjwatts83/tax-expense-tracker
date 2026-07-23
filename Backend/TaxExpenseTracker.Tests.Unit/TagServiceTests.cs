@@ -9,7 +9,7 @@ public class TagServiceTests
     public async Task CreateAsync_TrimsName_AndPersists()
     {
         var repository = new InMemoryTagRepository();
-        var service = new TagService(repository);
+        var service = new TagService(repository, TestTime.TimeProvider);
 
         var result = await service.CreateAsync(new CreateTagCommand("  Deductible  "));
 
@@ -22,7 +22,7 @@ public class TagServiceTests
     public async Task UpdateAsync_ReturnsFalse_WhenTagMissing()
     {
         var repository = new InMemoryTagRepository();
-        var service = new TagService(repository);
+        var service = new TagService(repository, TestTime.TimeProvider);
 
         var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateTagCommand("Updated"));
 
@@ -33,7 +33,7 @@ public class TagServiceTests
     public async Task DeleteAsync_ReturnsFalse_WhenTagMissing()
     {
         var repository = new InMemoryTagRepository();
-        var service = new TagService(repository);
+        var service = new TagService(repository, TestTime.TimeProvider);
 
         var result = await service.DeleteAsync(Guid.NewGuid());
 
@@ -44,11 +44,11 @@ public class TagServiceTests
     public async Task RestoreAsync_RestoresTag_WhenSoftDeleted()
     {
         var repository = new InMemoryTagRepository();
-        var tag = Tag.Create("Equipment", DateTime.UtcNow);
-        tag.SoftDelete();
+        var tag = Tag.Create("Equipment", TestTime.TimeProvider);
+        tag.SoftDelete(TestTime.TimeProvider);
         repository.Tags.Add(tag);
 
-        var service = new TagService(repository);
+        var service = new TagService(repository, TestTime.TimeProvider);
 
         var result = await service.RestoreAsync(tag.Id);
 
@@ -61,10 +61,10 @@ public class TagServiceTests
     public async Task UpdateAsync_UpdatesTag_WhenExists()
     {
         var repository = new InMemoryTagRepository();
-        var tag = Tag.Create("Old", DateTime.UtcNow);
+        var tag = Tag.Create("Old", TestTime.TimeProvider);
         repository.Tags.Add(tag);
 
-        var service = new TagService(repository);
+        var service = new TagService(repository, TestTime.TimeProvider);
 
         var result = await service.UpdateAsync(tag.Id, new UpdateTagCommand("  New  "));
 

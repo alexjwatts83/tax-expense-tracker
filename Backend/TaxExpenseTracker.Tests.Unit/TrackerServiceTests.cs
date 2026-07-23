@@ -9,7 +9,7 @@ public class TrackerServiceTests
     public async Task CreateAsync_TrimsNameAndDescription_AndPersists()
     {
         var repository = new InMemoryTrackerRepository();
-        var service = new TrackerService(repository);
+        var service = new TrackerService(repository, TestTime.TimeProvider);
 
         var result = await service.CreateAsync(new CreateTrackerCommand("  Home Office  ", "  2026 taxes  "));
 
@@ -23,7 +23,7 @@ public class TrackerServiceTests
     public async Task UpdateAsync_ReturnsFalse_WhenTrackerMissing()
     {
         var repository = new InMemoryTrackerRepository();
-        var service = new TrackerService(repository);
+        var service = new TrackerService(repository, TestTime.TimeProvider);
 
         var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateTrackerCommand("Name", "Desc"));
 
@@ -34,7 +34,7 @@ public class TrackerServiceTests
     public async Task DeleteAsync_ReturnsFalse_WhenTrackerMissing()
     {
         var repository = new InMemoryTrackerRepository();
-        var service = new TrackerService(repository);
+        var service = new TrackerService(repository, TestTime.TimeProvider);
 
         var result = await service.DeleteAsync(Guid.NewGuid());
 
@@ -45,11 +45,11 @@ public class TrackerServiceTests
     public async Task RestoreAsync_RestoresTracker_WhenSoftDeleted()
     {
         var repository = new InMemoryTrackerRepository();
-        var tracker = Tracker.Create("Home Office", "Desc", DateTime.UtcNow);
-        tracker.SoftDelete();
+        var tracker = Tracker.Create("Home Office", "Desc", TestTime.TimeProvider);
+        tracker.SoftDelete(TestTime.TimeProvider);
         repository.Trackers.Add(tracker);
 
-        var service = new TrackerService(repository);
+        var service = new TrackerService(repository, TestTime.TimeProvider);
 
         var result = await service.RestoreAsync(tracker.Id);
 
@@ -62,10 +62,10 @@ public class TrackerServiceTests
     public async Task UpdateAsync_UpdatesTracker_WhenExists()
     {
         var repository = new InMemoryTrackerRepository();
-        var tracker = Tracker.Create("Old", "Old desc", DateTime.UtcNow);
+        var tracker = Tracker.Create("Old", "Old desc", TestTime.TimeProvider);
         repository.Trackers.Add(tracker);
 
-        var service = new TrackerService(repository);
+        var service = new TrackerService(repository, TestTime.TimeProvider);
 
         var result = await service.UpdateAsync(tracker.Id, new UpdateTrackerCommand("  New  ", "  New desc  "));
 

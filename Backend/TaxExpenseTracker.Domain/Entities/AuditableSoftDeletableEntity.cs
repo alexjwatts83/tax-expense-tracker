@@ -4,15 +4,17 @@ public abstract class AuditableSoftDeletableEntity : AuditableEntity, ISoftDelet
 {
     public bool IsDeleted { get; set; }
 
-    public virtual void SoftDelete(DateTime? utcNow = null)
+    public virtual void SoftDelete(TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         IsDeleted = true;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
+        UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
 
-    public virtual void Restore(DateTime? utcNow = null)
+    public virtual void Restore(TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         IsDeleted = false;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
+        UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
 }

@@ -7,13 +7,14 @@ public class Bank : SoftDeletableEntity
 
     public ICollection<TaxExpense> Expenses { get; set; } = new List<TaxExpense>();
 
-    public static Bank Create(string name, DateTime? utcNow = null)
+    public static Bank Create(string name, TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         return new Bank
         {
             Id = Guid.NewGuid(),
             Name = NormalizeRequired(name, nameof(Name)),
-            CreatedAt = utcNow ?? DateTime.UtcNow,
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             IsDeleted = false,
         };
     }

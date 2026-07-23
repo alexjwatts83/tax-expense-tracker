@@ -7,13 +7,14 @@ public class Tag : SoftDeletableEntity
 
     public ICollection<TaxExpenseTag> TaxExpenseTags { get; set; } = new List<TaxExpenseTag>();
 
-    public static Tag Create(string name, DateTime? utcNow = null)
+    public static Tag Create(string name, TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         return new Tag
         {
             Id = Guid.NewGuid(),
             Name = NormalizeRequired(name, nameof(Name)),
-            CreatedAt = utcNow ?? DateTime.UtcNow,
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             IsDeleted = false,
         };
     }

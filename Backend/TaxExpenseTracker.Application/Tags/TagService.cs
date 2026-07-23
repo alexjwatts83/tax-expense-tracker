@@ -5,10 +5,12 @@ namespace TaxExpenseTracker.Application.Tags;
 public sealed class TagService : ITagService
 {
     private readonly ITagRepository _tagRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public TagService(ITagRepository tagRepository)
+    public TagService(ITagRepository tagRepository, TimeProvider timeProvider)
     {
         _tagRepository = tagRepository;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IReadOnlyList<TagReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -32,7 +34,7 @@ public sealed class TagService : ITagService
 
     public async Task<TagReadDto> CreateAsync(CreateTagCommand command, CancellationToken cancellationToken = default)
     {
-        var tag = Tag.Create(command.Name);
+        var tag = Tag.Create(command.Name, _timeProvider);
 
         await _tagRepository.AddAsync(tag, cancellationToken);
         await _tagRepository.SaveChangesAsync(cancellationToken);
@@ -62,7 +64,7 @@ public sealed class TagService : ITagService
             return false;
         }
 
-        tag.SoftDelete();
+        tag.SoftDelete(_timeProvider);
         await _tagRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -76,7 +78,7 @@ public sealed class TagService : ITagService
             return false;
         }
 
-        tag.Restore();
+        tag.Restore(_timeProvider);
         await _tagRepository.SaveChangesAsync(cancellationToken);
 
         return true;

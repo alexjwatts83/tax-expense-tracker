@@ -28,26 +28,26 @@ public class DomainEntityDefaultsTests
     [Fact]
     public void Tracker_Create_Throws_WhenNameMissing()
     {
-        Assert.Throws<ArgumentException>(() => Tracker.Create("   ", null));
+        Assert.Throws<ArgumentException>(() => Tracker.Create("   ", null, TestTime.TimeProvider));
     }
 
     [Fact]
     public void Tag_Create_Throws_WhenNameMissing()
     {
-        Assert.Throws<ArgumentException>(() => Tag.Create(""));
+        Assert.Throws<ArgumentException>(() => Tag.Create("", TestTime.TimeProvider));
     }
 
     [Fact]
     public void TaxExpense_Create_Throws_WhenPriceNegative()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            TaxExpense.Create("Desc", DateTime.UtcNow, Guid.NewGuid(), -1m, Guid.NewGuid()));
+            TaxExpense.Create("Desc", TestTime.FixedUtcNow.UtcDateTime, Guid.NewGuid(), -1m, Guid.NewGuid(), TestTime.TimeProvider));
     }
 
     [Fact]
     public void TaxExpense_Create_Throws_WhenDateDefault()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            TaxExpense.Create("Desc", default, Guid.NewGuid(), 1m, Guid.NewGuid()));
+            TaxExpense.Create("Desc", default, Guid.NewGuid(), 1m, Guid.NewGuid(), TestTime.TimeProvider));
     }
 }

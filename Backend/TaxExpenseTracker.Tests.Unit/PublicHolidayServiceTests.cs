@@ -9,9 +9,9 @@ public class PublicHolidayServiceTests
     public async Task ImportAsync_ImportsRows_AndSkipsDuplicates()
     {
         var repository = new InMemoryPublicHolidayRepository();
-        repository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 1), "New Year's Day", "Seed", false));
+        repository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 1), "New Year's Day", "Seed", false, TestTime.TimeProvider));
 
-        var service = new PublicHolidayService(repository);
+        var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
         var csv = "Date,Name\n2026-01-01,New Year's Day\n2026-01-26,Australia Day\n2026-01-26,Australia Day";
 
@@ -28,7 +28,7 @@ public class PublicHolidayServiceTests
     public async Task ImportAsync_Throws_WhenHeaderMissingRequiredColumns()
     {
         var repository = new InMemoryPublicHolidayRepository();
-        var service = new PublicHolidayService(repository);
+        var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
         var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
             service.ImportAsync("When,Title\n2026-01-01,New Year's Day", null));
@@ -40,7 +40,7 @@ public class PublicHolidayServiceTests
     public async Task ImportAsync_Throws_WhenRowDateInvalid()
     {
         var repository = new InMemoryPublicHolidayRepository();
-        var service = new PublicHolidayService(repository);
+        var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
         var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
             service.ImportAsync("Date,Name\nnot-a-date,Holiday", null));

@@ -18,9 +18,10 @@ public class TaxExpense : AuditableSoftDeletableEntity
         Guid bankId,
         decimal price,
         Guid sourceId,
-        DateTime? utcNow = null)
+        TimeProvider timeProvider)
     {
-        var now = utcNow ?? DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        var now = timeProvider.GetUtcNow().UtcDateTime;
 
         return new TaxExpense
         {
@@ -42,14 +43,15 @@ public class TaxExpense : AuditableSoftDeletableEntity
         Guid bankId,
         decimal price,
         Guid sourceId,
-        DateTime? utcNow = null)
+        TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         Description = NormalizeOptional(description);
         Date = ValidateDate(date);
         BankId = ValidateBankId(bankId);
         Price = ValidatePrice(price);
         SourceId = ValidateSourceId(sourceId);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
+        UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
 
     private static string NormalizeOptional(string? value)
