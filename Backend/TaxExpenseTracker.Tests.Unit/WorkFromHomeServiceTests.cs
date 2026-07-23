@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Application.WorkFromHome;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Tests.Unit;
@@ -94,6 +95,25 @@ public class WorkFromHomeServiceTests
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             service.UpdateAsync(entry.Id, new UpdateWorkFromHomeCommand(new DateTime(2026, 2, 3), DayEntryType.SpecificHours, null, null)));
+    }
+
+    [Fact]
+    public async Task GetSummaryAsync_Week_ReturnsTotalsWithinMondayToSundayWindow()
+    {
+        var repository = new InMemoryWorkFromHomeRepository();
+        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null));
+        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 14), DayEntryType.HalfDay, null, null));
+        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 19), DayEntryType.FullDay, null, null));
+
+        var service = new WorkFromHomeService(repository);
+
+        var summary = await service.GetSummaryAsync(SummaryView.Week, new DateTime(2026, 1, 14));
+
+        Assert.Equal(new DateTime(2026, 1, 12), summary.FromDate);
+        Assert.Equal(new DateTime(2026, 1, 18), summary.ToDate);
+        Assert.Equal(11.4m, summary.TotalHours);
+        Assert.Equal(2, summary.TotalDays);
+        Assert.Equal(2, summary.EntryCount);
     }
 
     private sealed class InMemoryWorkFromHomeRepository : IWorkFromHomeRepository

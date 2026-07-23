@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Domain.Entities;
+using TaxExpenseTracker.Application.Common;
 
 namespace TaxExpenseTracker.Application.WorkFromHome;
 
@@ -88,6 +89,20 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+    public async Task<DayEntrySummaryDto> GetSummaryAsync(SummaryView view, DateTime date, CancellationToken cancellationToken = default)
+    {
+        var (fromDate, toDate) = SummaryPeriod.GetBounds(date, view);
+
+        var entries = await _workFromHomeRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
+
+        return new DayEntrySummaryDto(
+            fromDate,
+            toDate,
+            entries.Sum(x => x.HoursWorked),
+            entries.Select(x => x.WorkDate.Date).Distinct().Count(),
+            entries.Count);
     }
 
     private static WorkFromHomeReadDto ToReadDto(WorkFromHomeEntry entry)

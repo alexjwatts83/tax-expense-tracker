@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Application.Leave;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Tests.Unit;
@@ -94,6 +95,25 @@ public class LeaveServiceTests
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateTime(2026, 4, 3), DayEntryType.SpecificHours, null, null)));
+    }
+
+    [Fact]
+    public async Task GetSummaryAsync_Month_ReturnsTotalsWithinMonthWindow()
+    {
+        var repository = new InMemoryLeaveRepository();
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 3), DayEntryType.FullDay, null, null));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 20), DayEntryType.SpecificHours, 2.5m, null));
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null));
+
+        var service = new LeaveService(repository);
+
+        var summary = await service.GetSummaryAsync(SummaryView.Month, new DateTime(2026, 3, 8));
+
+        Assert.Equal(new DateTime(2026, 3, 1), summary.FromDate);
+        Assert.Equal(new DateTime(2026, 3, 31), summary.ToDate);
+        Assert.Equal(10.1m, summary.TotalHours);
+        Assert.Equal(2, summary.TotalDays);
+        Assert.Equal(2, summary.EntryCount);
     }
 
     private sealed class InMemoryLeaveRepository : ILeaveRepository

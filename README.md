@@ -20,6 +20,7 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Work-from-home, leave, and public-holiday entities added to the domain and persistence model
 - WFH/leave repositories and application services implemented and wired in DI
 - WFH and leave API endpoints added for CRUD, restore, and optional date-range querying
+- WFH and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
 - Public holiday seed data for 2026/2027 added via EF migration
 - Shared entity base abstractions introduced (`IEntity`, `Entity`, `SoftDeletableEntity`, `AuditableEntity`, `AuditableSoftDeletableEntity`)
 - Shared generic repository abstractions introduced (`IRepository<T>`, `ISoftDeleteRepository<T>`)
@@ -27,7 +28,7 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 
 ## Planned Enhancements
 
-- Weekly and monthly work-from-home/leave summary endpoints and period navigation
+- Holiday overlap markers in weekly/monthly summaries
 - Public holiday import API endpoints and validation
 - Angular screens for work-from-home and leave entry management
 - Public holiday CSV import workflow and validation
@@ -120,6 +121,7 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - PUT /api/work-from-home/{id}
 - DELETE /api/work-from-home/{id}
 - POST /api/work-from-home/{id}/restore
+- GET /api/work-from-home/summary?view=week|month&date=YYYY-MM-DD
 
 ### Leave
 
@@ -130,6 +132,7 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - PUT /api/leave/{id}
 - DELETE /api/leave/{id}
 - POST /api/leave/{id}/restore
+- GET /api/leave/summary?view=week|month&date=YYYY-MM-DD
 
 Current filter query params:
 
@@ -223,9 +226,9 @@ Recent schema updates:
 
 - Phase 1 - Domain and Persistence Foundation: Complete
 - Phase 2 - Entry Management Use Cases: Complete
-- Phase 3 - Weekly and Monthly Reporting: Pending
+- Phase 3 - Weekly and Monthly Reporting: In Progress
 - Phase 4 - Public Holiday CSV Import: Pending
-- Phase 5 - API and Frontend Delivery: Pending
+- Phase 5 - API and Frontend Delivery: In Progress
 - Phase 6 - Hardening and Polish: Pending
 - DDD/Clean phases A-F complete
 - Bank entity refactor completed end-to-end (backend, frontend, migration, tests)

@@ -1,3 +1,5 @@
+using TaxExpenseTracker.Application.Common;
+
 namespace TaxExpenseTracker.Application.WorkFromHome;
 
 public interface IWorkFromHomeService
@@ -9,4 +11,5 @@ public interface IWorkFromHomeService
     Task<bool> UpdateAsync(Guid id, UpdateWorkFromHomeCommand command, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<DayEntrySummaryDto> GetSummaryAsync(SummaryView view, DateTime date, CancellationToken cancellationToken = default);
 }

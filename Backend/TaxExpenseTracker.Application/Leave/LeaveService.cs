@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Domain.Entities;
+using TaxExpenseTracker.Application.Common;
 
 namespace TaxExpenseTracker.Application.Leave;
 
@@ -88,6 +89,20 @@ public sealed class LeaveService : ILeaveService
         await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+    public async Task<DayEntrySummaryDto> GetSummaryAsync(SummaryView view, DateTime date, CancellationToken cancellationToken = default)
+    {
+        var (fromDate, toDate) = SummaryPeriod.GetBounds(date, view);
+
+        var entries = await _leaveRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
+
+        return new DayEntrySummaryDto(
+            fromDate,
+            toDate,
+            entries.Sum(x => x.HoursWorked),
+            entries.Select(x => x.LeaveDate.Date).Distinct().Count(),
+            entries.Count);
     }
 
     private static LeaveReadDto ToReadDto(LeaveEntry entry)

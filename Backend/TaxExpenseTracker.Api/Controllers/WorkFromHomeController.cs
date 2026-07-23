@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TaxExpenseTracker.Api.Models;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.WorkFromHome;
 
 namespace TaxExpenseTracker.Api.Controllers;
@@ -97,6 +98,29 @@ public class WorkFromHomeController(IWorkFromHomeService workFromHomeService) : 
         return NoContent();
     }
 
+    [HttpGet("summary")]
+    public async Task<ActionResult<WorkFromHomeSummaryDto>> Summary(
+        string view = "month",
+        DateTime? date = null,
+        CancellationToken cancellationToken = default)
+    {
+        var summaryView = ParseSummaryView(view);
+        var anchorDate = date?.Date ?? DateTime.UtcNow.Date;
+
+        var summary = await workFromHomeService.GetSummaryAsync(summaryView, anchorDate, cancellationToken);
+
+        return Ok(new WorkFromHomeSummaryDto
+        {
+            View = view.ToLowerInvariant(),
+            AnchorDate = anchorDate,
+            FromDate = summary.FromDate,
+            ToDate = summary.ToDate,
+            TotalHours = summary.TotalHours,
+            TotalDays = summary.TotalDays,
+            EntryCount = summary.EntryCount,
+        });
+    }
+
     private static WorkFromHomeDto MapWorkFromHome(WorkFromHomeReadDto entry)
     {
         return new WorkFromHomeDto
@@ -109,5 +133,20 @@ public class WorkFromHomeController(IWorkFromHomeService workFromHomeService) : 
             CreatedAt = entry.CreatedAt,
             UpdatedAt = entry.UpdatedAt
         };
+    }
+
+    private static SummaryView ParseSummaryView(string view)
+    {
+        if (string.Equals(view, "week", StringComparison.OrdinalIgnoreCase))
+        {
+            return SummaryView.Week;
+        }
+
+        if (string.Equals(view, "month", StringComparison.OrdinalIgnoreCase))
+        {
+            return SummaryView.Month;
+        }
+
+        throw new ArgumentException("view must be 'week' or 'month'.", nameof(view));
     }
 }
