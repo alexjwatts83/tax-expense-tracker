@@ -3,6 +3,7 @@
 		<h1>Calendar Batch Entry</h1>
 		<p>Pick weekdays for the month and mark each row as WFH or Leave.</p>
 		<p class="rule-note">Public holidays are locked. WFH and Leave cannot be added on those dates.</p>
+		<p class="keyboard-tip">Keyboard shortcuts on a focused day: N=None, W=WFH, L=Leave, F=Full day, H=Half day, S=Specific hours.</p>
 	</header>
 
 	<mat-card class="month-card">
@@ -22,11 +23,11 @@
 	</mat-card>
 
 	@if (errorMessage) {
-		<p class="error-message">{{ errorMessage }}</p>
+		<p class="error-message" aria-live="assertive">{{ errorMessage }}</p>
 	}
 
 	@if (infoMessage) {
-		<p class="info-message">{{ infoMessage }}</p>
+		<p class="info-message" aria-live="polite">{{ infoMessage }}</p>
 	}
 
 	<mat-card class="grid-card">
@@ -50,7 +51,7 @@
 							<div class="calendar-week-row">
 								@for (dayCell of week.days; track $index) {
 									@if (dayCell) {
-										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday">
+										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
 											<div class="date-cell">
 												<strong>{{ dayCell.dayLabel }}</strong>
 												<span class="date-code">{{ dayCell.dateIso }}</span>

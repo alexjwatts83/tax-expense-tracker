@@ -208,6 +208,53 @@ export class CalendarBatchEntry implements OnInit {
     this.clearRowResult(row);
   }
 
+  onDayCellKeydown(row: CalendarDayRowVm, event: KeyboardEvent): void {
+    if (event.target !== event.currentTarget || row.isHoliday) {
+      return;
+    }
+
+    const key = event.key.toLowerCase();
+
+    if (key === 'n') {
+      this.onCategoryChange(row, 'none');
+      event.preventDefault();
+      return;
+    }
+
+    if (key === 'w') {
+      this.onCategoryChange(row, 'wfh');
+      event.preventDefault();
+      return;
+    }
+
+    if (key === 'l') {
+      this.onCategoryChange(row, 'leave');
+      event.preventDefault();
+      return;
+    }
+
+    if (row.category === 'none') {
+      return;
+    }
+
+    if (key === 'f') {
+      this.onEntryTypeChange(row, DayEntryType.FullDay);
+      event.preventDefault();
+      return;
+    }
+
+    if (key === 'h') {
+      this.onEntryTypeChange(row, DayEntryType.HalfDay);
+      event.preventDefault();
+      return;
+    }
+
+    if (key === 's') {
+      this.onEntryTypeChange(row, DayEntryType.SpecificHours);
+      event.preventDefault();
+    }
+  }
+
   isSpecificHoursRow(row: CalendarDayRowVm): boolean {
     return row.category !== 'none' && row.entryType === DayEntryType.SpecificHours;
   }

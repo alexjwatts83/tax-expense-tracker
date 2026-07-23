@@ -53,10 +53,11 @@ Use this section to log implementation updates in chronological order.
 | 2026-07-23 | Team | Product decisions confirmed for endpoint split, editable entries, public holiday lock, and Full Day default. | Planning | Complete |
 | 2026-07-23 | Team | Phase 1 started and completed: route + navbar link added, weekday calendar rows implemented, editable per-day state with Full Day default and specific-hours validation, holiday-lock behavior wired via holiday lookup. | Phase 1 | Complete |
 | 2026-07-23 | Team | Phase 2 completed: added separate WFH/Leave batch endpoints, batch DTO contracts, non-throwing mixed-result handling (created/skipped/failed), public holiday lock enforcement, and unit coverage for mixed batch outcomes. | Phase 2 | Complete |
-| 2026-07-23 | Team | Phase 3 continued: frontend now submits only changed rows, applies create/update/delete deltas, shows row-level apply outcomes, and preserves failed rows for immediate retry. | Phase 3 | In Progress |
+| 2026-07-23 | Team | Phase 3 completed: frontend now submits only changed rows, applies create/update/delete deltas, shows row-level apply outcomes, and preserves failed rows for immediate retry. | Phase 3 | Complete |
 | 2026-07-23 | Team | Integration tests removed from scope by product direction; hardening focuses on backend unit tests and UX/accessibility checks. | Phase 4 | In Progress |
 | 2026-07-23 | Team | Frontend unit tests removed from scope because frontend test framework/tests are not present in this project. | Phase 4 | In Progress |
 | 2026-07-23 | Team | Added backend leap-year/month-boundary unit tests for leave and WFH summaries and applied accessibility labels to calendar controls; build and unit tests pass. | Phase 4 | Complete |
+| 2026-07-23 | Team | Continued post-first-pass UX/accessibility refinements: added keyboard shortcuts on focused day cells (N/W/L/F/H/S), improved focus-visible styling, and added live-region feedback messaging; frontend build passes. | Post First Pass | Complete |
 
 ## User Outcomes
 
@@ -294,8 +295,16 @@ Status: [x] Complete
 
 No open product decisions remain for the first pass.
 
-Follow-up architecture decision for later phases:
-1. Whether to consolidate split batch endpoints into a single combined endpoint after adoption.
+Endpoint strategy is finalized as separate batch endpoints for WFH and Leave.
+
+## Next Steps (Post First Pass)
+
+No additional product decisions are required for the current roadmap.
+
+Implementation follow-ups (non-decision):
+1. Continue incremental UX polish and accessibility refinements on the calendar batch page.
+2. Monitor batch usage and error trends for operational insight while retaining split endpoints.
+3. Add backend unit tests for any newly discovered edge cases as they arise.
 
 ## Tracking Workflow
 
