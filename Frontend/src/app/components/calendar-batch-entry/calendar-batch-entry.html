@@ -56,17 +56,18 @@
 								}
 							</div>
 
-							<mat-form-field appearance="outline">
-								<mat-label>Status</mat-label>
-								<mat-select
+							<div class="status-cell" [class.status-disabled]="row.isHoliday">
+								<label class="status-label">Status</label>
+								<mat-radio-group
+									class="status-radio-group"
 									[value]="row.category"
-									(selectionChange)="onCategoryChange(row, $event.value)"
+									(change)="onCategoryChange(row, $event.value)"
 									[disabled]="row.isHoliday">
 									@for (option of categoryOptions; track option.value) {
-										<mat-option [value]="option.value">{{ option.label }}</mat-option>
+										<mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
 									}
-								</mat-select>
-							</mat-form-field>
+								</mat-radio-group>
+							</div>
 
 							<mat-form-field appearance="outline">
 								<mat-label>Entry Type</mat-label>
