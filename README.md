@@ -32,6 +32,7 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
 - Angular service/model layer added for WFH, Leave, and Public Holidays
 - Angular management screens added for WFH, Leave, and Public Holidays, with WFH and Leave combined under a shared time-tracking page
+- Time-tracking screens use local date input formatting to avoid UTC day drift in browser date fields
 
 ## Planned Enhancements
 

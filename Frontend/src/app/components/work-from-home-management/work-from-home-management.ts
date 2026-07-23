@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { DayEntrySummary, DayEntryType, WorkFromHomeEntry } from '../../models/api.models';
 import { WorkFromHomeService } from '../../services/work-from-home';
+import { toLocalDateInputValue } from '../../utils/date';
 
 @Component({
   selector: 'app-work-from-home-management',
@@ -236,6 +237,6 @@ export class WorkFromHomeManagement implements OnInit {
   }
 
   private today(): string {
-    return new Date().toISOString().slice(0, 10);
+    return toLocalDateInputValue();
   }
 }

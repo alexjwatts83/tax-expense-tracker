@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { DayEntrySummary, DayEntryType, LeaveEntry } from '../../models/api.models';
 import { LeaveService } from '../../services/leave';
+import { toLocalDateInputValue } from '../../utils/date';
 
 @Component({
   selector: 'app-leave-management',
@@ -236,6 +237,6 @@ export class LeaveManagement implements OnInit {
   }
 
   private today(): string {
-    return new Date().toISOString().slice(0, 10);
+    return toLocalDateInputValue();
   }
 }

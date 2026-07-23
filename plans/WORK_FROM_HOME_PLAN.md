@@ -245,8 +245,8 @@ Seed the initial public holiday records with the following known holidays:
 
 1. Add empty-state and validation UX for the new flows.
 2. Decide whether notes are required or optional.
-3. Review date handling for time zone consistency.
-4. Decide whether paging or filtering is needed as time-entry volume grows.
+3. Decide whether paging or filtering is needed as time-entry volume grows.
+4. Review whether public holiday screens need default date filters.
 
 ## Phased Implementation Backlog
 
@@ -399,7 +399,7 @@ Stabilize the feature with edge-case handling and usability improvements.
 - [ ] Decide whether notes are required or optional.
 - [ ] Add empty-state handling for no entries and no holidays.
 - [ ] Add paging or filtering if the data volume grows.
-- [ ] Review date handling for time zone consistency.
+- [x] Review date handling for time zone consistency.
 - [ ] Add documentation for the CSV template and week/month rules.
 
 #### Exit Criteria
