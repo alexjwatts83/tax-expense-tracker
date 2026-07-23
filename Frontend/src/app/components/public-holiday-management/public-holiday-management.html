@@ -1,0 +1,92 @@
+<section class="page">
+	<h1>Public Holidays</h1>
+
+	<mat-card class="holiday-import-card">
+		<mat-card-title>Import Holidays</mat-card-title>
+		<mat-card-content>
+			<form [formGroup]="importForm" class="import-form">
+				<mat-form-field appearance="outline">
+					<mat-label>Source</mat-label>
+					<input matInput formControlName="source" placeholder="Manual Upload" />
+				</mat-form-field>
+
+				<div class="file-picker">
+					<input #fileInput type="file" accept=".csv,text/csv" (change)="onFileSelected($event)" />
+				</div>
+
+				<div class="form-actions">
+					<button mat-flat-button color="primary" type="button" (click)="importHolidays()" [disabled]="isImporting">
+						{{ isImporting ? 'Importing...' : 'Import CSV' }}
+					</button>
+				</div>
+			</form>
+		</mat-card-content>
+	</mat-card>
+
+	<mat-card class="holiday-filter-card">
+		<mat-card-title>Filter Holidays</mat-card-title>
+		<mat-card-content>
+			<form [formGroup]="filterForm" class="filter-form">
+				<mat-form-field appearance="outline">
+					<mat-label>From Date</mat-label>
+					<input matInput type="date" formControlName="fromDate" />
+				</mat-form-field>
+
+				<mat-form-field appearance="outline">
+					<mat-label>To Date</mat-label>
+					<input matInput type="date" formControlName="toDate" />
+				</mat-form-field>
+
+				<div class="form-actions">
+					<button mat-stroked-button type="button" (click)="loadHolidays()">Apply Filter</button>
+				</div>
+			</form>
+		</mat-card-content>
+	</mat-card>
+
+	@if (errorMessage) {
+		<p class="error-message">{{ errorMessage }}</p>
+	}
+
+	@if (infoMessage) {
+		<p class="info-message">{{ infoMessage }}</p>
+	}
+
+	<mat-card class="holiday-list-card">
+		<mat-card-title>Holiday Records</mat-card-title>
+		<mat-card-content>
+			@if (isLoading) {
+				<div class="loading">
+					<mat-spinner diameter="32"></mat-spinner>
+				</div>
+			} @else if (holidays.length === 0) {
+				<p>No public holidays found.</p>
+			} @else {
+				<table mat-table [dataSource]="holidays" class="holiday-table">
+					<ng-container matColumnDef="holidayDate">
+						<th mat-header-cell *matHeaderCellDef>Date</th>
+						<td mat-cell *matCellDef="let holiday">{{ holiday.holidayDate | date: 'mediumDate' }}</td>
+					</ng-container>
+
+					<ng-container matColumnDef="name">
+						<th mat-header-cell *matHeaderCellDef>Name</th>
+						<td mat-cell *matCellDef="let holiday">{{ holiday.name }}</td>
+					</ng-container>
+
+					<ng-container matColumnDef="source">
+						<th mat-header-cell *matHeaderCellDef>Source</th>
+						<td mat-cell *matCellDef="let holiday">{{ holiday.source || 'N/A' }}</td>
+					</ng-container>
+
+					<ng-container matColumnDef="createdAt">
+						<th mat-header-cell *matHeaderCellDef>Created</th>
+						<td mat-cell *matCellDef="let holiday">{{ holiday.createdAt | date: 'mediumDate' }}</td>
+					</ng-container>
+
+					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+					<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+				</table>
+			}
+		</mat-card-content>
+	</mat-card>
+</section>

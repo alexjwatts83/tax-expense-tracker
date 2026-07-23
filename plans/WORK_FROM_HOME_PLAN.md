@@ -243,10 +243,10 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Next Actions
 
-1. Deliver Angular UI flows for WFH/leave entry, summary views, and holiday import.
-2. Decide how holidays affect totals versus display-only markers.
-3. Confirm whether WFH and leave share one summary screen or separate screens.
-4. Add empty-state and validation UX for the new flows.
+1. Decide how holidays affect totals versus display-only markers.
+2. Confirm whether WFH and leave share one summary screen or separate screens.
+3. Add empty-state and validation UX for the new flows.
+4. Add lightweight UI coverage for the new frontend flows.
 
 ## Phased Implementation Backlog
 
@@ -373,12 +373,12 @@ Expose the feature through the API and Angular UI.
 - [x] Add WFH entry DTOs and controller endpoints.
 - [x] Add leave DTOs and controller endpoints.
 - [x] Add holiday import DTOs and controller endpoints.
-- [ ] Add WFH entry form with date picker and entry type selector.
-- [ ] Add leave entry form with date picker and entry type selector.
-- [ ] Add weekly/monthly summary page or panel.
-- [ ] Add CSV import screen or dialog for holidays.
-- [ ] Highlight public holidays in the UI.
-- [ ] Add form validation and error messaging.
+- [x] Add WFH entry form with date picker and entry type selector.
+- [x] Add leave entry form with date picker and entry type selector.
+- [x] Add weekly/monthly summary page or panel.
+- [x] Add CSV import screen or dialog for holidays.
+- [x] Highlight public holidays in the UI.
+- [x] Add form validation and error messaging.
 - [ ] Add smoke tests or lightweight UI coverage for the main flows.
 
 #### Exit Criteria

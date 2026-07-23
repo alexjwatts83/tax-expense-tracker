@@ -1,0 +1,42 @@
+.entry-form,
+.summary-form {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	grid-column: 1 / -1;
+}
+
+.entry-table {
+	width: 100%;
+}
+
+.summary-grid {
+	display: grid;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+
+.holiday-list {
+	margin-top: 1rem;
+}
+
+.loading {
+	display: flex;
+	justify-content: center;
+	padding: 1.5rem 0;
+}
+
+.error-message {
+	color: #b42318;
+	margin: 0.75rem 0;
+}
+
+.info-message {
+	color: #027a48;
+	margin: 0.75rem 0;
+}

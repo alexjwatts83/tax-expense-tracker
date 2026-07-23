@@ -29,11 +29,14 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Domain/application clock handling standardized on required `TimeProvider`
 - One-entry-per-date validation enforced for work-from-home and leave records
 - Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
+- Angular service/model layer added for WFH, Leave, and Public Holidays
+- Angular management screens added for WFH, Leave, and Public Holidays, including summary panels and CSV import
 
 ## Planned Enhancements
 
-- Angular screens for work-from-home and leave entry management
-- Public holiday CSV import UI workflow
+- UI-level coverage for WFH, Leave, and Public Holiday flows
+- Summary UX decisions for shared vs separate WFH/Leave views
+- Additional empty-state and validation polish for new screens
 - Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
 
 ## Tech Stack
@@ -161,6 +164,9 @@ Current filter query params:
 
 - /dashboard
 - /expenses
+- /work-from-home
+- /leave
+- /public-holidays
 - /trackers
 - /tags
 - /banks
@@ -243,7 +249,7 @@ Recent schema updates:
 - Phase 2 - Entry Management Use Cases: Complete
 - Phase 3 - Weekly and Monthly Reporting: Complete
 - Phase 4 - Public Holiday CSV Import: In Progress
-- Phase 5 - API and Frontend Delivery: In Progress
+- Phase 5 - API and Frontend Delivery: Near Complete
 - Phase 6 - Hardening and Polish: Pending
 - DDD/Clean phases A-F complete
 - Bank entity refactor completed end-to-end (backend, frontend, migration, tests)
