@@ -27,6 +27,7 @@ type DayCategory = 'none' | 'wfh' | 'leave';
 interface CalendarDayRowVm {
   dateIso: string;
   dayLabel: string;
+  isToday: boolean;
   category: DayCategory;
   originalCategory: DayCategory;
   entryType: DayEntryType;
@@ -149,6 +150,11 @@ export class CalendarBatchEntry implements OnInit {
 
   goToNextMonth(): void {
     this.monthAnchor = new Date(this.monthAnchor.getFullYear(), this.monthAnchor.getMonth() + 1, 1);
+    this.loadMonth();
+  }
+
+  goToCurrentMonth(): void {
+    this.monthAnchor = this.startOfMonth(new Date());
     this.loadMonth();
   }
 
@@ -633,6 +639,7 @@ export class CalendarBatchEntry implements OnInit {
     const year = anchor.getFullYear();
     const month = anchor.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = this.toDateIso(new Date());
 
     for (let day = 1; day <= daysInMonth; day += 1) {
       const date = new Date(year, month, day);
@@ -657,6 +664,7 @@ export class CalendarBatchEntry implements OnInit {
       rows.push({
         dateIso,
         dayLabel: new Intl.DateTimeFormat('en-AU', { weekday: 'short', day: '2-digit', month: 'short' }).format(date),
+        isToday: dateIso === today,
         category: originalCategory,
         originalCategory,
         entryType: originalEntryType,

@@ -7,7 +7,9 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/leave")]
-public class LeaveController(ILeaveService leaveService) : ControllerBase
+public class LeaveController(
+    ILeaveService leaveService,
+    ILogger<LeaveController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LeaveDto>>> GetAll(
@@ -53,6 +55,9 @@ public class LeaveController(ILeaveService leaveService) : ControllerBase
         CreateLeaveBatchDto request,
         CancellationToken cancellationToken)
     {
+        var requestedCount = request.Items?.Count ?? 0;
+        logger.LogInformation("Leave batch create requested with {RequestedCount} items.", requestedCount);
+
         var commands = (request.Items ?? [])
             .Select(x => new CreateLeaveCommand(
                 x.LeaveDate,
@@ -62,6 +67,18 @@ public class LeaveController(ILeaveService leaveService) : ControllerBase
             .ToList();
 
         var result = await leaveService.BatchCreateAsync(commands, cancellationToken);
+
+        logger.LogInformation(
+            "Leave batch create completed. Requested={RequestedCount}, Created={CreatedCount}, Skipped={SkippedCount}, Failed={FailedCount}.",
+            result.TotalRequested,
+            result.CreatedCount,
+            result.SkippedCount,
+            result.FailedCount);
+
+        if (result.FailedCount > 0)
+        {
+            logger.LogWarning("Leave batch create had failures for {FailedCount} items.", result.FailedCount);
+        }
 
         return Ok(new LeaveBatchResultDto
         {

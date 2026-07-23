@@ -255,6 +255,44 @@ public class WorkFromHomeServiceTests
         Assert.All(result.Results, x => Assert.Equal("FailedConflict", x.Status));
     }
 
+    [Fact]
+    public async Task BatchCreateAsync_ReturnsEmptyResult_WhenRequestItemsEmpty()
+    {
+        var repository = new InMemoryWorkFromHomeRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync([]);
+
+        Assert.Equal(0, result.TotalRequested);
+        Assert.Equal(0, result.CreatedCount);
+        Assert.Equal(0, result.SkippedCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Empty(result.Results);
+    }
+
+    [Fact]
+    public async Task BatchCreateAsync_CreatesEntry_WhenOnlyExistingEntryForDateIsSoftDeleted()
+    {
+        var repository = new InMemoryWorkFromHomeRepository();
+        var existing = WorkFromHomeEntry.Create(new DateTime(2026, 2, 5), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        existing.SoftDelete(TestTime.TimeProvider);
+        repository.Entries.Add(existing);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateWorkFromHomeCommand(new DateTime(2026, 2, 5), DayEntryType.HalfDay, null, null),
+        ]);
+
+        Assert.Equal(1, result.TotalRequested);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(0, result.SkippedCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.WorkDate == new DateTime(2026, 2, 5));
+    }
+
     private sealed class InMemoryPublicHolidayRepository : IPublicHolidayRepository
     {
         public List<PublicHoliday> Holidays { get; } = [];

@@ -255,6 +255,44 @@ public class LeaveServiceTests
         Assert.All(result.Results, x => Assert.Equal("FailedConflict", x.Status));
     }
 
+    [Fact]
+    public async Task BatchCreateAsync_ReturnsEmptyResult_WhenRequestItemsEmpty()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync([]);
+
+        Assert.Equal(0, result.TotalRequested);
+        Assert.Equal(0, result.CreatedCount);
+        Assert.Equal(0, result.SkippedCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Empty(result.Results);
+    }
+
+    [Fact]
+    public async Task BatchCreateAsync_CreatesEntry_WhenOnlyExistingEntryForDateIsSoftDeleted()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var existing = LeaveEntry.Create(new DateTime(2026, 4, 8), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        existing.SoftDelete(TestTime.TimeProvider);
+        repository.Entries.Add(existing);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateLeaveCommand(new DateTime(2026, 4, 8), DayEntryType.HalfDay, null, null),
+        ]);
+
+        Assert.Equal(1, result.TotalRequested);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(0, result.SkippedCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate == new DateTime(2026, 4, 8));
+    }
+
     private sealed class InMemoryPublicHolidayRepository : IPublicHolidayRepository
     {
         public List<PublicHoliday> Holidays { get; } = [];

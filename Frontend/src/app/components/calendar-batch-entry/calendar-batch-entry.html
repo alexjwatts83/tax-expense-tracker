@@ -11,6 +11,7 @@
 			<div class="month-toolbar">
 				<button mat-stroked-button type="button" aria-label="Go to previous month" (click)="goToPreviousMonth()">Previous Month</button>
 				<h2>{{ monthLabel }}</h2>
+				<button mat-stroked-button type="button" aria-label="Return to current month" (click)="goToCurrentMonth()">Current Month</button>
 				<button mat-stroked-button type="button" aria-label="Go to next month" (click)="goToNextMonth()">Next Month</button>
 			</div>
 
@@ -51,9 +52,12 @@
 							<div class="calendar-week-row">
 								@for (dayCell of week.days; track $index) {
 									@if (dayCell) {
-										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
+										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
 											<div class="date-cell">
 												<strong>{{ dayCell.dayLabel }}</strong>
+												@if (dayCell.isToday) {
+													<span class="today-chip" aria-label="Current day">Today</span>
+												}
 												<span class="date-code">{{ dayCell.dateIso }}</span>
 												@if (dayCell.resultState) {
 													<span class="result-chip" [class]="'result-chip ' + dayCell.resultState">{{ dayCell.resultState }}</span>

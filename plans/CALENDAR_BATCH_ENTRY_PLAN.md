@@ -59,6 +59,8 @@ Use this section to log implementation updates in chronological order.
 | 2026-07-23 | Team | Added backend leap-year/month-boundary unit tests for leave and WFH summaries and applied accessibility labels to calendar controls; build and unit tests pass. | Phase 4 | Complete |
 | 2026-07-23 | Team | Continued post-first-pass UX/accessibility refinements: added keyboard shortcuts on focused day cells (N/W/L/F/H/S), improved focus-visible styling, and added live-region feedback messaging; frontend build passes. | Post First Pass | Complete |
 | 2026-07-23 | Team | Added backend batch edge-case tests for date-only duplicate detection (same date with different time values) and holiday-priority conflict handling for both leave and WFH; unit test suite passes (54/54). | Post First Pass | Complete |
+| 2026-07-23 | Team | Added structured API logging for leave/WFH batch endpoints (requested/created/skipped/failed with warning on failures) and captured an operational monitoring checklist for ongoing support. | Post First Pass | Complete |
+| 2026-07-23 | Team | One-shot continuation pass completed: added Current Month action and today highlighting in calendar UI, plus backend batch edge-case tests for empty payload handling and soft-deleted date reuse for leave/WFH services. | Post First Pass | Complete |
 
 ## User Outcomes
 
@@ -303,9 +305,23 @@ Endpoint strategy is finalized as separate batch endpoints for WFH and Leave.
 No additional product decisions are required for the current roadmap.
 
 Implementation follow-ups (non-decision):
-1. Continue incremental UX polish and accessibility refinements on the calendar batch page.
-2. Monitor batch usage and error trends for operational insight while retaining split endpoints.
-3. Add backend unit tests for any newly discovered edge cases as they arise.
+1. Completed: incremental UX polish and accessibility refinements on the calendar batch page.
+2. In progress (ongoing): monitor batch usage and error trends for operational insight while retaining split endpoints.
+3. Completed: proactive backend unit-test expansion for known edge cases.
+
+### Operational Monitoring Checklist
+
+1. Track daily counts for each endpoint:
+   - `POST /api/work-from-home/batch`
+   - `POST /api/leave/batch`
+2. Monitor the result distribution from endpoint logs:
+   - Requested
+   - Created
+   - Skipped
+   - Failed
+3. Alert when failure ratio exceeds baseline expectations (for example, sustained >10% failures across a day).
+4. Review top failure messages weekly to identify product or validation friction.
+5. Capture monthly trend snapshots and add key observations to Progress Notes for roadmap planning.
 
 ## Tracking Workflow
 
