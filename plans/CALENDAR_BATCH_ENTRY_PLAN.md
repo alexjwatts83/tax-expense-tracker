@@ -58,6 +58,7 @@ Use this section to log implementation updates in chronological order.
 | 2026-07-23 | Team | Frontend unit tests removed from scope because frontend test framework/tests are not present in this project. | Phase 4 | In Progress |
 | 2026-07-23 | Team | Added backend leap-year/month-boundary unit tests for leave and WFH summaries and applied accessibility labels to calendar controls; build and unit tests pass. | Phase 4 | Complete |
 | 2026-07-23 | Team | Continued post-first-pass UX/accessibility refinements: added keyboard shortcuts on focused day cells (N/W/L/F/H/S), improved focus-visible styling, and added live-region feedback messaging; frontend build passes. | Post First Pass | Complete |
+| 2026-07-23 | Team | Added backend batch edge-case tests for date-only duplicate detection (same date with different time values) and holiday-priority conflict handling for both leave and WFH; unit test suite passes (54/54). | Post First Pass | Complete |
 
 ## User Outcomes
 

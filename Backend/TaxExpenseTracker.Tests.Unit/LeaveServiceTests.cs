@@ -214,6 +214,47 @@ public class LeaveServiceTests
         Assert.Equal(new DateTime(2028, 2, 29), summary.Holidays[0].Date);
     }
 
+    [Fact]
+    public async Task BatchCreateAsync_TreatsSameDateWithDifferentTimeAsDuplicate()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateLeaveCommand(new DateTime(2026, 3, 17, 8, 0, 0), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateTime(2026, 3, 17, 14, 0, 0), DayEntryType.HalfDay, null, null),
+        ]);
+
+        Assert.Equal(2, result.TotalRequested);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(1, result.SkippedCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Contains(result.Results, x => x.Status == "SkippedDuplicate" && x.LeaveDate == new DateTime(2026, 3, 17));
+    }
+
+    [Fact]
+    public async Task BatchCreateAsync_UsesHolidayConflictStatus_ForDuplicateHolidayDates()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 30), "Public Holiday", "Seed", false, TestTime.TimeProvider));
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateLeaveCommand(new DateTime(2026, 3, 30, 8, 0, 0), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateTime(2026, 3, 30, 12, 0, 0), DayEntryType.HalfDay, null, null),
+        ]);
+
+        Assert.Equal(2, result.TotalRequested);
+        Assert.Equal(0, result.CreatedCount);
+        Assert.Equal(0, result.SkippedCount);
+        Assert.Equal(2, result.FailedCount);
+        Assert.All(result.Results, x => Assert.Equal("FailedConflict", x.Status));
+    }
+
     private sealed class InMemoryPublicHolidayRepository : IPublicHolidayRepository
     {
         public List<PublicHoliday> Holidays { get; } = [];
