@@ -56,7 +56,25 @@ public class WorkFromHomeServiceTests
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.CreateAsync(new CreateWorkFromHomeCommand(new DateTime(2026, 1, 12), DayEntryType.HalfDay, null, null)));
 
-        Assert.Equal("A work-from-home entry already exists for this date.", ex.Message);
+        Assert.Equal("A work-location entry already exists for this date.", ex.Message);
+    }
+
+    [Fact]
+    public async Task CreateAsync_PersistsOfficeWorkLocation()
+    {
+        var repository = new InMemoryWorkFromHomeRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.CreateAsync(new CreateWorkFromHomeCommand(
+            new DateTime(2026, 1, 13),
+            DayEntryType.FullDay,
+            null,
+            null,
+            WorkLocationType.Office));
+
+        Assert.Equal(WorkLocationType.Office, result.WorkLocation);
+        Assert.Equal(WorkLocationType.Office, repository.Entries[0].WorkLocation);
     }
 
     [Fact]
@@ -133,7 +151,7 @@ public class WorkFromHomeServiceTests
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.UpdateAsync(entry.Id, new UpdateWorkFromHomeCommand(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null)));
 
-        Assert.Equal("A work-from-home entry already exists for this date.", ex.Message);
+        Assert.Equal("A work-location entry already exists for this date.", ex.Message);
     }
 
     [Fact]

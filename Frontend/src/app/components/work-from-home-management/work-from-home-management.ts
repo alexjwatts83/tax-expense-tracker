@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
-import { DayEntrySummary, DayEntryType, WorkFromHomeEntry } from '../../models/api.models';
+import { DayEntrySummary, DayEntryType, WorkFromHomeEntry, WorkLocationType } from '../../models/api.models';
 import { WorkFromHomeService } from '../../services/work-from-home';
 import { toLocalDateInputValue } from '../../utils/date';
 
@@ -35,12 +35,16 @@ export class WorkFromHomeManagement implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly displayedColumns: string[] = ['workDate', 'entryType', 'hoursWorked', 'notes', 'actions'];
+  readonly displayedColumns: string[] = ['workDate', 'workLocation', 'entryType', 'hoursWorked', 'notes', 'actions'];
   readonly pageSizes = [10, 20, 50];
   readonly entryTypeOptions = [
     { value: DayEntryType.FullDay, label: 'Full Day' },
     { value: DayEntryType.HalfDay, label: 'Half Day' },
     { value: DayEntryType.SpecificHours, label: 'Specific Hours' },
+  ];
+  readonly workLocationOptions = [
+    { value: WorkLocationType.Wfh, label: 'WFH' },
+    { value: WorkLocationType.Office, label: 'Office' },
   ];
   readonly summaryViewOptions = [
     { value: 'week', label: 'Week' },
@@ -49,6 +53,7 @@ export class WorkFromHomeManagement implements OnInit {
 
   readonly entryForm = this.formBuilder.group({
     workDate: [this.today(), Validators.required],
+    workLocation: [WorkLocationType.Wfh, Validators.required],
     entryType: [DayEntryType.FullDay, Validators.required],
     specificHours: [null as number | null],
     notes: [''],
@@ -156,6 +161,7 @@ export class WorkFromHomeManagement implements OnInit {
     this.workFromHomeService
       .create({
         workDate: value.workDate ?? this.today(),
+        workLocation: value.workLocation ?? WorkLocationType.Wfh,
         entryType: value.entryType ?? DayEntryType.FullDay,
         specificHours: value.entryType === DayEntryType.SpecificHours ? value.specificHours : null,
         notes: value.notes?.trim() || null,
@@ -172,6 +178,7 @@ export class WorkFromHomeManagement implements OnInit {
           this.updatePagedEntries();
           this.entryForm.patchValue({
             workDate: this.today(),
+            workLocation: WorkLocationType.Wfh,
             entryType: DayEntryType.FullDay,
             specificHours: null,
             notes: '',
@@ -236,6 +243,10 @@ export class WorkFromHomeManagement implements OnInit {
 
   formatEntryType(entryType: DayEntryType): string {
     return this.entryTypeOptions.find((x) => x.value === entryType)?.label ?? 'Unknown';
+  }
+
+  formatWorkLocation(workLocation: WorkLocationType): string {
+    return this.workLocationOptions.find((x) => x.value === workLocation)?.label ?? 'Unknown';
   }
 
   applyFilters(): void {

@@ -86,6 +86,11 @@ export enum DayEntryType {
   SpecificHours = 3,
 }
 
+export enum WorkLocationType {
+  Wfh = 1,
+  Office = 2,
+}
+
 export interface DayEntryHoliday {
   date: string;
   name: string;
@@ -110,6 +115,7 @@ export interface DateRangeRequest {
 export interface WorkFromHomeEntry {
   id: string;
   workDate: string;
+  workLocation: WorkLocationType;
   entryType: DayEntryType;
   hoursWorked: number;
   notes?: string | null;
@@ -119,6 +125,7 @@ export interface WorkFromHomeEntry {
 
 export interface CreateWorkFromHomeRequest {
   workDate: string;
+  workLocation: WorkLocationType;
   entryType: DayEntryType;
   specificHours?: number | null;
   notes?: string | null;
@@ -130,6 +137,7 @@ export interface WorkFromHomeBatchCreateRequest {
 
 export interface WorkFromHomeBatchItemResult {
   workDate: string;
+  workLocation: WorkLocationType;
   entryType: DayEntryType;
   specificHours?: number | null;
   notes?: string | null;

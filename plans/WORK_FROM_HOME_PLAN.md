@@ -1,8 +1,8 @@
-# Work From Home and Leave Tracker Plan
+# Work Location and Leave Tracker Plan
 
 ## Goal
 
-Add a work-from-home and leave tracking feature that lets users record time away from the office, review entries by week or month, and import public holidays from a CSV file.
+Add a work-location (WFH/Office) and leave tracking feature that lets users record time by location or leave, review entries by week or month, and import public holidays from a CSV file.
 
 ## Current Progress Snapshot
 
@@ -17,17 +17,17 @@ Add a work-from-home and leave tracking feature that lets users record time away
 
 The user will be able to:
 
-1. Enter a date worked from home.
+1. Enter a date worked as WFH or Office.
 2. Enter a date for leave.
 3. Select a full day, half day, or a specific number of hours for either entry type.
-4. View work-from-home and leave entries grouped by week or month.
+4. View work-location and leave entries grouped by week or month.
 5. Import public holidays from a CSV file.
 
 ## Scope
 
 ### In Scope
 
-1. Create and manage work-from-home entries.
+1. Create and manage work-location entries (WFH/Office).
 2. Create and manage leave entries.
 3. Support three time entry modes:
    - Full day = 7.6 hours
@@ -41,13 +41,13 @@ The user will be able to:
 1. Payroll export.
 2. Per-project or per-client time allocation.
 3. Approval workflows.
-4. Recurring work-from-home schedules.
+4. Recurring work-location schedules.
 
 ## Functional Requirements
 
 ### Entry Capture
 
-1. Users can create a work-from-home or leave entry for a selected date.
+1. Users can create a WFH, Office, or leave entry for a selected date.
 2. Users can choose one of three entry types:
    - Full day = 7.6 hours
    - Half day = 3.8 hours
@@ -60,9 +60,9 @@ The user will be able to:
 1. Weekly view uses a Monday-Sunday week boundary.
 2. Monthly view should show entries grouped by month with totals.
 3. Each view should display:
-   - total WFH hours
+   - total work-location hours
    - total leave hours
-   - number of WFH days
+   - number of work-location days
    - number of leave days
    - holiday markers within the selected period
 4. Users should be able to move forward/backward by week or month.
@@ -84,7 +84,7 @@ The user will be able to:
 4. Duplicate rows in the same file are skipped.
 5. Rows already present in the database (same date + name) are skipped.
 6. The public holiday screen loads all records by default until a date filter is applied.
-7. WFH and leave entry paging remains client-side unless real usage shows a server-side need.
+7. Work-location and leave entry paging remains client-side unless real usage shows a server-side need.
 
 ## Proposed Data Model
 
@@ -92,6 +92,7 @@ The user will be able to:
 
 - Id (GUID/UUID) - Primary Key
 - WorkDate (DateOnly or DateTime)
+- WorkLocation (Wfh, Office)
 - EntryType (FullDay, HalfDay, SpecificHours)
 - HoursWorked (decimal)
 - Notes (string, nullable)
@@ -158,7 +159,7 @@ Seed the initial public holiday records with the following known holidays:
 1. Full day always resolves to 7.6 hours.
 2. Half day always resolves to 3.8 hours.
 3. Specific hours must be greater than 0 and should probably cap at a sensible daily maximum.
-4. Public holiday dates are shown as display-only markers and do not change WFH or leave totals or day counts.
+4. Public holiday dates are shown as display-only markers and do not change work-location or leave totals or day counts.
 5. CSV import should reject invalid dates and missing mandatory columns.
 
 ## API Shape
@@ -193,7 +194,7 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Frontend Features
 
-1. Add a WFH entry form with date picker and entry type selector.
+1. Add a work-location entry form with date picker, location selector (WFH/Office), and entry type selector.
 2. Add a leave entry form with the same day-part options.
 3. Add a weekly/monthly summary page with navigation controls.
 4. Highlight public holidays in the summary views.
@@ -204,14 +205,14 @@ Seed the initial public holiday records with the following known holidays:
 
 ### Phase 1 - Domain and Persistence
 
-1. Add WFH entry and public holiday entities.
+1. Add work-location entry and public holiday entities.
 2. Add leave entry entity.
 3. Add persistence and migrations.
 4. Add validation rules for hours and dates.
 
 ### Phase 2 - Application Use Cases
 
-1. Add create/update/delete/query services for WFH entries.
+1. Add create/update/delete/query services for work-location entries.
 2. Add create/update/delete/query services for leave entries.
 3. Add summary queries for week and month views.
 4. Add holiday import use case with CSV parsing and validation.
@@ -238,7 +239,7 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Acceptance Criteria
 
-1. Users can record WFH entries as full day, half day, or specific hours.
+1. Users can record work-location entries (WFH/Office) as full day, half day, or specific hours.
 2. Weekly and monthly views display totals correctly.
 3. Public holidays can be imported from CSV and shown in reports.
 4. Invalid dates, hours, and CSV rows are rejected with clear feedback.

@@ -14,6 +14,7 @@ public sealed class WorkFromHomeBatchResultDto
 public sealed class WorkFromHomeBatchItemResultDto
 {
     public DateTime WorkDate { get; set; }
+    public WorkLocationType WorkLocation { get; set; }
     public DayEntryType EntryType { get; set; }
     public decimal? SpecificHours { get; set; }
     public string? Notes { get; set; }

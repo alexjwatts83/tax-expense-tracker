@@ -1,9 +1,9 @@
 <section class="page calendar-page">
 	<header class="page-header">
 		<h1>Calendar Batch Entry</h1>
-		<p>Pick weekdays for the month and mark each row as WFH or Leave.</p>
-		<p class="rule-note">Public holidays are locked. WFH and Leave cannot be added on those dates.</p>
-		<p class="keyboard-tip">Keyboard shortcuts on a focused day: N=None, W=WFH, L=Leave, F=Full day, H=Half day, S=Specific hours.</p>
+		<p>Pick weekdays for the month and mark each row as WFH, Office, or Leave.</p>
+		<p class="rule-note">Public holidays are locked. WFH, Office, and Leave cannot be added on those dates.</p>
+		<p class="keyboard-tip">Keyboard shortcuts on a focused day: N=None, W=WFH, O=Office, L=Leave, F=Full day, H=Half day, S=Specific hours.</p>
 	</header>
 
 	<mat-card class="month-card">
@@ -17,6 +17,7 @@
 
 			<div class="quick-actions">
 				<button mat-button type="button" aria-label="Set all weekdays to work from home" (click)="setAllCategory('wfh')">Mark All as WFH</button>
+				<button mat-button type="button" aria-label="Set all weekdays to office" (click)="setAllCategory('office')">Mark All as Office</button>
 				<button mat-button type="button" aria-label="Set all weekdays to leave" (click)="setAllCategory('leave')">Mark All as Leave</button>
 				<button mat-button type="button" aria-label="Revert all pending day changes" (click)="clearAll()">Clear All</button>
 			</div>
@@ -52,7 +53,7 @@
 							<div class="calendar-week-row">
 								@for (dayCell of week.days; track $index) {
 									@if (dayCell) {
-										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" [class.wfh-row]="!dayCell.isHoliday && dayCell.category === 'wfh'" [class.leave-row]="!dayCell.isHoliday && dayCell.category === 'leave'" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
+										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" [class.wfh-row]="!dayCell.isHoliday && dayCell.category === 'wfh'" [class.office-row]="!dayCell.isHoliday && dayCell.category === 'office'" [class.leave-row]="!dayCell.isHoliday && dayCell.category === 'leave'" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
 											<div class="date-cell">
 												<strong>{{ dayCell.dayLabel }}</strong>
 												@if (dayCell.isToday) {

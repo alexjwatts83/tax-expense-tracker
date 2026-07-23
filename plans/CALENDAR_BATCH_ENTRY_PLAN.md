@@ -1,12 +1,12 @@
-# Calendar Batch Entry Plan (WFH and Leave)
+# Calendar Batch Entry Plan (Work Location and Leave)
 
 ## Goal
 
-Add a new page that shows a month view focused on Monday to Friday, where each day is displayed as a row/tile. The user can select one or more days, choose whether each day is Work From Home (WFH) or Leave, and submit all selected entries in a single batch action.
+Add a new page that shows a month view focused on Monday to Friday, where each day is displayed as a row/tile. The user can select one or more days, choose whether each day is WFH, Office, or Leave, and submit all selected entries in a single batch action.
 
 ## Problem Statement
 
-Current WFH and Leave flows are entry-by-entry. Users need a faster way to plan or backfill multiple weekdays for a month without creating each record individually.
+Current work-location and leave flows are entry-by-entry. Users need a faster way to plan or backfill multiple weekdays for a month without creating each record individually.
 
 ## Progress Tracking
 
@@ -28,14 +28,14 @@ Current WFH and Leave flows are entry-by-entry. Users need a faster way to plan 
 
 1. Endpoint approach (combined vs split): [x] Decided - Separate endpoints for now.
 2. Existing entry behavior (read-only vs editable): [x] Decided - Editable in place.
-3. Public holiday behavior: [x] Decided - Public holidays are locked; users cannot add WFH or Leave.
+3. Public holiday behavior: [x] Decided - Public holidays are locked; users cannot add WFH, Office, or Leave.
 4. Default entry type/hours behavior: [x] Decided - Default entry type is Full Day.
 
 ### Milestone Checklist
 
 1. [x] Route added and reachable from navbar.
 2. [x] Month weekday renderer implemented (Monday-Friday only).
-3. [x] Per-day selector implemented (None/WFH/Leave).
+3. [x] Per-day selector implemented (None/WFH/Office/Leave).
 4. [x] Per-day entry type and hours validation implemented.
 5. [x] Batch payload contract finalized.
 6. [x] Batch API implemented and wired.
@@ -61,6 +61,7 @@ Use this section to log implementation updates in chronological order.
 | 2026-07-23 | Team | Added backend batch edge-case tests for date-only duplicate detection (same date with different time values) and holiday-priority conflict handling for both leave and WFH; unit test suite passes (54/54). | Post First Pass | Complete |
 | 2026-07-23 | Team | Added structured API logging for leave/WFH batch endpoints (requested/created/skipped/failed with warning on failures) and captured an operational monitoring checklist for ongoing support. | Post First Pass | Complete |
 | 2026-07-23 | Team | One-shot continuation pass completed: added Current Month action and today highlighting in calendar UI, plus backend batch edge-case tests for empty payload handling and soft-deleted date reuse for leave/WFH services. | Post First Pass | Complete |
+| 2026-07-23 | Team | Extended WFH model to support Work Location (WFH/Office), updated calendar batch selector to include Office, and wired API/frontend payloads plus migration/documentation updates. | Post First Pass | Complete |
 
 ## User Outcomes
 
@@ -71,6 +72,7 @@ The user will be able to:
 3. Mark each day as one of:
    - None
    - WFH
+   - Office
    - Leave
 4. Optionally set entry type for each marked day:
    - Full Day (7.6)
@@ -85,7 +87,7 @@ The user will be able to:
 
 1. New frontend page and route for monthly weekday batch entry.
 2. Weekday-only month rendering (Mon-Fri).
-3. Per-day state management for WFH/Leave/None.
+3. Per-day state management for WFH/Office/Leave/None.
 4. Batch submit workflow with API support.
 5. Validation and conflict handling (duplicates, invalid hours, conflicting day type).
 6. Basic tests for UI state logic and backend batch use case.
@@ -103,12 +105,12 @@ The user will be able to:
 
 1. Header:
    - Month navigation (Previous, Current Month label, Next)
-   - Optional quick actions: Clear All, Mark Selected as WFH, Mark Selected as Leave
+   - Optional quick actions: Clear All, Mark Selected as WFH, Mark Selected as Office, Mark Selected as Leave
 2. Calendar grid/list:
    - Show Monday to Friday dates only for the selected month
    - Each day row/tile includes:
      - Date label (e.g., Mon 05)
-     - Status selector (None, WFH, Leave)
+   - Status selector (None, WFH, Office, Leave)
      - Entry type selector (Full Day, Half Day, Specific Hours)
      - Hours input visible only when Specific Hours is selected
      - Optional notes input (if required later)
@@ -119,11 +121,11 @@ The user will be able to:
 
 ## Interaction Rules
 
-1. Selecting WFH/Leave marks the row as pending for batch add.
+1. Selecting WFH/Office/Leave marks the row as pending for batch add.
 2. Selecting None removes that row from pending payload.
 3. Specific Hours requires a decimal value greater than 0 and within configured max.
 4. Weekends are not shown and cannot be selected.
-5. Public holidays are shown as markers and are not selectable for WFH or Leave.
+5. Public holidays are shown as markers and are not selectable for WFH, Office, or Leave.
 6. New day selections default to Full Day unless the user changes entry type.
 
 ## Functional Requirements
@@ -141,7 +143,7 @@ The user will be able to:
 
 1. Batch Add sends only pending unsaved changes.
 2. Backend validates each item independently.
-3. Frontend groups pending rows by category and submits to separate WFH and Leave batch endpoints.
+3. Frontend groups pending rows by category and submits Leave rows to leave endpoints and WFH/Office rows to work-location endpoints.
 4. Batch response includes per-item result:
    - Created
    - SkippedDuplicate
@@ -151,12 +153,12 @@ The user will be able to:
 
 ## Business Rules
 
-1. One category per day: a day cannot be both WFH and Leave in the same batch item.
+1. One category per day: a day cannot be both work-location and leave in the same batch item.
 2. Full Day = 7.6 hours.
 3. Half Day = 3.8 hours.
 4. Specific Hours > 0 and <= daily maximum.
-5. Duplicate rules follow existing domain constraints for WFH and Leave entries.
-6. Public holidays are locked days; WFH and Leave cannot be added on those dates.
+5. Duplicate rules follow existing domain constraints for work-location and Leave entries.
+6. Public holidays are locked days; WFH, Office, and Leave cannot be added on those dates.
 
 ## API Plan
 
@@ -167,7 +169,7 @@ The user will be able to:
    - month (YYYY-MM)
    - items[] with:
      - date (YYYY-MM-DD)
-     - category (WFH | Leave)
+   - category (WFH | Office | Leave)
      - entryType (FullDay | HalfDay | SpecificHours)
      - hours (required for SpecificHours)
 3. Response model:
@@ -279,7 +281,7 @@ Status: [x] Complete
 
 1. A dedicated page exists and is reachable from the frontend navigation.
 2. The page displays only Monday-Friday days for the selected month.
-3. Users can mark days as WFH or Leave and choose entry type.
+3. Users can mark days as WFH, Office, or Leave and choose entry type.
 4. Batch Add submits all pending rows in one action.
 5. User sees accurate result summary for created/skipped/failed rows.
 6. Duplicate or invalid rows do not block valid rows from being created.

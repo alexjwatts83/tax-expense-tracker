@@ -9,19 +9,22 @@ public sealed record WorkFromHomeReadDto(
     decimal HoursWorked,
     string? Notes,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
 public sealed record CreateWorkFromHomeCommand(
     DateTime WorkDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
-    string? Notes);
+    string? Notes,
+    WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
 public sealed record UpdateWorkFromHomeCommand(
     DateTime WorkDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
-    string? Notes);
+    string? Notes,
+    WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
 public sealed record BatchCreateWorkFromHomeResult(
     int TotalRequested,
@@ -32,6 +35,7 @@ public sealed record BatchCreateWorkFromHomeResult(
 
 public sealed record BatchCreateWorkFromHomeItemResult(
     DateTime WorkDate,
+    WorkLocationType WorkLocation,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,

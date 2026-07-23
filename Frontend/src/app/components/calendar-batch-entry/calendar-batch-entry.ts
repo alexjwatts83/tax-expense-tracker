@@ -15,6 +15,7 @@ import {
   DayEntryType,
   LeaveEntry,
   LeaveBatchCreateResult,
+  WorkLocationType,
   WorkFromHomeEntry,
   WorkFromHomeBatchCreateResult,
 } from '../../models/api.models';
@@ -22,7 +23,7 @@ import { LeaveService } from '../../services/leave';
 import { PublicHolidayService } from '../../services/public-holiday';
 import { WorkFromHomeService } from '../../services/work-from-home';
 
-type DayCategory = 'none' | 'wfh' | 'leave';
+type DayCategory = 'none' | 'wfh' | 'office' | 'leave';
 
 interface CalendarDayRowVm {
   dateIso: string;
@@ -79,6 +80,7 @@ export class CalendarBatchEntry implements OnInit {
   readonly categoryOptions: Array<{ value: DayCategory; label: string }> = [
     { value: 'none', label: 'None' },
     { value: 'wfh', label: 'WFH' },
+    { value: 'office', label: 'Office' },
     { value: 'leave', label: 'Leave' },
   ];
 
@@ -185,7 +187,7 @@ export class CalendarBatchEntry implements OnInit {
       }
     }
 
-    this.infoMessage = `All weekday rows were set to ${category === 'wfh' ? 'WFH' : 'Leave'}.`;
+    this.infoMessage = `All weekday rows were set to ${this.categoryLabel(category)}.`;
     this.errorMessage = '';
   }
 
@@ -229,6 +231,12 @@ export class CalendarBatchEntry implements OnInit {
 
     if (key === 'w') {
       this.onCategoryChange(row, 'wfh');
+      event.preventDefault();
+      return;
+    }
+
+    if (key === 'o') {
+      this.onCategoryChange(row, 'office');
       event.preventDefault();
       return;
     }
@@ -287,12 +295,13 @@ export class CalendarBatchEntry implements OnInit {
 
     const changedRows = this.rows.filter((row) => this.isRowChanged(row));
 
-    const wfhCreateOps = changedRows
-      .filter((row) => this.requiresCreate(row, 'wfh'))
+    const workCreateOps = changedRows
+      .filter((row) => this.requiresWorkCreate(row))
       .map((row) => ({
         row,
         payload: {
           workDate: row.dateIso,
+          workLocation: this.toWorkLocationType(row.category),
           entryType: row.entryType,
           specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
           notes: null,
@@ -311,8 +320,8 @@ export class CalendarBatchEntry implements OnInit {
         } as CreateLeaveRequest,
       }));
 
-    const wfhDeleteOps = changedRows
-      .filter((row) => this.requiresDelete(row, 'wfh') && row.workFromHomeId)
+    const workDeleteOps = changedRows
+      .filter((row) => this.requiresWorkDelete(row) && row.workFromHomeId)
       .map((row) => ({
         row,
         id: row.workFromHomeId as string,
@@ -325,13 +334,14 @@ export class CalendarBatchEntry implements OnInit {
         id: row.leaveId as string,
       }));
 
-    const wfhUpdateOps = changedRows
-      .filter((row) => this.requiresUpdate(row, 'wfh') && row.workFromHomeId)
+    const workUpdateOps = changedRows
+      .filter((row) => this.requiresWorkUpdate(row) && row.workFromHomeId)
       .map((row) => ({
         row,
         id: row.workFromHomeId as string,
         payload: {
           workDate: row.dateIso,
+          workLocation: this.toWorkLocationType(row.category),
           entryType: row.entryType,
           specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
           notes: null,
@@ -360,12 +370,12 @@ export class CalendarBatchEntry implements OnInit {
     this.infoMessage = '';
 
     forkJoin({
-      wfhCreate: wfhCreateOps.length === 0
+      wfhCreate: workCreateOps.length === 0
         ? of<WorkFromHomeBatchCreateResult>(this.emptyWfhBatchResult())
-        : this.workFromHomeService.createBatch({ items: wfhCreateOps.map((x) => x.payload) }).pipe(
+        : this.workFromHomeService.createBatch({ items: workCreateOps.map((x) => x.payload) }).pipe(
             catchError((err) =>
               of<WorkFromHomeBatchCreateResult>(
-                this.failedWfhBatchResult(wfhCreateOps.length, err?.error?.detail ?? 'WFH batch request failed.'),
+                this.failedWfhBatchResult(workCreateOps.length, err?.error?.detail ?? 'Work-location batch request failed.'),
               ),
             ),
           ),
@@ -378,13 +388,13 @@ export class CalendarBatchEntry implements OnInit {
               ),
             ),
           ),
-      wfhDelete: wfhDeleteOps.length === 0
+      wfhDelete: workDeleteOps.length === 0
         ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
         : forkJoin(
-            wfhDeleteOps.map((op) =>
+            workDeleteOps.map((op) =>
               this.workFromHomeService.softDelete(op.id).pipe(
                 map(() => ({ row: op.row, ok: true, message: '' })),
-                catchError(() => of({ row: op.row, ok: false, message: 'Failed to remove existing WFH entry.' })),
+                catchError(() => of({ row: op.row, ok: false, message: 'Failed to remove existing work-location entry.' })),
               ),
             ),
           ),
@@ -398,13 +408,13 @@ export class CalendarBatchEntry implements OnInit {
               ),
             ),
           ),
-      wfhUpdate: wfhUpdateOps.length === 0
+      wfhUpdate: workUpdateOps.length === 0
         ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
         : forkJoin(
-            wfhUpdateOps.map((op) =>
+            workUpdateOps.map((op) =>
               this.workFromHomeService.update(op.id, op.payload).pipe(
                 map(() => ({ row: op.row, ok: true, message: '' })),
-                catchError(() => of({ row: op.row, ok: false, message: 'Failed to update existing WFH entry.' })),
+                catchError(() => of({ row: op.row, ok: false, message: 'Failed to update existing work-location entry.' })),
               ),
             ),
           ),
@@ -425,7 +435,7 @@ export class CalendarBatchEntry implements OnInit {
           let skipped = 0;
           let failed = 0;
 
-          const wfhCreateByDate = new Map(wfhCreateOps.map((x) => [x.row.dateIso, x.row]));
+          const wfhCreateByDate = new Map(workCreateOps.map((x) => [x.row.dateIso, x.row]));
           for (const result of wfhCreate.results) {
             const row = wfhCreateByDate.get(this.toDateKey(result.workDate));
             if (!row) {
@@ -435,19 +445,19 @@ export class CalendarBatchEntry implements OnInit {
             if (result.status === 'Created' && result.entry) {
               applied += 1;
               row.workFromHomeId = result.entry.id;
-              this.markApplied(row, 'Created WFH entry.');
+              this.markApplied(row, `Created ${this.workLocationLabel(result.entry.workLocation)} entry.`);
               this.syncOriginalState(row);
               continue;
             }
 
             if (result.status === 'SkippedDuplicate') {
               skipped += 1;
-              this.markSkipped(row, result.message ?? 'Skipped duplicate WFH entry.');
+              this.markSkipped(row, result.message ?? 'Skipped duplicate work-location entry.');
               continue;
             }
 
             failed += 1;
-            this.markFailed(row, result.message ?? 'WFH create failed.');
+            this.markFailed(row, result.message ?? 'Work-location create failed.');
           }
 
           const leaveCreateByDate = new Map(leaveCreateOps.map((x) => [x.row.dateIso, x.row]));
@@ -479,7 +489,7 @@ export class CalendarBatchEntry implements OnInit {
             if (result.ok) {
               applied += 1;
               result.row.workFromHomeId = null;
-              this.markApplied(result.row, 'Removed existing WFH entry.');
+              this.markApplied(result.row, 'Removed existing work-location entry.');
               this.syncOriginalState(result.row);
             } else {
               failed += 1;
@@ -502,7 +512,7 @@ export class CalendarBatchEntry implements OnInit {
           for (const result of wfhUpdate) {
             if (result.ok) {
               applied += 1;
-              this.markApplied(result.row, 'Updated existing WFH entry.');
+              this.markApplied(result.row, 'Updated existing work-location entry.');
               this.syncOriginalState(result.row);
             } else {
               failed += 1;
@@ -654,7 +664,7 @@ export class CalendarBatchEntry implements OnInit {
       const leaveEntry = leaveByDate.get(dateIso) ?? null;
       const wfhEntry = wfhByDate.get(dateIso) ?? null;
 
-      const originalCategory: DayCategory = leaveEntry ? 'leave' : wfhEntry ? 'wfh' : 'none';
+      const originalCategory: DayCategory = leaveEntry ? 'leave' : wfhEntry ? this.toCategoryFromWorkLocation(wfhEntry.workLocation) : 'none';
       const originalEntryType = leaveEntry?.entryType ?? wfhEntry?.entryType ?? DayEntryType.FullDay;
       const originalSpecificHours =
         originalEntryType === DayEntryType.SpecificHours
@@ -762,6 +772,46 @@ export class CalendarBatchEntry implements OnInit {
 
   private requiresUpdate(row: CalendarDayRowVm, category: Exclude<DayCategory, 'none'>): boolean {
     return row.originalCategory === category && row.category === category && this.isRowChanged(row);
+  }
+
+  private isWorkCategory(category: DayCategory): boolean {
+    return category === 'wfh' || category === 'office';
+  }
+
+  private requiresWorkCreate(row: CalendarDayRowVm): boolean {
+    return this.isWorkCategory(row.category) && !this.isWorkCategory(row.originalCategory);
+  }
+
+  private requiresWorkDelete(row: CalendarDayRowVm): boolean {
+    return this.isWorkCategory(row.originalCategory) && !this.isWorkCategory(row.category);
+  }
+
+  private requiresWorkUpdate(row: CalendarDayRowVm): boolean {
+    return this.isWorkCategory(row.originalCategory) && this.isWorkCategory(row.category) && this.isRowChanged(row);
+  }
+
+  private toWorkLocationType(category: DayCategory): WorkLocationType {
+    return category === 'office' ? WorkLocationType.Office : WorkLocationType.Wfh;
+  }
+
+  private toCategoryFromWorkLocation(workLocation: WorkLocationType): DayCategory {
+    return workLocation === WorkLocationType.Office ? 'office' : 'wfh';
+  }
+
+  private workLocationLabel(workLocation: WorkLocationType): string {
+    return workLocation === WorkLocationType.Office ? 'Office' : 'WFH';
+  }
+
+  private categoryLabel(category: Exclude<DayCategory, 'none'>): string {
+    if (category === 'wfh') {
+      return 'WFH';
+    }
+
+    if (category === 'office') {
+      return 'Office';
+    }
+
+    return 'Leave';
   }
 
   private clearRowResult(row: CalendarDayRowVm): void {

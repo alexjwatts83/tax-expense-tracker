@@ -3,6 +3,7 @@ namespace TaxExpenseTracker.Domain.Entities;
 public class WorkFromHomeEntry : AuditableSoftDeletableEntity
 {
     public DateTime WorkDate { get; set; }
+    public WorkLocationType WorkLocation { get; set; }
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }
     public string? Notes { get; set; }
@@ -12,7 +13,8 @@ public class WorkFromHomeEntry : AuditableSoftDeletableEntity
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        WorkLocationType workLocation = WorkLocationType.Wfh)
     {
         ArgumentNullException.ThrowIfNull(timeProvider);
         var now = timeProvider.GetUtcNow().UtcDateTime;
@@ -21,6 +23,7 @@ public class WorkFromHomeEntry : AuditableSoftDeletableEntity
         {
             Id = Guid.NewGuid(),
             WorkDate = ValidateDate(workDate),
+            WorkLocation = ValidateWorkLocation(workLocation),
             EntryType = ValidateEntryType(entryType),
             HoursWorked = ResolveHours(entryType, specificHours),
             Notes = NormalizeOptional(notes),
@@ -35,14 +38,26 @@ public class WorkFromHomeEntry : AuditableSoftDeletableEntity
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        WorkLocationType workLocation = WorkLocationType.Wfh)
     {
         ArgumentNullException.ThrowIfNull(timeProvider);
         WorkDate = ValidateDate(workDate);
+        WorkLocation = ValidateWorkLocation(workLocation);
         EntryType = ValidateEntryType(entryType);
         HoursWorked = ResolveHours(entryType, specificHours);
         Notes = NormalizeOptional(notes);
         UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
+    }
+
+    private static WorkLocationType ValidateWorkLocation(WorkLocationType workLocation)
+    {
+        if (!Enum.IsDefined(workLocation))
+        {
+            throw new ArgumentOutOfRangeException(nameof(workLocation), "Work location is invalid.");
+        }
+
+        return workLocation;
     }
 
     private static DayEntryType ValidateEntryType(DayEntryType entryType)

@@ -56,9 +56,9 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
     {
         var existsForDate = await _workFromHomeRepository.ExistsForDateAsync(command.WorkDate, cancellationToken: cancellationToken);
         if (existsForDate)
-            ThrowHelper.InvalidOperation("A work-from-home entry already exists for this date.");
+            ThrowHelper.InvalidOperation("A work-location entry already exists for this date.");
 
-        var entry = WorkFromHomeEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
+        var entry = WorkFromHomeEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
 
         await _workFromHomeRepository.AddAsync(entry, cancellationToken);
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
@@ -97,6 +97,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             {
                 results.Add(new BatchCreateWorkFromHomeItemResult(
                     workDate,
+                    command.WorkLocation,
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
@@ -111,6 +112,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
                 skippedCount += 1;
                 results.Add(new BatchCreateWorkFromHomeItemResult(
                     workDate,
+                    command.WorkLocation,
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
@@ -126,24 +128,26 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
                 skippedCount += 1;
                 results.Add(new BatchCreateWorkFromHomeItemResult(
                     workDate,
+                    command.WorkLocation,
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
                     StatusSkippedDuplicate,
-                    "A work-from-home entry already exists for this date.",
+                    "A work-location entry already exists for this date.",
                     null));
                 continue;
             }
 
             try
             {
-                var entry = WorkFromHomeEntry.Create(workDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
+                var entry = WorkFromHomeEntry.Create(workDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
                 await _workFromHomeRepository.AddAsync(entry, cancellationToken);
                 await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
 
                 createdCount += 1;
                 results.Add(new BatchCreateWorkFromHomeItemResult(
                     workDate,
+                    command.WorkLocation,
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
@@ -155,6 +159,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             {
                 results.Add(new BatchCreateWorkFromHomeItemResult(
                     workDate,
+                    command.WorkLocation,
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
@@ -166,6 +171,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             {
                 results.Add(new BatchCreateWorkFromHomeItemResult(
                     workDate,
+                    command.WorkLocation,
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
@@ -195,9 +201,9 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
 
         var existsForDate = await _workFromHomeRepository.ExistsForDateAsync(command.WorkDate, id, cancellationToken);
         if (existsForDate)
-            ThrowHelper.InvalidOperation("A work-from-home entry already exists for this date.");
+            ThrowHelper.InvalidOperation("A work-location entry already exists for this date.");
 
-        entry.Update(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
+        entry.Update(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -260,6 +266,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             entry.HoursWorked,
             entry.Notes,
             entry.CreatedAt,
-            entry.UpdatedAt);
+            entry.UpdatedAt,
+            entry.WorkLocation);
     }
 }

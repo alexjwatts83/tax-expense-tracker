@@ -44,7 +44,8 @@ public class WorkFromHomeController(
                 request.WorkDate,
                 request.EntryType,
                 request.SpecificHours,
-                request.Notes),
+                request.Notes,
+                request.WorkLocation),
             cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id = entry.Id }, MapWorkFromHome(entry));
@@ -56,20 +57,21 @@ public class WorkFromHomeController(
         CancellationToken cancellationToken)
     {
         var requestedCount = request.Items?.Count ?? 0;
-        logger.LogInformation("WFH batch create requested with {RequestedCount} items.", requestedCount);
+        logger.LogInformation("Work-location batch create requested with {RequestedCount} items.", requestedCount);
 
         var commands = (request.Items ?? [])
             .Select(x => new CreateWorkFromHomeCommand(
                 x.WorkDate,
                 x.EntryType,
                 x.SpecificHours,
-                x.Notes))
+                x.Notes,
+                x.WorkLocation))
             .ToList();
 
         var result = await workFromHomeService.BatchCreateAsync(commands, cancellationToken);
 
         logger.LogInformation(
-            "WFH batch create completed. Requested={RequestedCount}, Created={CreatedCount}, Skipped={SkippedCount}, Failed={FailedCount}.",
+            "Work-location batch create completed. Requested={RequestedCount}, Created={CreatedCount}, Skipped={SkippedCount}, Failed={FailedCount}.",
             result.TotalRequested,
             result.CreatedCount,
             result.SkippedCount,
@@ -77,7 +79,7 @@ public class WorkFromHomeController(
 
         if (result.FailedCount > 0)
         {
-            logger.LogWarning("WFH batch create had failures for {FailedCount} items.", result.FailedCount);
+            logger.LogWarning("Work-location batch create had failures for {FailedCount} items.", result.FailedCount);
         }
 
         return Ok(new WorkFromHomeBatchResultDto
@@ -90,6 +92,7 @@ public class WorkFromHomeController(
                 .Select(x => new WorkFromHomeBatchItemResultDto
                 {
                     WorkDate = x.WorkDate,
+                    WorkLocation = x.WorkLocation,
                     EntryType = x.EntryType,
                     SpecificHours = x.SpecificHours,
                     Notes = x.Notes,
@@ -110,7 +113,8 @@ public class WorkFromHomeController(
                 request.WorkDate,
                 request.EntryType,
                 request.SpecificHours,
-                request.Notes),
+                request.Notes,
+                request.WorkLocation),
             cancellationToken);
 
         if (!updated)
@@ -187,6 +191,7 @@ public class WorkFromHomeController(
         {
             Id = entry.Id,
             WorkDate = entry.WorkDate,
+            WorkLocation = entry.WorkLocation,
             EntryType = entry.EntryType,
             HoursWorked = entry.HoursWorked,
             Notes = entry.Notes,

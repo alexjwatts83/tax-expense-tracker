@@ -2,7 +2,7 @@
 
 Tax Expense Tracker is a full-stack app for managing tax-deductible expenses with soft-delete safety, filtering, and summary reporting.
 
-It also has a documented roadmap for work-from-home, leave, and public-holiday tracking in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md).
+It also has a documented roadmap for work-location (WFH/Office), leave, and public-holiday tracking in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md).
 
 ## Implemented Highlights
 
@@ -17,25 +17,25 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Dashboard summary totals grouped by bank and source
 - TaxExpense.Item removed end-to-end from domain, API, frontend models, and DB schema
 - Local run automation scripts with robust port handling
-- Work-from-home, leave, and public-holiday entities added to the domain and persistence model
-- WFH/leave repositories and application services implemented and wired in DI
-- WFH and leave API endpoints added for CRUD, restore, and optional date-range querying
-- WFH and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
-- Holiday markers are display-only and do not alter WFH/Leave totals or day counts
+- Work-location (WFH/Office), leave, and public-holiday entities added to the domain and persistence model
+- Work-location/leave repositories and application services implemented and wired in DI
+- Work-location and leave API endpoints added for CRUD, restore, and optional date-range querying
+- Work-location and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
+- Holiday markers are display-only and do not alter work-location/leave totals or day counts
 - Public holiday API endpoints added for list and CSV import with validation and duplicate handling
 - Public holiday seed data for 2026/2027 added via EF migration
 - Shared entity base abstractions introduced (`IEntity`, `Entity`, `SoftDeletableEntity`, `AuditableEntity`, `AuditableSoftDeletableEntity`)
 - Shared generic repository abstractions introduced (`IRepository<T>`, `ISoftDeleteRepository<T>`)
 - Domain guard clauses standardized with `ThrowIfNullOrWhiteSpace` and `ThrowIfEqual`
 - Domain/application clock handling standardized on required `TimeProvider`
-- One-entry-per-date validation enforced for work-from-home and leave records
+- One-entry-per-date validation enforced for work-location and leave records
 - Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
-- Angular service/model layer added for WFH, Leave, and Public Holidays
-- Angular management screens added for WFH, Leave, and Public Holidays, with WFH and Leave combined under a shared time-tracking page
+- Angular service/model layer added for Work Location (WFH/Office), Leave, and Public Holidays
+- Angular management screens added for Work Location, Leave, and Public Holidays, with Work Location and Leave combined under a shared time-tracking page
 - Time-tracking screens use local date input formatting to avoid UTC day drift in browser date fields
 - Time-tracking screens support date-range filtering and lightweight client-side paging
 - Public holiday screen loads all holiday records by default and applies filters only when requested
-- WFH/Leave paging remains client-side by design for current personal-use scale
+- Work-location/Leave paging remains client-side by design for current personal-use scale
 
 ## Planned Enhancements
 
@@ -128,6 +128,11 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - DELETE /api/work-from-home/{id}
 - POST /api/work-from-home/{id}/restore
 - GET /api/work-from-home/summary?view=week|month&date=YYYY-MM-DD
+
+`/api/work-from-home` payloads now include a `workLocation` field:
+
+- `1` = WFH
+- `2` = Office
 
 ### Leave
 
@@ -243,6 +248,7 @@ Recent schema updates:
 - `20260722041006_MakeBankEntity` (bank converted from string field to entity relationship)
 - `20260722044559_RemoveExpenseItem` (removed Item column from TaxExpenses)
 - `20260723003927_AddWfhLeaveAndPublicHolidays` (added WFH/leave/public-holiday tables and holiday seed data)
+- `20260723044046_AddWorkLocationToWorkFromHome` (added `WorkLocation` column to work-from-home entries for WFH/Office support)
 
 ## Status
 
@@ -257,6 +263,6 @@ Recent schema updates:
 - Expense Item field removed end-to-end (backend, frontend, migration, tests)
 - Domain and repository abstraction refactors completed (shared entity and repository interfaces)
 - TimeProvider refactor completed across domain and application services
-- Unit tests passing: 46/46
+- Unit tests passing: 59/59
 
 Open work remains across phases 3-6, focused on reporting, CSV import, API/frontend delivery, and hardening.
