@@ -190,6 +190,30 @@ public class WorkFromHomeServiceTests
         Assert.Contains(result.Results, x => x.Status == "FailedValidation" && x.WorkDate.Date == new DateTime(2026, 1, 15));
     }
 
+    [Fact]
+    public async Task GetSummaryAsync_Month_LeapYear_IncludesLeapDayAndRespectsBounds()
+    {
+        var repository = new InMemoryWorkFromHomeRepository();
+        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2028, 2, 28), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2028, 2, 29), DayEntryType.HalfDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2028, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2028, 2, 29), "Leap Day Holiday", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2028, 3, 1), "Outside Range", "Seed", false, TestTime.TimeProvider));
+
+        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var summary = await service.GetSummaryAsync(SummaryView.Month, new DateTime(2028, 2, 10));
+
+        Assert.Equal(new DateTime(2028, 2, 1), summary.FromDate);
+        Assert.Equal(new DateTime(2028, 2, 29), summary.ToDate);
+        Assert.Equal(11.4m, summary.TotalHours);
+        Assert.Equal(2, summary.TotalDays);
+        Assert.Equal(2, summary.EntryCount);
+        Assert.Single(summary.Holidays);
+        Assert.Equal(new DateTime(2028, 2, 29), summary.Holidays[0].Date);
+    }
+
     private sealed class InMemoryPublicHolidayRepository : IPublicHolidayRepository
     {
         public List<PublicHoliday> Holidays { get; } = [];

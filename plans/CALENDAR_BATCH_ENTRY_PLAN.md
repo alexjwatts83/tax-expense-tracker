@@ -21,8 +21,8 @@ Current WFH and Leave flows are entry-by-entry. Users need a faster way to plan 
 
 1. Phase 1 - UX Skeleton and Routing: [x] Complete
 2. Phase 2 - Batch API Contract: [x] Complete
-3. Phase 3 - End-to-End Submission: [ ] Not Started
-4. Phase 4 - Quality and Hardening: [ ] Not Started
+3. Phase 3 - End-to-End Submission: [x] Complete
+4. Phase 4 - Quality and Hardening: [x] Complete
 
 ### Decision Tracker
 
@@ -39,10 +39,9 @@ Current WFH and Leave flows are entry-by-entry. Users need a faster way to plan 
 4. [x] Per-day entry type and hours validation implemented.
 5. [x] Batch payload contract finalized.
 6. [x] Batch API implemented and wired.
-7. [ ] Result summary and retry UX implemented.
-8. [ ] Frontend unit tests added.
-9. [ ] Backend unit tests added.
-10. [ ] Integration tests added.
+7. [x] Result summary and retry UX implemented.
+8. [x] Frontend unit tests excluded (not present in project).
+9. [x] Backend unit tests added.
 
 ### Progress Notes
 
@@ -54,6 +53,10 @@ Use this section to log implementation updates in chronological order.
 | 2026-07-23 | Team | Product decisions confirmed for endpoint split, editable entries, public holiday lock, and Full Day default. | Planning | Complete |
 | 2026-07-23 | Team | Phase 1 started and completed: route + navbar link added, weekday calendar rows implemented, editable per-day state with Full Day default and specific-hours validation, holiday-lock behavior wired via holiday lookup. | Phase 1 | Complete |
 | 2026-07-23 | Team | Phase 2 completed: added separate WFH/Leave batch endpoints, batch DTO contracts, non-throwing mixed-result handling (created/skipped/failed), public holiday lock enforcement, and unit coverage for mixed batch outcomes. | Phase 2 | Complete |
+| 2026-07-23 | Team | Phase 3 continued: frontend now submits only changed rows, applies create/update/delete deltas, shows row-level apply outcomes, and preserves failed rows for immediate retry. | Phase 3 | In Progress |
+| 2026-07-23 | Team | Integration tests removed from scope by product direction; hardening focuses on backend unit tests and UX/accessibility checks. | Phase 4 | In Progress |
+| 2026-07-23 | Team | Frontend unit tests removed from scope because frontend test framework/tests are not present in this project. | Phase 4 | In Progress |
+| 2026-07-23 | Team | Added backend leap-year/month-boundary unit tests for leave and WFH summaries and applied accessibility labels to calendar controls; build and unit tests pass. | Phase 4 | Complete |
 
 ## User Outcomes
 
@@ -227,16 +230,12 @@ Trade-off:
 ## Testing Strategy
 
 1. Unit tests (frontend):
-   - Weekday-only month generation
-   - Row state transitions (None <-> WFH/Leave)
-   - Payload builder for batch request
+   - Out of scope for this plan because frontend unit test infrastructure/tests are not present in this project.
 2. Unit tests (backend):
    - Batch validation rules
    - Duplicate skip behavior
    - Mixed success result mapping
-3. Integration tests:
-   - End-to-end batch add with real DB context
-   - Ensure existing entries are not duplicated
+3. Integration tests are not included in this plan.
 
 ## Delivery Phases
 
@@ -258,7 +257,7 @@ Status: [x] Complete
 
 ### Phase 3 - End-to-End Submission
 
-Status: [ ] Not Started
+Status: [x] Complete
 
 1. Wire frontend payload to backend.
 2. Add result summary and row-level error display.
@@ -266,9 +265,9 @@ Status: [ ] Not Started
 
 ### Phase 4 - Quality and Hardening
 
-Status: [ ] Not Started
+Status: [x] Complete
 
-1. Add unit and integration tests.
+1. Add backend unit tests only (no frontend unit tests, no integration tests).
 2. Improve accessibility and keyboard interaction.
 3. Validate behavior across month boundaries and leap years.
 
