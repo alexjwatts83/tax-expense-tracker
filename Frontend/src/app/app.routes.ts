@@ -28,7 +28,6 @@ export const routes: Routes = [
 			import('./components/time-tracking/time-tracking').then((m) => m.TimeTracking),
 	},
 	{ path: 'work-locations', redirectTo: 'time-tracking', pathMatch: 'full' },
-	{ path: 'work-from-home', redirectTo: 'work-locations', pathMatch: 'full' },
 	{ path: 'leave', redirectTo: 'time-tracking', pathMatch: 'full' },
 	{
 		path: 'trackers',

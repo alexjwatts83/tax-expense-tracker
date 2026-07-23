@@ -129,10 +129,6 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - POST /api/work-locations/{id}/restore
 - GET /api/work-locations/summary?view=week|month&date=YYYY-MM-DD
 
-Legacy compatibility route currently supported:
-
-- /api/work-from-home
-
 `/api/work-locations` payloads include a `workLocation` field:
 
 - `1` = WFH

@@ -7,7 +7,6 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/work-locations")]
-[Route("api/work-from-home")]
 public class WorkLocationController(
     IWorkLocationService workLocationService,
     ILogger<WorkLocationController> logger) : ControllerBase
