@@ -1,47 +1,47 @@
 using Microsoft.AspNetCore.Mvc;
 using TaxExpenseTracker.Api.Models;
 using TaxExpenseTracker.Application.Common;
-using TaxExpenseTracker.Application.WorkFromHome;
+using TaxExpenseTracker.Application.WorkLocation;
 
 namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/work-locations")]
 [Route("api/work-from-home")]
-public class WorkFromHomeController(
-    IWorkFromHomeService workFromHomeService,
-    ILogger<WorkFromHomeController> logger) : ControllerBase
+public class WorkLocationController(
+    IWorkLocationService workLocationService,
+    ILogger<WorkLocationController> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<WorkFromHomeDto>>> GetAll(
+    public async Task<ActionResult<IEnumerable<WorkLocationDto>>> GetAll(
         DateTime? fromDate,
         DateTime? toDate,
         CancellationToken cancellationToken)
     {
         var entries = fromDate.HasValue || toDate.HasValue
-            ? await workFromHomeService.GetByDateRangeAsync(fromDate, toDate, cancellationToken)
-            : await workFromHomeService.GetAllAsync(cancellationToken);
+            ? await workLocationService.GetByDateRangeAsync(fromDate, toDate, cancellationToken)
+            : await workLocationService.GetAllAsync(cancellationToken);
 
-        return Ok(entries.Select(MapWorkFromHome));
+        return Ok(entries.Select(MapWorkLocation));
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<WorkFromHomeDto>> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<WorkLocationDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var entry = await workFromHomeService.GetByIdAsync(id, cancellationToken);
+        var entry = await workLocationService.GetByIdAsync(id, cancellationToken);
         if (entry is null)
         {
             return NotFound();
         }
 
-        return Ok(MapWorkFromHome(entry));
+        return Ok(MapWorkLocation(entry));
     }
 
     [HttpPost]
-    public async Task<ActionResult<WorkFromHomeDto>> Create(CreateWorkFromHomeDto request, CancellationToken cancellationToken)
+    public async Task<ActionResult<WorkLocationDto>> Create(CreateWorkLocationDto request, CancellationToken cancellationToken)
     {
-        var entry = await workFromHomeService.CreateAsync(
-            new CreateWorkFromHomeCommand(
+        var entry = await workLocationService.CreateAsync(
+            new CreateWorkLocationCommand(
                 request.WorkDate,
                 request.EntryType,
                 request.SpecificHours,
@@ -49,19 +49,19 @@ public class WorkFromHomeController(
                 request.WorkLocation),
             cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id = entry.Id }, MapWorkFromHome(entry));
+        return CreatedAtAction(nameof(GetById), new { id = entry.Id }, MapWorkLocation(entry));
     }
 
     [HttpPost("batch")]
-    public async Task<ActionResult<WorkFromHomeBatchResultDto>> BatchCreate(
-        CreateWorkFromHomeBatchDto request,
+    public async Task<ActionResult<WorkLocationBatchResultDto>> BatchCreate(
+        CreateWorkLocationBatchDto request,
         CancellationToken cancellationToken)
     {
         var requestedCount = request.Items?.Count ?? 0;
         logger.LogInformation("Work-location batch create requested with {RequestedCount} items.", requestedCount);
 
         var commands = (request.Items ?? [])
-            .Select(x => new CreateWorkFromHomeCommand(
+            .Select(x => new CreateWorkLocationCommand(
                 x.WorkDate,
                 x.EntryType,
                 x.SpecificHours,
@@ -69,7 +69,7 @@ public class WorkFromHomeController(
                 x.WorkLocation))
             .ToList();
 
-        var result = await workFromHomeService.BatchCreateAsync(commands, cancellationToken);
+        var result = await workLocationService.BatchCreateAsync(commands, cancellationToken);
 
         logger.LogInformation(
             "Work-location batch create completed. Requested={RequestedCount}, Created={CreatedCount}, Skipped={SkippedCount}, Failed={FailedCount}.",
@@ -83,14 +83,14 @@ public class WorkFromHomeController(
             logger.LogWarning("Work-location batch create had failures for {FailedCount} items.", result.FailedCount);
         }
 
-        return Ok(new WorkFromHomeBatchResultDto
+        return Ok(new WorkLocationBatchResultDto
         {
             TotalRequested = result.TotalRequested,
             CreatedCount = result.CreatedCount,
             SkippedCount = result.SkippedCount,
             FailedCount = result.FailedCount,
             Results = result.Results
-                .Select(x => new WorkFromHomeBatchItemResultDto
+                .Select(x => new WorkLocationBatchItemResultDto
                 {
                     WorkDate = x.WorkDate,
                     WorkLocation = x.WorkLocation,
@@ -99,18 +99,18 @@ public class WorkFromHomeController(
                     Notes = x.Notes,
                     Status = x.Status,
                     Message = x.Message,
-                    Entry = x.Entry is null ? null : MapWorkFromHome(x.Entry),
+                    Entry = x.Entry is null ? null : MapWorkLocation(x.Entry),
                 })
                 .ToList(),
         });
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<WorkFromHomeDto>> Update(Guid id, CreateWorkFromHomeDto request, CancellationToken cancellationToken)
+    public async Task<ActionResult<WorkLocationDto>> Update(Guid id, CreateWorkLocationDto request, CancellationToken cancellationToken)
     {
-        var updated = await workFromHomeService.UpdateAsync(
+        var updated = await workLocationService.UpdateAsync(
             id,
-            new UpdateWorkFromHomeCommand(
+            new UpdateWorkLocationCommand(
                 request.WorkDate,
                 request.EntryType,
                 request.SpecificHours,
@@ -123,19 +123,19 @@ public class WorkFromHomeController(
             return NotFound();
         }
 
-        var entry = await workFromHomeService.GetByIdAsync(id, cancellationToken);
+        var entry = await workLocationService.GetByIdAsync(id, cancellationToken);
         if (entry is null)
         {
             return NotFound();
         }
 
-        return Ok(MapWorkFromHome(entry));
+        return Ok(MapWorkLocation(entry));
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> SoftDelete(Guid id, CancellationToken cancellationToken)
     {
-        var deleted = await workFromHomeService.DeleteAsync(id, cancellationToken);
+        var deleted = await workLocationService.DeleteAsync(id, cancellationToken);
         if (!deleted)
         {
             return NotFound();
@@ -147,7 +147,7 @@ public class WorkFromHomeController(
     [HttpPost("{id:guid}/restore")]
     public async Task<IActionResult> Restore(Guid id, CancellationToken cancellationToken)
     {
-        var restored = await workFromHomeService.RestoreAsync(id, cancellationToken);
+        var restored = await workLocationService.RestoreAsync(id, cancellationToken);
         if (!restored)
         {
             return NotFound();
@@ -157,7 +157,7 @@ public class WorkFromHomeController(
     }
 
     [HttpGet("summary")]
-    public async Task<ActionResult<WorkFromHomeSummaryDto>> Summary(
+    public async Task<ActionResult<WorkLocationSummaryDto>> Summary(
         string view = "month",
         DateTime? date = null,
         CancellationToken cancellationToken = default)
@@ -165,9 +165,9 @@ public class WorkFromHomeController(
         var summaryView = ParseSummaryView(view);
         var anchorDate = date?.Date ?? DateTime.UtcNow.Date;
 
-        var summary = await workFromHomeService.GetSummaryAsync(summaryView, anchorDate, cancellationToken);
+        var summary = await workLocationService.GetSummaryAsync(summaryView, anchorDate, cancellationToken);
 
-        return Ok(new WorkFromHomeSummaryDto
+        return Ok(new WorkLocationSummaryDto
         {
             View = view.ToLowerInvariant(),
             AnchorDate = anchorDate,
@@ -186,9 +186,9 @@ public class WorkFromHomeController(
         });
     }
 
-    private static WorkFromHomeDto MapWorkFromHome(WorkFromHomeReadDto entry)
+    private static WorkLocationDto MapWorkLocation(WorkLocationReadDto entry)
     {
-        return new WorkFromHomeDto
+        return new WorkLocationDto
         {
             Id = entry.Id,
             WorkDate = entry.WorkDate,

@@ -2,39 +2,39 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-	CreateWorkFromHomeRequest,
-	WorkFromHomeBatchCreateRequest,
-	WorkFromHomeBatchCreateResult,
+	CreateWorkLocationRequest,
+	WorkLocationBatchCreateRequest,
+	WorkLocationBatchCreateResult,
 	DateRangeRequest,
 	DayEntrySummary,
-	WorkFromHomeEntry,
+	WorkLocationEntry,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
-export class WorkFromHomeService {
-	private readonly apiUrl = '/api/work-from-home';
+export class WorkLocationService {
+	private readonly apiUrl = '/api/work-locations';
 
 	constructor(private readonly http: HttpClient) {}
 
-	getAll(request?: DateRangeRequest): Observable<WorkFromHomeEntry[]> {
+	getAll(request?: DateRangeRequest): Observable<WorkLocationEntry[]> {
 		const params = this.buildDateRangeParams(request);
-		return this.http.get<WorkFromHomeEntry[]>(this.apiUrl, { params });
+		return this.http.get<WorkLocationEntry[]>(this.apiUrl, { params });
 	}
 
-	getById(id: string): Observable<WorkFromHomeEntry> {
-		return this.http.get<WorkFromHomeEntry>(`${this.apiUrl}/${id}`);
+	getById(id: string): Observable<WorkLocationEntry> {
+		return this.http.get<WorkLocationEntry>(`${this.apiUrl}/${id}`);
 	}
 
-	create(payload: CreateWorkFromHomeRequest): Observable<WorkFromHomeEntry> {
-		return this.http.post<WorkFromHomeEntry>(this.apiUrl, payload);
+	create(payload: CreateWorkLocationRequest): Observable<WorkLocationEntry> {
+		return this.http.post<WorkLocationEntry>(this.apiUrl, payload);
 	}
 
-	createBatch(payload: WorkFromHomeBatchCreateRequest): Observable<WorkFromHomeBatchCreateResult> {
-		return this.http.post<WorkFromHomeBatchCreateResult>(`${this.apiUrl}/batch`, payload);
+	createBatch(payload: WorkLocationBatchCreateRequest): Observable<WorkLocationBatchCreateResult> {
+		return this.http.post<WorkLocationBatchCreateResult>(`${this.apiUrl}/batch`, payload);
 	}
 
-	update(id: string, payload: CreateWorkFromHomeRequest): Observable<WorkFromHomeEntry> {
-		return this.http.put<WorkFromHomeEntry>(`${this.apiUrl}/${id}`, payload);
+	update(id: string, payload: CreateWorkLocationRequest): Observable<WorkLocationEntry> {
+		return this.http.put<WorkLocationEntry>(`${this.apiUrl}/${id}`, payload);
 	}
 
 	softDelete(id: string): Observable<void> {

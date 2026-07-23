@@ -112,7 +112,7 @@ export interface DateRangeRequest {
   toDate?: string;
 }
 
-export interface WorkFromHomeEntry {
+export interface WorkLocationEntry {
   id: string;
   workDate: string;
   workLocation: WorkLocationType;
@@ -123,7 +123,7 @@ export interface WorkFromHomeEntry {
   updatedAt: string;
 }
 
-export interface CreateWorkFromHomeRequest {
+export interface CreateWorkLocationRequest {
   workDate: string;
   workLocation: WorkLocationType;
   entryType: DayEntryType;
@@ -131,11 +131,11 @@ export interface CreateWorkFromHomeRequest {
   notes?: string | null;
 }
 
-export interface WorkFromHomeBatchCreateRequest {
-  items: CreateWorkFromHomeRequest[];
+export interface WorkLocationBatchCreateRequest {
+  items: CreateWorkLocationRequest[];
 }
 
-export interface WorkFromHomeBatchItemResult {
+export interface WorkLocationBatchItemResult {
   workDate: string;
   workLocation: WorkLocationType;
   entryType: DayEntryType;
@@ -143,15 +143,15 @@ export interface WorkFromHomeBatchItemResult {
   notes?: string | null;
   status: string;
   message?: string | null;
-  entry?: WorkFromHomeEntry | null;
+  entry?: WorkLocationEntry | null;
 }
 
-export interface WorkFromHomeBatchCreateResult {
+export interface WorkLocationBatchCreateResult {
   totalRequested: number;
   createdCount: number;
   skippedCount: number;
   failedCount: number;
-  results: WorkFromHomeBatchItemResult[];
+  results: WorkLocationBatchItemResult[];
 }
 
 export interface LeaveEntry {

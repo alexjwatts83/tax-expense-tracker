@@ -1,6 +1,6 @@
 namespace TaxExpenseTracker.Api.Models;
 
-public sealed class WorkFromHomeSummaryDto
+public sealed class WorkLocationSummaryDto
 {
     public string View { get; set; } = string.Empty;
     public DateTime AnchorDate { get; set; }

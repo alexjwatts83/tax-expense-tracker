@@ -1,6 +1,6 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class WorkFromHomeEntry : AuditableSoftDeletableEntity
+public class WorkLocationEntry : AuditableSoftDeletableEntity
 {
     public DateTime WorkDate { get; set; }
     public WorkLocationType WorkLocation { get; set; }
@@ -8,7 +8,7 @@ public class WorkFromHomeEntry : AuditableSoftDeletableEntity
     public decimal HoursWorked { get; set; }
     public string? Notes { get; set; }
 
-    public static WorkFromHomeEntry Create(
+    public static WorkLocationEntry Create(
         DateTime workDate,
         DayEntryType entryType,
         decimal? specificHours,
@@ -19,7 +19,7 @@ public class WorkFromHomeEntry : AuditableSoftDeletableEntity
         ArgumentNullException.ThrowIfNull(timeProvider);
         var now = timeProvider.GetUtcNow().UtcDateTime;
 
-        return new WorkFromHomeEntry
+        return new WorkLocationEntry
         {
             Id = Guid.NewGuid(),
             WorkDate = ValidateDate(workDate),

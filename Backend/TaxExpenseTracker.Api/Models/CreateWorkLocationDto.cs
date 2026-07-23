@@ -2,7 +2,7 @@ using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Api.Models;
 
-public sealed class CreateWorkFromHomeDto
+public sealed class CreateWorkLocationDto
 {
     public DateTime WorkDate { get; set; }
     public WorkLocationType WorkLocation { get; set; } = WorkLocationType.Wfh;

@@ -2,16 +2,16 @@ using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Api.Models;
 
-public sealed class WorkFromHomeBatchResultDto
+public sealed class WorkLocationBatchResultDto
 {
     public int TotalRequested { get; set; }
     public int CreatedCount { get; set; }
     public int SkippedCount { get; set; }
     public int FailedCount { get; set; }
-    public IReadOnlyList<WorkFromHomeBatchItemResultDto> Results { get; set; } = [];
+    public IReadOnlyList<WorkLocationBatchItemResultDto> Results { get; set; } = [];
 }
 
-public sealed class WorkFromHomeBatchItemResultDto
+public sealed class WorkLocationBatchItemResultDto
 {
     public DateTime WorkDate { get; set; }
     public WorkLocationType WorkLocation { get; set; }
@@ -20,5 +20,5 @@ public sealed class WorkFromHomeBatchItemResultDto
     public string? Notes { get; set; }
     public string Status { get; set; } = string.Empty;
     public string? Message { get; set; }
-    public WorkFromHomeDto? Entry { get; set; }
+    public WorkLocationDto? Entry { get; set; }
 }

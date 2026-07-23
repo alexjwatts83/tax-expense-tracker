@@ -2,7 +2,7 @@ using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Api.Models;
 
-public sealed class WorkFromHomeDto
+public sealed class WorkLocationDto
 {
     public Guid Id { get; set; }
     public DateTime WorkDate { get; set; }

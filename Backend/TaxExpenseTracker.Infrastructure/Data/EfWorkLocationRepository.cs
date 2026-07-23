@@ -1,17 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-using TaxExpenseTracker.Application.WorkFromHome;
+using TaxExpenseTracker.Application.WorkLocation;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Infrastructure.Data;
 
-public sealed class EfWorkFromHomeRepository : EfSoftDeleteRepository<WorkFromHomeEntry>, IWorkFromHomeRepository
+public sealed class EfWorkLocationRepository : EfSoftDeleteRepository<WorkLocationEntry>, IWorkLocationRepository
 {
-    public EfWorkFromHomeRepository(AppDbContext dbContext)
-        : base(dbContext, dbContext.WorkFromHomeEntries)
+    public EfWorkLocationRepository(AppDbContext dbContext)
+        : base(dbContext, dbContext.WorkLocationEntries)
     {
     }
 
-    public async Task<IReadOnlyList<WorkFromHomeEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WorkLocationEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
 

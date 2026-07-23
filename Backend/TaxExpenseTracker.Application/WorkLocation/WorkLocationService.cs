@@ -2,32 +2,32 @@ using TaxExpenseTracker.Domain.Entities;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.PublicHolidays;
 
-namespace TaxExpenseTracker.Application.WorkFromHome;
+namespace TaxExpenseTracker.Application.WorkLocation;
 
-public sealed class WorkFromHomeService : IWorkFromHomeService
+public sealed class WorkLocationService : IWorkLocationService
 {
     private const string StatusCreated = "Created";
     private const string StatusSkippedDuplicate = "SkippedDuplicate";
     private const string StatusFailedValidation = "FailedValidation";
     private const string StatusFailedConflict = "FailedConflict";
 
-    private readonly IWorkFromHomeRepository _workFromHomeRepository;
+    private readonly IWorkLocationRepository _workLocationRepository;
     private readonly IPublicHolidayRepository _publicHolidayRepository;
     private readonly TimeProvider _timeProvider;
 
-    public WorkFromHomeService(
-        IWorkFromHomeRepository workFromHomeRepository,
+    public WorkLocationService(
+        IWorkLocationRepository workLocationRepository,
         IPublicHolidayRepository publicHolidayRepository,
         TimeProvider timeProvider)
     {
-        _workFromHomeRepository = workFromHomeRepository;
+        _workLocationRepository = workLocationRepository;
         _publicHolidayRepository = publicHolidayRepository;
         _timeProvider = timeProvider;
     }
 
-    public async Task<IReadOnlyList<WorkFromHomeReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WorkLocationReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var entries = await _workFromHomeRepository.GetAllAsync(cancellationToken);
+        var entries = await _workLocationRepository.GetAllAsync(cancellationToken);
 
         return entries
             .OrderByDescending(x => x.WorkDate)
@@ -35,9 +35,9 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             .ToList();
     }
 
-    public async Task<IReadOnlyList<WorkFromHomeReadDto>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WorkLocationReadDto>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
     {
-        var entries = await _workFromHomeRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
+        var entries = await _workLocationRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
 
         return entries
             .OrderByDescending(x => x.WorkDate)
@@ -45,36 +45,36 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             .ToList();
     }
 
-    public async Task<WorkFromHomeReadDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<WorkLocationReadDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entry = await _workFromHomeRepository.GetByIdAsync(id, cancellationToken);
+        var entry = await _workLocationRepository.GetByIdAsync(id, cancellationToken);
 
         return entry is null ? null : ToReadDto(entry);
     }
 
-    public async Task<WorkFromHomeReadDto> CreateAsync(CreateWorkFromHomeCommand command, CancellationToken cancellationToken = default)
+    public async Task<WorkLocationReadDto> CreateAsync(CreateWorkLocationCommand command, CancellationToken cancellationToken = default)
     {
-        var existsForDate = await _workFromHomeRepository.ExistsForDateAsync(command.WorkDate, cancellationToken: cancellationToken);
+        var existsForDate = await _workLocationRepository.ExistsForDateAsync(command.WorkDate, cancellationToken: cancellationToken);
         if (existsForDate)
             ThrowHelper.InvalidOperation("A work-location entry already exists for this date.");
 
-        var entry = WorkFromHomeEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
+        var entry = WorkLocationEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
 
-        await _workFromHomeRepository.AddAsync(entry, cancellationToken);
-        await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
+        await _workLocationRepository.AddAsync(entry, cancellationToken);
+        await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
         return ToReadDto(entry);
     }
 
-    public async Task<BatchCreateWorkFromHomeResult> BatchCreateAsync(
-        IReadOnlyList<CreateWorkFromHomeCommand> commands,
+    public async Task<BatchCreateWorkLocationResult> BatchCreateAsync(
+        IReadOnlyList<CreateWorkLocationCommand> commands,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(commands);
 
         if (commands.Count == 0)
         {
-            return new BatchCreateWorkFromHomeResult(0, 0, 0, 0, []);
+            return new BatchCreateWorkLocationResult(0, 0, 0, 0, []);
         }
 
         var minDate = commands.Min(x => x.WorkDate).Date;
@@ -85,7 +85,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             .ToHashSet();
 
         var seenDates = new HashSet<DateTime>();
-        var results = new List<BatchCreateWorkFromHomeItemResult>(commands.Count);
+        var results = new List<BatchCreateWorkLocationItemResult>(commands.Count);
         var createdCount = 0;
         var skippedCount = 0;
 
@@ -95,14 +95,14 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
 
             if (holidayDates.Contains(workDate))
             {
-                results.Add(new BatchCreateWorkFromHomeItemResult(
+                results.Add(new BatchCreateWorkLocationItemResult(
                     workDate,
                     command.WorkLocation,
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
                     StatusFailedConflict,
-                    "Cannot create work-from-home on a public holiday.",
+                    "Cannot create work-location on a public holiday.",
                     null));
                 continue;
             }
@@ -110,7 +110,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             if (!seenDates.Add(workDate))
             {
                 skippedCount += 1;
-                results.Add(new BatchCreateWorkFromHomeItemResult(
+                results.Add(new BatchCreateWorkLocationItemResult(
                     workDate,
                     command.WorkLocation,
                     command.EntryType,
@@ -122,11 +122,11 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
                 continue;
             }
 
-            var existsForDate = await _workFromHomeRepository.ExistsForDateAsync(workDate, cancellationToken: cancellationToken);
+            var existsForDate = await _workLocationRepository.ExistsForDateAsync(workDate, cancellationToken: cancellationToken);
             if (existsForDate)
             {
                 skippedCount += 1;
-                results.Add(new BatchCreateWorkFromHomeItemResult(
+                results.Add(new BatchCreateWorkLocationItemResult(
                     workDate,
                     command.WorkLocation,
                     command.EntryType,
@@ -140,12 +140,12 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
 
             try
             {
-                var entry = WorkFromHomeEntry.Create(workDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
-                await _workFromHomeRepository.AddAsync(entry, cancellationToken);
-                await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
+                var entry = WorkLocationEntry.Create(workDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
+                await _workLocationRepository.AddAsync(entry, cancellationToken);
+                await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
                 createdCount += 1;
-                results.Add(new BatchCreateWorkFromHomeItemResult(
+                results.Add(new BatchCreateWorkLocationItemResult(
                     workDate,
                     command.WorkLocation,
                     command.EntryType,
@@ -157,7 +157,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             }
             catch (ArgumentException ex)
             {
-                results.Add(new BatchCreateWorkFromHomeItemResult(
+                results.Add(new BatchCreateWorkLocationItemResult(
                     workDate,
                     command.WorkLocation,
                     command.EntryType,
@@ -169,7 +169,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             }
             catch (InvalidOperationException ex)
             {
-                results.Add(new BatchCreateWorkFromHomeItemResult(
+                results.Add(new BatchCreateWorkLocationItemResult(
                     workDate,
                     command.WorkLocation,
                     command.EntryType,
@@ -183,7 +183,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
 
         var failedCount = results.Count - createdCount - skippedCount;
 
-        return new BatchCreateWorkFromHomeResult(
+        return new BatchCreateWorkLocationResult(
             commands.Count,
             createdCount,
             skippedCount,
@@ -191,48 +191,48 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
             results);
     }
 
-    public async Task<bool> UpdateAsync(Guid id, UpdateWorkFromHomeCommand command, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(Guid id, UpdateWorkLocationCommand command, CancellationToken cancellationToken = default)
     {
-        var entry = await _workFromHomeRepository.GetByIdAsync(id, cancellationToken);
+        var entry = await _workLocationRepository.GetByIdAsync(id, cancellationToken);
         if (entry is null)
         {
             return false;
         }
 
-        var existsForDate = await _workFromHomeRepository.ExistsForDateAsync(command.WorkDate, id, cancellationToken);
+        var existsForDate = await _workLocationRepository.ExistsForDateAsync(command.WorkDate, id, cancellationToken);
         if (existsForDate)
             ThrowHelper.InvalidOperation("A work-location entry already exists for this date.");
 
         entry.Update(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
-        await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
+        await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
         return true;
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entry = await _workFromHomeRepository.GetByIdAsync(id, cancellationToken);
+        var entry = await _workLocationRepository.GetByIdAsync(id, cancellationToken);
         if (entry is null)
         {
             return false;
         }
 
         entry.SoftDelete(_timeProvider);
-        await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
+        await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
         return true;
     }
 
     public async Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entry = await _workFromHomeRepository.GetByIdIncludingDeletedAsync(id, cancellationToken);
+        var entry = await _workLocationRepository.GetByIdIncludingDeletedAsync(id, cancellationToken);
         if (entry is null || !entry.IsDeleted)
         {
             return false;
         }
 
         entry.Restore(_timeProvider);
-        await _workFromHomeRepository.SaveChangesAsync(cancellationToken);
+        await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
         return true;
     }
@@ -241,7 +241,7 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
     {
         var (fromDate, toDate) = SummaryPeriod.GetBounds(date, view);
 
-        var entries = await _workFromHomeRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
+        var entries = await _workLocationRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
         var holidays = await _publicHolidayRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
 
         return new DayEntrySummaryDto(
@@ -257,9 +257,9 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
                 .ToList());
     }
 
-    private static WorkFromHomeReadDto ToReadDto(WorkFromHomeEntry entry)
+    private static WorkLocationReadDto ToReadDto(WorkLocationEntry entry)
     {
-        return new WorkFromHomeReadDto(
+        return new WorkLocationReadDto(
             entry.Id,
             entry.WorkDate,
             entry.EntryType,

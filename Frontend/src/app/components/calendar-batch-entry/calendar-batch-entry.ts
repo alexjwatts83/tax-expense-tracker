@@ -11,17 +11,17 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import {
   CreateLeaveRequest,
-  CreateWorkFromHomeRequest,
+  CreateWorkLocationRequest,
   DayEntryType,
   LeaveEntry,
   LeaveBatchCreateResult,
   WorkLocationType,
-  WorkFromHomeEntry,
-  WorkFromHomeBatchCreateResult,
+  WorkLocationEntry,
+  WorkLocationBatchCreateResult,
 } from '../../models/api.models';
 import { LeaveService } from '../../services/leave';
 import { PublicHolidayService } from '../../services/public-holiday';
-import { WorkFromHomeService } from '../../services/work-from-home';
+import { WorkLocationService } from '../../services/work-location';
 
 type DayCategory = 'none' | 'wfh' | 'office' | 'leave';
 
@@ -36,7 +36,7 @@ interface CalendarDayRowVm {
   specificHours: number | null;
   originalSpecificHours: number | null;
   leaveId: string | null;
-  workFromHomeId: string | null;
+  workLocationId: string | null;
   isHoliday: boolean;
   holidayName: string;
   resultState: 'applied' | 'failed' | 'skipped' | null;
@@ -68,7 +68,7 @@ interface CalendarWeekVm {
 export class CalendarBatchEntry implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly publicHolidayService = inject(PublicHolidayService);
-  private readonly workFromHomeService = inject(WorkFromHomeService);
+  private readonly workLocationService = inject(WorkLocationService);
   private readonly leaveService = inject(LeaveService);
 
   readonly entryTypeOptions = [
@@ -305,7 +305,7 @@ export class CalendarBatchEntry implements OnInit {
           entryType: row.entryType,
           specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
           notes: null,
-        } as CreateWorkFromHomeRequest,
+        } as CreateWorkLocationRequest,
       }));
 
     const leaveCreateOps = changedRows
@@ -321,10 +321,10 @@ export class CalendarBatchEntry implements OnInit {
       }));
 
     const workDeleteOps = changedRows
-      .filter((row) => this.requiresWorkDelete(row) && row.workFromHomeId)
+      .filter((row) => this.requiresWorkDelete(row) && row.workLocationId)
       .map((row) => ({
         row,
-        id: row.workFromHomeId as string,
+        id: row.workLocationId as string,
       }));
 
     const leaveDeleteOps = changedRows
@@ -335,17 +335,17 @@ export class CalendarBatchEntry implements OnInit {
       }));
 
     const workUpdateOps = changedRows
-      .filter((row) => this.requiresWorkUpdate(row) && row.workFromHomeId)
+      .filter((row) => this.requiresWorkUpdate(row) && row.workLocationId)
       .map((row) => ({
         row,
-        id: row.workFromHomeId as string,
+        id: row.workLocationId as string,
         payload: {
           workDate: row.dateIso,
           workLocation: this.toWorkLocationType(row.category),
           entryType: row.entryType,
           specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
           notes: null,
-        } as CreateWorkFromHomeRequest,
+        } as CreateWorkLocationRequest,
       }));
 
     const leaveUpdateOps = changedRows
@@ -371,10 +371,10 @@ export class CalendarBatchEntry implements OnInit {
 
     forkJoin({
       wfhCreate: workCreateOps.length === 0
-        ? of<WorkFromHomeBatchCreateResult>(this.emptyWfhBatchResult())
-        : this.workFromHomeService.createBatch({ items: workCreateOps.map((x) => x.payload) }).pipe(
+        ? of<WorkLocationBatchCreateResult>(this.emptyWfhBatchResult())
+        : this.workLocationService.createBatch({ items: workCreateOps.map((x) => x.payload) }).pipe(
             catchError((err) =>
-              of<WorkFromHomeBatchCreateResult>(
+              of<WorkLocationBatchCreateResult>(
                 this.failedWfhBatchResult(workCreateOps.length, err?.error?.detail ?? 'Work-location batch request failed.'),
               ),
             ),
@@ -392,7 +392,7 @@ export class CalendarBatchEntry implements OnInit {
         ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
         : forkJoin(
             workDeleteOps.map((op) =>
-              this.workFromHomeService.softDelete(op.id).pipe(
+              this.workLocationService.softDelete(op.id).pipe(
                 map(() => ({ row: op.row, ok: true, message: '' })),
                 catchError(() => of({ row: op.row, ok: false, message: 'Failed to remove existing work-location entry.' })),
               ),
@@ -412,7 +412,7 @@ export class CalendarBatchEntry implements OnInit {
         ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
         : forkJoin(
             workUpdateOps.map((op) =>
-              this.workFromHomeService.update(op.id, op.payload).pipe(
+              this.workLocationService.update(op.id, op.payload).pipe(
                 map(() => ({ row: op.row, ok: true, message: '' })),
                 catchError(() => of({ row: op.row, ok: false, message: 'Failed to update existing work-location entry.' })),
               ),
@@ -444,7 +444,7 @@ export class CalendarBatchEntry implements OnInit {
 
             if (result.status === 'Created' && result.entry) {
               applied += 1;
-              row.workFromHomeId = result.entry.id;
+              row.workLocationId = result.entry.id;
               this.markApplied(row, `Created ${this.workLocationLabel(result.entry.workLocation)} entry.`);
               this.syncOriginalState(row);
               continue;
@@ -488,7 +488,7 @@ export class CalendarBatchEntry implements OnInit {
           for (const result of wfhDelete) {
             if (result.ok) {
               applied += 1;
-              result.row.workFromHomeId = null;
+              result.row.workLocationId = null;
               this.markApplied(result.row, 'Removed existing work-location entry.');
               this.syncOriginalState(result.row);
             } else {
@@ -553,7 +553,7 @@ export class CalendarBatchEntry implements OnInit {
       });
   }
 
-  private emptyWfhBatchResult(): WorkFromHomeBatchCreateResult {
+  private emptyWfhBatchResult(): WorkLocationBatchCreateResult {
     return {
       totalRequested: 0,
       createdCount: 0,
@@ -563,7 +563,7 @@ export class CalendarBatchEntry implements OnInit {
     };
   }
 
-  private failedWfhBatchResult(totalRequested: number, message: string): WorkFromHomeBatchCreateResult {
+  private failedWfhBatchResult(totalRequested: number, message: string): WorkLocationBatchCreateResult {
     void message;
     return {
       totalRequested,
@@ -606,7 +606,7 @@ export class CalendarBatchEntry implements OnInit {
     forkJoin({
       holidays: this.publicHolidayService.getAll({ fromDate, toDate }),
       leave: this.leaveService.getAll({ fromDate, toDate }),
-      wfh: this.workFromHomeService.getAll({ fromDate, toDate }),
+      wfh: this.workLocationService.getAll({ fromDate, toDate }),
     })
       .pipe(
         take(1),
@@ -632,7 +632,7 @@ export class CalendarBatchEntry implements OnInit {
             this.monthAnchor,
             new Map<string, string>(),
             new Map<string, LeaveEntry>(),
-            new Map<string, WorkFromHomeEntry>(),
+            new Map<string, WorkLocationEntry>(),
           );
           this.errorMessage = 'Unable to load public holidays. Holiday day-locking may be incomplete until API is available.';
         },
@@ -643,7 +643,7 @@ export class CalendarBatchEntry implements OnInit {
     anchor: Date,
     holidayMap: Map<string, string>,
     leaveByDate: Map<string, LeaveEntry>,
-    wfhByDate: Map<string, WorkFromHomeEntry>,
+    wfhByDate: Map<string, WorkLocationEntry>,
   ): CalendarDayRowVm[] {
     const rows: CalendarDayRowVm[] = [];
     const year = anchor.getFullYear();
@@ -682,7 +682,7 @@ export class CalendarBatchEntry implements OnInit {
         specificHours: originalSpecificHours,
         originalSpecificHours,
         leaveId: leaveEntry?.id ?? null,
-        workFromHomeId: wfhEntry?.id ?? null,
+        workLocationId: wfhEntry?.id ?? null,
         isHoliday: Boolean(holidayName),
         holidayName,
         resultState: null,
@@ -733,8 +733,8 @@ export class CalendarBatchEntry implements OnInit {
     return result;
   }
 
-  private toWfhMap(entries: WorkFromHomeEntry[]): Map<string, WorkFromHomeEntry> {
-    const result = new Map<string, WorkFromHomeEntry>();
+  private toWfhMap(entries: WorkLocationEntry[]): Map<string, WorkLocationEntry> {
+    const result = new Map<string, WorkLocationEntry>();
     for (const entry of entries) {
       result.set(this.toDateKey(entry.workDate), entry);
     }
@@ -841,7 +841,7 @@ export class CalendarBatchEntry implements OnInit {
 
     if (row.category === 'none') {
       row.leaveId = null;
-      row.workFromHomeId = null;
+      row.workLocationId = null;
     }
   }
 

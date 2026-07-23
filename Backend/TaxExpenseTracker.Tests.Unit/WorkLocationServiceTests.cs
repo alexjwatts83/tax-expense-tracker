@@ -1,20 +1,20 @@
-using TaxExpenseTracker.Application.WorkFromHome;
+using TaxExpenseTracker.Application.WorkLocation;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.PublicHolidays;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Tests.Unit;
 
-public class WorkFromHomeServiceTests
+public class WorkLocationServiceTests
 {
     [Fact]
     public async Task CreateAsync_UsesFullDayHours_WhenEntryTypeFullDay()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateWorkFromHomeCommand(new DateTime(2026, 1, 10), DayEntryType.FullDay, null, "  Focus  "));
+        var result = await service.CreateAsync(new CreateWorkLocationCommand(new DateTime(2026, 1, 10), DayEntryType.FullDay, null, "  Focus  "));
 
         Assert.Equal(7.6m, result.HoursWorked);
         Assert.Equal("Focus", result.Notes);
@@ -24,11 +24,11 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task CreateAsync_UsesHalfDayHours_WhenEntryTypeHalfDay()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateWorkFromHomeCommand(new DateTime(2026, 1, 11), DayEntryType.HalfDay, null, null));
+        var result = await service.CreateAsync(new CreateWorkLocationCommand(new DateTime(2026, 1, 11), DayEntryType.HalfDay, null, null));
 
         Assert.Equal(3.8m, result.HoursWorked);
     }
@@ -36,11 +36,11 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task CreateAsync_UsesSpecificHours_WhenEntryTypeSpecificHours()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateWorkFromHomeCommand(new DateTime(2026, 1, 12), DayEntryType.SpecificHours, 5.5m, null));
+        var result = await service.CreateAsync(new CreateWorkLocationCommand(new DateTime(2026, 1, 12), DayEntryType.SpecificHours, 5.5m, null));
 
         Assert.Equal(5.5m, result.HoursWorked);
     }
@@ -48,13 +48,13 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task CreateAsync_Throws_WhenDateAlreadyExists()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var repository = new InMemoryWorkLocationRepository();
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.CreateAsync(new CreateWorkFromHomeCommand(new DateTime(2026, 1, 12), DayEntryType.HalfDay, null, null)));
+            service.CreateAsync(new CreateWorkLocationCommand(new DateTime(2026, 1, 12), DayEntryType.HalfDay, null, null)));
 
         Assert.Equal("A work-location entry already exists for this date.", ex.Message);
     }
@@ -62,11 +62,11 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task CreateAsync_PersistsOfficeWorkLocation()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateWorkFromHomeCommand(
+        var result = await service.CreateAsync(new CreateWorkLocationCommand(
             new DateTime(2026, 1, 13),
             DayEntryType.FullDay,
             null,
@@ -80,13 +80,13 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task GetByDateRangeAsync_ReturnsMatchingEntries()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 15), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 2, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var repository = new InMemoryWorkLocationRepository();
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 1, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 1, 15), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 2, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
 
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.GetByDateRangeAsync(new DateTime(2026, 1, 10), new DateTime(2026, 1, 31));
 
@@ -97,9 +97,9 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task DeleteAsync_ReturnsFalse_WhenEntryMissing()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.DeleteAsync(Guid.NewGuid());
 
@@ -109,13 +109,13 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task RestoreAsync_RestoresSoftDeletedEntry()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        var entry = WorkFromHomeEntry.Create(new DateTime(2026, 2, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var repository = new InMemoryWorkLocationRepository();
+        var entry = WorkLocationEntry.Create(new DateTime(2026, 2, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         entry.SoftDelete(TestTime.TimeProvider);
         repository.Entries.Add(entry);
         var holidayRepository = new InMemoryPublicHolidayRepository();
 
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.RestoreAsync(entry.Id);
 
@@ -127,29 +127,29 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task UpdateAsync_Throws_WhenSpecificHoursMissingForSpecificHoursType()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        var entry = WorkFromHomeEntry.Create(new DateTime(2026, 2, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var repository = new InMemoryWorkLocationRepository();
+        var entry = WorkLocationEntry.Create(new DateTime(2026, 2, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(entry);
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-            service.UpdateAsync(entry.Id, new UpdateWorkFromHomeCommand(new DateTime(2026, 2, 3), DayEntryType.SpecificHours, null, null)));
+            service.UpdateAsync(entry.Id, new UpdateWorkLocationCommand(new DateTime(2026, 2, 3), DayEntryType.SpecificHours, null, null)));
     }
 
     [Fact]
     public async Task UpdateAsync_Throws_WhenAnotherEntryExistsForDate()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        var entry = WorkFromHomeEntry.Create(new DateTime(2026, 2, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
-        var other = WorkFromHomeEntry.Create(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var repository = new InMemoryWorkLocationRepository();
+        var entry = WorkLocationEntry.Create(new DateTime(2026, 2, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var other = WorkLocationEntry.Create(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(entry);
         repository.Entries.Add(other);
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.UpdateAsync(entry.Id, new UpdateWorkFromHomeCommand(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null)));
+            service.UpdateAsync(entry.Id, new UpdateWorkLocationCommand(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null)));
 
         Assert.Equal("A work-location entry already exists for this date.", ex.Message);
     }
@@ -157,16 +157,16 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task GetSummaryAsync_Week_ReturnsTotalsWithinMondayToSundayWindow()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 14), DayEntryType.HalfDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 19), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var repository = new InMemoryWorkLocationRepository();
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 1, 14), DayEntryType.HalfDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 1, 19), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
         holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 12), "Public Holiday A", "Seed", false, TestTime.TimeProvider));
         holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 18), "Public Holiday B", "Seed", false, TestTime.TimeProvider));
         holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 20), "Outside Range", "Seed", false, TestTime.TimeProvider));
 
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var summary = await service.GetSummaryAsync(SummaryView.Week, new DateTime(2026, 1, 14));
 
@@ -183,20 +183,20 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task BatchCreateAsync_ReturnsMixedResults_ForCreatedSkippedAndFailedItems()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 14), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var repository = new InMemoryWorkLocationRepository();
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2026, 1, 14), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
         holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 13), "Public Holiday", "Seed", false, TestTime.TimeProvider));
 
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null),
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 12), DayEntryType.HalfDay, null, null),
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 13), DayEntryType.FullDay, null, null),
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 14), DayEntryType.FullDay, null, null),
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 15), DayEntryType.SpecificHours, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 12), DayEntryType.HalfDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 13), DayEntryType.FullDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 14), DayEntryType.FullDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 15), DayEntryType.SpecificHours, null, null),
         ]);
 
         Assert.Equal(5, result.TotalRequested);
@@ -211,15 +211,15 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task GetSummaryAsync_Month_LeapYear_IncludesLeapDayAndRespectsBounds()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2028, 2, 28), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2028, 2, 29), DayEntryType.HalfDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2028, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var repository = new InMemoryWorkLocationRepository();
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2028, 2, 28), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2028, 2, 29), DayEntryType.HalfDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(WorkLocationEntry.Create(new DateTime(2028, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
         holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2028, 2, 29), "Leap Day Holiday", "Seed", false, TestTime.TimeProvider));
         holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2028, 3, 1), "Outside Range", "Seed", false, TestTime.TimeProvider));
 
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var summary = await service.GetSummaryAsync(SummaryView.Month, new DateTime(2028, 2, 10));
 
@@ -235,14 +235,14 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task BatchCreateAsync_TreatsSameDateWithDifferentTimeAsDuplicate()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 16, 8, 0, 0), DayEntryType.FullDay, null, null),
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 16, 14, 0, 0), DayEntryType.HalfDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 16, 8, 0, 0), DayEntryType.FullDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 16, 14, 0, 0), DayEntryType.HalfDay, null, null),
         ]);
 
         Assert.Equal(2, result.TotalRequested);
@@ -255,15 +255,15 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task BatchCreateAsync_UsesHolidayConflictStatus_ForDuplicateHolidayDates()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
         holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 26), "Public Holiday", "Seed", false, TestTime.TimeProvider));
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 26, 8, 0, 0), DayEntryType.FullDay, null, null),
-            new CreateWorkFromHomeCommand(new DateTime(2026, 1, 26, 12, 0, 0), DayEntryType.HalfDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 26, 8, 0, 0), DayEntryType.FullDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 26, 12, 0, 0), DayEntryType.HalfDay, null, null),
         ]);
 
         Assert.Equal(2, result.TotalRequested);
@@ -276,9 +276,9 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task BatchCreateAsync_ReturnsEmptyResult_WhenRequestItemsEmpty()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
+        var repository = new InMemoryWorkLocationRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync([]);
 
@@ -292,16 +292,16 @@ public class WorkFromHomeServiceTests
     [Fact]
     public async Task BatchCreateAsync_CreatesEntry_WhenOnlyExistingEntryForDateIsSoftDeleted()
     {
-        var repository = new InMemoryWorkFromHomeRepository();
-        var existing = WorkFromHomeEntry.Create(new DateTime(2026, 2, 5), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var repository = new InMemoryWorkLocationRepository();
+        var existing = WorkLocationEntry.Create(new DateTime(2026, 2, 5), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         existing.SoftDelete(TestTime.TimeProvider);
         repository.Entries.Add(existing);
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateWorkFromHomeCommand(new DateTime(2026, 2, 5), DayEntryType.HalfDay, null, null),
+            new CreateWorkLocationCommand(new DateTime(2026, 2, 5), DayEntryType.HalfDay, null, null),
         ]);
 
         Assert.Equal(1, result.TotalRequested);
@@ -354,22 +354,22 @@ public class WorkFromHomeServiceTests
         }
     }
 
-    private sealed class InMemoryWorkFromHomeRepository : IWorkFromHomeRepository
+    private sealed class InMemoryWorkLocationRepository : IWorkLocationRepository
     {
-        public List<WorkFromHomeEntry> Entries { get; } = [];
+        public List<WorkLocationEntry> Entries { get; } = [];
         public bool SaveChangesCalled { get; private set; }
 
-        public Task<IReadOnlyList<WorkFromHomeEntry>> GetAllAsync(CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<WorkLocationEntry>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<IReadOnlyList<WorkFromHomeEntry>>(Entries.ToList());
+            return Task.FromResult<IReadOnlyList<WorkLocationEntry>>(Entries.ToList());
         }
 
-        public Task<WorkFromHomeEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public Task<WorkLocationEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Entries.FirstOrDefault(x => x.Id == id && !x.IsDeleted));
         }
 
-        public Task<IReadOnlyList<WorkFromHomeEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<WorkLocationEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
         {
             var query = Entries.Where(x => !x.IsDeleted);
 
@@ -383,7 +383,7 @@ public class WorkFromHomeServiceTests
                 query = query.Where(x => x.WorkDate <= toDate.Value.Date);
             }
 
-            return Task.FromResult<IReadOnlyList<WorkFromHomeEntry>>(query.ToList());
+            return Task.FromResult<IReadOnlyList<WorkLocationEntry>>(query.ToList());
         }
 
         public Task<bool> ExistsForDateAsync(DateTime workDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
@@ -393,12 +393,12 @@ public class WorkFromHomeServiceTests
             return Task.FromResult(exists);
         }
 
-        public Task<WorkFromHomeEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+        public Task<WorkLocationEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Entries.FirstOrDefault(x => x.Id == id));
         }
 
-        public Task AddAsync(WorkFromHomeEntry entry, CancellationToken cancellationToken = default)
+        public Task AddAsync(WorkLocationEntry entry, CancellationToken cancellationToken = default)
         {
             Entries.Add(entry);
             return Task.CompletedTask;

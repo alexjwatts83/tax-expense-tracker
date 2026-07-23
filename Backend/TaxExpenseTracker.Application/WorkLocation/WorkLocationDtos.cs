@@ -1,8 +1,8 @@
 using TaxExpenseTracker.Domain.Entities;
 
-namespace TaxExpenseTracker.Application.WorkFromHome;
+namespace TaxExpenseTracker.Application.WorkLocation;
 
-public sealed record WorkFromHomeReadDto(
+public sealed record WorkLocationReadDto(
     Guid Id,
     DateTime WorkDate,
     DayEntryType EntryType,
@@ -12,28 +12,28 @@ public sealed record WorkFromHomeReadDto(
     DateTime UpdatedAt,
     WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
-public sealed record CreateWorkFromHomeCommand(
+public sealed record CreateWorkLocationCommand(
     DateTime WorkDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,
     WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
-public sealed record UpdateWorkFromHomeCommand(
+public sealed record UpdateWorkLocationCommand(
     DateTime WorkDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,
     WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
-public sealed record BatchCreateWorkFromHomeResult(
+public sealed record BatchCreateWorkLocationResult(
     int TotalRequested,
     int CreatedCount,
     int SkippedCount,
     int FailedCount,
-    IReadOnlyList<BatchCreateWorkFromHomeItemResult> Results);
+    IReadOnlyList<BatchCreateWorkLocationItemResult> Results);
 
-public sealed record BatchCreateWorkFromHomeItemResult(
+public sealed record BatchCreateWorkLocationItemResult(
     DateTime WorkDate,
     WorkLocationType WorkLocation,
     DayEntryType EntryType,
@@ -41,4 +41,4 @@ public sealed record BatchCreateWorkFromHomeItemResult(
     string? Notes,
     string Status,
     string? Message,
-    WorkFromHomeReadDto? Entry);
+    WorkLocationReadDto? Entry);

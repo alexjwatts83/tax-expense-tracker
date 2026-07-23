@@ -6,7 +6,7 @@ namespace TaxExpenseTracker.Infrastructure.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<TaxExpense> TaxExpenses => Set<TaxExpense>();
-    public DbSet<WorkFromHomeEntry> WorkFromHomeEntries => Set<WorkFromHomeEntry>();
+    public DbSet<WorkLocationEntry> WorkLocationEntries => Set<WorkLocationEntry>();
     public DbSet<LeaveEntry> LeaveEntries => Set<LeaveEntry>();
     public DbSet<PublicHoliday> PublicHolidays => Set<PublicHoliday>();
     public DbSet<Bank> Banks => Set<Bank>();
@@ -19,7 +19,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<TaxExpense>().HasQueryFilter(x => !x.IsDeleted);
-        modelBuilder.Entity<WorkFromHomeEntry>().HasQueryFilter(x => !x.IsDeleted);
+        modelBuilder.Entity<WorkLocationEntry>()
+            .ToTable("WorkFromHomeEntries")
+            .HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<LeaveEntry>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Bank>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<Tracker>().HasQueryFilter(x => !x.IsDeleted);

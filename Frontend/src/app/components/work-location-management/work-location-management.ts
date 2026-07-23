@@ -9,12 +9,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
-import { DayEntrySummary, DayEntryType, WorkFromHomeEntry, WorkLocationType } from '../../models/api.models';
-import { WorkFromHomeService } from '../../services/work-from-home';
+import { DayEntrySummary, DayEntryType, WorkLocationEntry, WorkLocationType } from '../../models/api.models';
+import { WorkLocationService } from '../../services/work-location';
 import { toLocalDateInputValue } from '../../utils/date';
 
 @Component({
-  selector: 'app-work-from-home-management',
+  selector: 'app-work-location-management',
   imports: [
     CommonModule,
     DatePipe,
@@ -27,11 +27,11 @@ import { toLocalDateInputValue } from '../../utils/date';
     MatSelectModule,
     MatTableModule,
   ],
-  templateUrl: './work-from-home-management.html',
-  styleUrl: './work-from-home-management.scss',
+  templateUrl: './work-location-management.html',
+  styleUrl: './work-location-management.scss',
 })
-export class WorkFromHomeManagement implements OnInit {
-  private readonly workFromHomeService = inject(WorkFromHomeService);
+export class WorkLocationManagement implements OnInit {
+  private readonly workLocationService = inject(WorkLocationService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -69,10 +69,10 @@ export class WorkFromHomeManagement implements OnInit {
     toDate: [''],
   });
 
-  entries: WorkFromHomeEntry[] = [];
-  pagedEntries: WorkFromHomeEntry[] = [];
+  entries: WorkLocationEntry[] = [];
+  pagedEntries: WorkLocationEntry[] = [];
   summary: DayEntrySummary | null = null;
-  lastDeletedEntry: WorkFromHomeEntry | null = null;
+  lastDeletedEntry: WorkLocationEntry | null = null;
   page = 1;
   pageSize = 10;
   isLoading = false;
@@ -93,7 +93,7 @@ export class WorkFromHomeManagement implements OnInit {
 
     const value = this.filterForm.getRawValue();
 
-    this.workFromHomeService
+    this.workLocationService
       .getAll({
         fromDate: value.fromDate || undefined,
         toDate: value.toDate || undefined,
@@ -112,7 +112,7 @@ export class WorkFromHomeManagement implements OnInit {
           this.updatePagedEntries();
         },
         error: () => {
-          this.errorMessage = 'Unable to load work-from-home entries. Ensure the API is running.';
+          this.errorMessage = 'Unable to load work-location entries. Ensure the API is running.';
         },
       });
   }
@@ -127,7 +127,7 @@ export class WorkFromHomeManagement implements OnInit {
 
     this.isLoadingSummary = true;
 
-    this.workFromHomeService
+    this.workLocationService
       .getSummary(view, date)
       .pipe(
         take(1),
@@ -141,7 +141,7 @@ export class WorkFromHomeManagement implements OnInit {
           this.summary = summary;
         },
         error: () => {
-          this.errorMessage = 'Unable to load work-from-home summary.';
+          this.errorMessage = 'Unable to load work-location summary.';
         },
       });
   }
@@ -158,7 +158,7 @@ export class WorkFromHomeManagement implements OnInit {
     this.errorMessage = '';
     this.infoMessage = '';
 
-    this.workFromHomeService
+    this.workLocationService
       .create({
         workDate: value.workDate ?? this.today(),
         workLocation: value.workLocation ?? WorkLocationType.Wfh,
@@ -184,11 +184,11 @@ export class WorkFromHomeManagement implements OnInit {
             notes: '',
           });
           this.lastDeletedEntry = null;
-          this.infoMessage = 'Work-from-home entry created.';
+          this.infoMessage = 'Work-location entry created.';
           this.loadSummary();
         },
         error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create work-from-home entry.';
+          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create work-location entry.';
         },
       });
   }
@@ -206,16 +206,16 @@ export class WorkFromHomeManagement implements OnInit {
     this.errorMessage = '';
     this.infoMessage = '';
 
-    this.workFromHomeService.softDelete(id).pipe(take(1)).subscribe({
+    this.workLocationService.softDelete(id).pipe(take(1)).subscribe({
       next: () => {
         this.lastDeletedEntry = entry;
         this.entries = this.entries.filter((x) => x.id !== id);
         this.updatePagedEntries();
-        this.infoMessage = 'Work-from-home entry deleted.';
+        this.infoMessage = 'Work-location entry deleted.';
         this.loadSummary();
       },
       error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete work-from-home entry.';
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete work-location entry.';
       },
     });
   }
@@ -227,16 +227,16 @@ export class WorkFromHomeManagement implements OnInit {
 
     const entry = this.lastDeletedEntry;
 
-    this.workFromHomeService.restore(entry.id).pipe(take(1)).subscribe({
+    this.workLocationService.restore(entry.id).pipe(take(1)).subscribe({
       next: () => {
         this.entries = [entry, ...this.entries].sort((a, b) => b.workDate.localeCompare(a.workDate));
         this.updatePagedEntries();
         this.lastDeletedEntry = null;
-        this.infoMessage = 'Work-from-home entry restored.';
+        this.infoMessage = 'Work-location entry restored.';
         this.loadSummary();
       },
       error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore work-from-home entry.';
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore work-location entry.';
       },
     });
   }

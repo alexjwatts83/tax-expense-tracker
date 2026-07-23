@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { LeaveManagement } from '../leave-management/leave-management';
-import { WorkFromHomeManagement } from '../work-from-home-management/work-from-home-management';
+import { WorkLocationManagement } from '../work-location-management/work-location-management';
 
 @Component({
   selector: 'app-time-tracking',
-  imports: [CommonModule, WorkFromHomeManagement, LeaveManagement],
+  imports: [CommonModule, WorkLocationManagement, LeaveManagement],
   templateUrl: './time-tracking.html',
   styleUrl: './time-tracking.scss',
 })
