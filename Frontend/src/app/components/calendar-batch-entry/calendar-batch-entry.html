@@ -52,7 +52,7 @@
 							<div class="calendar-week-row">
 								@for (dayCell of week.days; track $index) {
 									@if (dayCell) {
-										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
+										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" [class.wfh-row]="!dayCell.isHoliday && dayCell.category === 'wfh'" [class.leave-row]="!dayCell.isHoliday && dayCell.category === 'leave'" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
 											<div class="date-cell">
 												<strong>{{ dayCell.dayLabel }}</strong>
 												@if (dayCell.isToday) {

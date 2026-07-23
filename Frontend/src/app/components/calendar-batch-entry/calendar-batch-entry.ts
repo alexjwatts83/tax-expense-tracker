@@ -427,7 +427,7 @@ export class CalendarBatchEntry implements OnInit {
 
           const wfhCreateByDate = new Map(wfhCreateOps.map((x) => [x.row.dateIso, x.row]));
           for (const result of wfhCreate.results) {
-            const row = wfhCreateByDate.get(result.workDate);
+            const row = wfhCreateByDate.get(this.toDateKey(result.workDate));
             if (!row) {
               continue;
             }
@@ -452,7 +452,7 @@ export class CalendarBatchEntry implements OnInit {
 
           const leaveCreateByDate = new Map(leaveCreateOps.map((x) => [x.row.dateIso, x.row]));
           for (const result of leaveCreate.results) {
-            const row = leaveCreateByDate.get(result.leaveDate);
+            const row = leaveCreateByDate.get(this.toDateKey(result.leaveDate));
             if (!row) {
               continue;
             }
@@ -609,7 +609,7 @@ export class CalendarBatchEntry implements OnInit {
         next: ({ holidays, leave, wfh }) => {
           const holidayMap = new Map<string, string>();
           for (const holiday of holidays) {
-            holidayMap.set(holiday.holidayDate, holiday.name);
+            holidayMap.set(this.toDateKey(holiday.holidayDate), holiday.name);
           }
 
           const leaveByDate = this.toLeaveMap(leave);
@@ -717,7 +717,7 @@ export class CalendarBatchEntry implements OnInit {
   private toLeaveMap(entries: LeaveEntry[]): Map<string, LeaveEntry> {
     const result = new Map<string, LeaveEntry>();
     for (const entry of entries) {
-      result.set(entry.leaveDate, entry);
+      result.set(this.toDateKey(entry.leaveDate), entry);
     }
 
     return result;
@@ -726,7 +726,7 @@ export class CalendarBatchEntry implements OnInit {
   private toWfhMap(entries: WorkFromHomeEntry[]): Map<string, WorkFromHomeEntry> {
     const result = new Map<string, WorkFromHomeEntry>();
     for (const entry of entries) {
-      result.set(entry.workDate, entry);
+      result.set(this.toDateKey(entry.workDate), entry);
     }
 
     return result;
@@ -793,5 +793,23 @@ export class CalendarBatchEntry implements OnInit {
       row.leaveId = null;
       row.workFromHomeId = null;
     }
+  }
+
+  private toDateKey(value: string): string {
+    const raw = (value ?? '').trim();
+    if (raw.length === 0) {
+      return raw;
+    }
+
+    const tIndex = raw.indexOf('T');
+    if (tIndex > 0) {
+      return raw.slice(0, tIndex);
+    }
+
+    if (raw.length >= 10) {
+      return raw.slice(0, 10);
+    }
+
+    return raw;
   }
 }
