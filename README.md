@@ -34,10 +34,11 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Angular management screens added for WFH, Leave, and Public Holidays, with WFH and Leave combined under a shared time-tracking page
 - Time-tracking screens use local date input formatting to avoid UTC day drift in browser date fields
 - Time-tracking screens support date-range filtering and lightweight client-side paging
+- Public holiday screen loads all holiday records by default and applies filters only when requested
+- WFH/Leave paging remains client-side by design for current personal-use scale
 
 ## Planned Enhancements
 
-- Additional empty-state and validation polish for new screens
 - Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
 
 ## Tech Stack

@@ -83,6 +83,8 @@ The user will be able to:
 3. Supported date formats: `yyyy-MM-dd`, `dd/MM/yyyy`, `d/M/yyyy`.
 4. Duplicate rows in the same file are skipped.
 5. Rows already present in the database (same date + name) are skipped.
+6. The public holiday screen loads all records by default until a date filter is applied.
+7. WFH and leave entry paging remains client-side unless real usage shows a server-side need.
 
 ## Proposed Data Model
 
@@ -243,10 +245,7 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Next Actions
 
-1. Add empty-state and validation UX for the new flows.
-2. Decide whether notes are required or optional.
-3. Review whether public holiday screens need default date filters.
-4. Decide whether time-entry paging should also move server-side later.
+1. Monitor real usage before deciding whether server-side paging is needed later.
 
 ## Phased Implementation Backlog
 
@@ -393,14 +392,13 @@ Stabilize the feature with edge-case handling and usability improvements.
 
 #### Backlog Items
 
-- [ ] Confirm how holidays affect totals and display logic.
 - [x] Confirm how holidays affect totals and display logic.
 - [x] Confirm whether leave and WFH share the same summary views or separate views.
-- [ ] Decide whether notes are required or optional.
-- [ ] Add empty-state handling for no entries and no holidays.
+- [x] Decide whether notes are required or optional.
+- [x] Add empty-state handling for no entries and no holidays.
 - [x] Add paging or filtering if the data volume grows.
 - [x] Review date handling for time zone consistency.
-- [ ] Add documentation for the CSV template and week/month rules.
+- [x] Add documentation for the CSV template and week/month rules.
 
 #### Exit Criteria
 
