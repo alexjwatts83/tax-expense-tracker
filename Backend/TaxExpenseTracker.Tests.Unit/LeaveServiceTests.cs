@@ -46,6 +46,20 @@ public class LeaveServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_Throws_WhenDateAlreadyExists()
+    {
+        var repository = new InMemoryLeaveRepository();
+        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.HalfDay, null, null)));
+
+        Assert.Equal("A leave entry already exists for this date.", ex.Message);
+    }
+
+    [Fact]
     public async Task GetByDateRangeAsync_ReturnsMatchingEntries()
     {
         var repository = new InMemoryLeaveRepository();
@@ -103,6 +117,23 @@ public class LeaveServiceTests
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateTime(2026, 4, 3), DayEntryType.SpecificHours, null, null)));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Throws_WhenAnotherEntryExistsForDate()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var entry = LeaveEntry.Create(new DateTime(2026, 4, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var other = LeaveEntry.Create(new DateTime(2026, 4, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        repository.Entries.Add(entry);
+        repository.Entries.Add(other);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateTime(2026, 4, 3), DayEntryType.FullDay, null, null)));
+
+        Assert.Equal("A leave entry already exists for this date.", ex.Message);
     }
 
     [Fact]
@@ -204,6 +235,13 @@ public class LeaveServiceTests
             }
 
             return Task.FromResult<IReadOnlyList<LeaveEntry>>(query.ToList());
+        }
+
+        public Task<bool> ExistsForDateAsync(DateTime leaveDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
+        {
+            var date = leaveDate.Date;
+            var exists = Entries.Any(x => !x.IsDeleted && x.LeaveDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value));
+            return Task.FromResult(exists);
         }
 
         public Task<LeaveEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)

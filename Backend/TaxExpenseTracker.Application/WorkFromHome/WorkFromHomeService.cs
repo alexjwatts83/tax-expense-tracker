@@ -49,6 +49,10 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
 
     public async Task<WorkFromHomeReadDto> CreateAsync(CreateWorkFromHomeCommand command, CancellationToken cancellationToken = default)
     {
+        var existsForDate = await _workFromHomeRepository.ExistsForDateAsync(command.WorkDate, cancellationToken: cancellationToken);
+        if (existsForDate)
+            ThrowHelper.InvalidOperation("A work-from-home entry already exists for this date.");
+
         var entry = WorkFromHomeEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
 
         await _workFromHomeRepository.AddAsync(entry, cancellationToken);
@@ -64,6 +68,10 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
         {
             return false;
         }
+
+        var existsForDate = await _workFromHomeRepository.ExistsForDateAsync(command.WorkDate, id, cancellationToken);
+        if (existsForDate)
+            ThrowHelper.InvalidOperation("A work-from-home entry already exists for this date.");
 
         entry.Update(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
         await _workFromHomeRepository.SaveChangesAsync(cancellationToken);

@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Domain.Entities;
+using TaxExpenseTracker.Application.Common;
 
 namespace TaxExpenseTracker.Application.Expenses;
 
@@ -34,15 +35,11 @@ public sealed class ExpenseService : IExpenseService
     {
         var sourceExists = await _expenseRepository.SourceExistsAsync(command.SourceId, cancellationToken);
         if (!sourceExists)
-        {
-            throw new InvalidOperationException("Source tracker does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Source tracker does not exist.");
 
         var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
         if (!bankExists)
-        {
-            throw new InvalidOperationException("Bank does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Bank does not exist.");
 
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
@@ -61,8 +58,9 @@ public sealed class ExpenseService : IExpenseService
         await _expenseRepository.AddAsync(expense, cancellationToken);
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
-        var created = await _expenseRepository.GetByIdWithDetailsAsync(expense.Id, cancellationToken)
-            ?? throw new InvalidOperationException("Created expense could not be loaded.");
+        var created = await _expenseRepository.GetByIdWithDetailsAsync(expense.Id, cancellationToken);
+        if (created is null)
+            ThrowHelper.InvalidOperation("Created expense could not be loaded.");
 
         return MapExpense(created);
     }
@@ -77,15 +75,11 @@ public sealed class ExpenseService : IExpenseService
 
         var sourceExists = await _expenseRepository.SourceExistsAsync(command.SourceId, cancellationToken);
         if (!sourceExists)
-        {
-            throw new InvalidOperationException("Source tracker does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Source tracker does not exist.");
 
         var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
         if (!bankExists)
-        {
-            throw new InvalidOperationException("Bank does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Bank does not exist.");
 
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
@@ -105,8 +99,11 @@ public sealed class ExpenseService : IExpenseService
 
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
-        var updated = await _expenseRepository.GetByIdWithDetailsAsync(id, cancellationToken)
-            ?? throw new InvalidOperationException("Updated expense could not be loaded.");
+        var updated = await _expenseRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+        if (updated is null)
+        {
+            ThrowHelper.InvalidOperation("Updated expense could not be loaded.");
+        }
 
         return MapExpense(updated);
     }

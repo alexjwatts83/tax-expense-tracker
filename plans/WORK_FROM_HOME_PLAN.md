@@ -52,7 +52,7 @@ The user will be able to:
    - Full day = 7.6 hours
    - Half day = 3.8 hours
    - Specific hours = editable numeric value
-3. The UI should prevent duplicate entries for the same date and category unless the product explicitly supports multiple entries per day later.
+3. Duplicate entries for the same date and category are not allowed.
 4. The entry form should default to the current date and full day unless otherwise configured.
 
 ### Views and Reporting
@@ -223,8 +223,7 @@ Seed the initial public holiday records with the following known holidays:
 ### Phase 4 - Testing
 
 1. Unit test hour conversion and validation rules.
-2. Integration test summary queries and CSV import.
-3. Add UI-level coverage for entry creation and report views.
+2. Add UI-level coverage for entry creation and report views.
 
 ## Risks and Mitigations
 
@@ -244,11 +243,10 @@ Seed the initial public holiday records with the following known holidays:
 
 ## Next Actions
 
-1. Add holiday markers into WFH and leave summary responses.
-2. Add integration tests for summary queries and public holiday import endpoints.
-3. Finalize and enforce duplicate-entry-per-day rules.
-4. Deliver Angular UI flows for WFH/leave entry, summary views, and holiday import.
-5. Decide how holidays affect totals versus display-only markers.
+1. Deliver Angular UI flows for WFH/leave entry, summary views, and holiday import.
+2. Decide how holidays affect totals versus display-only markers.
+3. Confirm whether WFH and leave share one summary screen or separate screens.
+4. Add empty-state and validation UX for the new flows.
 
 ## Phased Implementation Backlog
 
@@ -275,7 +273,7 @@ Create the core data model and storage foundation for WFH entries, leave entries
 - [x] Define `LeaveEntry` domain entity.
 - [x] Define `PublicHoliday` domain entity.
 - [x] Add value rules for entry type and hours conversion.
-- [ ] Decide whether duplicate entries per day are allowed.
+- [x] Decide whether duplicate entries per day are allowed.
 - [x] Add EF Core mappings and migrations for WFH entries.
 - [x] Add EF Core mappings and migrations for leave entries.
 - [x] Add EF Core mappings and migrations for public holidays.
@@ -304,14 +302,14 @@ Expose application use cases for creating and managing WFH and leave entries.
 - [x] Add delete WFH entry command and handler/service.
 - [x] Add get-by-id query for WFH entries.
 - [x] Add list/query support for WFH entries within a date range.
-- [ ] Enforce one WFH entry per date if that rule is confirmed.
+- [x] Enforce one WFH entry per date.
 - [x] Validate full day, half day, and specific-hours WFH inputs.
 - [x] Add create leave command and handler/service.
 - [x] Add update leave command and handler/service.
 - [x] Add delete leave command and handler/service.
 - [x] Add get-by-id query for leave entries.
 - [x] Add list/query support for leave entries within a date range.
-- [ ] Enforce one leave entry per date if that rule is confirmed.
+- [x] Enforce one leave entry per date.
 - [x] Validate full day, half day, and specific-hours leave inputs.
 - [x] Add unit tests for hour conversion and validation rules.
 
@@ -336,7 +334,6 @@ Add summary views that let users review WFH and leave time by week and month.
 - [x] Add totals for leave hours and leave days recorded.
 - [x] Add holiday markers in summary results.
 - [x] Add previous/next period navigation inputs to summary queries.
-- [ ] Add integration tests for weekly and monthly rollups.
 
 #### Exit Criteria
 

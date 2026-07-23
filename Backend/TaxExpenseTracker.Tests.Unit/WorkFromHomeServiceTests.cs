@@ -46,6 +46,20 @@ public class WorkFromHomeServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_Throws_WhenDateAlreadyExists()
+    {
+        var repository = new InMemoryWorkFromHomeRepository();
+        repository.Entries.Add(WorkFromHomeEntry.Create(new DateTime(2026, 1, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.CreateAsync(new CreateWorkFromHomeCommand(new DateTime(2026, 1, 12), DayEntryType.HalfDay, null, null)));
+
+        Assert.Equal("A work-from-home entry already exists for this date.", ex.Message);
+    }
+
+    [Fact]
     public async Task GetByDateRangeAsync_ReturnsMatchingEntries()
     {
         var repository = new InMemoryWorkFromHomeRepository();
@@ -103,6 +117,23 @@ public class WorkFromHomeServiceTests
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             service.UpdateAsync(entry.Id, new UpdateWorkFromHomeCommand(new DateTime(2026, 2, 3), DayEntryType.SpecificHours, null, null)));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Throws_WhenAnotherEntryExistsForDate()
+    {
+        var repository = new InMemoryWorkFromHomeRepository();
+        var entry = WorkFromHomeEntry.Create(new DateTime(2026, 2, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var other = WorkFromHomeEntry.Create(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        repository.Entries.Add(entry);
+        repository.Entries.Add(other);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkFromHomeService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(entry.Id, new UpdateWorkFromHomeCommand(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null)));
+
+        Assert.Equal("A work-from-home entry already exists for this date.", ex.Message);
     }
 
     [Fact]
@@ -204,6 +235,13 @@ public class WorkFromHomeServiceTests
             }
 
             return Task.FromResult<IReadOnlyList<WorkFromHomeEntry>>(query.ToList());
+        }
+
+        public Task<bool> ExistsForDateAsync(DateTime workDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
+        {
+            var date = workDate.Date;
+            var exists = Entries.Any(x => !x.IsDeleted && x.WorkDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value));
+            return Task.FromResult(exists);
         }
 
         public Task<WorkFromHomeEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)

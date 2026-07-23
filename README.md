@@ -27,13 +27,13 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Shared generic repository abstractions introduced (`IRepository<T>`, `ISoftDeleteRepository<T>`)
 - Domain guard clauses standardized with `ThrowIfNullOrWhiteSpace` and `ThrowIfEqual`
 - Domain/application clock handling standardized on required `TimeProvider`
+- One-entry-per-date validation enforced for work-from-home and leave records
 - Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
 
 ## Planned Enhancements
 
 - Angular screens for work-from-home and leave entry management
 - Public holiday CSV import UI workflow
-- Duplicate-entry-per-day business rule finalization and enforcement
 - Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
 
 ## Tech Stack
@@ -250,6 +250,6 @@ Recent schema updates:
 - Expense Item field removed end-to-end (backend, frontend, migration, tests)
 - Domain and repository abstraction refactors completed (shared entity and repository interfaces)
 - TimeProvider refactor completed across domain and application services
-- Unit tests passing: 42/42
+- Unit tests passing: 46/46
 
 Open work remains across phases 3-6, focused on reporting, CSV import, API/frontend delivery, and hardening.

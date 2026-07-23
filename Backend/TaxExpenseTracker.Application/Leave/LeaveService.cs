@@ -49,6 +49,10 @@ public sealed class LeaveService : ILeaveService
 
     public async Task<LeaveReadDto> CreateAsync(CreateLeaveCommand command, CancellationToken cancellationToken = default)
     {
+        var existsForDate = await _leaveRepository.ExistsForDateAsync(command.LeaveDate, cancellationToken: cancellationToken);
+        if (existsForDate)
+            ThrowHelper.InvalidOperation("A leave entry already exists for this date.");
+
         var entry = LeaveEntry.Create(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
 
         await _leaveRepository.AddAsync(entry, cancellationToken);
@@ -64,6 +68,10 @@ public sealed class LeaveService : ILeaveService
         {
             return false;
         }
+
+        var existsForDate = await _leaveRepository.ExistsForDateAsync(command.LeaveDate, id, cancellationToken);
+        if (existsForDate)
+            ThrowHelper.InvalidOperation("A leave entry already exists for this date.");
 
         entry.Update(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
         await _leaveRepository.SaveChangesAsync(cancellationToken);

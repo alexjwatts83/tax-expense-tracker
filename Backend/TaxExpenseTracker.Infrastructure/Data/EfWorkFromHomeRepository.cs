@@ -27,4 +27,13 @@ public sealed class EfWorkFromHomeRepository : EfSoftDeleteRepository<WorkFromHo
 
         return await query.ToListAsync(cancellationToken);
     }
+
+    public Task<bool> ExistsForDateAsync(DateTime workDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
+    {
+        var date = workDate.Date;
+
+        return DbSet.AnyAsync(
+            x => x.WorkDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value),
+            cancellationToken);
+    }
 }

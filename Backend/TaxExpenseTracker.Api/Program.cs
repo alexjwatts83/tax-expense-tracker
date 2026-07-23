@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Banks;
 using TaxExpenseTracker.Application.Expenses;
 using TaxExpenseTracker.Application.Leave;
