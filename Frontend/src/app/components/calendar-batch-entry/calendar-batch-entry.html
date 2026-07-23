@@ -2,10 +2,10 @@
 	<mat-card class="month-card">
 		<mat-card-content>
 			<div class="month-toolbar">
-				<button mat-stroked-button type="button" aria-label="Go to previous month" (click)="goToPreviousMonth()">Previous Month</button>
+				<button mat-stroked-button type="button" aria-label="Go to previous month" [disabled]="isMonthNavigationDisabled" (click)="goToPreviousMonth()">Previous Month</button>
 				<h2>{{ monthLabel }}</h2>
-				<button mat-stroked-button type="button" aria-label="Return to current month" (click)="goToCurrentMonth()">Current Month</button>
-				<button mat-stroked-button type="button" aria-label="Go to next month" (click)="goToNextMonth()">Next Month</button>
+				<button mat-stroked-button type="button" aria-label="Return to current month" [disabled]="isMonthNavigationDisabled" (click)="goToCurrentMonth()">Current Month</button>
+				<button mat-stroked-button type="button" aria-label="Go to next month" [disabled]="isMonthNavigationDisabled" (click)="goToNextMonth()">Next Month</button>
 			</div>
 
 			<div class="quick-actions">
@@ -39,7 +39,14 @@
 									@if (dayCell) {
 										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" [class.wfh-row]="!dayCell.isHoliday && dayCell.category === 'wfh'" [class.office-row]="!dayCell.isHoliday && dayCell.category === 'office'" [class.annual-row]="!dayCell.isHoliday && dayCell.category === 'annual'" [class.sick-row]="!dayCell.isHoliday && dayCell.category === 'sick'" [class.pending-row]="isRowChanged(dayCell)">
 											<div class="date-cell">
-												<strong [attr.title]="dayCell.dateIso">{{ dayCell.dayLabel }}</strong>
+												<div class="date-heading">
+													<strong [attr.title]="dayCell.dateIso">{{ dayCell.dayLabel }}</strong>
+													@if ($index === 0) {
+														<button mat-icon-button class="week-wfh-button" type="button" title="Set all non-holiday days in this week to WFH" aria-label="Set all non-holiday days in this week to WFH" (click)="setWeekToWfh(week)">
+															<mat-icon>arrow_circle_right</mat-icon>
+														</button>
+													}
+												</div>
 												@if (dayCell.isToday) {
 													<span class="today-chip" aria-label="Current day">Today</span>
 												}

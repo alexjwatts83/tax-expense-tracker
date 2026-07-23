@@ -112,6 +112,17 @@
 	gap: 0.25rem;
 }
 
+.date-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: 40px;
+}
+
+.week-wfh-button {
+	color: #7e22ce;
+}
+
 .holiday-chip {
 	display: inline-flex;
 	width: fit-content;

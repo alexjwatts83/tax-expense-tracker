@@ -5,6 +5,7 @@ import { catchError, finalize, forkJoin, map, of, take } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
@@ -60,6 +61,7 @@ interface CalendarWeekVm {
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatRadioModule,
@@ -109,6 +111,10 @@ export class CalendarBatchEntry implements OnInit {
 
   get hasValidationErrors(): boolean {
     return this.rows.some((row) => this.rowHasHoursError(row));
+  }
+
+  get isMonthNavigationDisabled(): boolean {
+    return this.pendingCount > 0 || this.isLoading || this.isSubmitting;
   }
 
   get weeks(): CalendarWeekVm[] {
@@ -188,6 +194,27 @@ export class CalendarBatchEntry implements OnInit {
     }
 
     this.infoMessage = `All weekday rows were set to ${this.categoryLabel(category)}.`;
+    this.errorMessage = '';
+  }
+
+  setWeekToWfh(week: CalendarWeekVm): void {
+    let changedCount = 0;
+
+    for (const row of week.days) {
+      if (!row || row.isHoliday) {
+        continue;
+      }
+
+      if (row.category !== 'wfh') {
+        changedCount += 1;
+      }
+
+      this.onCategoryChange(row, 'wfh');
+    }
+
+    this.infoMessage = changedCount === 0
+      ? 'No weekdays in this week needed changing.'
+      : `${this.dayCountLabel(changedCount)} set to WFH for this week. Public holidays were skipped.`;
     this.errorMessage = '';
   }
 
