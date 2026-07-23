@@ -65,7 +65,7 @@ Core entities:
 - Bank
 - TaxExpense
 - TaxExpenseTag (many-to-many join)
-- WorkFromHomeEntry
+- WorkLocationEntry
 - LeaveEntry
 - PublicHoliday
 
@@ -118,18 +118,22 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - GET /api/expenses/summary
 - GET /api/expenses/filter
 
-### Work From Home
+### Work Location
 
-- GET /api/work-from-home
-- GET /api/work-from-home?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
-- GET /api/work-from-home/{id}
-- POST /api/work-from-home
-- PUT /api/work-from-home/{id}
-- DELETE /api/work-from-home/{id}
-- POST /api/work-from-home/{id}/restore
-- GET /api/work-from-home/summary?view=week|month&date=YYYY-MM-DD
+- GET /api/work-locations
+- GET /api/work-locations?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
+- GET /api/work-locations/{id}
+- POST /api/work-locations
+- PUT /api/work-locations/{id}
+- DELETE /api/work-locations/{id}
+- POST /api/work-locations/{id}/restore
+- GET /api/work-locations/summary?view=week|month&date=YYYY-MM-DD
 
-`/api/work-from-home` payloads now include a `workLocation` field:
+Legacy compatibility route currently supported:
+
+- /api/work-from-home
+
+`/api/work-locations` payloads include a `workLocation` field:
 
 - `1` = WFH
 - `2` = Office
@@ -248,7 +252,7 @@ Recent schema updates:
 - `20260722041006_MakeBankEntity` (bank converted from string field to entity relationship)
 - `20260722044559_RemoveExpenseItem` (removed Item column from TaxExpenses)
 - `20260723003927_AddWfhLeaveAndPublicHolidays` (added WFH/leave/public-holiday tables and holiday seed data)
-- `20260723044046_AddWorkLocationToWorkFromHome` (added `WorkLocation` column to work-from-home entries for WFH/Office support)
+- `20260723044046_AddWorkLocationToWorkFromHome` (added `WorkLocation` column to work-location entries for WFH/Office support)
 
 ## Status
 

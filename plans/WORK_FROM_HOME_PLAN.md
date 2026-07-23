@@ -88,7 +88,7 @@ The user will be able to:
 
 ## Proposed Data Model
 
-### WorkFromHomeEntry
+### WorkLocationEntry
 
 - Id (GUID/UUID) - Primary Key
 - WorkDate (DateOnly or DateTime)
@@ -164,16 +164,16 @@ Seed the initial public holiday records with the following known holidays:
 
 ## API Shape
 
-### WFH Entries
+### Work Location Entries
 
-- GET /api/work-from-home
-- GET /api/work-from-home?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
-- GET /api/work-from-home/{id}
-- POST /api/work-from-home
-- PUT /api/work-from-home/{id}
-- DELETE /api/work-from-home/{id}
-- POST /api/work-from-home/{id}/restore
-- GET /api/work-from-home/summary?view=week|month&date=YYYY-MM-DD
+- GET /api/work-locations
+- GET /api/work-locations?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
+- GET /api/work-locations/{id}
+- POST /api/work-locations
+- PUT /api/work-locations/{id}
+- DELETE /api/work-locations/{id}
+- POST /api/work-locations/{id}/restore
+- GET /api/work-locations/summary?view=week|month&date=YYYY-MM-DD
 
 ### Leave Entries
 
@@ -269,7 +269,7 @@ Create the core data model and storage foundation for WFH entries, leave entries
 
 #### Backlog Items
 
-- [x] Define `WorkFromHomeEntry` domain entity.
+- [x] Define `WorkLocationEntry` domain entity.
 - [x] Define `LeaveEntry` domain entity.
 - [x] Define `PublicHoliday` domain entity.
 - [x] Add value rules for entry type and hours conversion.

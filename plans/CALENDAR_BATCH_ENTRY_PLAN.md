@@ -186,7 +186,7 @@ Benefits:
 
 ## Option B (Preferred for Now): Two Existing Batch Endpoints
 
-1. POST /api/work-from-home/batch
+1. POST /api/work-locations/batch
 2. POST /api/leave/batch
 
 Trade-off:
@@ -314,7 +314,7 @@ Implementation follow-ups (non-decision):
 ### Operational Monitoring Checklist
 
 1. Track daily counts for each endpoint:
-   - `POST /api/work-from-home/batch`
+   - `POST /api/work-locations/batch`
    - `POST /api/leave/batch`
 2. Monitor the result distribution from endpoint logs:
    - Requested
