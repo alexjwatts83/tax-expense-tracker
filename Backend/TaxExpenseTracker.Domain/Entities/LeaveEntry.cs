@@ -1,15 +1,12 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class LeaveEntry
+public class LeaveEntry : AuditableSoftDeletableEntity
 {
-    public Guid Id { get; set; }
     public DateTime LeaveDate { get; set; }
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }
     public string? Notes { get; set; }
-    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public static LeaveEntry Create(
         DateTime leaveDate,
@@ -44,18 +41,6 @@ public class LeaveEntry
         EntryType = ValidateEntryType(entryType);
         HoursWorked = ResolveHours(entryType, specificHours);
         Notes = NormalizeOptional(notes);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void SoftDelete(DateTime? utcNow = null)
-    {
-        IsDeleted = true;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void Restore(DateTime? utcNow = null)
-    {
-        IsDeleted = false;
         UpdatedAt = utcNow ?? DateTime.UtcNow;
     }
 

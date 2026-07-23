@@ -167,6 +167,21 @@ public class ExpenseServiceTests
             return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.Skip(skip).Take(take).ToList());
         }
 
+        public Task<IReadOnlyList<TaxExpense>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.ToList());
+        }
+
+        public Task<TaxExpense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id && !x.IsDeleted));
+        }
+
+        public Task<TaxExpense?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
+        }
+
         public Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var expense = Expenses.FirstOrDefault(x => x.Id == id);
@@ -192,11 +207,6 @@ public class ExpenseServiceTests
         }
 
         public Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
-        }
-
-        public Task<TaxExpense?> GetByIdForRestoreAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
         }

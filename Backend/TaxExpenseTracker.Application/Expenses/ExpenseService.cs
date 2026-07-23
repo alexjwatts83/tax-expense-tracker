@@ -123,7 +123,7 @@ public sealed class ExpenseService : IExpenseService
 
     public async Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var expense = await _expenseRepository.GetByIdForRestoreAsync(id, cancellationToken);
+        var expense = await _expenseRepository.GetByIdIncludingDeletedAsync(id, cancellationToken);
         if (expense is null || !expense.IsDeleted)
         {
             return false;

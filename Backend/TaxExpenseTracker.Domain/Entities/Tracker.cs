@@ -1,13 +1,10 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class Tracker
+public class Tracker : AuditableSoftDeletableEntity
 {
-    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<TaxExpense> Expenses { get; set; } = new List<TaxExpense>();
 
@@ -30,18 +27,6 @@ public class Tracker
     {
         Name = NormalizeRequired(name, nameof(Name));
         Description = NormalizeOptional(description);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void SoftDelete(DateTime? utcNow = null)
-    {
-        IsDeleted = true;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void Restore(DateTime? utcNow = null)
-    {
-        IsDeleted = false;
         UpdatedAt = utcNow ?? DateTime.UtcNow;
     }
 

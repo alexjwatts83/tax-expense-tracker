@@ -1,16 +1,13 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class TaxExpense
+public class TaxExpense : AuditableSoftDeletableEntity
 {
-    public Guid Id { get; set; }
     public string Description { get; set; } = string.Empty;
     public DateTime Date { get; set; }
     public Guid BankId { get; set; }
     public decimal Price { get; set; }
     public Guid SourceId { get; set; }
-    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public Bank? Bank { get; set; }
     public Tracker? Source { get; set; }
@@ -53,18 +50,6 @@ public class TaxExpense
         BankId = ValidateBankId(bankId);
         Price = ValidatePrice(price);
         SourceId = ValidateSourceId(sourceId);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void SoftDelete(DateTime? utcNow = null)
-    {
-        IsDeleted = true;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void Restore(DateTime? utcNow = null)
-    {
-        IsDeleted = false;
         UpdatedAt = utcNow ?? DateTime.UtcNow;
     }
 

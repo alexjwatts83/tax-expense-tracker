@@ -1,8 +1,7 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class PublicHoliday
+public class PublicHoliday : Entity
 {
-    public Guid Id { get; set; }
     public DateTime HolidayDate { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Source { get; set; }

@@ -6,6 +6,26 @@ namespace TaxExpenseTracker.Infrastructure.Data;
 
 public sealed class EfExpenseRepository : IExpenseRepository
 {
+        public async Task<IReadOnlyList<TaxExpense>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.TaxExpenses
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<TaxExpense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.TaxExpenses
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        }
+
+        public async Task<TaxExpense?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.TaxExpenses
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        }
+
     private readonly AppDbContext _dbContext;
 
     public EfExpenseRepository(AppDbContext dbContext)
@@ -41,14 +61,6 @@ public sealed class EfExpenseRepository : IExpenseRepository
     public async Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.TaxExpenses
-            .Include(x => x.TaxExpenseTags)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-    }
-
-    public async Task<TaxExpense?> GetByIdForRestoreAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.TaxExpenses
-            .IgnoreQueryFilters()
             .Include(x => x.TaxExpenseTags)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }

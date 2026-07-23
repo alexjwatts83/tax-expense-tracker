@@ -4,25 +4,16 @@ using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Infrastructure.Data;
 
-public sealed class EfWorkFromHomeRepository : IWorkFromHomeRepository
+public sealed class EfWorkFromHomeRepository : EfSoftDeleteRepository<WorkFromHomeEntry>, IWorkFromHomeRepository
 {
-    private readonly AppDbContext _dbContext;
-
     public EfWorkFromHomeRepository(AppDbContext dbContext)
+        : base(dbContext, dbContext.WorkFromHomeEntries)
     {
-        _dbContext = dbContext;
-    }
-
-    public async Task<IReadOnlyList<WorkFromHomeEntry>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.WorkFromHomeEntries
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<WorkFromHomeEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
     {
-        var query = _dbContext.WorkFromHomeEntries.AsNoTracking().AsQueryable();
+        var query = DbSet.AsNoTracking().AsQueryable();
 
         if (fromDate.HasValue)
         {
@@ -35,28 +26,5 @@ public sealed class EfWorkFromHomeRepository : IWorkFromHomeRepository
         }
 
         return await query.ToListAsync(cancellationToken);
-    }
-
-    public async Task<WorkFromHomeEntry?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.WorkFromHomeEntries
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-    }
-
-    public async Task<WorkFromHomeEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.WorkFromHomeEntries
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-    }
-
-    public Task AddAsync(WorkFromHomeEntry entry, CancellationToken cancellationToken = default)
-    {
-        return _dbContext.WorkFromHomeEntries.AddAsync(entry, cancellationToken).AsTask();
-    }
-
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

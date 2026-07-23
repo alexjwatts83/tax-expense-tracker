@@ -1,8 +1,7 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class TaxExpenseTag
+public class TaxExpenseTag : Entity
 {
-    public Guid Id { get; set; }
     public Guid TaxExpenseId { get; set; }
     public Guid TagId { get; set; }
 

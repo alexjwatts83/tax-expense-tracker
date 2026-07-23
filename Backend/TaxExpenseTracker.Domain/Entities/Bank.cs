@@ -1,10 +1,8 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class Bank
+public class Bank : SoftDeletableEntity
 {
-    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<TaxExpense> Expenses { get; set; } = new List<TaxExpense>();
@@ -23,16 +21,6 @@ public class Bank
     public void Rename(string name)
     {
         Name = NormalizeRequired(name, nameof(Name));
-    }
-
-    public void SoftDelete()
-    {
-        IsDeleted = true;
-    }
-
-    public void Restore()
-    {
-        IsDeleted = false;
     }
 
     private static string NormalizeRequired(string value, string fieldName)
