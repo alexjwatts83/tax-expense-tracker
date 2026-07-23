@@ -5,10 +5,12 @@ namespace TaxExpenseTracker.Application.Banks;
 public sealed class BankService : IBankService
 {
     private readonly IBankRepository _bankRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public BankService(IBankRepository bankRepository)
+    public BankService(IBankRepository bankRepository, TimeProvider timeProvider)
     {
         _bankRepository = bankRepository;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IReadOnlyList<BankReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -32,7 +34,7 @@ public sealed class BankService : IBankService
 
     public async Task<BankReadDto> CreateAsync(CreateBankCommand command, CancellationToken cancellationToken = default)
     {
-        var bank = Bank.Create(command.Name);
+        var bank = Bank.Create(command.Name, _timeProvider);
 
         await _bankRepository.AddAsync(bank, cancellationToken);
         await _bankRepository.SaveChangesAsync(cancellationToken);
@@ -62,7 +64,7 @@ public sealed class BankService : IBankService
             return false;
         }
 
-        bank.SoftDelete();
+        bank.SoftDelete(_timeProvider);
         await _bankRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -76,7 +78,7 @@ public sealed class BankService : IBankService
             return false;
         }
 
-        bank.Restore();
+        bank.Restore(_timeProvider);
         await _bankRepository.SaveChangesAsync(cancellationToken);
 
         return true;

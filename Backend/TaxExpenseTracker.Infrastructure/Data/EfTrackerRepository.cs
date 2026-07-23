@@ -4,41 +4,10 @@ using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Infrastructure.Data;
 
-public sealed class EfTrackerRepository : ITrackerRepository
+public sealed class EfTrackerRepository : EfSoftDeleteRepository<Tracker>, ITrackerRepository
 {
-    private readonly AppDbContext _dbContext;
-
     public EfTrackerRepository(AppDbContext dbContext)
+        : base(dbContext, dbContext.Trackers)
     {
-        _dbContext = dbContext;
-    }
-
-    public async Task<IReadOnlyList<Tracker>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.Trackers
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<Tracker?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.Trackers.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
-    }
-
-    public async Task<Tracker?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.Trackers
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
-    }
-
-    public Task AddAsync(Tracker tracker, CancellationToken cancellationToken = default)
-    {
-        return _dbContext.Trackers.AddAsync(tracker, cancellationToken).AsTask();
-    }
-
-    public Task SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

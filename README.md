@@ -17,13 +17,28 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Dashboard summary totals grouped by bank and source
 - TaxExpense.Item removed end-to-end from domain, API, frontend models, and DB schema
 - Local run automation scripts with robust port handling
+- Work-from-home, leave, and public-holiday entities added to the domain and persistence model
+- WFH/leave repositories and application services implemented and wired in DI
+- WFH and leave API endpoints added for CRUD, restore, and optional date-range querying
+- WFH and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
+- Holiday markers are display-only and do not alter WFH/Leave totals or day counts
+- Public holiday API endpoints added for list and CSV import with validation and duplicate handling
+- Public holiday seed data for 2026/2027 added via EF migration
+- Shared entity base abstractions introduced (`IEntity`, `Entity`, `SoftDeletableEntity`, `AuditableEntity`, `AuditableSoftDeletableEntity`)
+- Shared generic repository abstractions introduced (`IRepository<T>`, `ISoftDeleteRepository<T>`)
+- Domain guard clauses standardized with `ThrowIfNullOrWhiteSpace` and `ThrowIfEqual`
+- Domain/application clock handling standardized on required `TimeProvider`
+- One-entry-per-date validation enforced for work-from-home and leave records
+- Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
+- Angular service/model layer added for WFH, Leave, and Public Holidays
+- Angular management screens added for WFH, Leave, and Public Holidays, with WFH and Leave combined under a shared time-tracking page
+- Time-tracking screens use local date input formatting to avoid UTC day drift in browser date fields
+- Time-tracking screens support date-range filtering and lightweight client-side paging
+- Public holiday screen loads all holiday records by default and applies filters only when requested
+- WFH/Leave paging remains client-side by design for current personal-use scale
 
 ## Planned Enhancements
 
-- Work-from-home and leave tracking is planned, not yet implemented
-- Work-from-home and leave tracking with full-day, half-day, and specific-hours entry modes
-- Weekly and monthly views for work-from-home and leave summaries
-- Public holiday CSV import and seeded public holiday reference data
 - Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
 
 ## Tech Stack
@@ -50,6 +65,9 @@ Core entities:
 - Bank
 - TaxExpense
 - TaxExpenseTag (many-to-many join)
+- WorkFromHomeEntry
+- LeaveEntry
+- PublicHoliday
 
 TaxExpense stores:
 
@@ -100,6 +118,42 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - GET /api/expenses/summary
 - GET /api/expenses/filter
 
+### Work From Home
+
+- GET /api/work-from-home
+- GET /api/work-from-home?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
+- GET /api/work-from-home/{id}
+- POST /api/work-from-home
+- PUT /api/work-from-home/{id}
+- DELETE /api/work-from-home/{id}
+- POST /api/work-from-home/{id}/restore
+- GET /api/work-from-home/summary?view=week|month&date=YYYY-MM-DD
+
+### Leave
+
+- GET /api/leave
+- GET /api/leave?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
+- GET /api/leave/{id}
+- POST /api/leave
+- PUT /api/leave/{id}
+- DELETE /api/leave/{id}
+- POST /api/leave/{id}/restore
+- GET /api/leave/summary?view=week|month&date=YYYY-MM-DD
+
+### Public Holidays
+
+- GET /api/public-holidays
+- GET /api/public-holidays?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
+- POST /api/public-holidays/import (multipart/form-data file upload)
+
+Current public holiday CSV rules:
+
+- Required headers: `Date`, `Name`
+- Accepted header aliases: `HolidayDate`, `Holiday_Date`, `HolidayName`, `Holiday_Name`
+- Accepted date formats: `yyyy-MM-dd`, `dd/MM/yyyy`, `d/M/yyyy`, `yyyy/M/d`
+- Duplicate rows in the same file are skipped
+- Existing rows with the same date and name are skipped
+
 Current filter query params:
 
 - date (single day)
@@ -112,6 +166,8 @@ Current filter query params:
 
 - /dashboard
 - /expenses
+- /time-tracking
+- /public-holidays
 - /trackers
 - /tags
 - /banks
@@ -186,15 +242,21 @@ Recent schema updates:
 
 - `20260722041006_MakeBankEntity` (bank converted from string field to entity relationship)
 - `20260722044559_RemoveExpenseItem` (removed Item column from TaxExpenses)
+- `20260723003927_AddWfhLeaveAndPublicHolidays` (added WFH/leave/public-holiday tables and holiday seed data)
 
 ## Status
 
-- Phase 1 complete
-- Phase 2 complete
-- Phase 3 complete
+- Phase 1 - Domain and Persistence Foundation: Complete
+- Phase 2 - Entry Management Use Cases: Complete
+- Phase 3 - Weekly and Monthly Reporting: Complete
+- Phase 4 - Public Holiday CSV Import: In Progress
+- Phase 5 - API and Frontend Delivery: Near Complete
+- Phase 6 - Hardening and Polish: Pending
 - DDD/Clean phases A-F complete
 - Bank entity refactor completed end-to-end (backend, frontend, migration, tests)
 - Expense Item field removed end-to-end (backend, frontend, migration, tests)
-- Work-from-home, leave, and public-holiday tracking are planned in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
+- Domain and repository abstraction refactors completed (shared entity and repository interfaces)
+- TimeProvider refactor completed across domain and application services
+- Unit tests passing: 46/46
 
-Open work remains in Phase 4 (deployment, coverage expansion, CSV export, additional trend analytics).
+Open work remains across phases 3-6, focused on reporting, CSV import, API/frontend delivery, and hardening.

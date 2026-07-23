@@ -61,7 +61,7 @@ Scope for first pass:
 
 ### 7. Validation
 - [ ] API smoke tests pass in Azure dev
-- [ ] Frontend smoke tests pass in Azure dev
+- [ ] Frontend manual smoke validation completed in Azure dev (no automated UI tests)
 - [ ] Expense flows verified end-to-end
 - [ ] Filter/reset behavior verified in Azure
 - [ ] Monitoring and alerts configured and tested
@@ -82,6 +82,7 @@ Use this section to record major decisions and rationale.
 | DEC-002 | 2026-07-22 | Primary Azure region | East US, Australia East | Australia East (Sydney) | Lower latency and operational proximity for your location near Sydney. | Affects resource placement, latency, failover strategy, and cost. | You | Decided |
 | DEC-003 | 2026-07-22 | Naming and tagging standard | Custom per team, Azure baseline standard | Azure baseline naming + mandatory tags | Keeps resource discovery, cost reporting, and policy automation consistent while moving quickly. | Affects all Terraform module inputs, resource naming, cost governance, and operations. | You | Decided |
 | DEC-004 | 2026-07-22 | Environment strategy | Separate dev/prod, single environment | Single environment (dev only) | Solo usage; lower operational overhead and faster setup. | Simplifies subscription/RG strategy, Terragrunt structure, and deployment workflow. | You | Decided |
+| DEC-005 | 2026-07-23 | UI testing strategy | Automated UI tests, manual UI validation | Manual UI validation only (no automated UI tests) | Solo project; faster delivery and lower maintenance overhead for now. | Validation relies on API automation plus manual frontend smoke/flow checks. | You | Decided |
 
 ## Naming and Tag Standard (Baseline)
 

@@ -5,10 +5,12 @@ namespace TaxExpenseTracker.Application.Trackers;
 public sealed class TrackerService : ITrackerService
 {
     private readonly ITrackerRepository _trackerRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public TrackerService(ITrackerRepository trackerRepository)
+    public TrackerService(ITrackerRepository trackerRepository, TimeProvider timeProvider)
     {
         _trackerRepository = trackerRepository;
+        _timeProvider = timeProvider;
     }
 
     public async Task<IReadOnlyList<TrackerReadDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -32,7 +34,7 @@ public sealed class TrackerService : ITrackerService
 
     public async Task<TrackerReadDto> CreateAsync(CreateTrackerCommand command, CancellationToken cancellationToken = default)
     {
-        var tracker = Tracker.Create(command.Name, command.Description);
+        var tracker = Tracker.Create(command.Name, command.Description, _timeProvider);
 
         await _trackerRepository.AddAsync(tracker, cancellationToken);
         await _trackerRepository.SaveChangesAsync(cancellationToken);
@@ -48,7 +50,7 @@ public sealed class TrackerService : ITrackerService
             return false;
         }
 
-        tracker.Rename(command.Name, command.Description);
+        tracker.Rename(command.Name, command.Description, _timeProvider);
         await _trackerRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -62,7 +64,7 @@ public sealed class TrackerService : ITrackerService
             return false;
         }
 
-        tracker.SoftDelete();
+        tracker.SoftDelete(_timeProvider);
         await _trackerRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -76,7 +78,7 @@ public sealed class TrackerService : ITrackerService
             return false;
         }
 
-        tracker.Restore();
+        tracker.Restore(_timeProvider);
         await _trackerRepository.SaveChangesAsync(cancellationToken);
 
         return true;

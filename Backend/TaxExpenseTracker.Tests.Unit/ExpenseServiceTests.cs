@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Application.Expenses;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Tests.Unit;
@@ -14,12 +15,12 @@ public class ExpenseServiceTests
             BankExistsResult = true,
         };
 
-        var service = new ExpenseService(repository);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.CreateAsync(new CreateExpenseCommand(
                 "Work machine",
-                DateTime.UtcNow,
+                TestTime.FixedUtcNow.UtcDateTime,
                 repository.BankId,
                 1200m,
                 Guid.NewGuid(),
@@ -35,11 +36,11 @@ public class ExpenseServiceTests
             BankExistsResult = true,
         };
 
-        var service = new ExpenseService(repository);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
 
         var result = await service.CreateAsync(new CreateExpenseCommand(
             "  Work machine  ",
-            DateTime.UtcNow,
+            TestTime.FixedUtcNow.UtcDateTime,
             repository.BankId,
             1200m,
             repository.SourceId,
@@ -60,11 +61,11 @@ public class ExpenseServiceTests
             BankExistsResult = true,
         };
 
-        var service = new ExpenseService(repository);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
 
         var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateExpenseCommand(
             "Desc",
-            DateTime.UtcNow,
+            TestTime.FixedUtcNow.UtcDateTime,
             repository.BankId,
             10m,
             repository.SourceId,
@@ -77,7 +78,7 @@ public class ExpenseServiceTests
     public async Task DeleteAsync_ReturnsFalse_WhenExpenseMissing()
     {
         var repository = new InMemoryExpenseRepository();
-        var service = new ExpenseService(repository);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
 
         var result = await service.DeleteAsync(Guid.NewGuid());
 
@@ -95,14 +96,15 @@ public class ExpenseServiceTests
 
         var expense = TaxExpense.Create(
             "Desc",
-            DateTime.UtcNow,
+            TestTime.FixedUtcNow.UtcDateTime,
             repository.BankId,
             100m,
-            repository.SourceId);
-        expense.SoftDelete();
+            repository.SourceId,
+            TestTime.TimeProvider);
+        expense.SoftDelete(TestTime.TimeProvider);
         repository.Expenses.Add(expense);
 
-        var service = new ExpenseService(repository);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
 
         var result = await service.RestoreAsync(expense.Id);
 
@@ -115,20 +117,20 @@ public class ExpenseServiceTests
     public async Task GetSummaryAsync_ReturnsGroupedTotals()
     {
         var repository = new InMemoryExpenseRepository { SourceExistsResult = true, BankExistsResult = true };
-        var now = DateTime.UtcNow;
+        var now = TestTime.FixedUtcNow.UtcDateTime;
 
-        var first = TaxExpense.Create("Desc", now, repository.BankId, 10m, repository.SourceId);
-        first.Bank = Bank.Create("ANZ", now);
-        first.Source = Tracker.Create("Tracker A", "Source", now);
+        var first = TaxExpense.Create("Desc", now, repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
+        first.Bank = Bank.Create("ANZ", TestTime.TimeProvider);
+        first.Source = Tracker.Create("Tracker A", "Source", TestTime.TimeProvider);
 
-        var second = TaxExpense.Create("Desc", now, Guid.NewGuid(), 30m, repository.SourceId);
-        second.Bank = Bank.Create("CBA", now);
-        second.Source = Tracker.Create("Tracker B", "Source", now);
+        var second = TaxExpense.Create("Desc", now, Guid.NewGuid(), 30m, repository.SourceId, TestTime.TimeProvider);
+        second.Bank = Bank.Create("CBA", TestTime.TimeProvider);
+        second.Source = Tracker.Create("Tracker B", "Source", TestTime.TimeProvider);
 
         repository.Expenses.Add(first);
         repository.Expenses.Add(second);
 
-        var service = new ExpenseService(repository);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
         var summary = await service.GetSummaryAsync();
 
         Assert.Equal(40m, summary.TotalSpent);
@@ -140,7 +142,7 @@ public class ExpenseServiceTests
     public async Task FilterAsync_Throws_WhenPriceIsNegative()
     {
         var repository = new InMemoryExpenseRepository();
-        var service = new ExpenseService(repository);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
 
         var query = new ExpenseFilterQuery(
             null,
@@ -162,9 +164,38 @@ public class ExpenseServiceTests
         public Guid SourceId { get; } = Guid.NewGuid();
         public Guid TagId { get; } = Guid.NewGuid();
 
-        public Task<IReadOnlyList<TaxExpense>> GetPagedWithDetailsAsync(int skip, int take, CancellationToken cancellationToken = default)
+        public Task<PagedResult<TaxExpense>> GetPagedWithDetailsAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.Skip(skip).Take(take).ToList());
+            var normalizedPage = Math.Max(pageNumber, 1);
+            var normalizedPageSize = Math.Max(pageSize, 1);
+
+            var items = Expenses
+                .Skip((normalizedPage - 1) * normalizedPageSize)
+                .Take(normalizedPageSize)
+                .ToList();
+
+            return Task.FromResult(new PagedResult<TaxExpense>
+            {
+                Items = items,
+                TotalCount = Expenses.Count,
+                PageNumber = normalizedPage,
+                PageSize = normalizedPageSize
+            });
+        }
+
+        public Task<IReadOnlyList<TaxExpense>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.ToList());
+        }
+
+        public Task<TaxExpense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id && !x.IsDeleted));
+        }
+
+        public Task<TaxExpense?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
         }
 
         public Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
@@ -172,19 +203,19 @@ public class ExpenseServiceTests
             var expense = Expenses.FirstOrDefault(x => x.Id == id);
             if (expense is not null && expense.Bank is null)
             {
-                expense.Bank = Bank.Create("ANZ", DateTime.UtcNow);
+                expense.Bank = Bank.Create("ANZ", TestTime.TimeProvider);
             }
 
             if (expense is not null && expense.Source is null)
             {
-                expense.Source = Tracker.Create("Home Office", "Source", DateTime.UtcNow);
+                expense.Source = Tracker.Create("Home Office", "Source", TestTime.TimeProvider);
             }
 
             if (expense is not null)
             {
                 foreach (var tag in expense.TaxExpenseTags.Where(x => x.Tag is null))
                 {
-                    tag.Tag = Tag.Create("Deductible", DateTime.UtcNow);
+                    tag.Tag = Tag.Create("Deductible", TestTime.TimeProvider);
                 }
             }
 
@@ -192,11 +223,6 @@ public class ExpenseServiceTests
         }
 
         public Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
-        }
-
-        public Task<TaxExpense?> GetByIdForRestoreAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
         }

@@ -223,6 +223,7 @@ Current expense filter query parameters:
 ### Phase F - Testing and Quality Gates
 - [x] Baseline implemented
 - [~] Coverage expansion ongoing
+- [x] UI testing approach confirmed: manual UI validation only (no automated UI tests)
 
 ---
 
@@ -245,6 +246,7 @@ Current expense filter query parameters:
 ### Phase 4: Deployment & Enhancements
 - [ ] Cloud deployment setup (no containers)
 - [~] Expand test coverage (unit + integration)
+- [x] No automated UI tests planned currently; use manual UI smoke/end-to-end validation
 - [ ] CSV export functionality
 - [ ] Charts/graphs for trends
 - [ ] Query/performance tuning

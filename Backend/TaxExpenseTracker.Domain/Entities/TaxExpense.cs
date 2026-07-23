@@ -1,16 +1,12 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class TaxExpense
+public class TaxExpense : AuditableSoftDeletableEntity
 {
-    public Guid Id { get; set; }
     public string Description { get; set; } = string.Empty;
     public DateTime Date { get; set; }
     public Guid BankId { get; set; }
     public decimal Price { get; set; }
     public Guid SourceId { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public Bank? Bank { get; set; }
     public Tracker? Source { get; set; }
@@ -22,9 +18,10 @@ public class TaxExpense
         Guid bankId,
         decimal price,
         Guid sourceId,
-        DateTime? utcNow = null)
+        TimeProvider timeProvider)
     {
-        var now = utcNow ?? DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        var now = timeProvider.GetUtcNow().UtcDateTime;
 
         return new TaxExpense
         {
@@ -46,26 +43,15 @@ public class TaxExpense
         Guid bankId,
         decimal price,
         Guid sourceId,
-        DateTime? utcNow = null)
+        TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         Description = NormalizeOptional(description);
         Date = ValidateDate(date);
         BankId = ValidateBankId(bankId);
         Price = ValidatePrice(price);
         SourceId = ValidateSourceId(sourceId);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void SoftDelete(DateTime? utcNow = null)
-    {
-        IsDeleted = true;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void Restore(DateTime? utcNow = null)
-    {
-        IsDeleted = false;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
+        UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
 
     private static string NormalizeOptional(string? value)
@@ -85,31 +71,19 @@ public class TaxExpense
 
     private static DateTime ValidateDate(DateTime date)
     {
-        if (date == default)
-        {
-            throw new ArgumentException("Date is required.", nameof(date));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;
     }
 
     private static Guid ValidateSourceId(Guid sourceId)
     {
-        if (sourceId == Guid.Empty)
-        {
-            throw new ArgumentException("SourceId is required.", nameof(sourceId));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(sourceId, Guid.Empty, nameof(sourceId));
         return sourceId;
     }
 
     private static Guid ValidateBankId(Guid bankId)
     {
-        if (bankId == Guid.Empty)
-        {
-            throw new ArgumentException("BankId is required.", nameof(bankId));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfEqual(bankId, Guid.Empty, nameof(bankId));
         return bankId;
     }
 }

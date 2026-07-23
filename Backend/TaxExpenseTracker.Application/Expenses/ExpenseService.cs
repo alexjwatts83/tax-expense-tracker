@@ -1,25 +1,35 @@
 using TaxExpenseTracker.Domain.Entities;
+using TaxExpenseTracker.Application.Common;
 
 namespace TaxExpenseTracker.Application.Expenses;
 
 public sealed class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly TimeProvider _timeProvider;
 
-    public ExpenseService(IExpenseRepository expenseRepository)
+    public ExpenseService(IExpenseRepository expenseRepository, TimeProvider timeProvider)
     {
         _expenseRepository = expenseRepository;
+        _timeProvider = timeProvider;
     }
 
-    public async Task<IReadOnlyList<ExpenseReadDto>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<ExpenseReadDto>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var (normalizedPage, normalizedPageSize) = ExpenseValidation.NormalizePaging(page, pageSize);
 
-        var expenses = await _expenseRepository.GetPagedWithDetailsAsync(
-            (normalizedPage - 1) * normalizedPageSize,
+        var pagedExpenses = await _expenseRepository.GetPagedWithDetailsAsync(
+            normalizedPage,
             normalizedPageSize,
             cancellationToken);
-        return expenses.Select(MapExpense).ToList();
+
+        return new PagedResult<ExpenseReadDto>
+        {
+            Items = pagedExpenses.Items.Select(MapExpense).ToList(),
+            TotalCount = pagedExpenses.TotalCount,
+            PageNumber = pagedExpenses.PageNumber,
+            PageSize = pagedExpenses.PageSize
+        };
     }
 
     public async Task<ExpenseReadDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -32,15 +42,11 @@ public sealed class ExpenseService : IExpenseService
     {
         var sourceExists = await _expenseRepository.SourceExistsAsync(command.SourceId, cancellationToken);
         if (!sourceExists)
-        {
-            throw new InvalidOperationException("Source tracker does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Source tracker does not exist.");
 
         var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
         if (!bankExists)
-        {
-            throw new InvalidOperationException("Bank does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Bank does not exist.");
 
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
@@ -49,7 +55,8 @@ public sealed class ExpenseService : IExpenseService
             command.Date,
             command.BankId,
             command.Price,
-            command.SourceId);
+            command.SourceId,
+            _timeProvider);
 
         expense.TaxExpenseTags = validTagIds
             .Select(tagId => TaxExpenseTag.Create(expense.Id, tagId))
@@ -58,8 +65,9 @@ public sealed class ExpenseService : IExpenseService
         await _expenseRepository.AddAsync(expense, cancellationToken);
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
-        var created = await _expenseRepository.GetByIdWithDetailsAsync(expense.Id, cancellationToken)
-            ?? throw new InvalidOperationException("Created expense could not be loaded.");
+        var created = await _expenseRepository.GetByIdWithDetailsAsync(expense.Id, cancellationToken);
+        if (created is null)
+            ThrowHelper.InvalidOperation("Created expense could not be loaded.");
 
         return MapExpense(created);
     }
@@ -74,15 +82,11 @@ public sealed class ExpenseService : IExpenseService
 
         var sourceExists = await _expenseRepository.SourceExistsAsync(command.SourceId, cancellationToken);
         if (!sourceExists)
-        {
-            throw new InvalidOperationException("Source tracker does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Source tracker does not exist.");
 
         var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
         if (!bankExists)
-        {
-            throw new InvalidOperationException("Bank does not exist.");
-        }
+            ThrowHelper.InvalidOperation("Bank does not exist.");
 
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
@@ -91,7 +95,8 @@ public sealed class ExpenseService : IExpenseService
             command.Date,
             command.BankId,
             command.Price,
-            command.SourceId);
+            command.SourceId,
+            _timeProvider);
 
         expense.TaxExpenseTags.Clear();
         foreach (var tagId in validTagIds)
@@ -101,8 +106,11 @@ public sealed class ExpenseService : IExpenseService
 
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
-        var updated = await _expenseRepository.GetByIdWithDetailsAsync(id, cancellationToken)
-            ?? throw new InvalidOperationException("Updated expense could not be loaded.");
+        var updated = await _expenseRepository.GetByIdWithDetailsAsync(id, cancellationToken);
+        if (updated is null)
+        {
+            ThrowHelper.InvalidOperation("Updated expense could not be loaded.");
+        }
 
         return MapExpense(updated);
     }
@@ -115,7 +123,7 @@ public sealed class ExpenseService : IExpenseService
             return false;
         }
 
-        expense.SoftDelete();
+        expense.SoftDelete(_timeProvider);
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -123,13 +131,13 @@ public sealed class ExpenseService : IExpenseService
 
     public async Task<bool> RestoreAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var expense = await _expenseRepository.GetByIdForRestoreAsync(id, cancellationToken);
+        var expense = await _expenseRepository.GetByIdIncludingDeletedAsync(id, cancellationToken);
         if (expense is null || !expense.IsDeleted)
         {
             return false;
         }
 
-        expense.Restore();
+        expense.Restore(_timeProvider);
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 
         return true;

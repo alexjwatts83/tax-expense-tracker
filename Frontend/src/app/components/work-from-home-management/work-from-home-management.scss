@@ -1,0 +1,70 @@
+.entry-form,
+.summary-form {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	grid-column: 1 / -1;
+}
+
+.entry-table {
+	width: 100%;
+}
+
+.paging-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 1rem;
+	flex-wrap: wrap;
+}
+
+.page-size-field {
+	width: 140px;
+}
+
+.range-label {
+	margin: 0;
+	color: #475467;
+}
+
+.paging-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.summary-grid {
+	display: grid;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+
+.holiday-list {
+	margin-top: 1rem;
+}
+
+.empty-message {
+	color: #475467;
+	margin-top: 1rem;
+}
+
+.loading {
+	display: flex;
+	justify-content: center;
+	padding: 1.5rem 0;
+}
+
+.error-message {
+	color: #b42318;
+	margin: 0.75rem 0;
+}
+
+.info-message {
+	color: #027a48;
+	margin: 0.75rem 0;
+}

@@ -1,8 +1,7 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class TaxExpenseTag
+public class TaxExpenseTag : Entity
 {
-    public Guid Id { get; set; }
     public Guid TaxExpenseId { get; set; }
     public Guid TagId { get; set; }
 
@@ -11,15 +10,8 @@ public class TaxExpenseTag
 
     public static TaxExpenseTag Create(Guid taxExpenseId, Guid tagId)
     {
-        if (taxExpenseId == Guid.Empty)
-        {
-            throw new ArgumentException("TaxExpenseId is required.", nameof(taxExpenseId));
-        }
-
-        if (tagId == Guid.Empty)
-        {
-            throw new ArgumentException("TagId is required.", nameof(tagId));
-        }
+        ArgumentOutOfRangeException.ThrowIfEqual(taxExpenseId, Guid.Empty, nameof(taxExpenseId));
+        ArgumentOutOfRangeException.ThrowIfEqual(tagId, Guid.Empty, nameof(tagId));
 
         return new TaxExpenseTag
         {

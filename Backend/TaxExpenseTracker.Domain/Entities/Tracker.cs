@@ -1,19 +1,16 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class Tracker
+public class Tracker : AuditableSoftDeletableEntity
 {
-    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<TaxExpense> Expenses { get; set; } = new List<TaxExpense>();
 
-    public static Tracker Create(string name, string? description, DateTime? utcNow = null)
+    public static Tracker Create(string name, string? description, TimeProvider timeProvider)
     {
-        var now = utcNow ?? DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        var now = timeProvider.GetUtcNow().UtcDateTime;
 
         return new Tracker
         {
@@ -26,34 +23,18 @@ public class Tracker
         };
     }
 
-    public void Rename(string name, string? description, DateTime? utcNow = null)
+    public void Rename(string name, string? description, TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         Name = NormalizeRequired(name, nameof(Name));
         Description = NormalizeOptional(description);
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void SoftDelete(DateTime? utcNow = null)
-    {
-        IsDeleted = true;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
-    }
-
-    public void Restore(DateTime? utcNow = null)
-    {
-        IsDeleted = false;
-        UpdatedAt = utcNow ?? DateTime.UtcNow;
+        UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
 
     private static string NormalizeRequired(string value, string fieldName)
     {
-        var normalized = value?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            throw new ArgumentException($"{fieldName} is required.", fieldName);
-        }
-
-        return normalized;
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, fieldName);
+        return value.Trim();
     }
 
     private static string? NormalizeOptional(string? value)

@@ -31,6 +31,13 @@ export interface Expense {
   updatedAt: string;
 }
 
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
 export interface CreateExpenseRequest {
   description: string;
   date: string;
@@ -71,4 +78,80 @@ export interface ExpenseFilterRequest {
   price?: number;
   sourceId?: string;
   tagIds?: string[];
+}
+
+export enum DayEntryType {
+  FullDay = 1,
+  HalfDay = 2,
+  SpecificHours = 3,
+}
+
+export interface DayEntryHoliday {
+  date: string;
+  name: string;
+}
+
+export interface DayEntrySummary {
+  view: string;
+  anchorDate: string;
+  fromDate: string;
+  toDate: string;
+  totalHours: number;
+  totalDays: number;
+  entryCount: number;
+  holidays: DayEntryHoliday[];
+}
+
+export interface DateRangeRequest {
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface WorkFromHomeEntry {
+  id: string;
+  workDate: string;
+  entryType: DayEntryType;
+  hoursWorked: number;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateWorkFromHomeRequest {
+  workDate: string;
+  entryType: DayEntryType;
+  specificHours?: number | null;
+  notes?: string | null;
+}
+
+export interface LeaveEntry {
+  id: string;
+  leaveDate: string;
+  entryType: DayEntryType;
+  hoursWorked: number;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateLeaveRequest {
+  leaveDate: string;
+  entryType: DayEntryType;
+  specificHours?: number | null;
+  notes?: string | null;
+}
+
+export interface PublicHoliday {
+  id: string;
+  holidayDate: string;
+  name: string;
+  source?: string | null;
+  isImported: boolean;
+  createdAt: string;
+}
+
+export interface PublicHolidayImportResult {
+  importedCount: number;
+  skippedDuplicateCount: number;
+  warnings: string[];
 }

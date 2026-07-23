@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TaxExpenseTracker.Api.Models;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Expenses;
 
 namespace TaxExpenseTracker.Api.Controllers;
@@ -9,13 +10,21 @@ namespace TaxExpenseTracker.Api.Controllers;
 public class ExpensesController(IExpenseService expenseService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ExpenseResponseDto>>> GetAll(
+    public async Task<ActionResult<PagedResult<ExpenseResponseDto>>> GetAll(
         int page = 1,
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
         var expenses = await expenseService.GetAllAsync(page, pageSize, cancellationToken);
-        return Ok(expenses.Select(MapExpense));
+        var response = new PagedResult<ExpenseResponseDto>
+        {
+            Items = expenses.Items.Select(MapExpense).ToList(),
+            TotalCount = expenses.TotalCount,
+            PageNumber = expenses.PageNumber,
+            PageSize = expenses.PageSize
+        };
+
+        return Ok(response);
     }
 
     [HttpGet("{id:guid}")]

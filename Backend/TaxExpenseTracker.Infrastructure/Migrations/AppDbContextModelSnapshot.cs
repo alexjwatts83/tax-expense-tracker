@@ -61,6 +61,331 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TaxExpenseTracker.Domain.Entities.LeaveEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EntryType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("HoursWorked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LeaveDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LeaveEntries");
+                });
+
+            modelBuilder.Entity("TaxExpenseTracker.Domain.Entities.PublicHoliday", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("HolidayDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsImported")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HolidayDate", "Name")
+                        .IsUnique();
+
+                    b.ToTable("PublicHolidays");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165001"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "New Year's Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165002"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "New Year's Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165003"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 1, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Australia Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165004"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 1, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Australia Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165005"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 4, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Good Friday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165006"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 3, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Good Friday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165007"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Easter Saturday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165008"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 3, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Easter Saturday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165009"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Easter Sunday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165010"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 3, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Easter Sunday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165011"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 4, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Easter Monday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165012"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Easter Monday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165013"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 4, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Anzac Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165014"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 4, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Anzac Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165015"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 4, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Additional Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165016"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 4, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Additional Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165017"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "King's Birthday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165018"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 6, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "King's Birthday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165019"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 8, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Bank Holiday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165020"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 8, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Bank Holiday",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165021"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 10, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Labour Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165022"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 10, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Labour Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165023"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 12, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Christmas Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165024"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 12, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Christmas Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165025"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 12, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Additional Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165026"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 12, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Boxing Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165027"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 12, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Boxing Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165028"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2026, 12, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Additional Day",
+                            Source = "Seed"
+                        },
+                        new
+                        {
+                            Id = new Guid("90e87f20-6fd4-4f68-92a8-61fb6f165029"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            HolidayDate = new DateTime(2027, 12, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsImported = false,
+                            Name = "Additional Day",
+                            Source = "Seed"
+                        });
+                });
+
             modelBuilder.Entity("TaxExpenseTracker.Domain.Entities.Tag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -217,6 +542,38 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             Name = "Office Works",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
+                });
+
+            modelBuilder.Entity("TaxExpenseTracker.Domain.Entities.WorkFromHomeEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EntryType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("HoursWorked")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("WorkDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkFromHomeEntries");
                 });
 
             modelBuilder.Entity("TaxExpenseTracker.Domain.Entities.TaxExpense", b =>

@@ -1,21 +1,20 @@
 namespace TaxExpenseTracker.Domain.Entities;
 
-public class Tag
+public class Tag : SoftDeletableEntity
 {
-    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<TaxExpenseTag> TaxExpenseTags { get; set; } = new List<TaxExpenseTag>();
 
-    public static Tag Create(string name, DateTime? utcNow = null)
+    public static Tag Create(string name, TimeProvider timeProvider)
     {
+        ArgumentNullException.ThrowIfNull(timeProvider);
         return new Tag
         {
             Id = Guid.NewGuid(),
             Name = NormalizeRequired(name, nameof(Name)),
-            CreatedAt = utcNow ?? DateTime.UtcNow,
+            CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
             IsDeleted = false,
         };
     }
@@ -25,24 +24,9 @@ public class Tag
         Name = NormalizeRequired(name, nameof(Name));
     }
 
-    public void SoftDelete()
-    {
-        IsDeleted = true;
-    }
-
-    public void Restore()
-    {
-        IsDeleted = false;
-    }
-
     private static string NormalizeRequired(string value, string fieldName)
     {
-        var normalized = value?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            throw new ArgumentException($"{fieldName} is required.", fieldName);
-        }
-
-        return normalized;
+        ArgumentException.ThrowIfNullOrWhiteSpace(value, fieldName);
+        return value.Trim();
     }
 }

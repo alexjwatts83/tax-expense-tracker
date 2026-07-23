@@ -71,6 +71,7 @@ export class ExpenseList implements OnInit {
   banks: Bank[] = [];
   expenses: Expense[] = [];
   pagedExpenses: Expense[] = [];
+  totalCount = 0;
   lastDeletedExpense: Expense | null = null;
   trackers: Tracker[] = [];
   tags: Tag[] = [];
@@ -117,7 +118,7 @@ export class ExpenseList implements OnInit {
     this.infoMessage = '';
 
     this.expenseService
-      .getAll()
+      .getAll(this.page, this.pageSize)
       .pipe(
         take(1),
         finalize(() => {
@@ -126,9 +127,12 @@ export class ExpenseList implements OnInit {
         }),
       )
       .subscribe({
-        next: (expenses) => {
-          this.expenses = expenses;
-          this.updatePagedExpenses();
+        next: (result) => {
+          this.expenses = result.items;
+          this.pagedExpenses = result.items;
+          this.totalCount = result.totalCount;
+          this.page = result.pageNumber;
+          this.pageSize = result.pageSize;
         },
         error: () => {
           this.errorMessage = 'Unable to load expenses. Ensure the API is running.';
@@ -148,8 +152,13 @@ export class ExpenseList implements OnInit {
     this.expenseService.softDelete(id).subscribe({
       next: () => {
         this.lastDeletedExpense = expense;
-        this.expenses = this.expenses.filter((expense) => expense.id !== id);
-        this.updatePagedExpenses();
+        if (this.hasActiveFilters) {
+          this.expenses = this.expenses.filter((entry) => entry.id !== id);
+          this.totalCount = this.expenses.length;
+          this.updatePagedExpenses();
+        } else {
+          this.loadExpenses();
+        }
         this.infoMessage = 'Expense deleted.';
       },
       error: (err) => {
@@ -169,11 +178,14 @@ export class ExpenseList implements OnInit {
 
     this.expenseService.restore(expense.id).subscribe({
       next: () => {
-        this.expenses = [...this.expenses, expense].sort((a, b) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime(),
-        );
         this.lastDeletedExpense = null;
-        this.updatePagedExpenses();
+
+        if (this.hasActiveFilters) {
+          this.applyFilters();
+        } else {
+          this.loadExpenses();
+        }
+
         this.infoMessage = 'Expense restored.';
       },
       error: (err) => {
@@ -202,6 +214,13 @@ export class ExpenseList implements OnInit {
     const requestVersion = ++this.filterRequestVersion;
 
     this.hasActiveFilters = Object.values(request).some((v) => v !== undefined);
+
+    if (!this.hasActiveFilters) {
+      this.lastAppliedFilterSignature = '';
+      this.loadExpenses();
+      return;
+    }
+
     this.page = 1;
     this.isFiltering = true;
     this.errorMessage = '';
@@ -225,6 +244,7 @@ export class ExpenseList implements OnInit {
 
           this.lastAppliedFilterSignature = signature;
           this.expenses = expenses;
+          this.totalCount = expenses.length;
           this.updatePagedExpenses();
         },
         error: (err) => {
@@ -273,10 +293,8 @@ export class ExpenseList implements OnInit {
           if (this.hasActiveFilters) {
             this.applyFilters();
           } else {
-            this.expenses = [createdExpense, ...this.expenses].sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-            );
-            this.updatePagedExpenses();
+            this.page = 1;
+            this.loadExpenses();
           }
 
           this.createForm.reset({
@@ -339,25 +357,37 @@ export class ExpenseList implements OnInit {
   previousPage(): void {
     if (this.page > 1) {
       this.page -= 1;
-      this.updatePagedExpenses();
+      if (this.hasActiveFilters) {
+        this.updatePagedExpenses();
+      } else {
+        this.loadExpenses();
+      }
     }
   }
 
   nextPage(): void {
-    if (this.page * this.pageSize < this.expenses.length) {
+    if (this.page * this.pageSize < this.totalCount) {
       this.page += 1;
-      this.updatePagedExpenses();
+      if (this.hasActiveFilters) {
+        this.updatePagedExpenses();
+      } else {
+        this.loadExpenses();
+      }
     }
   }
 
   onPageSizeChange(pageSize: number): void {
     this.pageSize = pageSize;
     this.page = 1;
-    this.updatePagedExpenses();
+    if (this.hasActiveFilters) {
+      this.updatePagedExpenses();
+    } else {
+      this.loadExpenses();
+    }
   }
 
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.expenses.length / this.pageSize));
+    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
   }
 
   private updatePagedExpenses(): void {

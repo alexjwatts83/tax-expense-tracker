@@ -1,9 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Banks;
 using TaxExpenseTracker.Application.Expenses;
+using TaxExpenseTracker.Application.Leave;
+using TaxExpenseTracker.Application.PublicHolidays;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Application.Trackers;
+using TaxExpenseTracker.Application.WorkFromHome;
 using TaxExpenseTracker.Infrastructure.Data;
 using TaxExpenseTracker.Api.Middleware;
 
@@ -50,6 +54,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(defaultConnection, sqlite =>
         sqlite.MigrationsAssembly("TaxExpenseTracker.Infrastructure")));
 
+builder.Services.AddSingleton(TimeProvider.System);
+
 builder.Services.AddScoped<ITrackerRepository, EfTrackerRepository>();
 builder.Services.AddScoped<ITrackerService, TrackerService>();
 builder.Services.AddScoped<ITagRepository, EfTagRepository>();
@@ -58,6 +64,12 @@ builder.Services.AddScoped<IBankRepository, EfBankRepository>();
 builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddScoped<IExpenseRepository, EfExpenseRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IWorkFromHomeRepository, EfWorkFromHomeRepository>();
+builder.Services.AddScoped<IWorkFromHomeService, WorkFromHomeService>();
+builder.Services.AddScoped<ILeaveRepository, EfLeaveRepository>();
+builder.Services.AddScoped<ILeaveService, LeaveService>();
+builder.Services.AddScoped<IPublicHolidayRepository, EfPublicHolidayRepository>();
+builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 
 var app = builder.Build();
 

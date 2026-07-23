@@ -5,6 +5,7 @@ import {
 	CreateExpenseRequest,
 	Expense,
 	ExpenseFilterRequest,
+	PagedResult,
 	ExpenseSummary,
 } from '../models/api.models';
 
@@ -14,12 +15,12 @@ export class ExpenseService {
 
 	constructor(private readonly http: HttpClient) {}
 
-	getAll(page = 1, pageSize = 20): Observable<Expense[]> {
+	getAll(page = 1, pageSize = 20): Observable<PagedResult<Expense>> {
 		const params = new HttpParams()
 			.set('page', page)
 			.set('pageSize', pageSize);
 
-		return this.http.get<Expense[]>(this.apiUrl, { params });
+		return this.http.get<PagedResult<Expense>>(this.apiUrl, { params });
 	}
 
 	getById(id: string): Observable<Expense> {
