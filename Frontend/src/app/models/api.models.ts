@@ -31,6 +31,13 @@ export interface Expense {
   updatedAt: string;
 }
 
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
 export interface CreateExpenseRequest {
   description: string;
   date: string;

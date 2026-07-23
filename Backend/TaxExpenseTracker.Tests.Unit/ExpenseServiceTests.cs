@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Application.Expenses;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Tests.Unit;
@@ -163,9 +164,23 @@ public class ExpenseServiceTests
         public Guid SourceId { get; } = Guid.NewGuid();
         public Guid TagId { get; } = Guid.NewGuid();
 
-        public Task<IReadOnlyList<TaxExpense>> GetPagedWithDetailsAsync(int skip, int take, CancellationToken cancellationToken = default)
+        public Task<PagedResult<TaxExpense>> GetPagedWithDetailsAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.Skip(skip).Take(take).ToList());
+            var normalizedPage = Math.Max(pageNumber, 1);
+            var normalizedPageSize = Math.Max(pageSize, 1);
+
+            var items = Expenses
+                .Skip((normalizedPage - 1) * normalizedPageSize)
+                .Take(normalizedPageSize)
+                .ToList();
+
+            return Task.FromResult(new PagedResult<TaxExpense>
+            {
+                Items = items,
+                TotalCount = Expenses.Count,
+                PageNumber = normalizedPage,
+                PageSize = normalizedPageSize
+            });
         }
 
         public Task<IReadOnlyList<TaxExpense>> GetAllAsync(CancellationToken cancellationToken = default)

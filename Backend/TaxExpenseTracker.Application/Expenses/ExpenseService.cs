@@ -14,15 +14,22 @@ public sealed class ExpenseService : IExpenseService
         _timeProvider = timeProvider;
     }
 
-    public async Task<IReadOnlyList<ExpenseReadDto>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<ExpenseReadDto>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var (normalizedPage, normalizedPageSize) = ExpenseValidation.NormalizePaging(page, pageSize);
 
-        var expenses = await _expenseRepository.GetPagedWithDetailsAsync(
-            (normalizedPage - 1) * normalizedPageSize,
+        var pagedExpenses = await _expenseRepository.GetPagedWithDetailsAsync(
+            normalizedPage,
             normalizedPageSize,
             cancellationToken);
-        return expenses.Select(MapExpense).ToList();
+
+        return new PagedResult<ExpenseReadDto>
+        {
+            Items = pagedExpenses.Items.Select(MapExpense).ToList(),
+            TotalCount = pagedExpenses.TotalCount,
+            PageNumber = pagedExpenses.PageNumber,
+            PageSize = pagedExpenses.PageSize
+        };
     }
 
     public async Task<ExpenseReadDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

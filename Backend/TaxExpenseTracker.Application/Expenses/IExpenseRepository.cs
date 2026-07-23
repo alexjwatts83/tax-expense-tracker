@@ -5,7 +5,7 @@ namespace TaxExpenseTracker.Application.Expenses;
 
 public interface IExpenseRepository : ISoftDeleteRepository<TaxExpense>
 {
-    Task<IReadOnlyList<TaxExpense>> GetPagedWithDetailsAsync(int skip, int take, CancellationToken cancellationToken = default);
+    Task<PagedResult<TaxExpense>> GetPagedWithDetailsAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
     Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
     Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
     Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default);

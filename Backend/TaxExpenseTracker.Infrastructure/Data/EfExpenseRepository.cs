@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Expenses;
 using TaxExpenseTracker.Domain.Entities;
 
@@ -33,7 +34,7 @@ public sealed class EfExpenseRepository : IExpenseRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyList<TaxExpense>> GetPagedWithDetailsAsync(int skip, int take, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<TaxExpense>> GetPagedWithDetailsAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
     {
         return await _dbContext.TaxExpenses
             .AsNoTracking()
@@ -42,9 +43,7 @@ public sealed class EfExpenseRepository : IExpenseRepository
             .Include(x => x.TaxExpenseTags)
                 .ThenInclude(x => x.Tag)
             .OrderByDescending(x => x.Date)
-            .Skip(skip)
-            .Take(take)
-            .ToListAsync(cancellationToken);
+            .ToPagedResultAsync(pageNumber, pageSize, cancellationToken);
     }
 
     public async Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
