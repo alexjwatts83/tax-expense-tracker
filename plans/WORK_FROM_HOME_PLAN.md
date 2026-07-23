@@ -359,8 +359,8 @@ Expose the feature through the API and Angular UI.
 
 #### Backlog Items
 
-- [ ] Add WFH entry DTOs and controller endpoints.
-- [ ] Add leave DTOs and controller endpoints.
+- [x] Add WFH entry DTOs and controller endpoints.
+- [x] Add leave DTOs and controller endpoints.
 - [ ] Add holiday import DTOs and controller endpoints.
 - [ ] Add WFH entry form with date picker and entry type selector.
 - [ ] Add leave entry form with date picker and entry type selector.
