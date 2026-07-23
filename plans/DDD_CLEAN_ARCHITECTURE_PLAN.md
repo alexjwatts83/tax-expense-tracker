@@ -211,11 +211,12 @@ Deliverables:
 
 1. Unit tests for domain rules and application handlers.
 2. Integration tests for repositories and API endpoints.
-3. Add CI checks:
+3. Confirm UI testing approach: manual UI validation only (no automated UI tests).
+4. Add CI checks:
    - build
    - unit tests
    - integration tests
-4. Add basic architecture tests (optional): enforce dependency direction.
+5. Add basic architecture tests (optional): enforce dependency direction.
 
 Progress:
 
@@ -232,6 +233,7 @@ Acceptance criteria:
 
 1. Core use cases covered by automated tests.
 2. Build and tests run in CI before merge.
+3. Frontend validation is manual (no automated UI/e2e test suite in current scope).
 
 ## Feature Slice Execution Order
 

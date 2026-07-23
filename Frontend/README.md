@@ -46,15 +46,14 @@ To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use th
 ng test
 ```
 
-## Running end-to-end tests
+## UI validation strategy
 
-For end-to-end (e2e) testing, run:
+This project does not use automated UI/e2e tests right now.
 
-```bash
-ng e2e
-```
+Validation approach:
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- Run API and unit/integration automated checks.
+- Perform manual UI smoke and end-to-end flow checks in the app.
 
 ## Additional Resources
 

@@ -1,0 +1,15 @@
+.page-header {
+	margin-bottom: 1rem;
+}
+
+.page-header p {
+	margin: 0.25rem 0 0;
+	color: #475467;
+}
+
+.time-tracking-grid {
+	display: grid;
+	gap: 1.5rem;
+	grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+	align-items: start;
+}

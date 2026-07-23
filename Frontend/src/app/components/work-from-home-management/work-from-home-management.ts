@@ -67,6 +67,7 @@ export class WorkFromHomeManagement implements OnInit {
   infoMessage = '';
 
   ngOnInit(): void {
+    this.updateSpecificHoursValidation(this.entryForm.value.entryType ?? DayEntryType.FullDay);
     this.loadEntries();
     this.loadSummary();
   }
@@ -167,6 +168,10 @@ export class WorkFromHomeManagement implements OnInit {
       });
   }
 
+  onEntryTypeChange(entryType: DayEntryType): void {
+    this.updateSpecificHoursValidation(entryType);
+  }
+
   softDeleteEntry(id: string): void {
     const entry = this.entries.find((x) => x.id === id);
     if (!entry) {
@@ -211,6 +216,23 @@ export class WorkFromHomeManagement implements OnInit {
 
   formatEntryType(entryType: DayEntryType): string {
     return this.entryTypeOptions.find((x) => x.value === entryType)?.label ?? 'Unknown';
+  }
+
+  get needsSpecificHours(): boolean {
+    return this.entryForm.value.entryType === DayEntryType.SpecificHours;
+  }
+
+  private updateSpecificHoursValidation(entryType: DayEntryType): void {
+    const control = this.entryForm.controls.specificHours;
+
+    if (entryType === DayEntryType.SpecificHours) {
+      control.setValidators([Validators.required, Validators.min(0.25), Validators.max(24)]);
+    } else {
+      control.clearValidators();
+      control.setValue(null);
+    }
+
+    control.updateValueAndValidity();
   }
 
   private today(): string {

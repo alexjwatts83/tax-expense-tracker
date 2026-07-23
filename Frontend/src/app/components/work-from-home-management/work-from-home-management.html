@@ -8,21 +8,31 @@
 				<mat-form-field appearance="outline">
 					<mat-label>Date</mat-label>
 					<input matInput type="date" formControlName="workDate" />
+					@if (entryForm.controls.workDate.touched && entryForm.controls.workDate.hasError('required')) {
+						<mat-error>Date is required.</mat-error>
+					}
 				</mat-form-field>
 
 				<mat-form-field appearance="outline">
 					<mat-label>Entry Type</mat-label>
-					<mat-select formControlName="entryType">
+					<mat-select formControlName="entryType" (selectionChange)="onEntryTypeChange($event.value)">
 						@for (option of entryTypeOptions; track option.value) {
 							<mat-option [value]="option.value">{{ option.label }}</mat-option>
 						}
 					</mat-select>
 				</mat-form-field>
 
-				@if (entryForm.value.entryType === 3) {
+				@if (needsSpecificHours) {
 					<mat-form-field appearance="outline">
 						<mat-label>Specific Hours</mat-label>
 						<input matInput type="number" min="0" step="0.25" formControlName="specificHours" />
+						@if (entryForm.controls.specificHours.touched && entryForm.controls.specificHours.hasError('required')) {
+							<mat-error>Specific hours are required.</mat-error>
+						} @else if (entryForm.controls.specificHours.touched && entryForm.controls.specificHours.hasError('min')) {
+							<mat-error>Specific hours must be greater than 0.</mat-error>
+						} @else if (entryForm.controls.specificHours.touched && entryForm.controls.specificHours.hasError('max')) {
+							<mat-error>Specific hours must be 24 or less.</mat-error>
+						}
 					</mat-form-field>
 				}
 
@@ -63,6 +73,8 @@
 				<div class="loading">
 					<mat-spinner diameter="32"></mat-spinner>
 				</div>
+			} @else if (!summary) {
+				<p class="empty-message">Select a period to load summary details.</p>
 			} @else if (summary) {
 				<div class="summary-grid">
 					<p><strong>Period:</strong> {{ summary.fromDate | date: 'mediumDate' }} - {{ summary.toDate | date: 'mediumDate' }}</p>
@@ -80,6 +92,8 @@
 							}
 						</ul>
 					</div>
+				} @else {
+					<p class="empty-message">No holiday markers in this period.</p>
 				}
 			}
 		</mat-card-content>

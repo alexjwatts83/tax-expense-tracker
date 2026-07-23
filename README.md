@@ -30,12 +30,10 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - One-entry-per-date validation enforced for work-from-home and leave records
 - Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
 - Angular service/model layer added for WFH, Leave, and Public Holidays
-- Angular management screens added for WFH, Leave, and Public Holidays, including summary panels and CSV import
+- Angular management screens added for WFH, Leave, and Public Holidays, with WFH and Leave combined under a shared time-tracking page
 
 ## Planned Enhancements
 
-- UI-level coverage for WFH, Leave, and Public Holiday flows
-- Summary UX decisions for shared vs separate WFH/Leave views
 - Additional empty-state and validation polish for new screens
 - Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
 
@@ -164,8 +162,7 @@ Current filter query params:
 
 - /dashboard
 - /expenses
-- /work-from-home
-- /leave
+- /time-tracking
 - /public-holidays
 - /trackers
 - /tags

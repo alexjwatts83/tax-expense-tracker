@@ -244,9 +244,9 @@ Seed the initial public holiday records with the following known holidays:
 ## Next Actions
 
 1. Decide how holidays affect totals versus display-only markers.
-2. Confirm whether WFH and leave share one summary screen or separate screens.
-3. Add empty-state and validation UX for the new flows.
-4. Add lightweight UI coverage for the new frontend flows.
+2. Add empty-state and validation UX for the new flows.
+3. Decide whether notes are required or optional.
+4. Review date handling for time zone consistency.
 
 ## Phased Implementation Backlog
 
@@ -379,7 +379,6 @@ Expose the feature through the API and Angular UI.
 - [x] Add CSV import screen or dialog for holidays.
 - [x] Highlight public holidays in the UI.
 - [x] Add form validation and error messaging.
-- [ ] Add smoke tests or lightweight UI coverage for the main flows.
 
 #### Exit Criteria
 
@@ -395,7 +394,7 @@ Stabilize the feature with edge-case handling and usability improvements.
 #### Backlog Items
 
 - [ ] Confirm how holidays affect totals and display logic.
-- [ ] Confirm whether leave and WFH share the same summary views or separate views.
+- [x] Confirm whether leave and WFH share the same summary views or separate views.
 - [ ] Decide whether notes are required or optional.
 - [ ] Add empty-state handling for no entries and no holidays.
 - [ ] Add paging or filtering if the data volume grows.

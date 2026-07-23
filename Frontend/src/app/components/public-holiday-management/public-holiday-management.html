@@ -12,10 +12,13 @@
 
 				<div class="file-picker">
 					<input #fileInput type="file" accept=".csv,text/csv" (change)="onFileSelected($event)" />
+					@if (selectedFile) {
+						<span class="file-name">{{ selectedFile.name }}</span>
+					}
 				</div>
 
 				<div class="form-actions">
-					<button mat-flat-button color="primary" type="button" (click)="importHolidays()" [disabled]="isImporting">
+					<button mat-flat-button color="primary" type="button" (click)="importHolidays()" [disabled]="isImporting || !selectedFile">
 						{{ isImporting ? 'Importing...' : 'Import CSV' }}
 					</button>
 				</div>
@@ -39,6 +42,7 @@
 
 				<div class="form-actions">
 					<button mat-stroked-button type="button" (click)="loadHolidays()">Apply Filter</button>
+					<button mat-button type="button" (click)="clearFilters()">Clear</button>
 				</div>
 			</form>
 		</mat-card-content>
@@ -60,7 +64,7 @@
 					<mat-spinner diameter="32"></mat-spinner>
 				</div>
 			} @else if (holidays.length === 0) {
-				<p>No public holidays found.</p>
+				<p class="empty-message">No public holidays found for the current filter.</p>
 			} @else {
 				<table mat-table [dataSource]="holidays" class="holiday-table">
 					<ng-container matColumnDef="holidayDate">

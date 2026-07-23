@@ -122,4 +122,12 @@ export class PublicHolidayManagement implements OnInit {
         },
       });
   }
+
+  clearFilters(): void {
+    this.filterForm.patchValue({
+      fromDate: '',
+      toDate: '',
+    });
+    this.loadHolidays();
+  }
 }
