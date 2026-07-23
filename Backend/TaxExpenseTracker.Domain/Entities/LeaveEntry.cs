@@ -3,6 +3,7 @@ namespace TaxExpenseTracker.Domain.Entities;
 public class LeaveEntry : AuditableSoftDeletableEntity
 {
     public DateTime LeaveDate { get; set; }
+    public LeaveType LeaveType { get; set; } = LeaveType.Annual;
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }
     public string? Notes { get; set; }
@@ -12,7 +13,8 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        LeaveType leaveType = LeaveType.Annual)
     {
         ArgumentNullException.ThrowIfNull(timeProvider);
         var now = timeProvider.GetUtcNow().UtcDateTime;
@@ -21,6 +23,7 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         {
             Id = Guid.NewGuid(),
             LeaveDate = ValidateDate(leaveDate),
+            LeaveType = ValidateLeaveType(leaveType),
             EntryType = ValidateEntryType(entryType),
             HoursWorked = ResolveHours(entryType, specificHours),
             Notes = NormalizeOptional(notes),
@@ -35,14 +38,26 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        LeaveType leaveType = LeaveType.Annual)
     {
         ArgumentNullException.ThrowIfNull(timeProvider);
         LeaveDate = ValidateDate(leaveDate);
+        LeaveType = ValidateLeaveType(leaveType);
         EntryType = ValidateEntryType(entryType);
         HoursWorked = ResolveHours(entryType, specificHours);
         Notes = NormalizeOptional(notes);
         UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
+    }
+
+    private static LeaveType ValidateLeaveType(LeaveType leaveType)
+    {
+        if (!Enum.IsDefined(leaveType))
+        {
+            throw new ArgumentOutOfRangeException(nameof(leaveType), "Leave type is invalid.");
+        }
+
+        return leaveType;
     }
 
     private static DayEntryType ValidateEntryType(DayEntryType entryType)

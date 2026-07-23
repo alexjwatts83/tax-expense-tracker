@@ -18,7 +18,22 @@ public class LeaveServiceTests
 
         Assert.Equal(7.6m, result.HoursWorked);
         Assert.Equal("Annual leave", result.Notes);
+        Assert.Equal(LeaveType.Annual, result.LeaveType);
         Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
+    public async Task CreateAsync_UsesProvidedLeaveType_WhenSpecified()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, LeaveType.Sick));
+
+        Assert.Equal(LeaveType.Sick, result.LeaveType);
+        Assert.Single(repository.Entries);
+        Assert.Equal(LeaveType.Sick, repository.Entries[0].LeaveType);
     }
 
     [Fact]
@@ -185,7 +200,7 @@ public class LeaveServiceTests
         Assert.Equal(1, result.CreatedCount);
         Assert.Equal(2, result.SkippedCount);
         Assert.Equal(2, result.FailedCount);
-        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate.Date == new DateTime(2026, 3, 12));
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate.Date == new DateTime(2026, 3, 12) && x.LeaveType == LeaveType.Annual);
         Assert.Contains(result.Results, x => x.Status == "FailedConflict" && x.LeaveDate.Date == new DateTime(2026, 3, 13));
         Assert.Contains(result.Results, x => x.Status == "FailedValidation" && x.LeaveDate.Date == new DateTime(2026, 3, 15));
     }

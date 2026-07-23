@@ -50,4 +50,19 @@ public class DomainEntityDefaultsTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             TaxExpense.Create("Desc", default, Guid.NewGuid(), 1m, Guid.NewGuid(), TestTime.TimeProvider));
     }
+
+    [Fact]
+    public void LeaveEntry_Create_Defaults_ToAnnualLeaveType()
+    {
+        var entry = LeaveEntry.Create(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+
+        Assert.Equal(LeaveType.Annual, entry.LeaveType);
+    }
+
+    [Fact]
+    public void LeaveEntry_Create_Throws_WhenLeaveTypeInvalid()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            LeaveEntry.Create(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider, (LeaveType)99));
+    }
 }

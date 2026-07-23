@@ -73,6 +73,9 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                     b.Property<int>("EntryType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("LeaveType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("HoursWorked")
                         .HasColumnType("TEXT");
 

@@ -58,7 +58,7 @@ public sealed class LeaveService : ILeaveService
         if (existsForDate)
             ThrowHelper.InvalidOperation("A leave entry already exists for this date.");
 
-        var entry = LeaveEntry.Create(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
+        var entry = LeaveEntry.Create(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.LeaveType);
 
         await _leaveRepository.AddAsync(entry, cancellationToken);
         await _leaveRepository.SaveChangesAsync(cancellationToken);
@@ -100,6 +100,7 @@ public sealed class LeaveService : ILeaveService
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
+                    command.LeaveType,
                     StatusFailedConflict,
                     "Cannot create leave on a public holiday.",
                     null));
@@ -114,6 +115,7 @@ public sealed class LeaveService : ILeaveService
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
+                    command.LeaveType,
                     StatusSkippedDuplicate,
                     "This batch already includes an entry for the same date.",
                     null));
@@ -129,6 +131,7 @@ public sealed class LeaveService : ILeaveService
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
+                    command.LeaveType,
                     StatusSkippedDuplicate,
                     "A leave entry already exists for this date.",
                     null));
@@ -137,7 +140,7 @@ public sealed class LeaveService : ILeaveService
 
             try
             {
-                var entry = LeaveEntry.Create(leaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
+                var entry = LeaveEntry.Create(leaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.LeaveType);
                 await _leaveRepository.AddAsync(entry, cancellationToken);
                 await _leaveRepository.SaveChangesAsync(cancellationToken);
 
@@ -147,6 +150,7 @@ public sealed class LeaveService : ILeaveService
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
+                    command.LeaveType,
                     StatusCreated,
                     null,
                     ToReadDto(entry)));
@@ -158,6 +162,7 @@ public sealed class LeaveService : ILeaveService
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
+                    command.LeaveType,
                     StatusFailedValidation,
                     ex.Message,
                     null));
@@ -169,6 +174,7 @@ public sealed class LeaveService : ILeaveService
                     command.EntryType,
                     command.SpecificHours,
                     command.Notes,
+                    command.LeaveType,
                     StatusFailedConflict,
                     ex.Message,
                     null));
@@ -197,7 +203,7 @@ public sealed class LeaveService : ILeaveService
         if (existsForDate)
             ThrowHelper.InvalidOperation("A leave entry already exists for this date.");
 
-        entry.Update(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider);
+        entry.Update(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.LeaveType);
         await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         return true;
@@ -256,6 +262,7 @@ public sealed class LeaveService : ILeaveService
         return new LeaveReadDto(
             entry.Id,
             entry.LeaveDate,
+            entry.LeaveType,
             entry.EntryType,
             entry.HoursWorked,
             entry.Notes,

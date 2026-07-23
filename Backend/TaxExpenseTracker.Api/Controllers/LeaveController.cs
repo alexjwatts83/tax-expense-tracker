@@ -44,7 +44,8 @@ public class LeaveController(
                 request.LeaveDate,
                 request.EntryType,
                 request.SpecificHours,
-                request.Notes),
+                request.Notes,
+                request.LeaveType),
             cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id = entry.Id }, MapLeave(entry));
@@ -63,7 +64,8 @@ public class LeaveController(
                 x.LeaveDate,
                 x.EntryType,
                 x.SpecificHours,
-                x.Notes))
+                x.Notes,
+                x.LeaveType))
             .ToList();
 
         var result = await leaveService.BatchCreateAsync(commands, cancellationToken);
@@ -90,6 +92,7 @@ public class LeaveController(
                 .Select(x => new LeaveBatchItemResultDto
                 {
                     LeaveDate = x.LeaveDate,
+                    LeaveType = x.LeaveType,
                     EntryType = x.EntryType,
                     SpecificHours = x.SpecificHours,
                     Notes = x.Notes,
@@ -110,7 +113,8 @@ public class LeaveController(
                 request.LeaveDate,
                 request.EntryType,
                 request.SpecificHours,
-                request.Notes),
+                request.Notes,
+                request.LeaveType),
             cancellationToken);
 
         if (!updated)
@@ -187,6 +191,7 @@ public class LeaveController(
         {
             Id = entry.Id,
             LeaveDate = entry.LeaveDate,
+            LeaveType = entry.LeaveType,
             EntryType = entry.EntryType,
             HoursWorked = entry.HoursWorked,
             Notes = entry.Notes,
