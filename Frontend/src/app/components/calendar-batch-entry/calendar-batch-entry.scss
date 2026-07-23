@@ -1,22 +1,3 @@
-.page-header {
-	margin-bottom: 1rem;
-}
-
-.page-header p {
-	margin: 0.25rem 0 0;
-	color: #475467;
-}
-
-.rule-note {
-	font-size: 0.95rem;
-	color: #667085;
-}
-
-.keyboard-tip {
-	font-size: 0.85rem;
-	color: #344054;
-}
-
 .month-card {
 	margin-bottom: 1rem;
 }
@@ -47,19 +28,6 @@
 	padding-bottom: 0.25rem;
 }
 
-.calendar-weekday-header {
-	display: grid;
-	grid-template-columns: repeat(5, minmax(210px, 1fr));
-	gap: 0.75rem;
-	font-size: 0.8rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	color: #475467;
-	padding: 0 0.25rem;
-	margin-bottom: 0.5rem;
-}
-
 .calendar-week-grid {
 	display: flex;
 	flex-direction: column;
@@ -85,11 +53,6 @@
 	outline: none;
 }
 
-.calendar-day-cell:focus-visible {
-	border-color: #0ea5e9;
-	box-shadow: 0 0 0 3px #bae6fd;
-}
-
 .today-row {
 	border-color: #7dd3fc;
 	box-shadow: inset 0 0 0 1px #e0f2fe;
@@ -113,9 +76,19 @@
 	--mdc-outlined-text-field-caret-color: #15803d;
 }
 
-.leave-row {
+.annual-row {
 	background-color: #fff1f2;
 	border-color: #fda4af;
+}
+
+.sick-row {
+	background-color: #fecdd3;
+	border-color: #e11d48;
+}
+
+.pending-row {
+	outline: 3px solid #f59e0b;
+	outline-offset: -3px;
 }
 
 .calendar-day-cell mat-form-field {
@@ -137,11 +110,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.25rem;
-}
-
-.date-code {
-	font-size: 0.82rem;
-	color: #667085;
 }
 
 .holiday-chip {
@@ -233,17 +201,28 @@
 }
 
 .action-bar {
+	position: sticky;
+	bottom: 0;
+	z-index: 10;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	gap: 1rem;
 	margin-top: 1rem;
-	padding: 0.75rem 0;
+	padding: 0.75rem;
+	border-top: 1px solid #d0d5dd;
+	background-color: #ffffff;
+	box-shadow: 0 -4px 12px rgb(16 24 40 / 10%);
 }
 
 .action-bar p {
 	margin: 0;
 	color: #475467;
+}
+
+.action-status {
+	display: grid;
+	gap: 0.25rem;
 }
 
 .loading {
@@ -267,7 +246,6 @@
 }
 
 @media (max-width: 980px) {
-	.calendar-weekday-header,
 	.calendar-week-row {
 		grid-template-columns: repeat(5, minmax(180px, 1fr));
 		min-width: 940px;
@@ -293,7 +271,6 @@
 		gap: 0.25rem;
 	}
 
-	.calendar-weekday-header,
 	.calendar-week-row {
 		grid-template-columns: repeat(5, minmax(165px, 1fr));
 		min-width: 860px;

@@ -24,7 +24,7 @@ import { LeaveService } from '../../services/leave';
 import { PublicHolidayService } from '../../services/public-holiday';
 import { WorkLocationService } from '../../services/work-location';
 
-type DayCategory = 'none' | 'wfh' | 'office' | 'leave';
+type DayCategory = 'none' | 'wfh' | 'office' | 'annual' | 'sick';
 
 interface CalendarDayRowVm {
   dateIso: string;
@@ -80,19 +80,13 @@ export class CalendarBatchEntry implements OnInit {
     { value: DayEntryType.SpecificHours, label: 'Specific Hours' },
   ];
 
-  readonly leaveTypeOptions = [
-    { value: LeaveType.Annual, label: 'Annual Leave' },
-    { value: LeaveType.Sick, label: 'Sick Leave' },
-  ];
-
   readonly categoryOptions: Array<{ value: DayCategory; label: string }> = [
     { value: 'none', label: 'None' },
     { value: 'wfh', label: 'WFH' },
     { value: 'office', label: 'Office' },
-    { value: 'leave', label: 'Leave' },
+    { value: 'annual', label: 'Annual' },
+    { value: 'sick', label: 'Sick' },
   ];
-
-  readonly weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
   monthAnchor = this.startOfMonth(new Date());
   rows: CalendarDayRowVm[] = [];
@@ -115,10 +109,6 @@ export class CalendarBatchEntry implements OnInit {
 
   get hasValidationErrors(): boolean {
     return this.rows.some((row) => this.rowHasHoursError(row));
-  }
-
-  get canBatchAdd(): boolean {
-    return this.pendingCount > 0 && !this.hasValidationErrors;
   }
 
   get weeks(): CalendarWeekVm[] {
@@ -191,6 +181,7 @@ export class CalendarBatchEntry implements OnInit {
       }
 
       row.category = category;
+      row.leaveType = this.toLeaveType(category);
       if (row.entryType !== DayEntryType.SpecificHours) {
         row.specificHours = null;
       }
@@ -211,15 +202,10 @@ export class CalendarBatchEntry implements OnInit {
       row.entryType = DayEntryType.FullDay;
       row.specificHours = null;
       row.leaveType = row.originalLeaveType;
-    } else if (category === 'leave' && row.originalCategory !== 'leave') {
-      row.leaveType = LeaveType.Annual;
+    } else if (this.isLeaveCategory(category)) {
+      row.leaveType = this.toLeaveType(category);
     }
 
-    this.clearRowResult(row);
-  }
-
-  onLeaveTypeChange(row: CalendarDayRowVm, leaveType: LeaveType): void {
-    row.leaveType = leaveType;
     this.clearRowResult(row);
   }
 
@@ -231,59 +217,6 @@ export class CalendarBatchEntry implements OnInit {
     }
 
     this.clearRowResult(row);
-  }
-
-  onDayCellKeydown(row: CalendarDayRowVm, event: KeyboardEvent): void {
-    if (event.target !== event.currentTarget || row.isHoliday) {
-      return;
-    }
-
-    const key = event.key.toLowerCase();
-
-    if (key === 'n') {
-      this.onCategoryChange(row, 'none');
-      event.preventDefault();
-      return;
-    }
-
-    if (key === 'w') {
-      this.onCategoryChange(row, 'wfh');
-      event.preventDefault();
-      return;
-    }
-
-    if (key === 'o') {
-      this.onCategoryChange(row, 'office');
-      event.preventDefault();
-      return;
-    }
-
-    if (key === 'l') {
-      this.onCategoryChange(row, 'leave');
-      event.preventDefault();
-      return;
-    }
-
-    if (row.category === 'none') {
-      return;
-    }
-
-    if (key === 'f') {
-      this.onEntryTypeChange(row, DayEntryType.FullDay);
-      event.preventDefault();
-      return;
-    }
-
-    if (key === 'h') {
-      this.onEntryTypeChange(row, DayEntryType.HalfDay);
-      event.preventDefault();
-      return;
-    }
-
-    if (key === 's') {
-      this.onEntryTypeChange(row, DayEntryType.SpecificHours);
-      event.preventDefault();
-    }
   }
 
   isSpecificHoursRow(row: CalendarDayRowVm): boolean {
@@ -304,8 +237,14 @@ export class CalendarBatchEntry implements OnInit {
       return;
     }
 
-    if (!this.canBatchAdd) {
-      this.errorMessage = 'Add at least one valid weekday selection before using Batch Add.';
+    if (this.pendingCount === 0) {
+      this.errorMessage = '';
+      this.infoMessage = 'Nothing was changed.';
+      return;
+    }
+
+    if (this.hasValidationErrors) {
+      this.errorMessage = 'Fix the invalid specific hours before using Batch Add.';
       this.infoMessage = '';
       return;
     }
@@ -326,7 +265,7 @@ export class CalendarBatchEntry implements OnInit {
       }));
 
     const leaveCreateOps = changedRows
-      .filter((row) => this.requiresCreate(row, 'leave'))
+      .filter((row) => this.requiresLeaveCreate(row))
       .map((row) => ({
         row,
         payload: {
@@ -346,7 +285,7 @@ export class CalendarBatchEntry implements OnInit {
       }));
 
     const leaveDeleteOps = changedRows
-      .filter((row) => this.requiresDelete(row, 'leave') && row.leaveId)
+      .filter((row) => this.requiresLeaveDelete(row) && row.leaveId)
       .map((row) => ({
         row,
         id: row.leaveId as string,
@@ -367,7 +306,7 @@ export class CalendarBatchEntry implements OnInit {
       }));
 
     const leaveUpdateOps = changedRows
-      .filter((row) => this.requiresUpdate(row, 'leave') && row.leaveId)
+      .filter((row) => this.requiresLeaveUpdate(row) && row.leaveId)
       .map((row) => ({
         row,
         id: row.leaveId as string,
@@ -450,9 +389,21 @@ export class CalendarBatchEntry implements OnInit {
     })
       .pipe(
         map(({ wfhCreate, leaveCreate, wfhDelete, leaveDelete, wfhUpdate, leaveUpdate }) => {
-          let applied = 0;
           let skipped = 0;
           let failed = 0;
+          const addedDates = new Set<string>();
+          const updatedDates = new Set<string>();
+          const recordAppliedDay = (row: CalendarDayRowVm): void => {
+            if (row.originalCategory === 'none') {
+              addedDates.add(row.dateIso);
+            } else {
+              updatedDates.add(row.dateIso);
+            }
+          };
+          const recordUnappliedDay = (row: CalendarDayRowVm): void => {
+            addedDates.delete(row.dateIso);
+            updatedDates.delete(row.dateIso);
+          };
 
           const wfhCreateByDate = new Map(workCreateOps.map((x) => [x.row.dateIso, x.row]));
           for (const result of wfhCreate.results) {
@@ -462,8 +413,8 @@ export class CalendarBatchEntry implements OnInit {
             }
 
             if (result.status === 'Created' && result.entry) {
-              applied += 1;
               row.workLocationId = result.entry.id;
+              recordAppliedDay(row);
               this.markApplied(row, `Created ${this.workLocationLabel(result.entry.workLocation)} entry.`);
               this.syncOriginalState(row);
               continue;
@@ -471,11 +422,13 @@ export class CalendarBatchEntry implements OnInit {
 
             if (result.status === 'SkippedDuplicate') {
               skipped += 1;
+              recordUnappliedDay(row);
               this.markSkipped(row, result.message ?? 'Skipped duplicate work-location entry.');
               continue;
             }
 
             failed += 1;
+            recordUnappliedDay(row);
             this.markFailed(row, result.message ?? 'Work-location create failed.');
           }
 
@@ -487,8 +440,8 @@ export class CalendarBatchEntry implements OnInit {
             }
 
             if (result.status === 'Created' && result.entry) {
-              applied += 1;
               row.leaveId = result.entry.id;
+              recordAppliedDay(row);
               this.markApplied(row, 'Created leave entry.');
               this.syncOriginalState(row);
               continue;
@@ -496,73 +449,79 @@ export class CalendarBatchEntry implements OnInit {
 
             if (result.status === 'SkippedDuplicate') {
               skipped += 1;
+              recordUnappliedDay(row);
               this.markSkipped(row, result.message ?? 'Skipped duplicate leave entry.');
               continue;
             }
 
             failed += 1;
+            recordUnappliedDay(row);
             this.markFailed(row, result.message ?? 'Leave create failed.');
           }
 
           for (const result of wfhDelete) {
             if (result.ok) {
-              applied += 1;
               result.row.workLocationId = null;
+              recordAppliedDay(result.row);
               this.markApplied(result.row, 'Removed existing work-location entry.');
               this.syncOriginalState(result.row);
             } else {
               failed += 1;
+              recordUnappliedDay(result.row);
               this.markFailed(result.row, result.message);
             }
           }
 
           for (const result of leaveDelete) {
             if (result.ok) {
-              applied += 1;
               result.row.leaveId = null;
+              recordAppliedDay(result.row);
               this.markApplied(result.row, 'Removed existing leave entry.');
               this.syncOriginalState(result.row);
             } else {
               failed += 1;
+              recordUnappliedDay(result.row);
               this.markFailed(result.row, result.message);
             }
           }
 
           for (const result of wfhUpdate) {
             if (result.ok) {
-              applied += 1;
+              recordAppliedDay(result.row);
               this.markApplied(result.row, 'Updated existing work-location entry.');
               this.syncOriginalState(result.row);
             } else {
               failed += 1;
+              recordUnappliedDay(result.row);
               this.markFailed(result.row, result.message);
             }
           }
 
           for (const result of leaveUpdate) {
             if (result.ok) {
-              applied += 1;
+              recordAppliedDay(result.row);
               this.markApplied(result.row, 'Updated existing leave entry.');
               this.syncOriginalState(result.row);
             } else {
               failed += 1;
+              recordUnappliedDay(result.row);
               this.markFailed(result.row, result.message);
             }
           }
 
-          return { applied, skipped, failed };
+          return { skipped, failed, added: addedDates.size, updated: updatedDates.size };
         }),
         finalize(() => {
           this.isSubmitting = false;
         }),
       )
       .subscribe({
-        next: ({ applied, skipped, failed }) => {
-          this.infoMessage = `Batch apply complete: Applied ${applied}, Skipped ${skipped}, Failed ${failed}.`;
+        next: ({ skipped, failed, added, updated }) => {
+          this.infoMessage = `Batch apply complete: Added ${this.dayCountLabel(added)}, updated ${this.dayCountLabel(updated)}, skipped ${skipped}, failed ${failed}.`;
           this.errorMessage = failed > 0 ? 'Some rows failed. Fix the highlighted rows and submit again.' : '';
 
           if (failed === 0) {
-            this.loadMonth();
+            this.loadMonth(true);
           }
         },
         error: () => {
@@ -614,10 +573,12 @@ export class CalendarBatchEntry implements OnInit {
     };
   }
 
-  private loadMonth(): void {
+  private loadMonth(preserveMessages = false): void {
     this.isLoading = true;
-    this.errorMessage = '';
-    this.infoMessage = '';
+    if (!preserveMessages) {
+      this.errorMessage = '';
+      this.infoMessage = '';
+    }
 
     const fromDate = this.toDateIso(this.monthAnchor);
     const toDate = this.toDateIso(this.endOfMonth(this.monthAnchor));
@@ -680,7 +641,11 @@ export class CalendarBatchEntry implements OnInit {
       const leaveEntry = leaveByDate.get(dateIso) ?? null;
       const wfhEntry = wfhByDate.get(dateIso) ?? null;
 
-      const originalCategory: DayCategory = leaveEntry ? 'leave' : wfhEntry ? this.toCategoryFromWorkLocation(wfhEntry.workLocation) : 'none';
+      const originalCategory: DayCategory = leaveEntry
+        ? this.toCategoryFromLeaveType(leaveEntry.leaveType)
+        : wfhEntry
+          ? this.toCategoryFromWorkLocation(wfhEntry.workLocation)
+          : 'none';
       const originalEntryType = leaveEntry?.entryType ?? wfhEntry?.entryType ?? DayEntryType.FullDay;
       const originalSpecificHours =
         originalEntryType === DayEntryType.SpecificHours
@@ -761,7 +726,7 @@ export class CalendarBatchEntry implements OnInit {
     return result;
   }
 
-  private isRowChanged(row: CalendarDayRowVm): boolean {
+  isRowChanged(row: CalendarDayRowVm): boolean {
     if (row.category !== row.originalCategory) {
       return true;
     }
@@ -778,27 +743,31 @@ export class CalendarBatchEntry implements OnInit {
       return row.specificHours !== row.originalSpecificHours;
     }
 
-    if (row.category === 'leave' && row.leaveType !== row.originalLeaveType) {
+    if (this.isLeaveCategory(row.category) && row.leaveType !== row.originalLeaveType) {
       return true;
     }
 
     return false;
   }
 
-  private requiresCreate(row: CalendarDayRowVm, target: Exclude<DayCategory, 'none'>): boolean {
-    return row.category === target && row.originalCategory !== target;
-  }
-
-  private requiresDelete(row: CalendarDayRowVm, original: Exclude<DayCategory, 'none'>): boolean {
-    return row.originalCategory === original && row.category !== original;
-  }
-
-  private requiresUpdate(row: CalendarDayRowVm, category: Exclude<DayCategory, 'none'>): boolean {
-    return row.originalCategory === category && row.category === category && this.isRowChanged(row);
-  }
-
   private isWorkCategory(category: DayCategory): boolean {
     return category === 'wfh' || category === 'office';
+  }
+
+  private isLeaveCategory(category: DayCategory): boolean {
+    return category === 'annual' || category === 'sick';
+  }
+
+  private requiresLeaveCreate(row: CalendarDayRowVm): boolean {
+    return this.isLeaveCategory(row.category) && !this.isLeaveCategory(row.originalCategory);
+  }
+
+  private requiresLeaveDelete(row: CalendarDayRowVm): boolean {
+    return this.isLeaveCategory(row.originalCategory) && !this.isLeaveCategory(row.category);
+  }
+
+  private requiresLeaveUpdate(row: CalendarDayRowVm): boolean {
+    return this.isLeaveCategory(row.originalCategory) && this.isLeaveCategory(row.category) && this.isRowChanged(row);
   }
 
   private requiresWorkCreate(row: CalendarDayRowVm): boolean {
@@ -821,6 +790,14 @@ export class CalendarBatchEntry implements OnInit {
     return workLocation === WorkLocationType.Office ? 'office' : 'wfh';
   }
 
+  private toCategoryFromLeaveType(leaveType: LeaveType): DayCategory {
+    return leaveType === LeaveType.Sick ? 'sick' : 'annual';
+  }
+
+  private toLeaveType(category: DayCategory): LeaveType {
+    return category === 'sick' ? LeaveType.Sick : LeaveType.Annual;
+  }
+
   private workLocationLabel(workLocation: WorkLocationType): string {
     return workLocation === WorkLocationType.Office ? 'Office' : 'WFH';
   }
@@ -834,7 +811,11 @@ export class CalendarBatchEntry implements OnInit {
       return 'Office';
     }
 
-    return 'Leave';
+    return category === 'sick' ? 'Sick Leave' : 'Annual Leave';
+  }
+
+  private dayCountLabel(count: number): string {
+    return `${count} ${count === 1 ? 'day' : 'days'}`;
   }
 
   private clearRowResult(row: CalendarDayRowVm): void {

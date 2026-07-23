@@ -1,11 +1,4 @@
 <section class="page calendar-page">
-	<header class="page-header">
-		<h1>Calendar Batch Entry</h1>
-		<p>Pick weekdays for the month and mark each row as WFH, Office, or Leave.</p>
-		<p class="rule-note">Public holidays are locked. WFH, Office, and Leave cannot be added on those dates.</p>
-		<p class="keyboard-tip">Keyboard shortcuts on a focused day: N=None, W=WFH, O=Office, L=Leave, F=Full day, H=Half day, S=Specific hours.</p>
-	</header>
-
 	<mat-card class="month-card">
 		<mat-card-content>
 			<div class="month-toolbar">
@@ -18,7 +11,8 @@
 			<div class="quick-actions">
 				<button mat-button type="button" aria-label="Set all weekdays to WFH" (click)="setAllCategory('wfh')">Mark All as WFH</button>
 				<button mat-button type="button" aria-label="Set all weekdays to office" (click)="setAllCategory('office')">Mark All as Office</button>
-				<button mat-button type="button" aria-label="Set all weekdays to leave" (click)="setAllCategory('leave')">Mark All as Leave</button>
+				<button mat-button type="button" aria-label="Set all weekdays to annual leave" (click)="setAllCategory('annual')">Mark All as Annual</button>
+				<button mat-button type="button" aria-label="Set all weekdays to sick leave" (click)="setAllCategory('sick')">Mark All as Sick</button>
 				<button mat-button type="button" aria-label="Revert all pending day changes" (click)="clearAll()">Clear All</button>
 			</div>
 		</mat-card-content>
@@ -26,10 +20,6 @@
 
 	@if (errorMessage) {
 		<p class="error-message" aria-live="assertive">{{ errorMessage }}</p>
-	}
-
-	@if (infoMessage) {
-		<p class="info-message" aria-live="polite">{{ infoMessage }}</p>
 	}
 
 	<mat-card class="grid-card">
@@ -42,24 +32,17 @@
 				<p class="empty-message">No weekdays found for this month.</p>
 			} @else {
 				<div class="calendar-scroll">
-					<div class="calendar-weekday-header">
-						@for (label of weekdayLabels; track label) {
-							<span>{{ label }}</span>
-						}
-					</div>
-
 					<div class="calendar-week-grid">
 						@for (week of weeks; track week.weekStartIso) {
 							<div class="calendar-week-row">
 								@for (dayCell of week.days; track $index) {
 									@if (dayCell) {
-										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" [class.wfh-row]="!dayCell.isHoliday && dayCell.category === 'wfh'" [class.office-row]="!dayCell.isHoliday && dayCell.category === 'office'" [class.leave-row]="!dayCell.isHoliday && dayCell.category === 'leave'" tabindex="0" (keydown)="onDayCellKeydown(dayCell, $event)">
+										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" [class.wfh-row]="!dayCell.isHoliday && dayCell.category === 'wfh'" [class.office-row]="!dayCell.isHoliday && dayCell.category === 'office'" [class.annual-row]="!dayCell.isHoliday && dayCell.category === 'annual'" [class.sick-row]="!dayCell.isHoliday && dayCell.category === 'sick'" [class.pending-row]="isRowChanged(dayCell)">
 											<div class="date-cell">
-												<strong>{{ dayCell.dayLabel }}</strong>
+												<strong [attr.title]="dayCell.dateIso">{{ dayCell.dayLabel }}</strong>
 												@if (dayCell.isToday) {
 													<span class="today-chip" aria-label="Current day">Today</span>
 												}
-												<span class="date-code">{{ dayCell.dateIso }}</span>
 												@if (dayCell.resultState) {
 													<span class="result-chip" [class]="'result-chip ' + dayCell.resultState">{{ dayCell.resultState }}</span>
 												}
@@ -84,20 +67,6 @@
 													}
 												</mat-radio-group>
 											</div>
-
-										@if (!dayCell.isHoliday && dayCell.category === 'leave') {
-											<mat-form-field appearance="outline">
-												<mat-label>Leave Type</mat-label>
-												<mat-select
-													[value]="dayCell.leaveType"
-													(selectionChange)="onLeaveTypeChange(dayCell, $event.value)"
-													[attr.aria-label]="'Leave type for ' + dayCell.dayLabel">
-													@for (option of leaveTypeOptions; track option.value) {
-														<mat-option [value]="option.value">{{ option.label }}</mat-option>
-													}
-												</mat-select>
-											</mat-form-field>
-										}
 
 											<mat-form-field appearance="outline">
 												<mat-label>Entry Type</mat-label>
@@ -139,8 +108,13 @@
 	</mat-card>
 
 	<div class="action-bar">
-		<p>{{ pendingCount }} pending row(s)</p>
-		<button mat-flat-button color="primary" type="button" aria-label="Apply pending calendar changes" [disabled]="!canBatchAdd" (click)="queueBatchAdd()">
+		<div class="action-status">
+			<p>{{ pendingCount }} pending row(s)</p>
+			@if (infoMessage) {
+				<p class="info-message" aria-live="polite">{{ infoMessage }}</p>
+			}
+		</div>
+		<button mat-flat-button color="primary" type="button" aria-label="Apply pending calendar changes" [disabled]="isSubmitting || hasValidationErrors" (click)="queueBatchAdd()">
 			Batch Add
 		</button>
 	</div>
