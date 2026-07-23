@@ -6,12 +6,17 @@ public enum SummaryView
     Month,
 }
 
+public sealed record HolidayMarkerDto(
+    DateTime Date,
+    string Name);
+
 public sealed record DayEntrySummaryDto(
     DateTime FromDate,
     DateTime ToDate,
     decimal TotalHours,
     int TotalDays,
-    int EntryCount);
+    int EntryCount,
+    IReadOnlyList<HolidayMarkerDto> Holidays);
 
 public static class SummaryPeriod
 {

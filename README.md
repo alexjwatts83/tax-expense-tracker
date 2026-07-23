@@ -31,7 +31,6 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 
 ## Planned Enhancements
 
-- Holiday overlap markers in weekly/monthly summaries
 - Angular screens for work-from-home and leave entry management
 - Public holiday CSV import UI workflow
 - Duplicate-entry-per-day business rule finalization and enforcement
@@ -242,7 +241,7 @@ Recent schema updates:
 
 - Phase 1 - Domain and Persistence Foundation: Complete
 - Phase 2 - Entry Management Use Cases: Complete
-- Phase 3 - Weekly and Monthly Reporting: In Progress
+- Phase 3 - Weekly and Monthly Reporting: Complete
 - Phase 4 - Public Holiday CSV Import: In Progress
 - Phase 5 - API and Frontend Delivery: In Progress
 - Phase 6 - Hardening and Polish: Pending

@@ -9,4 +9,5 @@ public sealed class WorkFromHomeSummaryDto
     public decimal TotalHours { get; set; }
     public int TotalDays { get; set; }
     public int EntryCount { get; set; }
+    public List<SummaryHolidayDto> Holidays { get; set; } = [];
 }

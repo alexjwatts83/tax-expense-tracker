@@ -1,16 +1,22 @@
 using TaxExpenseTracker.Domain.Entities;
 using TaxExpenseTracker.Application.Common;
+using TaxExpenseTracker.Application.PublicHolidays;
 
 namespace TaxExpenseTracker.Application.WorkFromHome;
 
 public sealed class WorkFromHomeService : IWorkFromHomeService
 {
     private readonly IWorkFromHomeRepository _workFromHomeRepository;
+    private readonly IPublicHolidayRepository _publicHolidayRepository;
     private readonly TimeProvider _timeProvider;
 
-    public WorkFromHomeService(IWorkFromHomeRepository workFromHomeRepository, TimeProvider timeProvider)
+    public WorkFromHomeService(
+        IWorkFromHomeRepository workFromHomeRepository,
+        IPublicHolidayRepository publicHolidayRepository,
+        TimeProvider timeProvider)
     {
         _workFromHomeRepository = workFromHomeRepository;
+        _publicHolidayRepository = publicHolidayRepository;
         _timeProvider = timeProvider;
     }
 
@@ -98,13 +104,19 @@ public sealed class WorkFromHomeService : IWorkFromHomeService
         var (fromDate, toDate) = SummaryPeriod.GetBounds(date, view);
 
         var entries = await _workFromHomeRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
+        var holidays = await _publicHolidayRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
 
         return new DayEntrySummaryDto(
             fromDate,
             toDate,
             entries.Sum(x => x.HoursWorked),
             entries.Select(x => x.WorkDate.Date).Distinct().Count(),
-            entries.Count);
+            entries.Count,
+            holidays
+                .OrderBy(x => x.HolidayDate)
+                .ThenBy(x => x.Name)
+                .Select(x => new HolidayMarkerDto(x.HolidayDate.Date, x.Name))
+                .ToList());
     }
 
     private static WorkFromHomeReadDto ToReadDto(WorkFromHomeEntry entry)

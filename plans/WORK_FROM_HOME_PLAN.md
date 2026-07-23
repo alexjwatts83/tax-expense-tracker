@@ -8,7 +8,7 @@ Add a work-from-home and leave tracking feature that lets users record time away
 
 1. Phase 1 - Domain and Persistence Foundation: Complete
 2. Phase 2 - Entry Management Use Cases: Complete
-3. Phase 3 - Weekly and Monthly Reporting: In Progress
+3. Phase 3 - Weekly and Monthly Reporting: Complete
 4. Phase 4 - Public Holiday CSV Import: In Progress
 5. Phase 5 - API and Frontend Delivery: In Progress
 6. Phase 6 - Hardening and Polish: Pending
@@ -64,7 +64,7 @@ The user will be able to:
    - total leave hours
    - number of WFH days
    - number of leave days
-   - holiday overlap indicators where applicable
+   - holiday markers within the selected period
 4. Users should be able to move forward/backward by week or month.
 
 ### Public Holiday Import
@@ -334,7 +334,7 @@ Add summary views that let users review WFH and leave time by week and month.
 - [x] Add monthly summary query.
 - [x] Add totals for WFH hours and WFH days recorded.
 - [x] Add totals for leave hours and leave days recorded.
-- [ ] Add holiday markers in summary results.
+- [x] Add holiday markers in summary results.
 - [x] Add previous/next period navigation inputs to summary queries.
 - [ ] Add integration tests for weekly and monthly rollups.
 

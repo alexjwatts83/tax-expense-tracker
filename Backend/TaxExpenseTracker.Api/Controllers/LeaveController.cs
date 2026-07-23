@@ -118,6 +118,13 @@ public class LeaveController(ILeaveService leaveService) : ControllerBase
             TotalHours = summary.TotalHours,
             TotalDays = summary.TotalDays,
             EntryCount = summary.EntryCount,
+            Holidays = summary.Holidays
+                .Select(x => new SummaryHolidayDto
+                {
+                    Date = x.Date,
+                    Name = x.Name,
+                })
+                .ToList(),
         });
     }
 

@@ -1,16 +1,22 @@
 using TaxExpenseTracker.Domain.Entities;
 using TaxExpenseTracker.Application.Common;
+using TaxExpenseTracker.Application.PublicHolidays;
 
 namespace TaxExpenseTracker.Application.Leave;
 
 public sealed class LeaveService : ILeaveService
 {
     private readonly ILeaveRepository _leaveRepository;
+    private readonly IPublicHolidayRepository _publicHolidayRepository;
     private readonly TimeProvider _timeProvider;
 
-    public LeaveService(ILeaveRepository leaveRepository, TimeProvider timeProvider)
+    public LeaveService(
+        ILeaveRepository leaveRepository,
+        IPublicHolidayRepository publicHolidayRepository,
+        TimeProvider timeProvider)
     {
         _leaveRepository = leaveRepository;
+        _publicHolidayRepository = publicHolidayRepository;
         _timeProvider = timeProvider;
     }
 
@@ -98,13 +104,19 @@ public sealed class LeaveService : ILeaveService
         var (fromDate, toDate) = SummaryPeriod.GetBounds(date, view);
 
         var entries = await _leaveRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
+        var holidays = await _publicHolidayRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
 
         return new DayEntrySummaryDto(
             fromDate,
             toDate,
             entries.Sum(x => x.HoursWorked),
             entries.Select(x => x.LeaveDate.Date).Distinct().Count(),
-            entries.Count);
+            entries.Count,
+            holidays
+                .OrderBy(x => x.HolidayDate)
+                .ThenBy(x => x.Name)
+                .Select(x => new HolidayMarkerDto(x.HolidayDate.Date, x.Name))
+                .ToList());
     }
 
     private static LeaveReadDto ToReadDto(LeaveEntry entry)
