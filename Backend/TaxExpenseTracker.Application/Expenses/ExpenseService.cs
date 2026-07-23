@@ -67,7 +67,7 @@ public sealed class ExpenseService : IExpenseService
 
         var created = await _expenseRepository.GetByIdWithDetailsAsync(expense.Id, cancellationToken);
         if (created is null)
-            ThrowHelper.InvalidOperation("Created expense could not be loaded.");
+            throw new InvalidOperationException("Created expense could not be loaded.");
 
         return MapExpense(created);
     }
@@ -109,7 +109,7 @@ public sealed class ExpenseService : IExpenseService
         var updated = await _expenseRepository.GetByIdWithDetailsAsync(id, cancellationToken);
         if (updated is null)
         {
-            ThrowHelper.InvalidOperation("Updated expense could not be loaded.");
+            throw new InvalidOperationException("Updated expense could not be loaded.");
         }
 
         return MapExpense(updated);

@@ -40,6 +40,7 @@ It also has documented planning for work-location (WFH/Office), leave, and publi
 ## Planned Enhancements
 
 - Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
+- Work-location rename delivery and rollout checklist tracked in [plans/WORK_LOCATION_RENAME_PLAN.md](plans/WORK_LOCATION_RENAME_PLAN.md)
 
 ## Tech Stack
 

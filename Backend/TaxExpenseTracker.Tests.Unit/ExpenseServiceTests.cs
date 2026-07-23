@@ -154,12 +154,70 @@ public class ExpenseServiceTests
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.FilterAsync(query));
     }
 
+    [Fact]
+    public async Task CreateAsync_Throws_WhenCreatedExpenseCannotBeReloaded()
+    {
+        var repository = new InMemoryExpenseRepository
+        {
+            SourceExistsResult = true,
+            BankExistsResult = true,
+            ReturnNullFromGetByIdWithDetails = true,
+        };
+
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.CreateAsync(new CreateExpenseCommand(
+                "Keyboard",
+                TestTime.FixedUtcNow.UtcDateTime,
+                repository.BankId,
+                80m,
+                repository.SourceId,
+                [])));
+
+        Assert.Equal("Created expense could not be loaded.", ex.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Throws_WhenUpdatedExpenseCannotBeReloaded()
+    {
+        var repository = new InMemoryExpenseRepository
+        {
+            SourceExistsResult = true,
+            BankExistsResult = true,
+        };
+
+        var existing = TaxExpense.Create(
+            "Desk",
+            TestTime.FixedUtcNow.UtcDateTime,
+            repository.BankId,
+            300m,
+            repository.SourceId,
+            TestTime.TimeProvider);
+        repository.Expenses.Add(existing);
+        repository.ReturnNullFromGetByIdWithDetails = true;
+
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(existing.Id, new UpdateExpenseCommand(
+                "Desk Updated",
+                TestTime.FixedUtcNow.UtcDateTime,
+                repository.BankId,
+                320m,
+                repository.SourceId,
+                [])));
+
+        Assert.Equal("Updated expense could not be loaded.", ex.Message);
+    }
+
     private sealed class InMemoryExpenseRepository : IExpenseRepository
     {
         public List<TaxExpense> Expenses { get; } = [];
         public bool SaveChangesCalled { get; private set; }
         public bool SourceExistsResult { get; set; }
         public bool BankExistsResult { get; set; }
+        public bool ReturnNullFromGetByIdWithDetails { get; set; }
         public Guid BankId { get; } = Guid.NewGuid();
         public Guid SourceId { get; } = Guid.NewGuid();
         public Guid TagId { get; } = Guid.NewGuid();
@@ -200,6 +258,11 @@ public class ExpenseServiceTests
 
         public Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
         {
+            if (ReturnNullFromGetByIdWithDetails)
+            {
+                return Task.FromResult<TaxExpense?>(null);
+            }
+
             var expense = Expenses.FirstOrDefault(x => x.Id == id);
             if (expense is not null && expense.Bank is null)
             {

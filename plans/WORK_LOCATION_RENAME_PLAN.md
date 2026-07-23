@@ -124,3 +124,17 @@ Out of Scope (for this phase):
 2. Canonical routes are in place and legacy routes are removed after transition.
 3. Backend and frontend builds pass.
 4. Critical feature flows are validated without regression.
+
+## Next Operational Steps
+
+1. Apply database migrations in each environment before deploying API changes:
+	- `dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api --context AppDbContext`
+2. Run post-deploy smoke tests for work-location APIs:
+	- `GET /api/work-locations`
+	- `POST /api/work-locations`
+	- `GET /api/work-locations/summary?view=month`
+3. Validate frontend time-tracking flow against migrated database:
+	- Create WFH and Office entries
+	- Edit and soft-delete/restore one entry
+	- Confirm summary totals and day counts
+4. Monitor logs for migration or serialization issues during first rollout window.
