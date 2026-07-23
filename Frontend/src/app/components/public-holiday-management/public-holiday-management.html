@@ -64,7 +64,7 @@
 					<mat-spinner diameter="32"></mat-spinner>
 				</div>
 			} @else if (holidays.length === 0) {
-				<p class="empty-message">No public holidays found for the current filter.</p>
+				<p class="empty-message">No public holidays found for this filter.</p>
 			} @else {
 				<table mat-table [dataSource]="holidays" class="holiday-table">
 					<ng-container matColumnDef="holidayDate">

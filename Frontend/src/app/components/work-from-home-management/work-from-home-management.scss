@@ -15,6 +15,29 @@
 	width: 100%;
 }
 
+.paging-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 1rem;
+	flex-wrap: wrap;
+}
+
+.page-size-field {
+	width: 140px;
+}
+
+.range-label {
+	margin: 0;
+	color: #475467;
+}
+
+.paging-actions {
+	display: flex;
+	gap: 0.5rem;
+}
+
 .summary-grid {
 	display: grid;
 	gap: 0.5rem;

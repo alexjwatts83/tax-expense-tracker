@@ -100,6 +100,28 @@
 		</mat-card-content>
 	</mat-card>
 
+	<mat-card class="filter-card">
+		<mat-card-title>Filter Entries</mat-card-title>
+		<mat-card-content>
+			<form [formGroup]="filterForm" class="summary-form">
+				<mat-form-field appearance="outline">
+					<mat-label>From Date</mat-label>
+					<input matInput type="date" formControlName="fromDate" />
+				</mat-form-field>
+
+				<mat-form-field appearance="outline">
+					<mat-label>To Date</mat-label>
+					<input matInput type="date" formControlName="toDate" />
+				</mat-form-field>
+
+				<div class="form-actions">
+					<button mat-stroked-button type="button" (click)="applyFilters()">Apply Filter</button>
+					<button mat-button type="button" (click)="clearFilters()">Clear</button>
+				</div>
+			</form>
+		</mat-card-content>
+	</mat-card>
+
 	@if (errorMessage) {
 		<p class="error-message">{{ errorMessage }}</p>
 	}
@@ -121,9 +143,9 @@
 					<mat-spinner diameter="32"></mat-spinner>
 				</div>
 			} @else if (entries.length === 0) {
-				<p>No work-from-home entries yet.</p>
+				<p>No entries yet. Add your first work-from-home or leave record above.</p>
 			} @else {
-				<table mat-table [dataSource]="entries" class="entry-table">
+				<table mat-table [dataSource]="pagedEntries" class="entry-table">
 					<ng-container matColumnDef="workDate">
 						<th mat-header-cell *matHeaderCellDef>Date</th>
 						<td mat-cell *matCellDef="let entry">{{ entry.workDate | date: 'mediumDate' }}</td>
@@ -154,6 +176,24 @@
 					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 					<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 				</table>
+
+				<div class="paging-bar">
+					<mat-form-field appearance="outline" class="page-size-field">
+						<mat-label>Page Size</mat-label>
+						<mat-select [value]="pageSize" (selectionChange)="onPageSizeChange($event.value)">
+							@for (size of pageSizes; track size) {
+								<mat-option [value]="size">{{ size }}</mat-option>
+							}
+						</mat-select>
+					</mat-form-field>
+
+					<p class="range-label">{{ rangeLabel }}</p>
+
+					<div class="paging-actions">
+						<button mat-button type="button" (click)="goToPreviousPage()" [disabled]="page === 1">Previous</button>
+						<button mat-button type="button" (click)="goToNextPage()" [disabled]="page >= totalPages">Next</button>
+					</div>
+				</div>
 			}
 		</mat-card-content>
 	</mat-card>

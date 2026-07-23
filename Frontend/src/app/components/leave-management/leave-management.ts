@@ -36,6 +36,7 @@ export class LeaveManagement implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly displayedColumns: string[] = ['leaveDate', 'entryType', 'hoursWorked', 'notes', 'actions'];
+  readonly pageSizes = [10, 20, 50];
   readonly entryTypeOptions = [
     { value: DayEntryType.FullDay, label: 'Full Day' },
     { value: DayEntryType.HalfDay, label: 'Half Day' },
@@ -58,9 +59,17 @@ export class LeaveManagement implements OnInit {
     date: [this.today(), Validators.required],
   });
 
+  readonly filterForm = this.formBuilder.group({
+    fromDate: [''],
+    toDate: [''],
+  });
+
   entries: LeaveEntry[] = [];
+  pagedEntries: LeaveEntry[] = [];
   summary: DayEntrySummary | null = null;
   lastDeletedEntry: LeaveEntry | null = null;
+  page = 1;
+  pageSize = 10;
   isLoading = false;
   isSubmitting = false;
   isLoadingSummary = false;
@@ -77,8 +86,13 @@ export class LeaveManagement implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
+    const value = this.filterForm.getRawValue();
+
     this.leaveService
-      .getAll()
+      .getAll({
+        fromDate: value.fromDate || undefined,
+        toDate: value.toDate || undefined,
+      })
       .pipe(
         take(1),
         finalize(() => {
@@ -89,6 +103,8 @@ export class LeaveManagement implements OnInit {
       .subscribe({
         next: (entries) => {
           this.entries = entries;
+          this.page = 1;
+          this.updatePagedEntries();
         },
         error: () => {
           this.errorMessage = 'Unable to load leave entries. Ensure the API is running.';
@@ -153,6 +169,7 @@ export class LeaveManagement implements OnInit {
       .subscribe({
         next: (created) => {
           this.entries = [created, ...this.entries].sort((a, b) => b.leaveDate.localeCompare(a.leaveDate));
+          this.updatePagedEntries();
           this.entryForm.patchValue({
             leaveDate: this.today(),
             entryType: DayEntryType.FullDay,
@@ -186,6 +203,7 @@ export class LeaveManagement implements OnInit {
       next: () => {
         this.lastDeletedEntry = entry;
         this.entries = this.entries.filter((x) => x.id !== id);
+        this.updatePagedEntries();
         this.infoMessage = 'Leave entry deleted.';
         this.loadSummary();
       },
@@ -205,6 +223,7 @@ export class LeaveManagement implements OnInit {
     this.leaveService.restore(entry.id).pipe(take(1)).subscribe({
       next: () => {
         this.entries = [entry, ...this.entries].sort((a, b) => b.leaveDate.localeCompare(a.leaveDate));
+        this.updatePagedEntries();
         this.lastDeletedEntry = null;
         this.infoMessage = 'Leave entry restored.';
         this.loadSummary();
@@ -217,6 +236,52 @@ export class LeaveManagement implements OnInit {
 
   formatEntryType(entryType: DayEntryType): string {
     return this.entryTypeOptions.find((x) => x.value === entryType)?.label ?? 'Unknown';
+  }
+
+  applyFilters(): void {
+    this.loadEntries();
+  }
+
+  clearFilters(): void {
+    this.filterForm.patchValue({
+      fromDate: '',
+      toDate: '',
+    });
+    this.loadEntries();
+  }
+
+  onPageSizeChange(pageSize: number): void {
+    this.pageSize = Number(pageSize);
+    this.page = 1;
+    this.updatePagedEntries();
+  }
+
+  goToPreviousPage(): void {
+    if (this.page > 1) {
+      this.page -= 1;
+      this.updatePagedEntries();
+    }
+  }
+
+  goToNextPage(): void {
+    if (this.page < this.totalPages) {
+      this.page += 1;
+      this.updatePagedEntries();
+    }
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.entries.length / this.pageSize));
+  }
+
+  get rangeLabel(): string {
+    if (this.entries.length === 0) {
+      return '0 of 0';
+    }
+
+    const start = (this.page - 1) * this.pageSize + 1;
+    const end = Math.min(this.page * this.pageSize, this.entries.length);
+    return `${start}-${end} of ${this.entries.length}`;
   }
 
   get needsSpecificHours(): boolean {
@@ -234,6 +299,12 @@ export class LeaveManagement implements OnInit {
     }
 
     control.updateValueAndValidity();
+  }
+
+  private updatePagedEntries(): void {
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.pagedEntries = this.entries.slice(start, end);
   }
 
   private today(): string {

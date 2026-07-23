@@ -245,8 +245,8 @@ Seed the initial public holiday records with the following known holidays:
 
 1. Add empty-state and validation UX for the new flows.
 2. Decide whether notes are required or optional.
-3. Decide whether paging or filtering is needed as time-entry volume grows.
-4. Review whether public holiday screens need default date filters.
+3. Review whether public holiday screens need default date filters.
+4. Decide whether time-entry paging should also move server-side later.
 
 ## Phased Implementation Backlog
 
@@ -398,7 +398,7 @@ Stabilize the feature with edge-case handling and usability improvements.
 - [x] Confirm whether leave and WFH share the same summary views or separate views.
 - [ ] Decide whether notes are required or optional.
 - [ ] Add empty-state handling for no entries and no holidays.
-- [ ] Add paging or filtering if the data volume grows.
+- [x] Add paging or filtering if the data volume grows.
 - [x] Review date handling for time zone consistency.
 - [ ] Add documentation for the CSV template and week/month rules.
 

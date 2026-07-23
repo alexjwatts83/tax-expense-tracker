@@ -33,6 +33,7 @@ It also has a documented roadmap for work-from-home, leave, and public-holiday t
 - Angular service/model layer added for WFH, Leave, and Public Holidays
 - Angular management screens added for WFH, Leave, and Public Holidays, with WFH and Leave combined under a shared time-tracking page
 - Time-tracking screens use local date input formatting to avoid UTC day drift in browser date fields
+- Time-tracking screens support date-range filtering and lightweight client-side paging
 
 ## Planned Enhancements
 
