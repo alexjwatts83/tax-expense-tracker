@@ -2,6 +2,8 @@
 
 Tax Expense Tracker is a full-stack app for managing tax-deductible expenses with soft-delete safety, filtering, and summary reporting.
 
+It also has a documented roadmap for work-from-home, leave, and public-holiday tracking in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md).
+
 ## Implemented Highlights
 
 - DDD/Clean architecture across Domain, Application, Infrastructure, and API layers
@@ -18,6 +20,7 @@ Tax Expense Tracker is a full-stack app for managing tax-deductible expenses wit
 
 ## Planned Enhancements
 
+- Work-from-home and leave tracking is planned, not yet implemented
 - Work-from-home and leave tracking with full-day, half-day, and specific-hours entry modes
 - Weekly and monthly views for work-from-home and leave summaries
 - Public holiday CSV import and seeded public holiday reference data
@@ -192,5 +195,6 @@ Recent schema updates:
 - DDD/Clean phases A-F complete
 - Bank entity refactor completed end-to-end (backend, frontend, migration, tests)
 - Expense Item field removed end-to-end (backend, frontend, migration, tests)
+- Work-from-home, leave, and public-holiday tracking are planned in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
 
 Open work remains in Phase 4 (deployment, coverage expansion, CSV export, additional trend analytics).
