@@ -135,8 +135,11 @@ tax-expense-tracker/
 │   ├── Start-Local.ps1
 │   └── Stop-Local.ps1
 ├── plans/
+│   ├── archive/
+│   │   └── DDD_CLEAN_ARCHITECTURE_PLAN.md
 │   ├── TAX_EXPENSE_TRACKER_PLAN.md
-│   └── DDD_CLEAN_ARCHITECTURE_PLAN.md
+│   ├── LEAVE_TYPE_CLASSIFICATION_PLAN.md
+│   └── AZURE_DEPLOYMENT_TRACKER.md
 └── README.md
 ```
 

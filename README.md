@@ -2,7 +2,7 @@
 
 Tax Expense Tracker is a full-stack app for managing tax-deductible expenses with soft-delete safety, filtering, and summary reporting.
 
-It also has documented planning for work-location (WFH/Office), leave, and public-holiday tracking in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md), with rename delivery tracked in [plans/WORK_LOCATION_RENAME_PLAN.md](plans/WORK_LOCATION_RENAME_PLAN.md).
+Completed delivery notes for work-location (WFH/Office), leave, and public-holiday tracking are archived in [plans/archive/WORK_FROM_HOME_PLAN.md](plans/archive/WORK_FROM_HOME_PLAN.md), with rename delivery tracked in [plans/archive/WORK_LOCATION_RENAME_PLAN.md](plans/archive/WORK_LOCATION_RENAME_PLAN.md).
 
 ## Implemented Highlights
 
@@ -41,8 +41,9 @@ It also has documented planning for work-location (WFH/Office), leave, and publi
 
 ## Planned Enhancements
 
-- Delivery notes and backlog tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md)
-- Work-location rename delivery and rollout checklist tracked in [plans/WORK_LOCATION_RENAME_PLAN.md](plans/WORK_LOCATION_RENAME_PLAN.md)
+- Product roadmap and backlog tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md)
+- Leave type rollout tracked in [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md)
+- Azure deployment tracked in [plans/AZURE_DEPLOYMENT_TRACKER.md](plans/AZURE_DEPLOYMENT_TRACKER.md)
 
 ## Tech Stack
 
@@ -274,4 +275,4 @@ Recent schema updates:
 - Unit tests passing: 61/61
 - Integration tests passing: 1/1
 
-Current roadmap and backlog remain tracked in [plans/WORK_FROM_HOME_PLAN.md](plans/WORK_FROM_HOME_PLAN.md) and [plans/WORK_LOCATION_RENAME_PLAN.md](plans/WORK_LOCATION_RENAME_PLAN.md).
+Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md), and [plans/AZURE_DEPLOYMENT_TRACKER.md](plans/AZURE_DEPLOYMENT_TRACKER.md).

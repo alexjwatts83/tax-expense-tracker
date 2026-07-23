@@ -21,7 +21,7 @@ Add a work-location (WFH/Office) and leave tracking feature that lets users reco
 1. Canonical API and frontend route naming now uses Work Location terminology.
 2. Legacy compatibility routes have been removed after transition.
 3. Work-location persistence naming has been finalized in the database via table rename migration.
-4. Detailed rename rollout and migration notes are tracked in `plans/WORK_LOCATION_RENAME_PLAN.md`.
+4. Detailed rename rollout and migration notes are tracked in `plans/archive/WORK_LOCATION_RENAME_PLAN.md`.
 
 ## User Outcomes
 
