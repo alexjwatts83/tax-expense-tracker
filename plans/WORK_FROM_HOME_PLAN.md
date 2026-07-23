@@ -247,14 +247,14 @@ Create the core data model and storage foundation for WFH entries, leave entries
 
 #### Backlog Items
 
-- [ ] Define `WorkFromHomeEntry` domain entity.
-- [ ] Define `LeaveEntry` domain entity.
-- [ ] Define `PublicHoliday` domain entity.
-- [ ] Add value rules for entry type and hours conversion.
+- [x] Define `WorkFromHomeEntry` domain entity.
+- [x] Define `LeaveEntry` domain entity.
+- [x] Define `PublicHoliday` domain entity.
+- [x] Add value rules for entry type and hours conversion.
 - [ ] Decide whether duplicate entries per day are allowed.
-- [ ] Add EF Core mappings and migrations for WFH entries.
-- [ ] Add EF Core mappings and migrations for leave entries.
-- [ ] Add EF Core mappings and migrations for public holidays.
+- [x] Add EF Core mappings and migrations for WFH entries.
+- [x] Add EF Core mappings and migrations for leave entries.
+- [x] Add EF Core mappings and migrations for public holidays.
 - [ ] Add repository abstractions or application ports for WFH entries.
 - [ ] Add repository abstractions or application ports for leave entries.
 - [ ] Add repository abstractions or application ports for public holidays.
