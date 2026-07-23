@@ -49,4 +49,9 @@ export const routes: Routes = [
 		loadComponent: () =>
 			import('./components/public-holiday-management/public-holiday-management').then((m) => m.PublicHolidayManagement),
 	},
+	{
+		path: 'calendar-batch-entry',
+		loadComponent: () =>
+			import('./components/calendar-batch-entry/calendar-batch-entry').then((m) => m.CalendarBatchEntry),
+	},
 ];

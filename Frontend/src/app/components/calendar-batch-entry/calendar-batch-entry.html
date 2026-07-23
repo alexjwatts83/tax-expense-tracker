@@ -1,0 +1,109 @@
+<section class="page calendar-page">
+	<header class="page-header">
+		<h1>Calendar Batch Entry</h1>
+		<p>Pick weekdays for the month and mark each row as WFH or Leave.</p>
+		<p class="rule-note">Public holidays are locked. WFH and Leave cannot be added on those dates.</p>
+	</header>
+
+	<mat-card class="month-card">
+		<mat-card-content>
+			<div class="month-toolbar">
+				<button mat-stroked-button type="button" (click)="goToPreviousMonth()">Previous Month</button>
+				<h2>{{ monthLabel }}</h2>
+				<button mat-stroked-button type="button" (click)="goToNextMonth()">Next Month</button>
+			</div>
+
+			<div class="quick-actions">
+				<button mat-button type="button" (click)="setAllCategory('wfh')">Mark All as WFH</button>
+				<button mat-button type="button" (click)="setAllCategory('leave')">Mark All as Leave</button>
+				<button mat-button type="button" (click)="clearAll()">Clear All</button>
+			</div>
+		</mat-card-content>
+	</mat-card>
+
+	@if (errorMessage) {
+		<p class="error-message">{{ errorMessage }}</p>
+	}
+
+	@if (infoMessage) {
+		<p class="info-message">{{ infoMessage }}</p>
+	}
+
+	<mat-card class="grid-card">
+		<mat-card-content>
+			@if (isLoading) {
+				<div class="loading">
+					<mat-spinner diameter="32"></mat-spinner>
+				</div>
+			} @else if (rows.length === 0) {
+				<p class="empty-message">No weekdays found for this month.</p>
+			} @else {
+				<div class="calendar-list">
+					<div class="calendar-list-header">
+						<span>Date</span>
+						<span>Status</span>
+						<span>Entry Type</span>
+						<span>Specific Hours</span>
+					</div>
+
+					@for (row of rows; track row.dateIso) {
+						<div class="calendar-row" [class.holiday-row]="row.isHoliday">
+							<div class="date-cell">
+								<strong>{{ row.dayLabel }}</strong>
+								<span class="date-code">{{ row.dateIso }}</span>
+								@if (row.isHoliday) {
+									<span class="holiday-chip">Holiday: {{ row.holidayName }}</span>
+								}
+							</div>
+
+							<mat-form-field appearance="outline">
+								<mat-label>Status</mat-label>
+								<mat-select
+									[value]="row.category"
+									(selectionChange)="onCategoryChange(row, $event.value)"
+									[disabled]="row.isHoliday">
+									@for (option of categoryOptions; track option.value) {
+										<mat-option [value]="option.value">{{ option.label }}</mat-option>
+									}
+								</mat-select>
+							</mat-form-field>
+
+							<mat-form-field appearance="outline">
+								<mat-label>Entry Type</mat-label>
+								<mat-select
+									[value]="row.entryType"
+									(selectionChange)="onEntryTypeChange(row, $event.value)"
+									[disabled]="row.isHoliday || row.category === 'none'">
+									@for (option of entryTypeOptions; track option.value) {
+										<mat-option [value]="option.value">{{ option.label }}</mat-option>
+									}
+								</mat-select>
+							</mat-form-field>
+
+							<div class="hours-cell">
+								@if (isSpecificHoursRow(row)) {
+									<mat-form-field appearance="outline">
+										<mat-label>Hours</mat-label>
+										<input matInput type="number" min="0" max="24" step="0.25" [(ngModel)]="row.specificHours" />
+										@if (rowHasHoursError(row)) {
+											<mat-error>Enter a value greater than 0 and up to 24.</mat-error>
+										}
+									</mat-form-field>
+								} @else {
+									<span class="hours-placeholder">Not required</span>
+								}
+							</div>
+						</div>
+					}
+				</div>
+			}
+		</mat-card-content>
+	</mat-card>
+
+	<div class="action-bar">
+		<p>{{ pendingCount }} pending row(s)</p>
+		<button mat-flat-button color="primary" type="button" [disabled]="!canBatchAdd" (click)="queueBatchAdd()">
+			Batch Add
+		</button>
+	</div>
+</section>
