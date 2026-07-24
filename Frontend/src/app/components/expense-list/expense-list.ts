@@ -1,6 +1,6 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -60,10 +60,10 @@ export class ExpenseList implements OnInit {
 
   readonly createForm = this.formBuilder.group({
     description: [''],
-    date: [''],
-    bankId: [''],
-    price: [0],
-    sourceId: [''],
+    date: ['', [Validators.required]],
+    bankId: ['', [Validators.required]],
+    price: [0, [Validators.required, Validators.min(0)]],
+    sourceId: ['', [Validators.required]],
     tagIds: [[] as string[]],
     manualTags: [''],
   });
@@ -259,8 +259,9 @@ export class ExpenseList implements OnInit {
   createExpenseInline(): void {
     const value = this.createForm.value;
 
-    if (!value.date || !value.bankId || !value.sourceId || Number(value.price) < 0) {
-      this.errorMessage = 'Please provide date, bank, tracker, and a non-negative price.';
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      this.errorMessage = 'Please fix the highlighted fields before adding an expense.';
       return;
     }
 

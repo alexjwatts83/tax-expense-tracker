@@ -7,14 +7,6 @@
 				<button mat-stroked-button type="button" aria-label="Return to current month" [disabled]="isMonthNavigationDisabled" (click)="goToCurrentMonth()">Current Month</button>
 				<button mat-stroked-button type="button" aria-label="Go to next month" [disabled]="isMonthNavigationDisabled" (click)="goToNextMonth()">Next Month</button>
 			</div>
-
-			<div class="quick-actions">
-				<button mat-button type="button" aria-label="Set all weekdays to WFH" (click)="setAllCategory('wfh')">Mark All as WFH</button>
-				<button mat-button type="button" aria-label="Set all weekdays to office" (click)="setAllCategory('office')">Mark All as Office</button>
-				<button mat-button type="button" aria-label="Set all weekdays to annual leave" (click)="setAllCategory('annual')">Mark All as Annual</button>
-				<button mat-button type="button" aria-label="Set all weekdays to sick leave" (click)="setAllCategory('sick')">Mark All as Sick</button>
-				<button mat-button type="button" aria-label="Revert all pending day changes" (click)="clearAll()">Clear All</button>
-			</div>
 		</mat-card-content>
 	</mat-card>
 
@@ -37,15 +29,10 @@
 							<div class="calendar-week-row">
 								@for (dayCell of week.days; track $index) {
 									@if (dayCell) {
-										<div class="calendar-day-cell" [class.holiday-row]="dayCell.isHoliday" [class.today-row]="dayCell.isToday" [class.wfh-row]="!dayCell.isHoliday && dayCell.category === 'wfh'" [class.office-row]="!dayCell.isHoliday && dayCell.category === 'office'" [class.annual-row]="!dayCell.isHoliday && dayCell.category === 'annual'" [class.sick-row]="!dayCell.isHoliday && dayCell.category === 'sick'" [class.pending-row]="isRowChanged(dayCell)">
+										<div class="calendar-day-cell" [class.holiday-row]="isHolidayLocked(dayCell)" [class.today-row]="dayCell.isToday" [class.wfh-row]="!isHolidayLocked(dayCell) && dayCell.category === 'wfh'" [class.office-row]="!isHolidayLocked(dayCell) && dayCell.category === 'office'" [class.annual-row]="!isHolidayLocked(dayCell) && dayCell.category === 'annual'" [class.sick-row]="!isHolidayLocked(dayCell) && dayCell.category === 'sick'" [class.pending-row]="isRowChanged(dayCell)">
 											<div class="date-cell">
 												<div class="date-heading">
 													<strong [attr.title]="dayCell.dateIso">{{ dayCell.dayLabel }}</strong>
-													@if ($index === 0) {
-														<button mat-icon-button class="week-wfh-button" type="button" title="Set all non-holiday days in this week to WFH" aria-label="Set all non-holiday days in this week to WFH" (click)="setWeekToWfh(week)">
-															<mat-icon>arrow_circle_right</mat-icon>
-														</button>
-													}
 												</div>
 												@if (dayCell.isToday) {
 													<span class="today-chip" aria-label="Current day">Today</span>

@@ -6,11 +6,19 @@
 .tag-form {
 	display: grid;
 	gap: 0.75rem;
+	grid-template-columns: minmax(220px, 1fr) auto;
+	align-items: start;
+}
+
+.tag-form mat-form-field {
+	width: 100%;
 }
 
 .form-actions {
 	display: flex;
 	justify-content: flex-end;
+	align-self: start;
+	padding-top: 0.25rem;
 }
 
 .tag-table {
@@ -37,4 +45,10 @@
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+	.tag-form {
+		grid-template-columns: 1fr;
+	}
 }

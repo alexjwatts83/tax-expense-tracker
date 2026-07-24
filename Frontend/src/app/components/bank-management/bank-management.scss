@@ -1,12 +1,19 @@
 .bank-form {
 	display: grid;
-	gap: 1rem;
-	grid-template-columns: 1fr;
+	gap: 0.75rem;
+	grid-template-columns: minmax(220px, 1fr) auto;
+	align-items: start;
+}
+
+.bank-form mat-form-field {
+	width: 100%;
 }
 
 .form-actions {
 	display: flex;
 	justify-content: flex-end;
+	align-self: start;
+	padding-top: 0.25rem;
 }
 
 .bank-table {
@@ -27,4 +34,10 @@
 .info-message {
 	color: #027a48;
 	margin: 0.75rem 0;
+}
+
+@media (max-width: 640px) {
+	.bank-form {
+		grid-template-columns: 1fr;
+	}
 }

@@ -15,13 +15,6 @@
 	font-size: 1.1rem;
 }
 
-.quick-actions {
-	display: flex;
-	gap: 0.5rem;
-	flex-wrap: wrap;
-	margin-top: 1rem;
-}
-
 .calendar-scroll {
 	overflow-x: auto;
 	overflow-y: hidden;
@@ -115,12 +108,7 @@
 .date-heading {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	min-height: 40px;
-}
-
-.week-wfh-button {
-	color: #7e22ce;
 }
 
 .holiday-chip {
@@ -276,10 +264,6 @@
 @media (max-width: 430px) {
 	.month-toolbar h2 {
 		font-size: 1rem;
-	}
-
-	.quick-actions {
-		gap: 0.25rem;
 	}
 
 	.calendar-week-row {

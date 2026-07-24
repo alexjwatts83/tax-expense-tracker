@@ -1,15 +1,32 @@
+
 .import-form,
 .filter-form {
 	display: grid;
-	gap: 1rem;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 0.75rem;
+	align-items: start;
+}
+
+.import-form {
+	grid-template-columns: minmax(220px, 1fr) minmax(260px, 1.3fr) auto;
+	align-items: center;
+}
+
+.filter-form {
+	grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+	align-items: center;
+}
+
+.import-form mat-form-field,
+.filter-form mat-form-field {
+	width: 100%;
 }
 
 .file-picker {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
-	padding-top: 0.5rem;
+	padding-top: 0;
+	align-self: center;
 }
 
 .file-name {
@@ -20,7 +37,30 @@
 .form-actions {
 	display: flex;
 	justify-content: flex-end;
-	grid-column: 1 / -1;
+	align-self: start;
+	padding-top: 0.25rem;
+}
+
+.filter-form .form-actions {
+	gap: 0.5rem;
+	align-self: center;
+	padding-top: 0;
+}
+
+.import-form .form-actions {
+	align-self: center;
+	padding-top: 0;
+}
+
+@media (max-width: 860px) {
+	.import-form,
+	.filter-form {
+		grid-template-columns: 1fr;
+	}
+
+	.form-actions {
+		justify-content: flex-start;
+	}
 }
 
 .holiday-table {

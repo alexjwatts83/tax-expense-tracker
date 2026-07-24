@@ -6,6 +6,18 @@
 .tracker-form {
 	display: grid;
 	gap: 0.75rem;
+	grid-template-columns: minmax(180px, 1fr) minmax(320px, 2fr) auto;
+	align-items: start;
+}
+
+.name-field,
+.description-field {
+	width: 100%;
+}
+
+.inline-action {
+	align-self: start;
+	padding-top: 0.25rem;
 }
 
 .form-actions {
@@ -38,6 +50,13 @@
 	align-items: center;
 	gap: 0.5rem;
 }
+
+@media (max-width: 860px) {
+	.tracker-form {
+		grid-template-columns: 1fr;
+	}
+}
+
 .page {
 	display: grid;
 	gap: 1rem;

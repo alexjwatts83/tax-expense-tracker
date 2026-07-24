@@ -1,8 +1,5 @@
 <section class="page">
-	<h1>Tag Management</h1>
-
 	<mat-card class="tag-form-card">
-		<mat-card-title>Add Tag</mat-card-title>
 		<mat-card-content>
 			<form [formGroup]="tagForm" (ngSubmit)="createTag()" class="tag-form">
 				<mat-form-field appearance="outline">
@@ -33,7 +30,6 @@
 	}
 
 	<mat-card class="tag-list-card">
-		<mat-card-title>Tags</mat-card-title>
 		<mat-card-content>
 			@if (isLoading) {
 				<div class="loading">
