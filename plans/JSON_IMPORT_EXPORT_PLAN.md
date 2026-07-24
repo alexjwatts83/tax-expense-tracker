@@ -306,7 +306,7 @@ Current implementation note:
 
 ### Unit Tests
 
-- [ ] Serialization/deserialization for envelope and entity payloads.
+- [x] Serialization/deserialization for envelope and entity payloads.
 - [~] Import mode behavior (`insertOnly`, `upsert`, `replace`).
 - [ ] Dependency ordering and FK validation.
 - [~] Dry-run returns expected report with no DB mutation.
@@ -316,7 +316,8 @@ Current implementation note:
 - Added regression coverage proving an expense tag can reference an expense created in the same dry-run payload without database mutation.
 - Added coverage proving typed issue codes/messages are preserved in API result mapping.
 - Added focused coverage for transactional `replace + allowDeletes`, including dry-run, soft deletes, and expense-tag link synchronization.
-- Full DataTransfer mode and serialization coverage remains pending.
+- Added wire-contract coverage for the reference envelope and expense, work-location, and leave payloads using the API's web JSON settings.
+- Full import-mode and dependency validation coverage remains pending.
 
 ## Application Module Organization
 
@@ -388,7 +389,7 @@ Create a separate project only if this module gains independent consumers, depen
   - Streamed export responses
   - Phase 4 safety/observability items
 - Pending:
-  - Complete serialization and import-mode unit coverage
+  - Complete import-mode and dependency-validation unit coverage
   - Bulk import optimization and batching
   - Frontend admin data-transfer screen
   - Manual roundtrip and large-payload verification
