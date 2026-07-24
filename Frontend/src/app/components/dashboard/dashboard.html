@@ -10,19 +10,84 @@
 			<mat-spinner diameter="32"></mat-spinner>
 		</div>
 	} @else {
-	<div class="cards">
-		<mat-card>
-			<mat-card-title>Total Spent</mat-card-title>
-			<mat-card-content>{{ summary?.totalSpent ?? 0 | currency }}</mat-card-content>
+		<div class="cards">
+			<mat-card>
+				<mat-card-title>Total Spent</mat-card-title>
+				<mat-card-content>{{ summary?.totalSpent ?? 0 | currency }}</mat-card-content>
+			</mat-card>
+			<mat-card>
+				<mat-card-title>Top Tracker</mat-card-title>
+				<mat-card-content>{{ topTracker }}</mat-card-content>
+			</mat-card>
+			<mat-card>
+				<mat-card-title>Top Bank</mat-card-title>
+				<mat-card-content>{{ topBank }}</mat-card-content>
+			</mat-card>
+		</div>
+
+		<mat-card class="time-tracking-card">
+			<mat-card-title>Time Tracking Snapshot</mat-card-title>
+			<mat-card-content>
+				<div class="snapshot-cards">
+					<mat-card>
+						<mat-card-title>Total Records</mat-card-title>
+						<mat-card-content>{{ totalTimeRecords | number: '1.2-2' }}</mat-card-content>
+					</mat-card>
+					<mat-card>
+						<mat-card-title>Total Hours</mat-card-title>
+						<mat-card-content>{{ totalTimeHours | number: '1.2-2' }}</mat-card-content>
+					</mat-card>
+					<mat-card>
+						<mat-card-title>Hours This Month</mat-card-title>
+						<mat-card-content>{{ currentMonthHours | number: '1.2-2' }}</mat-card-content>
+					</mat-card>
+					<mat-card>
+						<mat-card-title>Leave Records</mat-card-title>
+						<mat-card-content>{{ leaveRecordCount | number: '1.2-2' }}</mat-card-content>
+					</mat-card>
+				</div>
+
+				@if (recentTimeRecords.length === 0) {
+					<p class="empty-message">No time tracking records available yet.</p>
+				} @else {
+					<div class="table-wrap">
+						<table mat-table [dataSource]="recentTimeRecords" class="time-records-table">
+							<ng-container matColumnDef="date">
+								<th mat-header-cell *matHeaderCellDef>Date</th>
+								<td mat-cell *matCellDef="let record">{{ record.date | standardDateDisplay }}</td>
+							</ng-container>
+
+							<ng-container matColumnDef="category">
+								<th mat-header-cell *matHeaderCellDef>Category</th>
+								<td mat-cell *matCellDef="let record">{{ record.category }}</td>
+							</ng-container>
+
+							<ng-container matColumnDef="type">
+								<th mat-header-cell *matHeaderCellDef>Type</th>
+								<td mat-cell *matCellDef="let record">{{ record.type }}</td>
+							</ng-container>
+
+							<ng-container matColumnDef="entryType">
+								<th mat-header-cell *matHeaderCellDef>Entry Type</th>
+								<td mat-cell *matCellDef="let record">{{ record.entryType }}</td>
+							</ng-container>
+
+							<ng-container matColumnDef="hours">
+								<th mat-header-cell *matHeaderCellDef>Hours</th>
+								<td mat-cell *matCellDef="let record">{{ record.hours | number: '1.2-2' }}</td>
+							</ng-container>
+
+							<ng-container matColumnDef="notes">
+								<th mat-header-cell *matHeaderCellDef>Notes</th>
+								<td mat-cell *matCellDef="let record">{{ record.notes }}</td>
+							</ng-container>
+
+							<tr mat-header-row *matHeaderRowDef="timeRecordColumns"></tr>
+							<tr mat-row *matRowDef="let row; columns: timeRecordColumns"></tr>
+						</table>
+					</div>
+				}
+			</mat-card-content>
 		</mat-card>
-		<mat-card>
-			<mat-card-title>Top Tracker</mat-card-title>
-			<mat-card-content>{{ topTracker }}</mat-card-content>
-		</mat-card>
-		<mat-card>
-			<mat-card-title>Top Bank</mat-card-title>
-			<mat-card-content>{{ topBank }}</mat-card-content>
-		</mat-card>
-	</div>
 	}
 </section>
