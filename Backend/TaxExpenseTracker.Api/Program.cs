@@ -11,6 +11,7 @@ using TaxExpenseTracker.Application.Trackers;
 using TaxExpenseTracker.Application.WorkLocation;
 using TaxExpenseTracker.Infrastructure.Data;
 using TaxExpenseTracker.Api.Middleware;
+using TaxExpenseTracker.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 const string AppCorsPolicy = "AppCorsPolicy";
@@ -71,8 +72,7 @@ builder.Services.AddScoped<ILeaveRepository, EfLeaveRepository>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
 builder.Services.AddScoped<IPublicHolidayRepository, EfPublicHolidayRepository>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
-builder.Services.AddScoped<IDataTransferTransactionCoordinator, EfDataTransferTransactionCoordinator>();
-builder.Services.AddScoped<IDataTransferService, DataTransferService>();
+builder.Services.AddDataTransferServices();
 
 var app = builder.Build();
 

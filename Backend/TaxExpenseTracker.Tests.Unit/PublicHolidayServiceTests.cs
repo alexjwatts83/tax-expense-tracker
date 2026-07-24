@@ -112,6 +112,12 @@ public class PublicHolidayServiceTests
             return Task.CompletedTask;
         }
 
+        public Task RemoveByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
+        {
+            Holidays.RemoveAll(x => ids.Contains(x.Id));
+            return Task.CompletedTask;
+        }
+
         public Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             SaveChangesCalled = true;

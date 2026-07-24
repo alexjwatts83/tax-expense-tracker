@@ -218,8 +218,11 @@ Current implementation note:
 
 - Reference-data export is implemented.
 - Reference-data import is implemented for `upsert`, `insertOnly`, and `dryRun`.
+- Reference-data import now supports `replace + allowDeletes` synchronization:
+  - Trackers, tags, and banks are soft-deleted when omitted from payload.
+  - Public holidays are deleted when omitted from payload.
 - Transactional imports (`expenses`, `work-locations`, `leave`) are implemented for `upsert`, `insertOnly`, and `dryRun`.
-- `replace` currently behaves as upsert with warning; delete synchronization is pending.
+- Transactional `replace + allowDeletes` delete synchronization is still pending.
 
 ### Phase 2: Infrastructure and Persistence
 
@@ -233,7 +236,9 @@ Current implementation note:
 - Added repository support for expense update including deleted rows.
 - Import logic uses per-entity lookups and staged processing.
 - Import operations now execute under explicit transaction boundaries when `dryRun=false`.
-- Bulk optimization work is still pending.
+- Imports with validation errors roll back instead of committing partial changes.
+- Expense export loads expenses and tag links with one no-tracking repository query.
+- Further bulk import optimization is still pending.
 
 ### Phase 3: API Endpoints
 
@@ -301,7 +306,25 @@ Current implementation note:
 - [ ] Serialization/deserialization for envelope and entity payloads.
 - [ ] Import mode behavior (`insertOnly`, `upsert`, `replace`).
 - [ ] Dependency ordering and FK validation.
-- [ ] Dry-run returns expected report with no DB mutation.
+- [~] Dry-run returns expected report with no DB mutation.
+
+Current implementation note:
+
+- Added regression coverage proving an expense tag can reference an expense created in the same dry-run payload without database mutation.
+- Added coverage proving typed issue codes/messages are preserved in API result mapping.
+- Full DataTransfer mode and serialization coverage remains pending.
+
+## Application Module Organization
+
+Data transfer remains an Application-layer feature module because it orchestrates use cases across existing domain aggregates rather than defining a separate bounded context.
+
+- `Contracts/`: payloads, typed issues, and import computation contracts.
+- `Export/`: export-specific orchestration and projections.
+- `Import/Common/`: transaction/result/delete synchronization policies.
+- `Import/Reference/`: reference-data handlers and orchestration.
+- `Import/Transactional/`: expense, work-location, and leave handlers and orchestration.
+
+Create a separate project only if this module gains independent consumers, dependencies, release ownership, or substantial schema-migration responsibilities.
 
 ### Manual Tests
 

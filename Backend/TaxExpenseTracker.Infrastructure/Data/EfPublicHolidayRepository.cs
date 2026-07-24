@@ -51,6 +51,20 @@ public sealed class EfPublicHolidayRepository : IPublicHolidayRepository
         return Task.CompletedTask;
     }
 
+    public async Task RemoveByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        var entities = await _dbContext.PublicHolidays
+            .Where(x => ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        _dbContext.PublicHolidays.RemoveRange(entities);
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return _dbContext.SaveChangesAsync(cancellationToken);

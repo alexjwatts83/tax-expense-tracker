@@ -11,9 +11,9 @@ public sealed class EfDataTransferTransactionCoordinator : IDataTransferTransact
         _dbContext = dbContext;
     }
 
-    public async Task<T> ExecuteAsync<T>(
+    public async Task<DataTransferImportResultDto> ExecuteAsync(
         bool useTransaction,
-        Func<CancellationToken, Task<T>> action,
+        Func<CancellationToken, Task<DataTransferImportResultDto>> action,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(action);
@@ -25,7 +25,12 @@ public sealed class EfDataTransferTransactionCoordinator : IDataTransferTransact
 
         await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
         var result = await action(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+
+        if (result.Results.All(x => x.Errors.Count == 0))
+            await transaction.CommitAsync(cancellationToken);
+        else
+            await transaction.RollbackAsync(cancellationToken);
+
         return result;
     }
 }

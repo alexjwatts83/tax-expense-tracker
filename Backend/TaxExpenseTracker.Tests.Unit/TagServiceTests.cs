@@ -85,6 +85,11 @@ public class TagServiceTests
             return Task.FromResult<IReadOnlyList<Tag>>(Tags.ToList());
         }
 
+        public Task<IReadOnlyList<Tag>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<Tag>>(Tags.ToList());
+        }
+
         public Task<Tag?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Tags.FirstOrDefault(x => x.Id == id));

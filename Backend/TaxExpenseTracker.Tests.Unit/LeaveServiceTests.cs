@@ -384,6 +384,12 @@ public class LeaveServiceTests
             return Task.CompletedTask;
         }
 
+        public Task RemoveByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
+        {
+            Holidays.RemoveAll(x => ids.Contains(x.Id));
+            return Task.CompletedTask;
+        }
+
         public Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return Task.CompletedTask;
@@ -413,6 +419,11 @@ public class LeaveServiceTests
         public bool SaveChangesCalled { get; private set; }
 
         public Task<IReadOnlyList<LeaveEntry>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<LeaveEntry>>(Entries.ToList());
+        }
+
+        public Task<IReadOnlyList<LeaveEntry>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult<IReadOnlyList<LeaveEntry>>(Entries.ToList());
         }

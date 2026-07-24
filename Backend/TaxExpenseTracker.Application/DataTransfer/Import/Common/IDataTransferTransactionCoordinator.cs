@@ -2,8 +2,8 @@ namespace TaxExpenseTracker.Application.DataTransfer;
 
 public interface IDataTransferTransactionCoordinator
 {
-    Task<T> ExecuteAsync<T>(
+    Task<DataTransferImportResultDto> ExecuteAsync(
         bool useTransaction,
-        Func<CancellationToken, Task<T>> action,
+        Func<CancellationToken, Task<DataTransferImportResultDto>> action,
         CancellationToken cancellationToken = default);
 }

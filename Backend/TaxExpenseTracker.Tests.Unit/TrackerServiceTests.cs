@@ -85,6 +85,11 @@ public class TrackerServiceTests
             return Task.FromResult<IReadOnlyList<Tracker>>(Trackers.ToList());
         }
 
+        public Task<IReadOnlyList<Tracker>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<Tracker>>(Trackers.ToList());
+        }
+
         public Task<Tracker?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Trackers.FirstOrDefault(x => x.Id == id));

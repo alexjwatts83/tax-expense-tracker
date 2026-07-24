@@ -246,6 +246,16 @@ public class ExpenseServiceTests
             return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.ToList());
         }
 
+        public Task<IReadOnlyList<TaxExpense>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.ToList());
+        }
+
+        public Task<IReadOnlyList<TaxExpense>> GetAllForExportAsync(bool includeSoftDeleted, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.Where(x => includeSoftDeleted || !x.IsDeleted).ToList());
+        }
+
         public Task<TaxExpense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id && !x.IsDeleted));
@@ -286,6 +296,11 @@ public class ExpenseServiceTests
         }
 
         public Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Task<TaxExpense?> GetByIdForUpdateIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
         }

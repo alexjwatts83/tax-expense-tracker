@@ -22,6 +22,23 @@ public sealed class EfExpenseRepository : IExpenseRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<TaxExpense>> GetAllForExportAsync(
+        bool includeSoftDeleted,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.TaxExpenses
+            .AsNoTracking()
+            .Include(x => x.TaxExpenseTags)
+            .AsQueryable();
+
+        if (includeSoftDeleted)
+            query = query.IgnoreQueryFilters();
+
+        return await query
+            .OrderByDescending(x => x.Date)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<TaxExpense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.TaxExpenses
