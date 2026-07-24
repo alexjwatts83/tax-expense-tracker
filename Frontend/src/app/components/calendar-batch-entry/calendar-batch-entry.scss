@@ -1,12 +1,22 @@
+.calendar-page {
+	display: grid;
+	gap: 0.5rem;
+}
+
+.month-card mat-card-content,
+.grid-card mat-card-content {
+	padding: 0.65rem;
+}
+
 .month-card {
-	margin-bottom: 1rem;
+	margin-bottom: 0;
 }
 
 .month-toolbar {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 1rem;
+	gap: 0.45rem;
 	flex-wrap: wrap;
 }
 
@@ -24,179 +34,24 @@
 .calendar-week-grid {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
+	gap: 0.35rem;
 }
 
 .calendar-week-row {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(210px, 1fr));
-	gap: 0.75rem;
+	gap: 0.35rem;
 	align-items: stretch;
 }
 
-.calendar-day-cell {
-	padding: 0.75rem;
-	border: 1px solid #d0d5dd;
-	border-radius: 10px;
-	background-color: #ffffff;
-	display: flex;
-	flex-direction: column;
-	gap: 0.65rem;
-	min-height: 320px;
-	outline: none;
-}
-
-.today-row {
-	border-color: #7dd3fc;
-	box-shadow: inset 0 0 0 1px #e0f2fe;
-}
-
-.wfh-row {
-	background-color: #eff8ff;
-	border-color: #7cc2ff;
-}
-
-.office-row {
-	background-color: #ecfdf3;
-	border-color: #86efac;
-	box-shadow: inset 0 0 0 1px #bbf7d0;
-	--mdc-theme-primary: #15803d;
-	--mdc-radio-selected-icon-color: #15803d;
-	--mdc-radio-selected-focus-icon-color: #15803d;
-	--mdc-radio-selected-hover-icon-color: #15803d;
-	--mdc-radio-selected-pressed-icon-color: #166534;
-	--mdc-outlined-text-field-focus-outline-color: #15803d;
-	--mdc-outlined-text-field-caret-color: #15803d;
-}
-
-.annual-row {
-	background-color: #fff1f2;
-	border-color: #fda4af;
-}
-
-.sick-row {
-	background-color: #fecdd3;
-	border-color: #e11d48;
-}
-
-.pending-row {
-	outline: 3px solid #f59e0b;
-	outline-offset: -3px;
-}
-
-.calendar-day-cell mat-form-field {
-	width: 100%;
-}
-
 .empty-day-cell {
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	border: 1px dashed #d0d5dd;
+	border-radius: 10px;
 	background-color: #f8fafc;
-	border-style: dashed;
-	min-height: 320px;
-}
-
-.holiday-row {
-	background-color: #fff4ed;
-	border-color: #fdba74;
-}
-
-.date-cell {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
-}
-
-.date-heading {
-	display: flex;
-	align-items: center;
-	min-height: 40px;
-}
-
-.holiday-chip {
-	display: inline-flex;
-	width: fit-content;
-	padding: 0.2rem 0.5rem;
-	border-radius: 999px;
-	font-size: 0.76rem;
-	font-weight: 600;
-	background-color: #ffead5;
-	color: #9a3412;
-}
-
-.today-chip {
-	display: inline-flex;
-	width: fit-content;
-	padding: 0.2rem 0.5rem;
-	border-radius: 999px;
-	font-size: 0.74rem;
-	font-weight: 700;
-	background-color: #e0f2fe;
-	color: #0c4a6e;
-}
-
-.result-chip {
-	display: inline-flex;
-	width: fit-content;
-	padding: 0.1rem 0.45rem;
-	border-radius: 999px;
-	font-size: 0.72rem;
-	font-weight: 700;
-	text-transform: capitalize;
-}
-
-.result-chip.applied {
-	background-color: #dcfae6;
-	color: #166534;
-}
-
-.result-chip.failed {
-	background-color: #fee4e2;
-	color: #991b1b;
-}
-
-.result-chip.skipped {
-	background-color: #f2f4f7;
-	color: #344054;
-}
-
-.result-message {
-	font-size: 0.78rem;
-	color: #667085;
-}
-
-.status-cell {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-	padding-top: 0.2rem;
-}
-
-.status-label {
-	font-size: 0.78rem;
-	font-weight: 700;
-	color: #475467;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-}
-
-.status-radio-group {
-	display: flex;
-	gap: 0.75rem;
-	flex-wrap: wrap;
-}
-
-.status-disabled {
-	opacity: 0.75;
-}
-
-.hours-cell {
-	display: flex;
-	align-items: center;
-	min-height: 40px;
-}
-
-.hours-placeholder {
-	font-size: 0.85rem;
-	color: #667085;
+	box-sizing: border-box;
 }
 
 .action-bar {
@@ -207,8 +62,8 @@
 	justify-content: space-between;
 	align-items: center;
 	gap: 1rem;
-	margin-top: 1rem;
-	padding: 0.75rem;
+	margin-top: 0.35rem;
+	padding: 0.4rem;
 	border-top: 1px solid #d0d5dd;
 	background-color: #ffffff;
 	box-shadow: 0 -4px 12px rgb(16 24 40 / 10%);
@@ -221,7 +76,7 @@
 
 .action-status {
 	display: grid;
-	gap: 0.25rem;
+	gap: 0.15rem;
 }
 
 .loading {
@@ -251,7 +106,6 @@
 		min-width: 940px;
 	}
 
-	.calendar-day-cell,
 	.empty-day-cell {
 		min-height: 0;
 	}
@@ -270,22 +124,5 @@
 	.calendar-week-row {
 		grid-template-columns: repeat(5, minmax(165px, 1fr));
 		min-width: 860px;
-	}
-
-	.calendar-day-cell {
-		padding: 0.55rem;
-	}
-
-	.status-radio-group {
-		flex-direction: column;
-		gap: 0.2rem;
-	}
-
-	.status-label {
-		font-size: 0.72rem;
-	}
-
-	.hours-cell {
-		align-items: flex-start;
 	}
 }

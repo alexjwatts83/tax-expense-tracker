@@ -1,0 +1,236 @@
+:host {
+	display: block;
+	align-self: start;
+}
+
+.calendar-day-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 0.4rem;
+	min-height: 0;
+	border: 1px solid #d0d5dd;
+	border-radius: 10px;
+	background-color: #ffffff;
+	outline: none;
+}
+
+.calendar-day-cell mat-form-field {
+	width: 100%;
+}
+
+.entry-details {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 0.35rem;
+	flex-wrap: nowrap;
+}
+
+.entry-type-field {
+	flex: 2.4 1 0;
+	min-width: 0;
+}
+
+.today-row {
+	border-color: #7dd3fc;
+	box-shadow: inset 0 0 0 1px #e0f2fe;
+}
+
+.wfh-row {
+	border-color: #7cc2ff;
+	background-color: #eff8ff;
+}
+
+.office-row {
+	--mdc-theme-primary: #15803d;
+	--mdc-radio-selected-icon-color: #15803d;
+	--mdc-radio-selected-focus-icon-color: #15803d;
+	--mdc-radio-selected-hover-icon-color: #15803d;
+	--mdc-radio-selected-pressed-icon-color: #166534;
+	--mdc-outlined-text-field-focus-outline-color: #15803d;
+	--mdc-outlined-text-field-caret-color: #15803d;
+	border-color: #86efac;
+	background-color: #ecfdf3;
+	box-shadow: inset 0 0 0 1px #bbf7d0;
+}
+
+.annual-row {
+	border-color: #fda4af;
+	background-color: #fff1f2;
+}
+
+.sick-row {
+	border-color: #e11d48;
+	background-color: #fecdd3;
+}
+
+.pending-row {
+	outline: 3px solid #f59e0b;
+	outline-offset: -3px;
+}
+
+.date-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+.date-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.35rem;
+	min-height: 24px;
+}
+
+.week-wfh-button {
+	flex: 0 0 auto;
+	margin-left: auto;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	width: 32px;
+	height: 32px;
+}
+
+.week-wfh-button mat-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	background-color: #dbeafe;
+	color: #0c4a6e;
+	font-size: 22px;
+	width: 22px;
+	height: 22px;
+	padding: 5px;
+}
+
+.holiday-chip {
+	display: inline-flex;
+	width: fit-content;
+	padding: 0.2rem 0.5rem;
+	border-radius: 999px;
+	background-color: #ffead5;
+	color: #9a3412;
+	font-size: 0.76rem;
+	font-weight: 600;
+}
+
+.today-chip {
+	display: inline-flex;
+	width: fit-content;
+	padding: 0.2rem 0.5rem;
+	border-radius: 999px;
+	background-color: #e0f2fe;
+	color: #0c4a6e;
+	font-size: 0.74rem;
+	font-weight: 700;
+}
+
+.result-chip {
+	display: inline-flex;
+	width: fit-content;
+	padding: 0.1rem 0.45rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: capitalize;
+}
+
+.result-chip.applied {
+	background-color: #dcfae6;
+	color: #166534;
+}
+
+.result-chip.failed {
+	background-color: #fee4e2;
+	color: #991b1b;
+}
+
+.result-chip.skipped {
+	background-color: #f2f4f7;
+	color: #344054;
+}
+
+.result-message {
+	color: #667085;
+	font-size: 0.78rem;
+}
+
+.status-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	padding-top: 0.1rem;
+}
+
+.status-label {
+	color: #475467;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.status-radio-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+.status-radio-group .mdc-form-field {
+	--mdc-radio-state-layer-size: 16px;
+	margin: 0;
+	padding: 0;
+}
+
+.status-radio-group .mdc-radio {
+	--mat-radio-state-layer-size: 20px;
+	margin: 0;
+	padding: 0;
+}
+
+.status-radio-group .mdc-radio__background,
+.status-radio-group .mdc-radio__ripple,
+.status-radio-group .mdc-radio__native-control,
+.status-radio-group .mdc-radio__touch-target {
+	margin: 0;
+	padding: 0;
+}
+
+.status-disabled {
+	opacity: 0.75;
+}
+
+.hours-field {
+	flex: 0 0 5.5rem;
+	margin-top: 0;
+}
+
+.hours-field .mat-mdc-input-element {
+	text-align: right !important;
+}
+
+:host ::ng-deep .mdc-form-field,
+:host ::ng-deep .mdc-radio {
+	padding: 2px !important;
+	margin: 0 !important;
+}
+
+@media (max-width: 430px) {
+	.calendar-day-cell {
+		padding: 0.35rem;
+	}
+
+	.status-radio-group {
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+
+	.status-label {
+		font-size: 0.72rem;
+	}
+}
