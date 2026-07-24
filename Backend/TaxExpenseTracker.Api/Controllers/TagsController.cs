@@ -17,6 +17,7 @@ public class TagsController(ITagService tagService) : ControllerBase
         {
             Id = x.Id,
             Name = x.Name,
+            Color = x.Color,
             CreatedAt = x.CreatedAt
         });
 
@@ -37,6 +38,7 @@ public class TagsController(ITagService tagService) : ControllerBase
         {
             Id = tag.Id,
             Name = tag.Name,
+            Color = tag.Color,
             CreatedAt = tag.CreatedAt
         };
 
@@ -46,12 +48,13 @@ public class TagsController(ITagService tagService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TagDto>> Create(CreateTagDto request, CancellationToken cancellationToken)
     {
-        var tag = await tagService.CreateAsync(new CreateTagCommand(request.Name), cancellationToken);
+        var tag = await tagService.CreateAsync(new CreateTagCommand(request.Name, request.Color), cancellationToken);
 
         var response = new TagDto
         {
             Id = tag.Id,
             Name = tag.Name,
+            Color = tag.Color,
             CreatedAt = tag.CreatedAt
         };
 
@@ -61,7 +64,7 @@ public class TagsController(ITagService tagService) : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<TagDto>> Update(Guid id, CreateTagDto request, CancellationToken cancellationToken)
     {
-        var updated = await tagService.UpdateAsync(id, new UpdateTagCommand(request.Name), cancellationToken);
+        var updated = await tagService.UpdateAsync(id, new UpdateTagCommand(request.Name, request.Color), cancellationToken);
         if (!updated)
         {
             return NotFound();
@@ -77,6 +80,7 @@ public class TagsController(ITagService tagService) : ControllerBase
         {
             Id = tag.Id,
             Name = tag.Name,
+            Color = tag.Color,
             CreatedAt = tag.CreatedAt
         };
 

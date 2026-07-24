@@ -14,6 +14,7 @@ public class TagServiceTests
         var result = await service.CreateAsync(new CreateTagCommand("  Deductible  "));
 
         Assert.Equal("Deductible", result.Name);
+        Assert.Equal(Tag.DefaultColor, result.Color);
         Assert.Single(repository.Tags);
         Assert.True(repository.SaveChangesCalled);
     }
@@ -44,7 +45,7 @@ public class TagServiceTests
     public async Task RestoreAsync_RestoresTag_WhenSoftDeleted()
     {
         var repository = new InMemoryTagRepository();
-        var tag = Tag.Create("Equipment", TestTime.TimeProvider);
+        var tag = Tag.Create("Equipment", null, TestTime.TimeProvider);
         tag.SoftDelete(TestTime.TimeProvider);
         repository.Tags.Add(tag);
 
@@ -61,15 +62,16 @@ public class TagServiceTests
     public async Task UpdateAsync_UpdatesTag_WhenExists()
     {
         var repository = new InMemoryTagRepository();
-        var tag = Tag.Create("Old", TestTime.TimeProvider);
+        var tag = Tag.Create("Old", null, TestTime.TimeProvider);
         repository.Tags.Add(tag);
 
         var service = new TagService(repository, TestTime.TimeProvider);
 
-        var result = await service.UpdateAsync(tag.Id, new UpdateTagCommand("  New  "));
+        var result = await service.UpdateAsync(tag.Id, new UpdateTagCommand("  New  ", "#112233"));
 
         Assert.True(result);
         Assert.Equal("New", tag.Name);
+        Assert.Equal("#112233", tag.Color);
         Assert.True(repository.SaveChangesCalled);
     }
 

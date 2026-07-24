@@ -34,7 +34,7 @@ public class DomainEntityDefaultsTests
     [Fact]
     public void Tag_Create_Throws_WhenNameMissing()
     {
-        Assert.Throws<ArgumentException>(() => Tag.Create("", TestTime.TimeProvider));
+        Assert.Throws<ArgumentException>(() => Tag.Create("", null, TestTime.TimeProvider));
     }
 
     [Fact]

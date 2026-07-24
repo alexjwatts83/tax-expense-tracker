@@ -8,6 +8,7 @@ export interface Tracker {
 export interface Tag {
   id: string;
   name: string;
+  color: string;
   createdAt: string;
 }
 
@@ -54,6 +55,7 @@ export interface CreateTrackerRequest {
 
 export interface CreateTagRequest {
   name: string;
+  color?: string;
 }
 
 export interface CreateBankRequest {

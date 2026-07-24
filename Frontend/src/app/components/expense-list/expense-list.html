@@ -186,7 +186,7 @@
 							} @else {
 								<mat-chip-set>
 									@for (tag of expense.tags; track tag.id) {
-										<mat-chip>{{ tag.name }}</mat-chip>
+										<mat-chip class="expense-tag-chip" [ngStyle]="getTagChipStyles(tag.color)">{{ tag.name }}</mat-chip>
 									}
 								</mat-chip-set>
 							}

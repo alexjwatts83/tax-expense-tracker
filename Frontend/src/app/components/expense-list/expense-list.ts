@@ -388,6 +388,20 @@ export class ExpenseList implements OnInit {
     return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
   }
 
+  getTagChipStyles(color: string | null | undefined): Record<string, string> {
+    const resolvedColor = this.normalizeHexColor(color);
+
+    return {
+      'background-color': resolvedColor,
+      color: '#FFFFFF',
+      '--mat-chip-label-text-color': '#FFFFFF',
+      '--mdc-chip-label-text-color': '#FFFFFF',
+      '--mdc-chip-elevated-label-text-color': '#FFFFFF',
+      '--mdc-chip-outline-label-text-color': '#FFFFFF',
+      border: '1px solid rgb(0 0 0 / 10%)',
+    };
+  }
+
   private updatePagedExpenses(): void {
     const start = (this.page - 1) * this.pageSize;
     const end = start + this.pageSize;
@@ -438,4 +452,18 @@ export class ExpenseList implements OnInit {
       }),
     );
   }
+
+  private normalizeHexColor(value: string | null | undefined): string {
+    if (!value) {
+      return '#CBD5E1';
+    }
+
+    const trimmed = value.trim();
+    if (!/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+      return '#CBD5E1';
+    }
+
+    return trimmed;
+  }
+
 }

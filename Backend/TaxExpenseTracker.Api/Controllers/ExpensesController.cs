@@ -178,6 +178,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
                 {
                     Id = x.Id,
                     Name = x.Name,
+                    Color = x.Color,
                     CreatedAt = x.CreatedAt
                 })
                 .ToList(),

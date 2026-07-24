@@ -4,7 +4,7 @@ public sealed record ExpenseSourceDto(Guid Id, string Name, string? Description,
 
 public sealed record ExpenseBankDto(Guid Id, string Name, DateTime CreatedAt);
 
-public sealed record ExpenseTagDto(Guid Id, string Name, DateTime CreatedAt);
+public sealed record ExpenseTagDto(Guid Id, string Name, string Color, DateTime CreatedAt);
 
 public sealed record ExpenseReadDto(
     Guid Id,

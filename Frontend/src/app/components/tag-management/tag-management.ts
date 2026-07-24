@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -19,6 +20,7 @@ import { TagService } from '../../services/tag';
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -33,10 +35,11 @@ export class TagManagement implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly displayedColumns: string[] = ['name', 'createdAt', 'actions'];
+  readonly displayedColumns: string[] = ['name', 'color', 'createdAt', 'actions'];
 
   readonly tagForm = this.formBuilder.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
+    color: ['#CBD5E1', [Validators.required]],
   });
 
   tags: Tag[] = [];
@@ -81,15 +84,19 @@ export class TagManagement implements OnInit {
     }
 
     const name = this.tagForm.value.name?.trim() ?? '';
+    const color = this.tagForm.value.color ?? '#CBD5E1';
 
     this.isSubmitting = true;
     this.errorMessage = '';
     this.infoMessage = '';
 
-    this.tagService.create({ name }).subscribe({
+    this.tagService.create({ name, color }).subscribe({
       next: (created) => {
         this.tags = [created, ...this.tags];
-        this.tagForm.reset();
+        this.tagForm.reset({
+          name: '',
+          color: '#CBD5E1',
+        });
         this.lastDeletedTag = null;
         this.infoMessage = 'Tag created.';
         this.isSubmitting = false;
@@ -142,4 +149,32 @@ export class TagManagement implements OnInit {
       },
     });
   }
+
+  getTagChipStyles(color: string | null | undefined): Record<string, string> {
+    const resolvedColor = this.normalizeHexColor(color);
+
+    return {
+      'background-color': resolvedColor,
+      color: '#FFFFFF',
+      '--mat-chip-label-text-color': '#FFFFFF',
+      '--mdc-chip-label-text-color': '#FFFFFF',
+      '--mdc-chip-elevated-label-text-color': '#FFFFFF',
+      '--mdc-chip-outline-label-text-color': '#FFFFFF',
+      border: '1px solid rgb(0 0 0 / 10%)',
+    };
+  }
+
+  private normalizeHexColor(value: string | null | undefined): string {
+    if (!value) {
+      return '#CBD5E1';
+    }
+
+    const trimmed = value.trim();
+    if (!/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+      return '#CBD5E1';
+    }
+
+    return trimmed;
+  }
+
 }

@@ -278,7 +278,7 @@ public class ExpenseServiceTests
             {
                 foreach (var tag in expense.TaxExpenseTags.Where(x => x.Tag is null))
                 {
-                    tag.Tag = Tag.Create("Deductible", TestTime.TimeProvider);
+                    tag.Tag = Tag.Create("Deductible", null, TestTime.TimeProvider);
                 }
             }
 

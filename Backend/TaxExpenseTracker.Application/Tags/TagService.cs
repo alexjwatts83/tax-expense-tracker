@@ -19,7 +19,7 @@ public sealed class TagService : ITagService
 
         return tags
             .OrderBy(t => t.Name)
-            .Select(t => new TagReadDto(t.Id, t.Name, t.CreatedAt))
+            .Select(t => new TagReadDto(t.Id, t.Name, t.Color, t.CreatedAt))
             .ToList();
     }
 
@@ -29,17 +29,17 @@ public sealed class TagService : ITagService
 
         return tag is null
             ? null
-            : new TagReadDto(tag.Id, tag.Name, tag.CreatedAt);
+            : new TagReadDto(tag.Id, tag.Name, tag.Color, tag.CreatedAt);
     }
 
     public async Task<TagReadDto> CreateAsync(CreateTagCommand command, CancellationToken cancellationToken = default)
     {
-        var tag = Tag.Create(command.Name, _timeProvider);
+        var tag = Tag.Create(command.Name, command.Color, _timeProvider);
 
         await _tagRepository.AddAsync(tag, cancellationToken);
         await _tagRepository.SaveChangesAsync(cancellationToken);
 
-        return new TagReadDto(tag.Id, tag.Name, tag.CreatedAt);
+        return new TagReadDto(tag.Id, tag.Name, tag.Color, tag.CreatedAt);
     }
 
     public async Task<bool> UpdateAsync(Guid id, UpdateTagCommand command, CancellationToken cancellationToken = default)
@@ -51,6 +51,7 @@ public sealed class TagService : ITagService
         }
 
         tag.Rename(command.Name);
+        tag.SetColor(command.Color);
         await _tagRepository.SaveChangesAsync(cancellationToken);
 
         return true;

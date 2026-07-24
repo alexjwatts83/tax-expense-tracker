@@ -177,7 +177,7 @@ public sealed class ExpenseService : IExpenseService
                 : new ExpenseSourceDto(expense.Source.Id, expense.Source.Name, expense.Source.Description, expense.Source.CreatedAt),
             expense.TaxExpenseTags
                 .Where(x => x.Tag is not null)
-                .Select(x => new ExpenseTagDto(x.Tag!.Id, x.Tag.Name, x.Tag.CreatedAt))
+                .Select(x => new ExpenseTagDto(x.Tag!.Id, x.Tag.Name, x.Tag.Color, x.Tag.CreatedAt))
                 .ToList(),
             expense.CreatedAt,
             expense.UpdatedAt);
