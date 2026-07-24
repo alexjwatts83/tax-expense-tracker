@@ -202,41 +202,79 @@ Notes:
 
 ### Phase 1: Contracts and Application Layer
 
-- [ ] Add DTO contracts in Application layer for:
+- [x] Add DTO contracts in Application layer for:
   - Export envelope
   - Per-entity payloads
   - Import request options
   - Import result summary
-- [ ] Add `IDataTransferService` abstraction.
-- [ ] Implement `DataTransferService` with:
+- [x] Add `IDataTransferService` abstraction.
+- [~] Implement `DataTransferService` with:
   - Reference-data export builder
   - Reference-data import orchestration
   - Separate transactional import orchestration
   - Validation and dry-run execution
 
+Current implementation note:
+
+- Reference-data export is implemented.
+- Reference-data import is implemented for `upsert`, `insertOnly`, and `dryRun`.
+- Transactional imports (`expenses`, `work-locations`, `leave`) are implemented for `upsert`, `insertOnly`, and `dryRun`.
+- `replace` currently behaves as upsert with warning; delete synchronization is pending.
+
 ### Phase 2: Infrastructure and Persistence
 
-- [ ] Add repository helpers for bulk read/write patterns.
-- [ ] Add transaction support wrapping full import operations.
-- [ ] Implement efficient lookup dictionaries keyed by ID for upsert.
-- [ ] Keep EF tracking/memory pressure low (batching + no-tracking reads for export).
+- [~] Add repository helpers for bulk read/write patterns.
+- [x] Add transaction support wrapping full import operations.
+- [~] Implement efficient lookup dictionaries keyed by ID for upsert.
+- [~] Keep EF tracking/memory pressure low (batching + no-tracking reads for export).
+
+Current implementation note:
+
+- Added repository support for expense update including deleted rows.
+- Import logic uses per-entity lookups and staged processing.
+- Import operations now execute under explicit transaction boundaries when `dryRun=false`.
+- Bulk optimization work is still pending.
 
 ### Phase 3: API Endpoints
 
-- [ ] Add `DataTransferController` in API project.
-- [ ] Add endpoints for:
+- [x] Add `DataTransferController` in API project.
+- [x] Add endpoints for:
   - Full reference-data export/import
   - Per-entity export/import
   - Dedicated imports for expenses/work/leave
-- [ ] Stream large export response (`IAsyncEnumerable`/stream writer pattern).
-- [ ] Add request-size and timeout safeguards.
+- [x] Stream large export response (`IAsyncEnumerable`/stream writer pattern).
+- [x] Add request-size and timeout safeguards.
+
+Current implementation note:
+
+- Implemented endpoints:
+  - `GET /api/data-transfer/export`
+  - `GET /api/data-transfer/export/{entityName}`
+  - `POST /api/data-transfer/import`
+  - `POST /api/data-transfer/import/{entityName}`
+  - `POST /api/data-transfer/import/expenses`
+  - `POST /api/data-transfer/import/work-locations`
+  - `POST /api/data-transfer/import/leave`
+- Request-size limits are in place for import endpoints.
+- Import timeout safeguard is in place (request returns HTTP 408 on timeout).
+- Per-entity export/import route shape is implemented.
+- Per-entity routes now support entity-specific payload shapes (for example arrays for `trackers`, `tags`, `banks`, `public-holidays`, `expense-tags`, `work-locations`, and `leave`).
+- Export endpoints stream JSON payloads directly to the response body.
 
 ### Phase 4: Safety and Observability
 
-- [ ] Add structured logs for import/export start/end and counts.
-- [ ] Add correlation ID in responses for troubleshooting.
-- [ ] Add explicit warning/error codes in import result payload.
-- [ ] Optional: feature flag or environment guard for import endpoints in Production.
+- [x] Add structured logs for import/export start/end and counts.
+- [x] Add correlation ID in responses for troubleshooting.
+- [x] Add explicit warning/error codes in import result payload.
+- [x] Optional: feature flag or environment guard for import endpoints in Production.
+
+Current implementation note:
+
+- Correlation ID middleware adds `X-Correlation-ID` header and sets `HttpContext.TraceIdentifier`.
+- API problem responses and import responses include correlation IDs.
+- Import/export controllers emit structured logs with endpoint, mode, dry-run, counts, and correlation ID.
+- Import result payload includes explicit warning/error codes per entity.
+- Data-transfer endpoints are blocked in Production unless `Features:EnableDataTransferEndpoints=true`.
 
 ## Frontend Implementation Plan
 
@@ -265,17 +303,6 @@ Notes:
 - [ ] Dependency ordering and FK validation.
 - [ ] Dry-run returns expected report with no DB mutation.
 
-### Integration Tests
-
-- [ ] Export (reference-data) returns valid payload with expected sections.
-- [ ] Import (reference-data) roundtrip test:
-  - Seed reference data -> export -> clear reference data -> import -> compare counts/key fields.
-- [ ] Separate expenses import succeeds when references exist.
-- [ ] Separate work entries import succeeds.
-- [ ] Separate leave entries import succeeds.
-- [ ] Import rejects invalid foreign keys.
-- [ ] Import handles duplicate IDs according to mode.
-
 ### Manual Tests
 
 - [ ] Large export/download in browser.
@@ -292,7 +319,7 @@ Notes:
 ## Rollout Plan
 
 1. Implement backend export/import services and endpoints behind feature flag.
-2. Add tests and run integration suite.
+2. Add tests and run verification.
 3. Add frontend admin page with dry-run first workflow.
 4. Enable in non-prod and run roundtrip verification with realistic dataset.
 5. Enable in prod with guarded access and monitoring.
@@ -319,3 +346,20 @@ Notes:
 - Separate leave entries import succeeds.
 - Dry-run mode validates and returns issues without modifying data.
 - Roundtrip (reference export -> clean reference data -> import) restores functional reference relationships.
+
+## Current Implementation Status Snapshot
+
+- Completed:
+  - API/controller scaffolding
+  - Reference export endpoint
+  - Per-entity export/import route shape
+  - Reference import execution (`upsert`, `insertOnly`, `dryRun`)
+  - Transactional import execution for expenses/work/leave (`upsert`, `insertOnly`, `dryRun`)
+  - Explicit transaction boundary for non-dry-run imports
+  - Phase 4 safety/observability items
+- Pending:
+  - Per-entity export/import route shape
+  - True `replace` delete synchronization
+  - Explicit transaction boundary across full import runs
+  - Streamed export response
+  - Unit test coverage

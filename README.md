@@ -45,6 +45,7 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Product roadmap and backlog tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md)
 - Leave type rollout tracked in [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md)
 - Azure deployment tracked in [plans/AZURE_DEPLOYMENT_TRACKER.md](plans/AZURE_DEPLOYMENT_TRACKER.md)
+- JSON import/export approach tracked in [plans/JSON_IMPORT_EXPORT_PLAN.md](plans/JSON_IMPORT_EXPORT_PLAN.md)
 
 ## Tech Stack
 
@@ -179,6 +180,18 @@ Current filter query params:
 - price
 - sourceId
 - tagIds (comma-separated)
+
+### Planned Data Transfer (JSON)
+
+Planned JSON data-transfer functionality is not yet implemented and is tracked in [plans/JSON_IMPORT_EXPORT_PLAN.md](plans/JSON_IMPORT_EXPORT_PLAN.md).
+
+Planned shape:
+
+- Big JSON export/import for reference data only: Trackers, Tags, Banks, Public Holidays.
+- Separate JSON imports for transactional data:
+	- Expenses (including expense-tag links)
+	- Work Location entries
+	- Leave entries
 
 ## Frontend Routes
 

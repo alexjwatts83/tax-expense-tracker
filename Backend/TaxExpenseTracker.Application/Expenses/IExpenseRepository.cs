@@ -8,6 +8,7 @@ public interface IExpenseRepository : ISoftDeleteRepository<TaxExpense>
     Task<PagedResult<TaxExpense>> GetPagedWithDetailsAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default);
     Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default);
     Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<TaxExpense?> GetByIdForUpdateIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default);
     Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default);
     Task<bool> BankExistsAsync(Guid bankId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Guid>> GetExistingTagIdsAsync(IReadOnlyList<Guid> tagIds, CancellationToken cancellationToken = default);

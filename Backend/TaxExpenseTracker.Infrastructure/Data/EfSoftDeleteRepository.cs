@@ -22,6 +22,14 @@ public abstract class EfSoftDeleteRepository<T> : ISoftDeleteRepository<T> where
             .ToListAsync(cancellationToken);
     }
 
+    public virtual async Task<IReadOnlyList<T>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public virtual Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return DbSet.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);

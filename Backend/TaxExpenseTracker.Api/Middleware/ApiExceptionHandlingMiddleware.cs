@@ -43,6 +43,8 @@ public sealed class ApiExceptionHandlingMiddleware
             Detail = detail,
         };
 
+        problem.Extensions["correlationId"] = context.TraceIdentifier;
+
         await context.Response.WriteAsJsonAsync(problem);
     }
 }

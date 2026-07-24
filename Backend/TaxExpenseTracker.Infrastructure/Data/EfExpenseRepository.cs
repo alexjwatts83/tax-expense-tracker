@@ -14,6 +14,14 @@ public sealed class EfExpenseRepository : IExpenseRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<TaxExpense>> GetAllIncludingDeletedAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.TaxExpenses
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<TaxExpense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.TaxExpenses
@@ -60,6 +68,14 @@ public sealed class EfExpenseRepository : IExpenseRepository
     public async Task<TaxExpense?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.TaxExpenses
+            .Include(x => x.TaxExpenseTags)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public async Task<TaxExpense?> GetByIdForUpdateIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.TaxExpenses
+            .IgnoreQueryFilters()
             .Include(x => x.TaxExpenseTags)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }

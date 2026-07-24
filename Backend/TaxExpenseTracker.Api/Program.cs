@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Banks;
+using TaxExpenseTracker.Application.DataTransfer;
 using TaxExpenseTracker.Application.Expenses;
 using TaxExpenseTracker.Application.Leave;
 using TaxExpenseTracker.Application.PublicHolidays;
@@ -70,6 +71,8 @@ builder.Services.AddScoped<ILeaveRepository, EfLeaveRepository>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
 builder.Services.AddScoped<IPublicHolidayRepository, EfPublicHolidayRepository>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
+builder.Services.AddScoped<IDataTransferTransactionCoordinator, EfDataTransferTransactionCoordinator>();
+builder.Services.AddScoped<IDataTransferService, DataTransferService>();
 
 var app = builder.Build();
 
@@ -80,6 +83,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ApiExceptionHandlingMiddleware>();
 
 using (var scope = app.Services.CreateScope())
