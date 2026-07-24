@@ -26,7 +26,7 @@
       <div class="empty-message">{{ noSummaryMessage }}</div>
     } @else if (summary) {
       <div class="summary-grid">
-        <p class="period-row"><strong>Period:</strong> {{ summary.fromDate | date: 'mediumDate' }} - {{ summary.toDate | date: 'mediumDate' }}</p>
+        <p class="period-row"><strong>Period:</strong> {{ summary.fromDate | standardDateDisplay }} - {{ summary.toDate | standardDateDisplay }}</p>
         <p><strong>Total Hours:</strong> {{ summary.totalHours }}</p>
         <p><strong>Total Days:</strong> {{ summary.totalDays }}</p>
         <p><strong>Entries:</strong> {{ summary.entryCount }}</p>
@@ -37,7 +37,7 @@
           <h3>Holiday Markers</h3>
           <ul>
             @for (holiday of summary.holidays; track holiday.date + holiday.name) {
-              <li>{{ holiday.date | date: 'mediumDate' }} - {{ holiday.name }}</li>
+              <li>{{ holiday.date | standardDateDisplay }} - {{ holiday.name }}</li>
             }
           </ul>
         </div>

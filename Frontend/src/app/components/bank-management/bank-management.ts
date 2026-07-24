@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { Bank } from '../../models/api.models';
 import { BankService } from '../../services/bank';
+import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 
 @Component({
   selector: 'app-bank-management',
@@ -24,6 +25,7 @@ import { BankService } from '../../services/bank';
     MatInputModule,
     MatProgressSpinnerModule,
     MatTableModule,
+    StandardDateDisplayPipe,
   ],
   templateUrl: './bank-management.html',
   styleUrl: './bank-management.scss',

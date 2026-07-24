@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { finalize, take } from 'rxjs';
 import { DayEntrySummary, DayEntryType, WorkLocationEntry, WorkLocationType } from '../../models/api.models';
 import { WorkLocationService } from '../../services/work-location';
 import { DayEntrySummaryCardComponent } from '../../shared/day-entry-summary-card.component';
+import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 import { toLocalDateInputValue } from '../../utils/date';
@@ -21,7 +22,7 @@ import { toLocalDateInputValue } from '../../utils/date';
   selector: 'app-work-location-management',
   imports: [
     CommonModule,
-    DatePipe,
+    StandardDateDisplayPipe,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,

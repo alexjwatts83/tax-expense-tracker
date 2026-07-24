@@ -9,7 +9,7 @@
 	[class.pending-row]="isPendingRow">
 	<div class="date-cell">
 		<div class="date-heading">
-			<strong [attr.title]="dayCell.dateIso">{{ dayCell.dayLabel }}</strong>
+			<strong [attr.title]="dayCell.dateIso">{{ dayCell.dateIso | calendarBatchDateDisplay }}</strong>
 			@if (showWeekWfhAction) {
 				<button mat-icon-button class="week-wfh-button" type="button" title="Set all non-holiday days in this week to WFH" aria-label="Set all non-holiday days in this week to WFH" (click)="weekWfhClick.emit()">
 					<mat-icon>arrow_circle_right</mat-icon>

@@ -115,7 +115,7 @@
 				<table mat-table [dataSource]="pagedEntries" class="entry-table">
 					<ng-container matColumnDef="leaveDate">
 						<th mat-header-cell *matHeaderCellDef>Date</th>
-						<td mat-cell *matCellDef="let entry">{{ entry.leaveDate | date: 'mediumDate' }}</td>
+						<td mat-cell *matCellDef="let entry">{{ entry.leaveDate | standardDateDisplay }}</td>
 					</ng-container>
 
 					<ng-container matColumnDef="entryType">

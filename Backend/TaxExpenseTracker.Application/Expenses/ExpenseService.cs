@@ -98,8 +98,22 @@ public sealed class ExpenseService : IExpenseService
             command.SourceId,
             _timeProvider);
 
-        expense.TaxExpenseTags.Clear();
-        foreach (var tagId in validTagIds)
+        var desiredTagIds = validTagIds.ToHashSet();
+
+        var tagsToRemove = expense.TaxExpenseTags
+            .Where(x => !desiredTagIds.Contains(x.TagId))
+            .ToList();
+
+        foreach (var tag in tagsToRemove)
+        {
+            expense.TaxExpenseTags.Remove(tag);
+        }
+
+        var existingTagIds = expense.TaxExpenseTags
+            .Select(x => x.TagId)
+            .ToHashSet();
+
+        foreach (var tagId in desiredTagIds.Where(tagId => !existingTagIds.Contains(tagId)))
         {
             expense.TaxExpenseTags.Add(TaxExpenseTag.Create(expense.Id, tagId));
         }

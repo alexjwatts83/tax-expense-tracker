@@ -56,7 +56,7 @@
 
 					<ng-container matColumnDef="createdAt">
 						<th mat-header-cell *matHeaderCellDef>Created</th>
-						<td mat-cell *matCellDef="let tracker">{{ tracker.createdAt | date: 'mediumDate' }}</td>
+						<td mat-cell *matCellDef="let tracker">{{ tracker.createdAt | standardDateDisplay }}</td>
 					</ng-container>
 
 					<ng-container matColumnDef="actions">

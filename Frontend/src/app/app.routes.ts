@@ -20,7 +20,7 @@ export const routes: Routes = [
 	{
 		path: 'expenses/:id',
 		loadComponent: () =>
-			import('./components/expense-details/expense-details').then((m) => m.ExpenseDetails),
+			import('./components/expense-form/expense-form').then((m) => m.ExpenseForm),
 	},
 	{
 		path: 'time-tracking',

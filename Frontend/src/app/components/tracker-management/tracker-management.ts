@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { Tracker } from '../../models/api.models';
 import { TrackerService } from '../../services/tracker';
+import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 
 @Component({
   selector: 'app-tracker-management',
@@ -24,6 +25,7 @@ import { TrackerService } from '../../services/tracker';
     MatInputModule,
     MatProgressSpinnerModule,
     MatTableModule,
+    StandardDateDisplayPipe,
   ],
   templateUrl: './tracker-management.html',
   styleUrl: './tracker-management.scss',

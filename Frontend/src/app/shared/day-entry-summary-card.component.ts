@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { DayEntrySummary } from '../models/api.models';
+import { StandardDateDisplayPipe } from './standard-date-display.pipe';
 import { DateInputDirective } from './date-input.directive';
 import { DatePickerToggleComponent } from './date-picker-toggle.component';
 
@@ -15,7 +16,7 @@ import { DatePickerToggleComponent } from './date-picker-toggle.component';
   standalone: true,
   imports: [
     CommonModule,
-    DatePipe,
+    StandardDateDisplayPipe,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,

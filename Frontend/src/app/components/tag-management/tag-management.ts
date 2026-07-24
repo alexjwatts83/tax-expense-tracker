@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { Tag } from '../../models/api.models';
 import { TagService } from '../../services/tag';
+import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 
 @Component({
   selector: 'app-tag-management',
@@ -26,6 +27,7 @@ import { TagService } from '../../services/tag';
     MatInputModule,
     MatProgressSpinnerModule,
     MatTableModule,
+    StandardDateDisplayPipe,
   ],
   templateUrl: './tag-management.html',
   styleUrl: './tag-management.scss',

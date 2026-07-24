@@ -19,6 +19,15 @@
 		<mat-card-content>
 			<form [formGroup]="createForm" class="filter-grid" (ngSubmit)="createExpenseInline()">
 				<mat-form-field>
+					<mat-label>Date</mat-label>
+					<input #createDateInput="appDateInput" appDateInput matInput type="date" formControlName="date" />
+					<app-date-picker-toggle matSuffix [for]="createDateInput" ariaLabel="Open add expense date calendar"></app-date-picker-toggle>
+					@if (createForm.controls.date.hasError('required')) {
+						<mat-error>Date is required.</mat-error>
+					}
+				</mat-form-field>
+
+				<mat-form-field>
 					<mat-label>Tracker</mat-label>
 					<mat-select formControlName="sourceId">
 						@for (tracker of trackers; track tracker.id) {
@@ -33,15 +42,6 @@
 				<mat-form-field>
 					<mat-label>Description</mat-label>
 					<input matInput formControlName="description" />
-				</mat-form-field>
-
-				<mat-form-field>
-					<mat-label>Date</mat-label>
-					<input #createDateInput="appDateInput" appDateInput matInput type="date" formControlName="date" />
-					<app-date-picker-toggle matSuffix [for]="createDateInput" ariaLabel="Open add expense date calendar"></app-date-picker-toggle>
-					@if (createForm.controls.date.hasError('required')) {
-						<mat-error>Date is required.</mat-error>
-					}
 				</mat-form-field>
 
 				<mat-form-field>
@@ -121,7 +121,7 @@
 								</mat-form-field>
 							</div>
 						</th>
-						<td mat-cell *matCellDef="let expense">{{ expense.date | date: 'mediumDate' }}</td>
+						<td mat-cell *matCellDef="let expense">{{ expense.date | standardDateDisplay }}</td>
 					</ng-container>
 
 					<ng-container matColumnDef="bank">
@@ -160,7 +160,14 @@
 								</mat-form-field>
 							</div>
 						</th>
-						<td mat-cell *matCellDef="let expense">{{ expense.source?.name || '-' }}</td>
+						<td mat-cell *matCellDef="let expense">
+							{{ expense.source?.name || '-' }}
+						</td>
+					</ng-container>
+
+					<ng-container matColumnDef="description">
+						<th mat-header-cell *matHeaderCellDef>Description</th>
+						<td mat-cell *matCellDef="let expense">{{ expense.description || '-' }}</td>
 					</ng-container>
 
 					<ng-container matColumnDef="tags">
@@ -207,6 +214,9 @@
 							</div>
 						</th>
 						<td mat-cell *matCellDef="let expense">
+							<a mat-icon-button color="primary" [routerLink]="['/expenses', expense.id]" aria-label="Edit expense">
+								<mat-icon>edit</mat-icon>
+							</a>
 							<button mat-icon-button color="warn" (click)="softDeleteExpense(expense.id)" aria-label="Delete expense">
 								<mat-icon>delete</mat-icon>
 							</button>

@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { PublicHoliday } from '../../models/api.models';
 import { PublicHolidayService } from '../../services/public-holiday';
+import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 
@@ -19,7 +20,7 @@ import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.compo
   selector: 'app-public-holiday-management',
   imports: [
     CommonModule,
-    DatePipe,
+    StandardDateDisplayPipe,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,

@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { Router } from '@angular/router';
-import { forkJoin, of, switchMap } from 'rxjs';
-import { Bank, Tag, Tracker } from '../../models/api.models';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize, forkJoin, of, switchMap, take } from 'rxjs';
+import { Bank, Expense, Tag, Tracker } from '../../models/api.models';
 import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
 import { TagService } from '../../services/tag';
@@ -24,8 +25,10 @@ import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.compo
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    MatProgressSpinnerModule,
     MatSelectModule,
     ReactiveFormsModule,
+    RouterLink,
     DateInputDirective,
     DatePickerToggleComponent,
   ],
@@ -33,11 +36,13 @@ import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.compo
   styleUrl: './expense-form.scss',
 })
 export class ExpenseForm implements OnInit {
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly formBuilder = inject(FormBuilder);
   private readonly expenseService = inject(ExpenseService);
   private readonly bankService = inject(BankService);
   private readonly trackerService = inject(TrackerService);
   private readonly tagService = inject(TagService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly form: FormGroup;
@@ -45,8 +50,11 @@ export class ExpenseForm implements OnInit {
   trackers: Tracker[] = [];
   tags: Tag[] = [];
   isLoadingLookups = false;
+  isLoadingExpense = false;
   isSubmitting = false;
   errorMessage = '';
+  isEditMode = false;
+  private expenseId: string | null = null;
 
   constructor() {
     this.form = this.formBuilder.group({
@@ -62,6 +70,12 @@ export class ExpenseForm implements OnInit {
 
   ngOnInit(): void {
     this.loadLookups();
+    this.expenseId = this.route.snapshot.paramMap.get('id');
+    this.isEditMode = !!this.expenseId;
+
+    if (this.expenseId) {
+      this.loadExpense(this.expenseId);
+    }
   }
 
   loadLookups(): void {
@@ -78,12 +92,38 @@ export class ExpenseForm implements OnInit {
         this.trackers = trackers;
         this.tags = tags;
         this.isLoadingLookups = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Unable to load lookup data.';
         this.isLoadingLookups = false;
+        this.cdr.detectChanges();
       },
     });
+  }
+
+  loadExpense(id: string): void {
+    this.isLoadingExpense = true;
+    this.errorMessage = '';
+
+    this.expenseService
+      .getById(id)
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.isLoadingExpense = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (expense) => {
+          this.patchExpense(expense);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to load expense.';
+        },
+      });
   }
 
   submit(): void {
@@ -111,7 +151,7 @@ export class ExpenseForm implements OnInit {
             tagIds,
           };
 
-          return this.expenseService.create(payload);
+          return this.expenseId ? this.expenseService.update(this.expenseId, payload) : this.expenseService.create(payload);
         }),
       )
       .subscribe({
@@ -188,5 +228,17 @@ export class ExpenseForm implements OnInit {
     const selectedTagIds = (this.form.value.tagIds ?? []) as string[];
     const manualTagNames = this.parseManualTags(this.form.value.manualTags);
     return this.resolveTagIds(selectedTagIds, manualTagNames);
+  }
+
+  private patchExpense(expense: Expense): void {
+    this.form.patchValue({
+      description: expense.description,
+      date: expense.date?.slice(0, 10) ?? '',
+      bankId: expense.bankId,
+      price: expense.price,
+      sourceId: expense.sourceId,
+      tagIds: expense.tags.map((tag) => tag.id),
+      manualTags: '',
+    });
   }
 }

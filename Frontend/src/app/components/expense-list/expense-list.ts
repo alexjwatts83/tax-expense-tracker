@@ -1,4 +1,4 @@
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,12 +11,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import { finalize, forkJoin, of, switchMap, take, timeout } from 'rxjs';
 import { Bank, Expense, Tag, Tracker } from '../../models/api.models';
 import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
 import { TagService } from '../../services/tag';
 import { TrackerService } from '../../services/tracker';
+import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 
@@ -25,7 +27,7 @@ import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.compo
   imports: [
     CommonModule,
     CurrencyPipe,
-    DatePipe,
+    StandardDateDisplayPipe,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
@@ -37,6 +39,7 @@ import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.compo
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
+    RouterLink,
     DateInputDirective,
     DatePickerToggleComponent,
   ],
@@ -51,7 +54,7 @@ export class ExpenseList implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly displayedColumns = ['date', 'bank', 'price', 'tracker', 'tags', 'actions'];
+  readonly displayedColumns = ['date', 'tracker', 'description', 'bank', 'price', 'tags', 'actions'];
   readonly pageSizes = [10, 20, 50];
 
   readonly filterForm = this.formBuilder.group({

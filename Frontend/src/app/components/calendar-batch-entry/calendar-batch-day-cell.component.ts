@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { DayEntryType } from '../../models/api.models';
+import { CalendarBatchDateDisplayPipe } from '../../shared/calendar-batch-date-display.pipe';
 
 type DayCategory = 'none' | 'wfh' | 'office' | 'annual' | 'sick';
 
@@ -34,7 +35,7 @@ interface CalendarDayRowVm {
 @Component({
   selector: 'app-calendar-batch-day-cell',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatIconModule, MatInputModule, MatRadioModule, MatSelectModule],
+  imports: [CommonModule, FormsModule, MatFormFieldModule, MatIconModule, MatInputModule, MatRadioModule, MatSelectModule, CalendarBatchDateDisplayPipe],
   templateUrl: './calendar-batch-day-cell.component.html',
   styleUrl: './calendar-batch-day-cell.component.scss',
 })

@@ -1,13 +1,18 @@
 <section class="page">
-	<h1>Create Expense</h1>
+	<h1>{{ isEditMode ? 'Edit Expense' : 'Create Expense' }}</h1>
 
 	@if (errorMessage) {
 		<p class="error-message">{{ errorMessage }}</p>
 	}
 
-	<mat-card>
-		<mat-card-content>
-			<form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+	@if (isLoadingLookups || isLoadingExpense) {
+		<div class="loading">
+			<mat-spinner diameter="32"></mat-spinner>
+		</div>
+	} @else {
+		<mat-card>
+			<mat-card-content>
+				<form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
 				<mat-form-field>
 					<mat-label>Description</mat-label>
 					<input matInput formControlName="description" />
@@ -58,6 +63,7 @@
 				</mat-form-field>
 
 				<div class="actions">
+					<button mat-stroked-button type="button" routerLink="/expenses" [disabled]="isSubmitting">Cancel</button>
 					<button mat-stroked-button type="button" (click)="applyManualTags()" [disabled]="isLoadingLookups || isSubmitting">
 						Apply Tags
 					</button>
@@ -65,10 +71,11 @@
 
 				<div class="actions">
 					<button mat-flat-button color="primary" type="submit" [disabled]="isLoadingLookups || isSubmitting">
-						{{ isSubmitting ? 'Saving...' : 'Save Expense' }}
+						{{ isSubmitting ? 'Saving...' : (isEditMode ? 'Update Expense' : 'Save Expense') }}
 					</button>
 				</div>
 			</form>
-		</mat-card-content>
-	</mat-card>
+			</mat-card-content>
+		</mat-card>
+	}
 </section>
