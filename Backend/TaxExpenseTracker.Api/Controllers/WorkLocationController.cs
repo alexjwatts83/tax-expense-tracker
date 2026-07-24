@@ -180,6 +180,7 @@ public class WorkLocationController(
                 {
                     Date = x.Date,
                     Name = x.Name,
+                    CanBeWorkedOn = x.CanBeWorkedOn,
                 })
                 .ToList(),
         });

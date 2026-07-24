@@ -6,6 +6,7 @@ public class PublicHoliday : Entity
     public string Name { get; set; } = string.Empty;
     public string? Source { get; set; }
     public bool IsImported { get; set; }
+    public bool CanBeWorkedOn { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public static PublicHoliday Create(
@@ -13,7 +14,8 @@ public class PublicHoliday : Entity
         string name,
         string? source,
         bool isImported,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        bool canBeWorkedOn = false)
     {
         ArgumentNullException.ThrowIfNull(timeProvider);
         return new PublicHoliday
@@ -23,6 +25,7 @@ public class PublicHoliday : Entity
             Name = NormalizeRequired(name, nameof(Name)),
             Source = NormalizeOptional(source),
             IsImported = isImported,
+            CanBeWorkedOn = canBeWorkedOn,
             CreatedAt = timeProvider.GetUtcNow().UtcDateTime,
         };
     }
@@ -30,6 +33,11 @@ public class PublicHoliday : Entity
     public void Rename(string name)
     {
         Name = NormalizeRequired(name, nameof(Name));
+    }
+
+    public void SetWorkable(bool canBeWorkedOn)
+    {
+        CanBeWorkedOn = canBeWorkedOn;
     }
 
     private static DateTime ValidateDate(DateTime date)

@@ -27,6 +27,11 @@ import { WorkLocationService } from '../../services/work-location';
 
 type DayCategory = 'none' | 'wfh' | 'office' | 'annual' | 'sick';
 
+interface HolidayDayInfo {
+  name: string;
+  canBeWorkedOn: boolean;
+}
+
 interface CalendarDayRowVm {
   dateIso: string;
   dayLabel: string;
@@ -43,6 +48,7 @@ interface CalendarDayRowVm {
   workLocationId: string | null;
   isHoliday: boolean;
   holidayName: string;
+  canBeWorkedOnHoliday: boolean;
   resultState: 'applied' | 'failed' | 'skipped' | null;
   resultMessage: string;
 }
@@ -166,7 +172,7 @@ export class CalendarBatchEntry implements OnInit {
 
   clearAll(): void {
     for (const row of this.rows) {
-      if (row.isHoliday) {
+      if (this.isHolidayLocked(row)) {
         continue;
       }
 
@@ -182,7 +188,7 @@ export class CalendarBatchEntry implements OnInit {
 
   setAllCategory(category: Exclude<DayCategory, 'none'>): void {
     for (const row of this.rows) {
-      if (row.isHoliday) {
+      if (this.isHolidayLocked(row)) {
         continue;
       }
 
@@ -201,7 +207,7 @@ export class CalendarBatchEntry implements OnInit {
     let changedCount = 0;
 
     for (const row of week.days) {
-      if (!row || row.isHoliday) {
+      if (!row || this.isHolidayLocked(row)) {
         continue;
       }
 
@@ -214,12 +220,12 @@ export class CalendarBatchEntry implements OnInit {
 
     this.infoMessage = changedCount === 0
       ? 'No weekdays in this week needed changing.'
-      : `${this.dayCountLabel(changedCount)} set to WFH for this week. Public holidays were skipped.`;
+      : `${this.dayCountLabel(changedCount)} set to WFH for this week. Non-workable holidays were skipped.`;
     this.errorMessage = '';
   }
 
   onCategoryChange(row: CalendarDayRowVm, category: DayCategory): void {
-    if (row.isHoliday) {
+    if (this.isHolidayLocked(row)) {
       row.category = 'none';
       return;
     }
@@ -626,9 +632,23 @@ export class CalendarBatchEntry implements OnInit {
       )
       .subscribe({
         next: ({ holidays, leave, wfh }) => {
-          const holidayMap = new Map<string, string>();
+          const holidayMap = new Map<string, HolidayDayInfo>();
           for (const holiday of holidays) {
-            holidayMap.set(this.toDateKey(holiday.holidayDate), holiday.name);
+            const dateKey = this.toDateKey(holiday.holidayDate);
+            const existing = holidayMap.get(dateKey);
+
+            if (!existing) {
+              holidayMap.set(dateKey, {
+                name: holiday.name,
+                canBeWorkedOn: holiday.canBeWorkedOn,
+              });
+              continue;
+            }
+
+            holidayMap.set(dateKey, {
+              name: existing.name,
+              canBeWorkedOn: existing.canBeWorkedOn && holiday.canBeWorkedOn,
+            });
           }
 
           const leaveByDate = this.toLeaveMap(leave);
@@ -645,7 +665,7 @@ export class CalendarBatchEntry implements OnInit {
 
   private buildWeekdayRows(
     anchor: Date,
-    holidayMap: Map<string, string>,
+    holidayMap: Map<string, HolidayDayInfo>,
     leaveByDate: Map<string, LeaveEntry>,
     wfhByDate: Map<string, WorkLocationEntry>,
   ): CalendarDayRowVm[] {
@@ -664,7 +684,9 @@ export class CalendarBatchEntry implements OnInit {
       }
 
       const dateIso = this.toDateIso(date);
-      const holidayName = holidayMap.get(dateIso) ?? '';
+      const holiday = holidayMap.get(dateIso);
+      const holidayName = holiday?.name ?? '';
+      const canBeWorkedOnHoliday = holiday?.canBeWorkedOn ?? false;
       const leaveEntry = leaveByDate.get(dateIso) ?? null;
       const wfhEntry = wfhByDate.get(dateIso) ?? null;
 
@@ -696,6 +718,7 @@ export class CalendarBatchEntry implements OnInit {
         workLocationId: wfhEntry?.id ?? null,
         isHoliday: Boolean(holidayName),
         holidayName,
+        canBeWorkedOnHoliday,
         resultState: null,
         resultMessage: '',
       });
@@ -742,6 +765,10 @@ export class CalendarBatchEntry implements OnInit {
     }
 
     return result;
+  }
+
+  isHolidayLocked(row: CalendarDayRowVm): boolean {
+    return row.isHoliday && !row.canBeWorkedOnHoliday;
   }
 
   private toWfhMap(entries: WorkLocationEntry[]): Map<string, WorkLocationEntry> {

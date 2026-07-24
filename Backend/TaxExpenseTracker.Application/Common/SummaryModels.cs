@@ -8,7 +8,8 @@ public enum SummaryView
 
 public sealed record HolidayMarkerDto(
     DateTime Date,
-    string Name);
+    string Name,
+    bool CanBeWorkedOn);
 
 public sealed record DayEntrySummaryDto(
     DateTime FromDate,

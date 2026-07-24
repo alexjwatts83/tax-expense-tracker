@@ -99,6 +99,7 @@ export enum WorkLocationType {
 export interface DayEntryHoliday {
   date: string;
   name: string;
+  canBeWorkedOn: boolean;
 }
 
 export interface DayEntrySummary {
@@ -207,6 +208,7 @@ export interface PublicHoliday {
   name: string;
   source?: string | null;
   isImported: boolean;
+  canBeWorkedOn: boolean;
   createdAt: string;
 }
 

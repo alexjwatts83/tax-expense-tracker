@@ -78,7 +78,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
                 continue;
             }
 
-            var holiday = PublicHoliday.Create(row.Date, row.Name, normalizedSource, true, _timeProvider);
+            var holiday = PublicHoliday.Create(row.Date, row.Name, normalizedSource, true, _timeProvider, row.CanBeWorkedOn);
             await _publicHolidayRepository.AddAsync(holiday, cancellationToken);
             existingKeys.Add(key);
             added++;
@@ -98,6 +98,20 @@ public sealed class PublicHolidayService : IPublicHolidayService
         return new PublicHolidayImportResultDto(added, skipped, warnings);
     }
 
+    public async Task<PublicHolidayReadDto?> SetWorkableAsync(Guid holidayId, bool canBeWorkedOn, CancellationToken cancellationToken = default)
+    {
+        var holiday = await _publicHolidayRepository.GetByIdAsync(holidayId, cancellationToken);
+        if (holiday is null)
+        {
+            return null;
+        }
+
+        holiday.SetWorkable(canBeWorkedOn);
+        await _publicHolidayRepository.SaveChangesAsync(cancellationToken);
+
+        return ToReadDto(holiday);
+    }
+
     private static string ToKey(DateTime date, string name)
     {
         return $"{date.Date:yyyy-MM-dd}|{name.Trim()}";
@@ -111,6 +125,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
             holiday.Name,
             holiday.Source,
             holiday.IsImported,
+            holiday.CanBeWorkedOn,
             holiday.CreatedAt);
     }
 
@@ -127,6 +142,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
         var headers = SplitCsvLine(headerLine);
         var dateIndex = FindHeaderIndex(headers, "date", "holidaydate", "holiday_date");
         var nameIndex = FindHeaderIndex(headers, "name", "holidayname", "holiday_name");
+        var workableIndex = FindHeaderIndex(headers, "canbeworkedon", "workable", "isworkable", "allowwork");
 
         var errors = new List<string>();
 
@@ -162,6 +178,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
             var values = SplitCsvLine(line);
             var dateValue = GetValue(values, dateIndex)?.Trim();
             var nameValue = GetValue(values, nameIndex)?.Trim();
+            var workableValue = GetValue(values, workableIndex)?.Trim();
 
             if (string.IsNullOrWhiteSpace(dateValue))
             {
@@ -181,13 +198,19 @@ public sealed class PublicHolidayService : IPublicHolidayService
                 continue;
             }
 
+            if (!TryParseWorkableValue(workableValue, workableIndex >= 0, out var canBeWorkedOn))
+            {
+                errors.Add($"Line {lineNumber}: Invalid workable value '{workableValue}'. Use true/false, yes/no, or 1/0.");
+                continue;
+            }
+
             var importKey = ToKey(date, nameValue);
             if (!seenImportKeys.Add(importKey))
             {
                 continue;
             }
 
-            rows.Add(new CsvHolidayRow(date, nameValue));
+            rows.Add(new CsvHolidayRow(date, nameValue, canBeWorkedOn));
         }
 
         return new CsvParseResult(rows, errors);
@@ -222,6 +245,29 @@ public sealed class PublicHolidayService : IPublicHolidayService
         string[] formats = ["yyyy-MM-dd", "dd/MM/yyyy", "d/M/yyyy", "yyyy/M/d"];
         return DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out date)
             || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+    }
+
+    private static bool TryParseWorkableValue(string? value, bool columnExists, out bool canBeWorkedOn)
+    {
+        canBeWorkedOn = false;
+
+        if (!columnExists || string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "true" or "yes" or "y" or "1" => SetResult(true, out canBeWorkedOn),
+            "false" or "no" or "n" or "0" => SetResult(false, out canBeWorkedOn),
+            _ => false,
+        };
+    }
+
+    private static bool SetResult(bool value, out bool result)
+    {
+        result = value;
+        return true;
     }
 
     private static List<string> SplitCsvLine(string line)
@@ -263,7 +309,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
         return values;
     }
 
-    private sealed record CsvHolidayRow(DateTime Date, string Name);
+    private sealed record CsvHolidayRow(DateTime Date, string Name, bool CanBeWorkedOn);
 
     private sealed record CsvParseResult(IReadOnlyList<CsvHolidayRow> Rows, IReadOnlyList<string> Errors);
 }

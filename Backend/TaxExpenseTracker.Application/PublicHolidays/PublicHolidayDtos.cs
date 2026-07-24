@@ -6,6 +6,7 @@ public sealed record PublicHolidayReadDto(
     string Name,
     string? Source,
     bool IsImported,
+    bool CanBeWorkedOn,
     DateTime CreatedAt);
 
 public sealed record PublicHolidayImportResultDto(

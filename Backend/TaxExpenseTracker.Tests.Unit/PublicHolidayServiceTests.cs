@@ -48,6 +48,49 @@ public class PublicHolidayServiceTests
         Assert.Contains("Invalid date", ex.Message);
     }
 
+    [Fact]
+    public async Task SetWorkableAsync_UpdatesExistingHoliday()
+    {
+        var repository = new InMemoryPublicHolidayRepository();
+        var holiday = PublicHoliday.Create(new DateTime(2026, 1, 1), "New Year's Day", "Seed", false, TestTime.TimeProvider);
+        repository.Holidays.Add(holiday);
+        var service = new PublicHolidayService(repository, TestTime.TimeProvider);
+
+        var updated = await service.SetWorkableAsync(holiday.Id, true);
+
+        Assert.NotNull(updated);
+        Assert.True(updated!.CanBeWorkedOn);
+        Assert.True(repository.Holidays[0].CanBeWorkedOn);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
+    public async Task ImportAsync_ParsesWorkableColumn_WhenProvided()
+    {
+        var repository = new InMemoryPublicHolidayRepository();
+        var service = new PublicHolidayService(repository, TestTime.TimeProvider);
+
+        var csv = "Date,Name,CanBeWorkedOn\n2026-01-26,Australia Day,true\n2026-04-25,Anzac Day,0";
+
+        var result = await service.ImportAsync(csv, "User CSV");
+
+        Assert.Equal(2, result.ImportedCount);
+        Assert.Contains(repository.Holidays, x => x.Name == "Australia Day" && x.CanBeWorkedOn);
+        Assert.Contains(repository.Holidays, x => x.Name == "Anzac Day" && !x.CanBeWorkedOn);
+    }
+
+    [Fact]
+    public async Task ImportAsync_Throws_WhenWorkableValueInvalid()
+    {
+        var repository = new InMemoryPublicHolidayRepository();
+        var service = new PublicHolidayService(repository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+            service.ImportAsync("Date,Name,Workable\n2026-01-01,New Year's Day,maybe", null));
+
+        Assert.Contains("Invalid workable value", ex.Message);
+    }
+
     private sealed class InMemoryPublicHolidayRepository : IPublicHolidayRepository
     {
         public List<PublicHoliday> Holidays { get; } = [];

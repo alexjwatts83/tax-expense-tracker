@@ -81,6 +81,7 @@ public sealed class WorkLocationService : IWorkLocationService
         var maxDate = commands.Max(x => x.WorkDate).Date;
         var holidays = await _publicHolidayRepository.GetByDateRangeAsync(minDate, maxDate, cancellationToken);
         var holidayDates = holidays
+            .Where(x => !x.CanBeWorkedOn)
             .Select(x => x.HolidayDate.Date)
             .ToHashSet();
 
@@ -253,7 +254,7 @@ public sealed class WorkLocationService : IWorkLocationService
             holidays
                 .OrderBy(x => x.HolidayDate)
                 .ThenBy(x => x.Name)
-                .Select(x => new HolidayMarkerDto(x.HolidayDate.Date, x.Name))
+                .Select(x => new HolidayMarkerDto(x.HolidayDate.Date, x.Name, x.CanBeWorkedOn))
                 .ToList());
     }
 

@@ -23,7 +23,8 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Work-location and leave weekly/monthly summary endpoints added (`view=week|month`, `date=YYYY-MM-DD`) using Monday-Sunday week boundaries
 - Work-location canonicalization completed end-to-end (legacy `/api/work-from-home` and `/work-from-home` routes removed)
 - Work-location persistence table renamed to canonical `WorkLocationEntries` via EF migration
-- Holiday markers are display-only and do not alter work-location/leave totals or day counts
+- Holiday markers do not alter work-location/leave totals or day counts
+- Public holidays support a `CanBeWorkedOn` flag to explicitly allow or block work/leave entry creation on holiday dates
 - Public holiday API endpoints added for list and CSV import with validation and duplicate handling
 - Public holiday seed data for 2026/2027 added via EF migration
 - Shared entity base abstractions introduced (`IEntity`, `Entity`, `SoftDeletableEntity`, `AuditableEntity`, `AuditableSoftDeletableEntity`)
@@ -159,11 +160,14 @@ Soft-delete query filters are applied for TaxExpense, Tracker, Tag, and Bank.
 - GET /api/public-holidays
 - GET /api/public-holidays?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
 - POST /api/public-holidays/import (multipart/form-data file upload)
+- PATCH /api/public-holidays/{id}/workable
 
 Current public holiday CSV rules:
 
 - Required headers: `Date`, `Name`
 - Accepted header aliases: `HolidayDate`, `Holiday_Date`, `HolidayName`, `Holiday_Name`
+- Optional workable header aliases: `CanBeWorkedOn`, `Workable`, `IsWorkable`, `AllowWork`
+- Accepted workable values: `true/false`, `yes/no`, `y/n`, `1/0` (blank defaults to `false`)
 - Accepted date formats: `yyyy-MM-dd`, `dd/MM/yyyy`, `d/M/yyyy`, `yyyy/M/d`
 - Duplicate rows in the same file are skipped
 - Existing rows with the same date and name are skipped
@@ -264,6 +268,7 @@ Recent schema updates:
 - `20260723003927_AddWfhLeaveAndPublicHolidays` (added WFH/leave/public-holiday tables and holiday seed data)
 - `20260723044046_AddWorkLocationToWorkFromHome` (added `WorkLocation` column to work-location entries for WFH/Office support)
 - `20260723050557_RenameWorkFromHomeEntriesToWorkLocationEntries` (renamed work-location table and primary key to canonical naming)
+- `20260724000339_AddCanBeWorkedOnToPublicHolidays` (added `CanBeWorkedOn` to public holidays)
 
 ## Status
 
@@ -272,7 +277,7 @@ Recent schema updates:
 - DB migration chain includes work-location column addition and table rename to `WorkLocationEntries`
 - DDD/Clean phases A-F complete
 - Backend and frontend builds passing
-- Unit tests passing: 61/61
+- Unit tests passing: 69/69
 - Integration tests passing: 1/1
 
 Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md), and [plans/AZURE_DEPLOYMENT_TRACKER.md](plans/AZURE_DEPLOYMENT_TRACKER.md).

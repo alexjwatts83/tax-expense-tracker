@@ -57,18 +57,18 @@
 													<span class="result-message">{{ dayCell.resultMessage }}</span>
 												}
 												@if (dayCell.isHoliday) {
-													<span class="holiday-chip">Holiday: {{ dayCell.holidayName }}</span>
+													<span class="holiday-chip">Holiday: {{ dayCell.holidayName }} ({{ dayCell.canBeWorkedOnHoliday ? 'Workable' : 'Locked' }})</span>
 												}
 											</div>
 
-											<div class="status-cell" [class.status-disabled]="dayCell.isHoliday">
+											<div class="status-cell" [class.status-disabled]="isHolidayLocked(dayCell)">
 												<label class="status-label">Status</label>
 												<mat-radio-group
 													class="status-radio-group"
 													[value]="dayCell.category"
 													(change)="onCategoryChange(dayCell, $event.value)"
 													[attr.aria-label]="'Status for ' + dayCell.dayLabel"
-													[disabled]="dayCell.isHoliday">
+													[disabled]="isHolidayLocked(dayCell)">
 													@for (option of categoryOptions; track option.value) {
 														<mat-radio-button [value]="option.value">{{ option.label }}</mat-radio-button>
 													}
@@ -81,7 +81,7 @@
 													[value]="dayCell.entryType"
 													(selectionChange)="onEntryTypeChange(dayCell, $event.value)"
 													[attr.aria-label]="'Entry type for ' + dayCell.dayLabel"
-													[disabled]="dayCell.isHoliday || dayCell.category === 'none'">
+													[disabled]="isHolidayLocked(dayCell) || dayCell.category === 'none'">
 													@for (option of entryTypeOptions; track option.value) {
 														<mat-option [value]="option.value">{{ option.label }}</mat-option>
 													}

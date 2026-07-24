@@ -289,6 +289,25 @@ public class LeaveServiceTests
     }
 
     [Fact]
+    public async Task BatchCreateAsync_AllowsEntries_OnWorkableHoliday()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 30), "Optional Work Day", "Seed", false, TestTime.TimeProvider, true));
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateLeaveCommand(new DateTime(2026, 3, 30), DayEntryType.FullDay, null, null),
+        ]);
+
+        Assert.Equal(1, result.TotalRequested);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate.Date == new DateTime(2026, 3, 30));
+    }
+
+    [Fact]
     public async Task BatchCreateAsync_ReturnsEmptyResult_WhenRequestItemsEmpty()
     {
         var repository = new InMemoryLeaveRepository();

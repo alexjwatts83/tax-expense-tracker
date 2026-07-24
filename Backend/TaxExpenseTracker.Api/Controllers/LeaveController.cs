@@ -180,6 +180,7 @@ public class LeaveController(
                 {
                     Date = x.Date,
                     Name = x.Name,
+                    CanBeWorkedOn = x.CanBeWorkedOn,
                 })
                 .ToList(),
         });

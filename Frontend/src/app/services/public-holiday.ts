@@ -30,6 +30,10 @@ export class PublicHolidayService {
 		return this.http.post<PublicHolidayImportResult>(`${this.apiUrl}/import`, formData, { params });
 	}
 
+	setWorkable(id: string, canBeWorkedOn: boolean): Observable<PublicHoliday> {
+		return this.http.patch<PublicHoliday>(`${this.apiUrl}/${id}/workable`, { canBeWorkedOn });
+	}
+
 	private buildDateRangeParams(request?: DateRangeRequest): HttpParams {
 		let params = new HttpParams();
 

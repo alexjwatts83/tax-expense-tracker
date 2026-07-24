@@ -4,4 +4,5 @@ public sealed class SummaryHolidayDto
 {
     public DateTime Date { get; set; }
     public string Name { get; set; } = string.Empty;
+    public bool CanBeWorkedOn { get; set; }
 }

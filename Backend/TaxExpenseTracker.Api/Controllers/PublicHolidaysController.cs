@@ -25,6 +25,7 @@ public class PublicHolidaysController(IPublicHolidayService publicHolidayService
             Name = x.Name,
             Source = x.Source,
             IsImported = x.IsImported,
+            CanBeWorkedOn = x.CanBeWorkedOn,
             CreatedAt = x.CreatedAt,
         });
 
@@ -54,6 +55,30 @@ public class PublicHolidaysController(IPublicHolidayService publicHolidayService
             ImportedCount = result.ImportedCount,
             SkippedDuplicateCount = result.SkippedDuplicateCount,
             Warnings = result.Warnings.ToList(),
+        });
+    }
+
+    [HttpPatch("{id:guid}/workable")]
+    public async Task<ActionResult<PublicHolidayDto>> SetWorkable(
+        Guid id,
+        [FromBody] UpdateHolidayWorkableRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var updated = await publicHolidayService.SetWorkableAsync(id, request.CanBeWorkedOn, cancellationToken);
+        if (updated is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(new PublicHolidayDto
+        {
+            Id = updated.Id,
+            HolidayDate = updated.HolidayDate,
+            Name = updated.Name,
+            Source = updated.Source,
+            IsImported = updated.IsImported,
+            CanBeWorkedOn = updated.CanBeWorkedOn,
+            CreatedAt = updated.CreatedAt,
         });
     }
 }

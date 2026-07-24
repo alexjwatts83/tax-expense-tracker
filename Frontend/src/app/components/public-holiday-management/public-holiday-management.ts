@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { PublicHoliday } from '../../models/api.models';
@@ -22,6 +23,7 @@ import { PublicHolidayService } from '../../services/public-holiday';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatSlideToggleModule,
     MatTableModule,
   ],
   templateUrl: './public-holiday-management.html',
@@ -34,7 +36,7 @@ export class PublicHolidayManagement implements OnInit {
 
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
-  readonly displayedColumns: string[] = ['holidayDate', 'name', 'source', 'createdAt'];
+  readonly displayedColumns: string[] = ['holidayDate', 'name', 'canBeWorkedOn', 'source', 'createdAt'];
 
   readonly importForm = this.formBuilder.group({
     source: ['Manual Upload'],
@@ -51,6 +53,7 @@ export class PublicHolidayManagement implements OnInit {
   isImporting = false;
   errorMessage = '';
   infoMessage = '';
+  updatingHolidayId: string | null = null;
 
   ngOnInit(): void {
     this.loadHolidays();
@@ -129,5 +132,36 @@ export class PublicHolidayManagement implements OnInit {
       toDate: '',
     });
     this.loadHolidays();
+  }
+
+  onWorkableToggle(holiday: PublicHoliday, event: MatSlideToggleChange): void {
+    if (this.updatingHolidayId) {
+      event.source.checked = holiday.canBeWorkedOn;
+      return;
+    }
+
+    this.updatingHolidayId = holiday.id;
+    this.errorMessage = '';
+
+    this.publicHolidayService
+      .setWorkable(holiday.id, event.checked)
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.updatingHolidayId = null;
+        }),
+      )
+      .subscribe({
+        next: (updated) => {
+          holiday.canBeWorkedOn = updated.canBeWorkedOn;
+          this.infoMessage = updated.canBeWorkedOn
+            ? `${updated.name} is now marked as workable.`
+            : `${updated.name} is now marked as non-workable.`;
+        },
+        error: () => {
+          event.source.checked = holiday.canBeWorkedOn;
+          this.errorMessage = 'Unable to update holiday workable setting.';
+        },
+      });
   }
 }

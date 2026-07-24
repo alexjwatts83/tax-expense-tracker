@@ -274,6 +274,25 @@ public class WorkLocationServiceTests
     }
 
     [Fact]
+    public async Task BatchCreateAsync_AllowsEntries_OnWorkableHoliday()
+    {
+        var repository = new InMemoryWorkLocationRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 26), "Optional Work Day", "Seed", false, TestTime.TimeProvider, true));
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var result = await service.BatchCreateAsync(
+        [
+            new CreateWorkLocationCommand(new DateTime(2026, 1, 26), DayEntryType.FullDay, null, null),
+        ]);
+
+        Assert.Equal(1, result.TotalRequested);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.WorkDate.Date == new DateTime(2026, 1, 26));
+    }
+
+    [Fact]
     public async Task BatchCreateAsync_ReturnsEmptyResult_WhenRequestItemsEmpty()
     {
         var repository = new InMemoryWorkLocationRepository();
