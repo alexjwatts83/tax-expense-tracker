@@ -214,6 +214,13 @@ export interface PublicHoliday {
   createdAt: string;
 }
 
+export interface UpdatePublicHolidayRequest {
+  holidayDate: string;
+  name: string;
+  source?: string | null;
+  canBeWorkedOn: boolean;
+}
+
 export interface PublicHolidayImportResult {
   importedCount: number;
   skippedDuplicateCount: number;

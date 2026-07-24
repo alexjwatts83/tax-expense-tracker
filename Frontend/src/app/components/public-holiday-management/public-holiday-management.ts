@@ -1,9 +1,10 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -23,6 +24,7 @@ import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.compo
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
@@ -40,7 +42,7 @@ export class PublicHolidayManagement implements OnInit {
 
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
-  readonly displayedColumns: string[] = ['holidayDate', 'name', 'canBeWorkedOn', 'source', 'createdAt'];
+  readonly displayedColumns: string[] = ['holidayDate', 'name', 'canBeWorkedOn', 'source', 'createdAt', 'actions'];
 
   readonly importForm = this.formBuilder.group({
     source: ['Manual Upload'],
@@ -51,6 +53,13 @@ export class PublicHolidayManagement implements OnInit {
     toDate: [''],
   });
 
+  readonly editHolidayForm = this.formBuilder.group({
+    holidayDate: ['', [Validators.required]],
+    name: ['', [Validators.required, Validators.maxLength(100)]],
+    source: [''],
+    canBeWorkedOn: [false],
+  });
+
   holidays: PublicHoliday[] = [];
   selectedFile: File | null = null;
   isLoading = false;
@@ -58,6 +67,8 @@ export class PublicHolidayManagement implements OnInit {
   errorMessage = '';
   infoMessage = '';
   updatingHolidayId: string | null = null;
+  editingHolidayId: string | null = null;
+  savingHolidayId: string | null = null;
 
   ngOnInit(): void {
     this.loadHolidays();
@@ -139,6 +150,11 @@ export class PublicHolidayManagement implements OnInit {
   }
 
   onWorkableToggle(holiday: PublicHoliday, event: MatSlideToggleChange): void {
+    if (this.editingHolidayId === holiday.id) {
+      event.source.checked = holiday.canBeWorkedOn;
+      return;
+    }
+
     if (this.updatingHolidayId) {
       event.source.checked = holiday.canBeWorkedOn;
       return;
@@ -167,6 +183,70 @@ export class PublicHolidayManagement implements OnInit {
           this.errorMessage = 'Unable to update holiday workable setting.';
         },
       });
+  }
+
+  startEditHoliday(holiday: PublicHoliday): void {
+    this.editingHolidayId = holiday.id;
+    this.editHolidayForm.reset({
+      holidayDate: holiday.holidayDate.slice(0, 10),
+      name: holiday.name,
+      source: holiday.source ?? '',
+      canBeWorkedOn: holiday.canBeWorkedOn,
+    });
+    this.errorMessage = '';
+    this.infoMessage = '';
+  }
+
+  cancelEditHoliday(): void {
+    this.editingHolidayId = null;
+    this.savingHolidayId = null;
+    this.editHolidayForm.reset({
+      holidayDate: '',
+      name: '',
+      source: '',
+      canBeWorkedOn: false,
+    });
+  }
+
+  saveEditedHoliday(holiday: PublicHoliday): void {
+    if (this.editHolidayForm.invalid || this.savingHolidayId) {
+      this.editHolidayForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.editHolidayForm.getRawValue();
+
+    this.savingHolidayId = holiday.id;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.publicHolidayService
+      .update(holiday.id, {
+        holidayDate: value.holidayDate ?? '',
+        name: value.name?.trim() ?? '',
+        source: value.source?.trim() || null,
+        canBeWorkedOn: value.canBeWorkedOn ?? false,
+      })
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.savingHolidayId = null;
+        }),
+      )
+      .subscribe({
+        next: (updated) => {
+          this.holidays = this.holidays.map((x) => (x.id === updated.id ? updated : x));
+          this.cancelEditHoliday();
+          this.infoMessage = `Updated holiday "${updated.name}".`;
+        },
+        error: (err) => {
+          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to update holiday.';
+        },
+      });
+  }
+
+  isEditingHoliday(holidayId: string): boolean {
+    return this.editingHolidayId === holidayId;
   }
 
 }

@@ -5,6 +5,7 @@ import {
 	DateRangeRequest,
 	PublicHoliday,
 	PublicHolidayImportResult,
+	UpdatePublicHolidayRequest,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +33,10 @@ export class PublicHolidayService {
 
 	setWorkable(id: string, canBeWorkedOn: boolean): Observable<PublicHoliday> {
 		return this.http.patch<PublicHoliday>(`${this.apiUrl}/${id}/workable`, { canBeWorkedOn });
+	}
+
+	update(id: string, payload: UpdatePublicHolidayRequest): Observable<PublicHoliday> {
+		return this.http.put<PublicHoliday>(`${this.apiUrl}/${id}`, payload);
 	}
 
 	private buildDateRangeParams(request?: DateRangeRequest): HttpParams {

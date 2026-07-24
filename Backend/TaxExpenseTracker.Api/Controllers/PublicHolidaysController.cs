@@ -81,4 +81,32 @@ public class PublicHolidaysController(IPublicHolidayService publicHolidayService
             CreatedAt = updated.CreatedAt,
         });
     }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<PublicHolidayDto>> Update(
+        Guid id,
+        [FromBody] UpdatePublicHolidayRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        var updated = await publicHolidayService.UpdateAsync(
+            id,
+            new UpdatePublicHolidayCommand(request.HolidayDate, request.Name, request.Source, request.CanBeWorkedOn),
+            cancellationToken);
+
+        if (updated is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(new PublicHolidayDto
+        {
+            Id = updated.Id,
+            HolidayDate = updated.HolidayDate,
+            Name = updated.Name,
+            Source = updated.Source,
+            IsImported = updated.IsImported,
+            CanBeWorkedOn = updated.CanBeWorkedOn,
+            CreatedAt = updated.CreatedAt,
+        });
+    }
 }

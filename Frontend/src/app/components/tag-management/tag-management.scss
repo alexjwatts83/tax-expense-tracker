@@ -25,6 +25,31 @@
 	width: 100%;
 }
 
+.inline-edit-field {
+	width: min(320px, 100%);
+}
+
+.inline-color-editor {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.inline-color-editor input[type='color'] {
+	width: 2.4rem;
+	height: 2rem;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.tag-color-value {
+	font-size: 0.85rem;
+	color: #334155;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
 .tag-color-chip {
 	display: inline-block;
 	padding: 0.2rem 0.45rem;

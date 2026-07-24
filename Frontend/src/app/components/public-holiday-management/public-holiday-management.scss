@@ -67,6 +67,14 @@
 	width: 100%;
 }
 
+.inline-edit-field {
+	width: min(280px, 100%);
+}
+
+.date-edit-field {
+	width: min(200px, 100%);
+}
+
 .loading {
 	display: flex;
 	justify-content: center;

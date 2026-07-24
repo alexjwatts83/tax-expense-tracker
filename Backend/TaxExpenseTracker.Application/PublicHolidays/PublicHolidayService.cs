@@ -112,6 +112,26 @@ public sealed class PublicHolidayService : IPublicHolidayService
         return ToReadDto(holiday);
     }
 
+    public async Task<PublicHolidayReadDto?> UpdateAsync(Guid holidayId, UpdatePublicHolidayCommand command, CancellationToken cancellationToken = default)
+    {
+        var holiday = await _publicHolidayRepository.GetByIdAsync(holidayId, cancellationToken);
+        if (holiday is null)
+        {
+            return null;
+        }
+
+        ArgumentOutOfRangeException.ThrowIfEqual(command.HolidayDate, default, nameof(command.HolidayDate));
+
+        holiday.HolidayDate = command.HolidayDate.Date;
+        holiday.Rename(command.Name);
+        holiday.Source = string.IsNullOrWhiteSpace(command.Source) ? null : command.Source.Trim();
+        holiday.SetWorkable(command.CanBeWorkedOn);
+
+        await _publicHolidayRepository.SaveChangesAsync(cancellationToken);
+
+        return ToReadDto(holiday);
+    }
+
     private static string ToKey(DateTime date, string name)
     {
         return $"{date.Date:yyyy-MM-dd}|{name.Trim()}";

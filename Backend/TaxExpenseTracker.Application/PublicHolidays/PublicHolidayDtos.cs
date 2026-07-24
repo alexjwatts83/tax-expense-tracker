@@ -13,3 +13,9 @@ public sealed record PublicHolidayImportResultDto(
     int ImportedCount,
     int SkippedDuplicateCount,
     IReadOnlyList<string> Warnings);
+
+public sealed record UpdatePublicHolidayCommand(
+    DateTime HolidayDate,
+    string Name,
+    string? Source,
+    bool CanBeWorkedOn);

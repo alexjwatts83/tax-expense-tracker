@@ -44,10 +44,17 @@ export class TagManagement implements OnInit {
 
   tags: Tag[] = [];
   lastDeletedTag: Tag | null = null;
+  editingTagId: string | null = null;
+  savingTagId: string | null = null;
   isLoading = false;
   isSubmitting = false;
   errorMessage = '';
   infoMessage = '';
+
+  readonly editTagForm = this.formBuilder.group({
+    name: ['', [Validators.required, Validators.maxLength(100)]],
+    color: ['#CBD5E1', [Validators.required]],
+  });
 
   ngOnInit(): void {
     this.loadTags();
@@ -108,6 +115,55 @@ export class TagManagement implements OnInit {
     });
   }
 
+  startEditTag(tag: Tag): void {
+    this.editingTagId = tag.id;
+    this.editTagForm.reset({
+      name: tag.name,
+      color: this.normalizeHexColor(tag.color),
+    });
+    this.errorMessage = '';
+    this.infoMessage = '';
+  }
+
+  cancelEditTag(): void {
+    this.editingTagId = null;
+    this.savingTagId = null;
+    this.editTagForm.reset({
+      name: '',
+      color: '#CBD5E1',
+    });
+  }
+
+  saveEditedTag(tag: Tag): void {
+    if (this.editTagForm.invalid || this.savingTagId) {
+      this.editTagForm.markAllAsTouched();
+      return;
+    }
+
+    const name = this.editTagForm.value.name?.trim() ?? '';
+    const color = this.normalizeHexColor(this.editTagForm.value.color);
+
+    this.savingTagId = tag.id;
+    this.errorMessage = '';
+    this.infoMessage = '';
+
+    this.tagService.update(tag.id, { name, color }).subscribe({
+      next: (updated) => {
+        this.tags = this.tags.map((x) => (x.id === updated.id ? updated : x));
+        this.cancelEditTag();
+        this.infoMessage = `Tag "${updated.name}" updated.`;
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to update tag.';
+        this.savingTagId = null;
+      },
+    });
+  }
+
+  isEditingTag(tagId: string): boolean {
+    return this.editingTagId === tagId;
+  }
+
   softDeleteTag(id: string): void {
     this.errorMessage = '';
     this.infoMessage = '';
@@ -115,6 +171,10 @@ export class TagManagement implements OnInit {
     const tag = this.tags.find((x) => x.id === id);
     if (!tag) {
       return;
+    }
+
+    if (this.editingTagId === id) {
+      this.cancelEditTag();
     }
 
     this.tagService.softDelete(id).subscribe({
