@@ -95,10 +95,10 @@
 					</mat-form-field>
 
 					<div class="filter-actions-icons">
-						<button mat-icon-button color="primary" class="filter-icon-button" type="button" aria-label="Apply filter" (click)="applyFilters()">
+						<button mat-icon-button color="accent" class="filter-icon-button" type="button" aria-label="Apply filter" (click)="applyFilters()">
 							<mat-icon>filter_alt</mat-icon>
 						</button>
-						<button mat-icon-button color="primary" class="filter-icon-button" type="button" aria-label="Clear filter" (click)="clearFilters()">
+						<button mat-icon-button color="accent" class="filter-icon-button" type="button" aria-label="Clear filter" (click)="clearFilters()">
 							<mat-icon>clear_all</mat-icon>
 						</button>
 					</div>
@@ -141,7 +141,9 @@
 					<ng-container matColumnDef="actions">
 						<th mat-header-cell *matHeaderCellDef>Actions</th>
 						<td mat-cell *matCellDef="let entry">
-							<button mat-button color="warn" type="button" (click)="softDeleteEntry(entry.id)">Delete</button>
+							<button mat-icon-button color="warn" type="button" (click)="softDeleteEntry(entry.id)" aria-label="Delete entry">
+								<mat-icon>delete</mat-icon>
+							</button>
 						</td>
 					</ng-container>
 

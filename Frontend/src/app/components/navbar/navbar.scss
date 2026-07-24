@@ -12,7 +12,8 @@
 	flex: 1;
 }
 
-.active-link {
-	font-weight: 700;
-	text-decoration: underline;
+a[mat-button].active-link {
+	background-color: rgb(255 255 255 / 18%);
+	font-weight: 600;
 }
+

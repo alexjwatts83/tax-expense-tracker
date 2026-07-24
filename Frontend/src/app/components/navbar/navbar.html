@@ -3,7 +3,7 @@
 
 	<span class="spacer"></span>
 
-	<a mat-button routerLink="/dashboard" routerLinkActive="active-link">Dashboard</a>
+	<a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
 	<a mat-button routerLink="/expenses" routerLinkActive="active-link">Expenses</a>
 	<a mat-button routerLink="/time-tracking" routerLinkActive="active-link">Time Tracking</a>
 	<a mat-button routerLink="/calendar-batch-entry" routerLinkActive="active-link">Calendar Batch</a>
