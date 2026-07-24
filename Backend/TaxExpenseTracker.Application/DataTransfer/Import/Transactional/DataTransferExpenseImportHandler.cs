@@ -22,14 +22,12 @@ public sealed class DataTransferExpenseImportHandler
         var expenses = payload.Expenses ?? [];
         var expenseTags = payload.ExpenseTags ?? [];
 
-        var modeWarnings = new List<DataTransferImportIssue>();
-        DataTransferReplaceDeleteUtility.AddReplaceDeleteNotImplementedWarning(options, modeWarnings);
-
-        var expenseWarnings = new List<DataTransferImportIssue>(modeWarnings);
+        var expenseWarnings = new List<DataTransferImportIssue>();
         var expenseErrors = new List<DataTransferImportIssue>();
         var expenseCreated = 0;
         var expenseUpdated = 0;
         var expenseSkipped = 0;
+        var expenseDeleted = 0;
 
         var trackedExpenses = new Dictionary<Guid, TaxExpense>();
         var acceptedExpenseIds = new HashSet<Guid>();
@@ -125,10 +123,25 @@ public sealed class DataTransferExpenseImportHandler
             trackedExpenses[item.Id] = existing;
         }
 
-        var tagWarnings = new List<DataTransferImportIssue>(modeWarnings);
+        if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
+        {
+            expenseDeleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<TaxExpense>(
+                expenses.Select(x => x.Id).ToList(),
+                ct => _expenseRepository.GetAllIncludingDeletedAsync(ct),
+                (id, ct) => _expenseRepository.GetByIdForUpdateIncludingDeletedAsync(id, ct),
+                entity => entity.SoftDelete(_timeProvider),
+                options.DryRun,
+                cancellationToken);
+
+            if (expenseDeleted > 0)
+                expenseWarnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {expenseDeleted} expense records not present in payload."));
+        }
+
+        var tagWarnings = new List<DataTransferImportIssue>();
         var tagErrors = new List<DataTransferImportIssue>();
         var tagCreated = 0;
         var tagSkipped = 0;
+        var tagDeleted = 0;
 
         var seenPairs = new HashSet<(Guid TaxExpenseId, Guid TagId)>();
         var requestedTagIds = expenseTags
@@ -200,7 +213,33 @@ public sealed class DataTransferExpenseImportHandler
             }
         }
 
-        if (!options.DryRun && (expenseCreated > 0 || expenseUpdated > 0 || tagCreated > 0))
+        if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
+        {
+            var payloadExpenseIds = expenses.Select(x => x.Id).ToHashSet();
+            var payloadTagPairs = expenseTags
+                .Where(x => x.TaxExpenseId != Guid.Empty && x.TagId != Guid.Empty)
+                .Select(x => (x.TaxExpenseId, x.TagId))
+                .ToHashSet();
+
+            foreach (var expense in trackedExpenses.Values.Where(x => payloadExpenseIds.Contains(x.Id)))
+            {
+                var linksToDelete = expense.TaxExpenseTags
+                    .Where(x => !payloadTagPairs.Contains((x.TaxExpenseId, x.TagId)))
+                    .ToList();
+
+                tagDeleted += linksToDelete.Count;
+                if (!options.DryRun)
+                {
+                    foreach (var link in linksToDelete)
+                        expense.TaxExpenseTags.Remove(link);
+                }
+            }
+
+            if (tagDeleted > 0)
+                tagWarnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceDeletedMissing, $"Replace mode: deleted {tagDeleted} expense tag records not present in payload."));
+        }
+
+        if (!options.DryRun && (expenseCreated > 0 || expenseUpdated > 0 || expenseDeleted > 0 || tagCreated > 0 || tagDeleted > 0))
             await _expenseRepository.SaveChangesAsync(cancellationToken);
 
         return

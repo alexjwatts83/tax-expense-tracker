@@ -4,18 +4,6 @@ namespace TaxExpenseTracker.Application.DataTransfer;
 
 internal static class DataTransferReplaceDeleteUtility
 {
-    private const string ReplaceDeleteNotImplementedMessage = "Replace mode delete synchronization is not implemented yet; processing behaves like upsert.";
-
-    public static void AddReplaceDeleteNotImplementedWarning(
-        DataTransferImportOptions options,
-        ICollection<DataTransferImportIssue> warnings)
-    {
-        if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
-            warnings.Add(new DataTransferImportIssue(
-                DataTransferIssueCodes.WarnReplaceDeleteNotImplemented,
-                ReplaceDeleteNotImplementedMessage));
-    }
-
     public static async Task<int> SoftDeleteMissingAsync<T>(
         IReadOnlyCollection<Guid> payloadIds,
         Func<CancellationToken, Task<IReadOnlyList<T>>> getAllAsync,

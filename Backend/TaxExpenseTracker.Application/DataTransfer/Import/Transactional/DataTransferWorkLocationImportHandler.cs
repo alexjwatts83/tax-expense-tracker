@@ -27,8 +27,7 @@ public sealed class DataTransferWorkLocationImportHandler
         var created = 0;
         var updated = 0;
         var skipped = 0;
-
-        DataTransferReplaceDeleteUtility.AddReplaceDeleteNotImplementedWarning(options, warnings);
+        var deleted = 0;
 
         foreach (var item in items)
         {
@@ -106,7 +105,21 @@ public sealed class DataTransferWorkLocationImportHandler
             }
         }
 
-        if (!options.DryRun && (created > 0 || updated > 0))
+        if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
+        {
+            deleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<WorkLocationEntry>(
+                items.Select(x => x.Id).ToList(),
+                ct => _workLocationRepository.GetAllIncludingDeletedAsync(ct),
+                (id, ct) => _workLocationRepository.GetByIdIncludingDeletedAsync(id, ct),
+                entity => entity.SoftDelete(_timeProvider),
+                options.DryRun,
+                cancellationToken);
+
+            if (deleted > 0)
+                warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {deleted} work location records not present in payload."));
+        }
+
+        if (!options.DryRun && (created > 0 || updated > 0 || deleted > 0))
             await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
         return new DataTransferEntityImportComputation("workLocationEntries", items.Count, created, updated, skipped, warnings, errors);

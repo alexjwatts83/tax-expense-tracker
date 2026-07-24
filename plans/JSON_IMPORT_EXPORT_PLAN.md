@@ -208,7 +208,7 @@ Notes:
   - Import request options
   - Import result summary
 - [x] Add `IDataTransferService` abstraction.
-- [~] Implement `DataTransferService` with:
+- [x] Implement `DataTransferService` with:
   - Reference-data export builder
   - Reference-data import orchestration
   - Separate transactional import orchestration
@@ -222,7 +222,10 @@ Current implementation note:
   - Trackers, tags, and banks are soft-deleted when omitted from payload.
   - Public holidays are deleted when omitted from payload.
 - Transactional imports (`expenses`, `work-locations`, `leave`) are implemented for `upsert`, `insertOnly`, and `dryRun`.
-- Transactional `replace + allowDeletes` delete synchronization is still pending.
+- Transactional `replace + allowDeletes` synchronization is implemented:
+  - Expenses, work locations, and leave entries are soft-deleted when omitted from payload.
+  - Expense-tag links are deleted when omitted for expenses included in the payload.
+  - Dry-run reports the same deletion counts without mutation.
 
 ### Phase 2: Infrastructure and Persistence
 
@@ -304,7 +307,7 @@ Current implementation note:
 ### Unit Tests
 
 - [ ] Serialization/deserialization for envelope and entity payloads.
-- [ ] Import mode behavior (`insertOnly`, `upsert`, `replace`).
+- [~] Import mode behavior (`insertOnly`, `upsert`, `replace`).
 - [ ] Dependency ordering and FK validation.
 - [~] Dry-run returns expected report with no DB mutation.
 
@@ -312,6 +315,7 @@ Current implementation note:
 
 - Added regression coverage proving an expense tag can reference an expense created in the same dry-run payload without database mutation.
 - Added coverage proving typed issue codes/messages are preserved in API result mapping.
+- Added focused coverage for transactional `replace + allowDeletes`, including dry-run, soft deletes, and expense-tag link synchronization.
 - Full DataTransfer mode and serialization coverage remains pending.
 
 ## Application Module Organization
@@ -378,11 +382,13 @@ Create a separate project only if this module gains independent consumers, depen
   - Per-entity export/import route shape
   - Reference import execution (`upsert`, `insertOnly`, `dryRun`)
   - Transactional import execution for expenses/work/leave (`upsert`, `insertOnly`, `dryRun`)
+  - Reference and transactional `replace + allowDeletes` synchronization
   - Explicit transaction boundary for non-dry-run imports
+  - Rollback of imports containing validation errors
+  - Streamed export responses
   - Phase 4 safety/observability items
 - Pending:
-  - Per-entity export/import route shape
-  - True `replace` delete synchronization
-  - Explicit transaction boundary across full import runs
-  - Streamed export response
-  - Unit test coverage
+  - Complete serialization and import-mode unit coverage
+  - Bulk import optimization and batching
+  - Frontend admin data-transfer screen
+  - Manual roundtrip and large-payload verification

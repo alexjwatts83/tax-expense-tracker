@@ -27,8 +27,7 @@ public sealed class DataTransferLeaveImportHandler
         var created = 0;
         var updated = 0;
         var skipped = 0;
-
-        DataTransferReplaceDeleteUtility.AddReplaceDeleteNotImplementedWarning(options, warnings);
+        var deleted = 0;
 
         foreach (var item in items)
         {
@@ -106,7 +105,21 @@ public sealed class DataTransferLeaveImportHandler
             }
         }
 
-        if (!options.DryRun && (created > 0 || updated > 0))
+        if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
+        {
+            deleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<LeaveEntry>(
+                items.Select(x => x.Id).ToList(),
+                ct => _leaveRepository.GetAllIncludingDeletedAsync(ct),
+                (id, ct) => _leaveRepository.GetByIdIncludingDeletedAsync(id, ct),
+                entity => entity.SoftDelete(_timeProvider),
+                options.DryRun,
+                cancellationToken);
+
+            if (deleted > 0)
+                warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {deleted} leave records not present in payload."));
+        }
+
+        if (!options.DryRun && (created > 0 || updated > 0 || deleted > 0))
             await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         return new DataTransferEntityImportComputation("leaveEntries", items.Count, created, updated, skipped, warnings, errors);

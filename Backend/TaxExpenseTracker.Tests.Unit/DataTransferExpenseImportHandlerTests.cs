@@ -41,6 +41,32 @@ public class DataTransferExpenseImportHandlerTests
     }
 
     [Fact]
+    public async Task ImportAsync_ReplaceWithDeletes_SoftDeletesExpenseMissingFromPayload()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var kept = TaxExpense.Create("Kept", new DateTime(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
+        var missing = TaxExpense.Create("Missing", new DateTime(2026, 7, 2), repository.BankId, 20m, repository.SourceId, TestTime.TimeProvider);
+        kept.TaxExpenseTags.Add(TaxExpenseTag.Create(kept.Id, repository.TagId));
+        repository.Expenses.AddRange([kept, missing]);
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+
+        var results = await handler.ImportAsync(
+            new ExpenseImportPayloadDto(
+                [new ExpenseImportItemDto(kept.Id, kept.Date, kept.Description, kept.Price, kept.BankId, kept.SourceId, null, null, false)],
+                []),
+            new DataTransferImportOptions(DataTransferImportMode.Replace, AllowDeletes: true));
+
+        var expenseResult = Assert.Single(results, x => x.Entity == "expenses");
+        Assert.False(kept.IsDeleted);
+        Assert.True(missing.IsDeleted);
+        Assert.Empty(kept.TaxExpenseTags);
+        Assert.True(repository.SaveChangesCalled);
+        Assert.Contains(expenseResult.Warnings, x => x.Code == "WARN_REPLACE_SOFT_DELETED_MISSING");
+        var tagResult = Assert.Single(results, x => x.Entity == "expenseTags");
+        Assert.Contains(tagResult.Warnings, x => x.Code == "WARN_REPLACE_DELETED_MISSING");
+    }
+
+    [Fact]
     public void BuildEntityResult_PreservesTypedIssueCodes()
     {
         var factory = new DataTransferImportResultFactory();

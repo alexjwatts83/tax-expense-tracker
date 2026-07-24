@@ -4,7 +4,6 @@ internal static class DataTransferIssueCodes
 {
     public const string WarnInsertOnlySkipped = "WARN_INSERT_ONLY_SKIPPED";
     public const string WarnDuplicateSkipped = "WARN_DUPLICATE_SKIPPED";
-    public const string WarnReplaceDeleteNotImplemented = "WARN_REPLACE_DELETE_NOT_IMPLEMENTED";
     public const string WarnReplaceSoftDeletedMissing = "WARN_REPLACE_SOFT_DELETED_MISSING";
     public const string WarnReplaceDeletedMissing = "WARN_REPLACE_DELETED_MISSING";
 
