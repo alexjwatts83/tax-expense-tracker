@@ -1,0 +1,49 @@
+<mat-card class="summary-card">
+  <mat-card-content>
+    <div class="empty-message">Holiday markers are informational only. Totals remain based on recorded entries.</div>
+    <form [formGroup]="summaryForm" class="summary-form">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>View</mat-label>
+        <mat-select formControlName="view" (selectionChange)="refresh.emit()">
+          @for (option of summaryViewOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Anchor Date</mat-label>
+        <input #summaryDateInput="appDateInput" appDateInput matInput type="date" formControlName="date" (change)="refresh.emit()" />
+        <app-date-picker-toggle matSuffix [for]="summaryDateInput" [ariaLabel]="datePickerAriaLabel"></app-date-picker-toggle>
+      </mat-form-field>
+    </form>
+
+    @if (isLoadingSummary) {
+      <div class="loading">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+    } @else if (!summary) {
+      <div class="empty-message">{{ noSummaryMessage }}</div>
+    } @else if (summary) {
+      <div class="summary-grid">
+        <p class="period-row"><strong>Period:</strong> {{ summary.fromDate | date: 'mediumDate' }} - {{ summary.toDate | date: 'mediumDate' }}</p>
+        <p><strong>Total Hours:</strong> {{ summary.totalHours }}</p>
+        <p><strong>Total Days:</strong> {{ summary.totalDays }}</p>
+        <p><strong>Entries:</strong> {{ summary.entryCount }}</p>
+      </div>
+
+      @if (summary.holidays.length > 0) {
+        <div class="holiday-list">
+          <h3>Holiday Markers</h3>
+          <ul>
+            @for (holiday of summary.holidays; track holiday.date + holiday.name) {
+              <li>{{ holiday.date | date: 'mediumDate' }} - {{ holiday.name }}</li>
+            }
+          </ul>
+        </div>
+      } @else {
+        <div class="empty-message">{{ noHolidaysMessage }}</div>
+      }
+    }
+  </mat-card-content>
+</mat-card>

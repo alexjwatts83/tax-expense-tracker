@@ -39,10 +39,6 @@
 	.filter-actions-icons {
 		justify-content: flex-start;
 	}
-
-	.summary-grid {
-		grid-template-columns: 1fr;
-	}
 }
 
 .paging-bar {
@@ -68,25 +64,9 @@
 	gap: 0.5rem;
 }
 
-.summary-grid {
-	display: grid;
-	gap: 1rem;
-	margin-top: 1rem;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.summary-grid .period-row {
-	grid-column: 1 / -1;
-	margin: 0;
-}
-
-.holiday-list {
-	margin-top: 1rem;
-}
-
 .empty-message {
 	color: #475467;
-	margin-top: 1rem;
+	margin: 0 0 1rem;
 }
 
 .loading {

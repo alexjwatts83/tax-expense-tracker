@@ -1,7 +1,7 @@
 <section class="page">
 	<mat-card class="holiday-import-card">
 		<mat-card-content>
-			<p class="empty-message">CSV columns: Date, Name, optional CanBeWorkedOn/Workable (true/false, yes/no, 1/0).</p>
+			<div class="empty-message">CSV columns: Date, Name, optional CanBeWorkedOn/Workable (true/false, yes/no, 1/0).</div>
 			<form [formGroup]="importForm" class="import-form">
 				<mat-form-field appearance="outline" subscriptSizing="dynamic">
 					<mat-label>Source</mat-label>
@@ -62,7 +62,7 @@
 					<mat-spinner diameter="32"></mat-spinner>
 				</div>
 			} @else if (holidays.length === 0) {
-				<p class="empty-message">No public holidays found for this filter.</p>
+				<div class="empty-message">No public holidays found for this filter.</div>
 			} @else {
 				<table mat-table [dataSource]="holidays" class="holiday-table">
 					<ng-container matColumnDef="holidayDate">

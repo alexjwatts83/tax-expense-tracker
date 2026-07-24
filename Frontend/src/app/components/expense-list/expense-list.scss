@@ -42,6 +42,32 @@
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.manual-tags-row {
+	grid-column: 1 / -1;
+	display: grid;
+	grid-template-columns: minmax(320px, 1fr) minmax(220px, 1fr) auto;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.manual-tags-field {
+	width: 100%;
+}
+
+.manual-tags-help {
+	color: #667085;
+	font-size: 0.85rem;
+	line-height: 1.3;
+	white-space: normal;
+}
+
+.manual-tags-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	align-items: center;
+}
+
 .filter-actions {
 	grid-column: 1 / -1;
 	display: flex;
@@ -105,5 +131,13 @@
 	.table-filter-actions {
 		height: auto;
 		flex-wrap: wrap;
+	}
+
+	.manual-tags-row {
+		grid-template-columns: 1fr;
+	}
+
+	.manual-tags-actions {
+		justify-content: flex-start;
 	}
 }

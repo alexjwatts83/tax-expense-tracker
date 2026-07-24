@@ -57,55 +57,13 @@
 		</mat-card-content>
 	</mat-card>
 
-	<mat-card class="summary-card">
-		<mat-card-content>
-			<p class="empty-message">Holiday markers are informational only. Totals remain based on recorded entries.</p>
-			<form [formGroup]="summaryForm" class="summary-form">
-				<mat-form-field appearance="outline" subscriptSizing="dynamic">
-					<mat-label>View</mat-label>
-					<mat-select formControlName="view" (selectionChange)="loadSummary()">
-						@for (option of summaryViewOptions; track option.value) {
-							<mat-option [value]="option.value">{{ option.label }}</mat-option>
-						}
-					</mat-select>
-				</mat-form-field>
-
-				<mat-form-field appearance="outline" subscriptSizing="dynamic">
-					<mat-label>Anchor Date</mat-label>
-					<input #summaryDateInput="appDateInput" appDateInput matInput type="date" formControlName="date" (change)="loadSummary()" />
-					<app-date-picker-toggle matSuffix [for]="summaryDateInput" ariaLabel="Open work summary date calendar"></app-date-picker-toggle>
-				</mat-form-field>
-			</form>
-
-			@if (isLoadingSummary) {
-				<div class="loading">
-					<mat-spinner diameter="32"></mat-spinner>
-				</div>
-			} @else if (!summary) {
-				<p class="empty-message">Select a period to load summary details.</p>
-			} @else if (summary) {
-				<div class="summary-grid">
-					<p class="period-row"><strong>Period:</strong> {{ summary.fromDate | date: 'mediumDate' }} - {{ summary.toDate | date: 'mediumDate' }}</p>
-					<p><strong>Total Hours:</strong> {{ summary.totalHours }}</p>
-					<p><strong>Total Days:</strong> {{ summary.totalDays }}</p>
-					<p><strong>Entries:</strong> {{ summary.entryCount }}</p>
-				</div>
-
-				@if (summary.holidays.length > 0) {
-					<div class="holiday-list">
-						<h3>Holiday Markers</h3>
-						<ul>
-							@for (holiday of summary.holidays; track holiday.date + holiday.name) {
-								<li>{{ holiday.date | date: 'mediumDate' }} - {{ holiday.name }}</li>
-							}
-						</ul>
-					</div>
-				} @else {
-					<p class="empty-message">No holiday markers in this period.</p>
-				}
-			}
-		</mat-card-content>
-	</mat-card>
+	<app-day-entry-summary-card
+		[summaryForm]="summaryForm"
+		[summaryViewOptions]="summaryViewOptions"
+		[isLoadingSummary]="isLoadingSummary"
+		[summary]="summary"
+		datePickerAriaLabel="Open work summary date calendar"
+		(refresh)="loadSummary()"></app-day-entry-summary-card>
 
 	@if (errorMessage) {
 		<p class="error-message">{{ errorMessage }}</p>

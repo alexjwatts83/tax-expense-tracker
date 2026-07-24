@@ -1,0 +1,38 @@
+.summary-form {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.summary-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summary-grid .period-row {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.holiday-list {
+  margin-top: 1rem;
+}
+
+.empty-message {
+  color: #475467;
+  margin: 0 0 1rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+@media (max-width: 720px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
