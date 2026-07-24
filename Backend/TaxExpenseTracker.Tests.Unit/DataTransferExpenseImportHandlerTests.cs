@@ -41,6 +41,56 @@ public class DataTransferExpenseImportHandlerTests
     }
 
     [Fact]
+    public async Task ImportAsync_MissingSource_ReturnsReferenceError()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+
+        var results = await handler.ImportAsync(
+            CreatePayload(repository, sourceId: Guid.NewGuid()),
+            new DataTransferImportOptions(DryRun: true));
+
+        var result = Assert.Single(results, x => x.Entity == "expenses");
+        var error = Assert.Single(result.Errors);
+        Assert.Equal("ERR_REFERENCE_NOT_FOUND", error.Code);
+        Assert.Contains("SourceId", error.Message);
+    }
+
+    [Fact]
+    public async Task ImportAsync_MissingBank_ReturnsReferenceError()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+
+        var results = await handler.ImportAsync(
+            CreatePayload(repository, bankId: Guid.NewGuid()),
+            new DataTransferImportOptions(DryRun: true));
+
+        var result = Assert.Single(results, x => x.Entity == "expenses");
+        var error = Assert.Single(result.Errors);
+        Assert.Equal("ERR_REFERENCE_NOT_FOUND", error.Code);
+        Assert.Contains("BankId", error.Message);
+    }
+
+    [Fact]
+    public async Task ImportAsync_MissingTag_ReturnsReferenceError()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+        var expenseId = Guid.NewGuid();
+        var payload = CreatePayload(repository, expenseId, tagId: Guid.NewGuid());
+
+        var results = await handler.ImportAsync(payload, new DataTransferImportOptions(DryRun: true));
+
+        var expenseResult = Assert.Single(results, x => x.Entity == "expenses");
+        var tagResult = Assert.Single(results, x => x.Entity == "expenseTags");
+        Assert.Empty(expenseResult.Errors);
+        var error = Assert.Single(tagResult.Errors);
+        Assert.Equal("ERR_REFERENCE_NOT_FOUND", error.Code);
+        Assert.Contains("TagId", error.Message);
+    }
+
+    [Fact]
     public async Task ImportAsync_ReplaceWithDeletes_SoftDeletesExpenseMissingFromPayload()
     {
         var repository = new DataTransferExpenseRepository();
@@ -85,6 +135,30 @@ public class DataTransferExpenseImportHandlerTests
         Assert.Equal(["warning"], result.Warnings);
         Assert.Equal(["ERR_TEST"], result.ErrorCodes);
         Assert.Equal(["error"], result.Errors);
+    }
+
+    private static ExpenseImportPayloadDto CreatePayload(
+        DataTransferExpenseRepository repository,
+        Guid? expenseId = null,
+        Guid? bankId = null,
+        Guid? sourceId = null,
+        Guid? tagId = null)
+    {
+        var resolvedExpenseId = expenseId ?? Guid.NewGuid();
+        return new ExpenseImportPayloadDto(
+            [new ExpenseImportItemDto(
+                resolvedExpenseId,
+                TestTime.FixedUtcNow.UtcDateTime,
+                "Laptop",
+                1200m,
+                bankId ?? repository.BankId,
+                sourceId ?? repository.SourceId,
+                null,
+                null,
+                false)],
+            tagId.HasValue
+                ? [new ExpenseTagImportItemDto(Guid.NewGuid(), resolvedExpenseId, tagId.Value)]
+                : []);
     }
 
     private sealed class DataTransferExpenseRepository : IExpenseRepository

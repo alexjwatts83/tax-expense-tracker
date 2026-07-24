@@ -308,7 +308,7 @@ Current implementation note:
 
 - [x] Serialization/deserialization for envelope and entity payloads.
 - [~] Import mode behavior (`insertOnly`, `upsert`, `replace`).
-- [ ] Dependency ordering and FK validation.
+- [x] Dependency ordering and FK validation.
 - [~] Dry-run returns expected report with no DB mutation.
 
 Current implementation note:
@@ -317,7 +317,8 @@ Current implementation note:
 - Added coverage proving typed issue codes/messages are preserved in API result mapping.
 - Added focused coverage for transactional `replace + allowDeletes`, including dry-run, soft deletes, and expense-tag link synchronization.
 - Added wire-contract coverage for the reference envelope and expense, work-location, and leave payloads using the API's web JSON settings.
-- Full import-mode and dependency validation coverage remains pending.
+- Added expense dependency coverage for same-payload expense tags and missing source, bank, and tag references.
+- Full import-mode coverage remains pending.
 
 ## Application Module Organization
 
@@ -389,7 +390,7 @@ Create a separate project only if this module gains independent consumers, depen
   - Streamed export responses
   - Phase 4 safety/observability items
 - Pending:
-  - Complete import-mode and dependency-validation unit coverage
+  - Complete import-mode unit coverage
   - Bulk import optimization and batching
   - Frontend admin data-transfer screen
   - Manual roundtrip and large-payload verification
