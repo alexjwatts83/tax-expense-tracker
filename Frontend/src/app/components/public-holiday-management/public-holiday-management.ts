@@ -11,6 +11,8 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { PublicHoliday } from '../../models/api.models';
 import { PublicHolidayService } from '../../services/public-holiday';
+import { DateInputDirective } from '../../shared/date-input.directive';
+import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 
 @Component({
   selector: 'app-public-holiday-management',
@@ -25,6 +27,8 @@ import { PublicHolidayService } from '../../services/public-holiday';
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     MatTableModule,
+    DateInputDirective,
+    DatePickerToggleComponent,
   ],
   templateUrl: './public-holiday-management.html',
   styleUrl: './public-holiday-management.scss',
@@ -164,4 +168,5 @@ export class PublicHolidayManagement implements OnInit {
         },
       });
   }
+
 }

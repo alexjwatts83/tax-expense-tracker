@@ -37,15 +37,8 @@
 
 				<mat-form-field>
 					<mat-label>Date</mat-label>
-					<input #createDateInput matInput type="date" formControlName="date" />
-					<button
-						mat-icon-button
-						matSuffix
-						type="button"
-						aria-label="Open add expense date calendar"
-						(click)="openDatePicker(createDateInput)">
-						<mat-icon>calendar_month</mat-icon>
-					</button>
+					<input #createDateInput="appDateInput" appDateInput matInput type="date" formControlName="date" />
+					<app-date-picker-toggle matSuffix [for]="createDateInput" ariaLabel="Open add expense date calendar"></app-date-picker-toggle>
 					@if (createForm.controls.date.hasError('required')) {
 						<mat-error>Date is required.</mat-error>
 					}
@@ -117,19 +110,13 @@
 							<div class="date-pop-inline">
 								<mat-form-field class="header-filter-field" subscriptSizing="dynamic">
 									<input
-										#dateHeaderInput
+										#dateHeaderInput="appDateInput"
+										appDateInput
 										matInput
 										type="date"
 										[formControl]="filterForm.controls.date"
 										(change)="applyFilters()" />
-									<button
-										mat-icon-button
-										matSuffix
-										type="button"
-										aria-label="Open date calendar"
-										(click)="openDatePicker(dateHeaderInput)">
-										<mat-icon>calendar_month</mat-icon>
-									</button>
+									<app-date-picker-toggle matSuffix [for]="dateHeaderInput" ariaLabel="Open date calendar"></app-date-picker-toggle>
 								</mat-form-field>
 							</div>
 						</th>

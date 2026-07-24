@@ -13,6 +13,8 @@ import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
 import { TagService } from '../../services/tag';
 import { TrackerService } from '../../services/tracker';
+import { DateInputDirective } from '../../shared/date-input.directive';
+import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 
 @Component({
   selector: 'app-expense-form',
@@ -24,6 +26,8 @@ import { TrackerService } from '../../services/tracker';
     MatInputModule,
     MatSelectModule,
     ReactiveFormsModule,
+    DateInputDirective,
+    DatePickerToggleComponent,
   ],
   templateUrl: './expense-form.html',
   styleUrl: './expense-form.scss',

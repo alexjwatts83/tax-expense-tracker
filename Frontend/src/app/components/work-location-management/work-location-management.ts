@@ -11,6 +11,8 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { DayEntrySummary, DayEntryType, WorkLocationEntry, WorkLocationType } from '../../models/api.models';
 import { WorkLocationService } from '../../services/work-location';
+import { DateInputDirective } from '../../shared/date-input.directive';
+import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 import { toLocalDateInputValue } from '../../utils/date';
 
 @Component({
@@ -26,6 +28,8 @@ import { toLocalDateInputValue } from '../../utils/date';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
+    DateInputDirective,
+    DatePickerToggleComponent,
   ],
   templateUrl: './work-location-management.html',
   styleUrl: './work-location-management.scss',

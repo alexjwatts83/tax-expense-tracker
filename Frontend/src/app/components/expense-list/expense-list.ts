@@ -17,6 +17,8 @@ import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
 import { TagService } from '../../services/tag';
 import { TrackerService } from '../../services/tracker';
+import { DateInputDirective } from '../../shared/date-input.directive';
+import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 
 @Component({
   selector: 'app-expense-list',
@@ -35,6 +37,8 @@ import { TrackerService } from '../../services/tracker';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
+    DateInputDirective,
+    DatePickerToggleComponent,
   ],
   templateUrl: './expense-list.html',
   styleUrl: './expense-list.scss',
@@ -346,13 +350,6 @@ export class ExpenseList implements OnInit {
     this.page = 1;
     this.lastDeletedExpense = null;
     this.loadExpenses();
-  }
-
-  openDatePicker(input: HTMLInputElement): void {
-    input.focus();
-
-    const pickerInput = input as HTMLInputElement & { showPicker?: () => void };
-    pickerInput.showPicker?.();
   }
 
   previousPage(): void {

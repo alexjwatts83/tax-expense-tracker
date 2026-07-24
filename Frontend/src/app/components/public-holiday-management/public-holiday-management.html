@@ -29,12 +29,14 @@
 			<form [formGroup]="filterForm" class="filter-form">
 				<mat-form-field appearance="outline" subscriptSizing="dynamic">
 					<mat-label>From Date</mat-label>
-					<input matInput type="date" formControlName="fromDate" />
+					<input #fromDateInput="appDateInput" appDateInput matInput type="date" formControlName="fromDate" />
+					<app-date-picker-toggle matSuffix [for]="fromDateInput" ariaLabel="Open holiday filter from date calendar"></app-date-picker-toggle>
 				</mat-form-field>
 
 				<mat-form-field appearance="outline" subscriptSizing="dynamic">
 					<mat-label>To Date</mat-label>
-					<input matInput type="date" formControlName="toDate" />
+					<input #toDateInput="appDateInput" appDateInput matInput type="date" formControlName="toDate" />
+					<app-date-picker-toggle matSuffix [for]="toDateInput" ariaLabel="Open holiday filter to date calendar"></app-date-picker-toggle>
 				</mat-form-field>
 
 				<div class="form-actions">

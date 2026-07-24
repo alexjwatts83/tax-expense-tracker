@@ -2,7 +2,7 @@
 	<mat-card class="bank-form-card">
 		<mat-card-content>
 			<form [formGroup]="bankForm" (ngSubmit)="createBank()" class="bank-form">
-				<mat-form-field appearance="outline">
+				<mat-form-field appearance="outline" subscriptSizing="dynamic">
 					<mat-label>Name</mat-label>
 					<input matInput formControlName="name" placeholder="ANZ" />
 				</mat-form-field>

@@ -2,7 +2,7 @@
 	<mat-card class="tag-form-card">
 		<mat-card-content>
 			<form [formGroup]="tagForm" (ngSubmit)="createTag()" class="tag-form">
-				<mat-form-field appearance="outline">
+				<mat-form-field appearance="outline" subscriptSizing="dynamic">
 					<mat-label>Name</mat-label>
 					<input matInput formControlName="name" placeholder="Deductible" />
 				</mat-form-field>

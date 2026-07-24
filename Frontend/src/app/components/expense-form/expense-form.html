@@ -15,7 +15,8 @@
 
 				<mat-form-field>
 					<mat-label>Date</mat-label>
-					<input matInput formControlName="date" type="date" />
+					<input #expenseDateInput="appDateInput" appDateInput matInput formControlName="date" type="date" />
+					<app-date-picker-toggle matSuffix [for]="expenseDateInput" ariaLabel="Open expense date calendar"></app-date-picker-toggle>
 				</mat-form-field>
 
 				<mat-form-field>

@@ -55,6 +55,29 @@ Validation approach:
 - Run API and unit/integration automated checks.
 - Perform manual UI smoke and end-to-end flow checks in the app.
 
+## Reusable Date Input Pattern
+
+Use the shared date-input helpers so every `matInput` date field has a consistent calendar popup button:
+
+- Directive: `src/app/shared/date-input.directive.ts`
+- Toggle component: `src/app/shared/date-picker-toggle.component.ts`
+
+When adding a new date input in a standalone component:
+
+1. Add `DateInputDirective` and `DatePickerToggleComponent` to the component `imports` array.
+2. Decorate the input with `appDateInput` and export it in the template.
+3. Place `<app-date-picker-toggle>` in the same `mat-form-field` and bind `[for]` to that exported input.
+
+Example:
+
+```html
+<mat-form-field appearance="outline" subscriptSizing="dynamic">
+	<mat-label>Date</mat-label>
+	<input #entryDateInput="appDateInput" appDateInput matInput type="date" formControlName="date" />
+	<app-date-picker-toggle [for]="entryDateInput" ariaLabel="Open date calendar"></app-date-picker-toggle>
+</mat-form-field>
+```
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

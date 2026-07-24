@@ -11,6 +11,8 @@ import { MatTableModule } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
 import { DayEntrySummary, DayEntryType, LeaveEntry, LeaveType } from '../../models/api.models';
 import { LeaveService } from '../../services/leave';
+import { DateInputDirective } from '../../shared/date-input.directive';
+import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 import { toLocalDateInputValue } from '../../utils/date';
 
 @Component({
@@ -26,6 +28,8 @@ import { toLocalDateInputValue } from '../../utils/date';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
+    DateInputDirective,
+    DatePickerToggleComponent,
   ],
   templateUrl: './leave-management.html',
   styleUrl: './leave-management.scss',
