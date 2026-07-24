@@ -15,6 +15,36 @@
 	width: 100%;
 }
 
+.entry-filter-block {
+	margin-bottom: 1rem;
+}
+
+.filter-row {
+	grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+	align-items: center;
+}
+
+.filter-actions-icons {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+@media (max-width: 720px) {
+	.filter-row {
+		grid-template-columns: 1fr;
+	}
+
+	.filter-actions-icons {
+		justify-content: flex-start;
+	}
+
+	.summary-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 .paging-bar {
 	display: flex;
 	align-items: center;
@@ -40,8 +70,14 @@
 
 .summary-grid {
 	display: grid;
-	gap: 0.5rem;
+	gap: 1rem;
 	margin-top: 1rem;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summary-grid .period-row {
+	grid-column: 1 / -1;
+	margin: 0;
 }
 
 .holiday-list {

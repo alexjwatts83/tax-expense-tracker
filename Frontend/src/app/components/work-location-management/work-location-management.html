@@ -85,7 +85,7 @@
 				<p class="empty-message">Select a period to load summary details.</p>
 			} @else if (summary) {
 				<div class="summary-grid">
-					<p><strong>Period:</strong> {{ summary.fromDate | date: 'mediumDate' }} - {{ summary.toDate | date: 'mediumDate' }}</p>
+					<p class="period-row"><strong>Period:</strong> {{ summary.fromDate | date: 'mediumDate' }} - {{ summary.toDate | date: 'mediumDate' }}</p>
 					<p><strong>Total Hours:</strong> {{ summary.totalHours }}</p>
 					<p><strong>Total Days:</strong> {{ summary.totalDays }}</p>
 					<p><strong>Entries:</strong> {{ summary.entryCount }}</p>
@@ -107,29 +107,6 @@
 		</mat-card-content>
 	</mat-card>
 
-	<mat-card class="filter-card">
-		<mat-card-content>
-			<form [formGroup]="filterForm" class="summary-form">
-				<mat-form-field appearance="outline" subscriptSizing="dynamic">
-					<mat-label>From Date</mat-label>
-					<input #fromDateInput="appDateInput" appDateInput matInput type="date" formControlName="fromDate" />
-					<app-date-picker-toggle matSuffix [for]="fromDateInput" ariaLabel="Open work filter from date calendar"></app-date-picker-toggle>
-				</mat-form-field>
-
-				<mat-form-field appearance="outline" subscriptSizing="dynamic">
-					<mat-label>To Date</mat-label>
-					<input #toDateInput="appDateInput" appDateInput matInput type="date" formControlName="toDate" />
-					<app-date-picker-toggle matSuffix [for]="toDateInput" ariaLabel="Open work filter to date calendar"></app-date-picker-toggle>
-				</mat-form-field>
-
-				<div class="form-actions">
-					<button mat-stroked-button type="button" (click)="applyFilters()">Apply Filter</button>
-					<button mat-button type="button" (click)="clearFilters()">Clear</button>
-				</div>
-			</form>
-		</mat-card-content>
-	</mat-card>
-
 	@if (errorMessage) {
 		<p class="error-message">{{ errorMessage }}</p>
 	}
@@ -145,6 +122,31 @@
 
 	<mat-card class="entry-list-card">
 		<mat-card-content>
+			<div class="entry-filter-block">
+				<form [formGroup]="filterForm" class="summary-form filter-row">
+					<mat-form-field appearance="outline" subscriptSizing="dynamic">
+						<mat-label>From Date</mat-label>
+						<input #fromDateInput="appDateInput" appDateInput matInput type="date" formControlName="fromDate" />
+						<app-date-picker-toggle matSuffix [for]="fromDateInput" ariaLabel="Open work filter from date calendar"></app-date-picker-toggle>
+					</mat-form-field>
+
+					<mat-form-field appearance="outline" subscriptSizing="dynamic">
+						<mat-label>To Date</mat-label>
+						<input #toDateInput="appDateInput" appDateInput matInput type="date" formControlName="toDate" />
+						<app-date-picker-toggle matSuffix [for]="toDateInput" ariaLabel="Open work filter to date calendar"></app-date-picker-toggle>
+					</mat-form-field>
+
+					<div class="filter-actions-icons">
+						<button mat-icon-button type="button" aria-label="Apply filter" (click)="applyFilters()">
+							<mat-icon>filter_alt</mat-icon>
+						</button>
+						<button mat-icon-button type="button" aria-label="Clear filter" (click)="clearFilters()">
+							<mat-icon>clear_all</mat-icon>
+						</button>
+					</div>
+				</form>
+			</div>
+
 			@if (isLoading) {
 				<div class="loading">
 					<mat-spinner diameter="32"></mat-spinner>
