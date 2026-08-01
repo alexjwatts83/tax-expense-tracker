@@ -54,4 +54,9 @@ export const routes: Routes = [
 		loadComponent: () =>
 			import('./components/calendar-batch-entry/calendar-batch-entry').then((m) => m.CalendarBatchEntry),
 	},
+	{
+		path: 'data-transfer',
+		loadComponent: () =>
+			import('./components/data-transfer/data-transfer').then((m) => m.DataTransfer),
+	},
 ];

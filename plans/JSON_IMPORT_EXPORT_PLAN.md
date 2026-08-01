@@ -288,11 +288,11 @@ Current implementation note:
 
 ### Admin Data Transfer Screen
 
-- [ ] Add route/page: `/data-transfer`.
-- [ ] Export actions:
+- [x] Add route/page: `/data-transfer`.
+- [x] Export actions:
   - Export Reference Data JSON
   - Export per-entity JSON
-- [ ] Import actions:
+- [x] Import actions:
   - Upload JSON file
   - Import Expenses JSON
   - Import Work Entries JSON
@@ -300,16 +300,24 @@ Current implementation note:
   - Select mode (`insertOnly`, `upsert`, `replace`)
   - Optional dry-run toggle
   - Show validation summary before confirm
-- [ ] Show result report table (created/updated/skipped/errors by entity).
+- [x] Show result report table (created/updated/skipped/errors by entity).
+
+Current implementation note:
+
+- Added a lazy-loaded Data Transfer page and API service.
+- Imports require a successful dry-run with unchanged settings before the real import action is enabled.
+- Replace mode exposes the explicit missing-record deletion option.
+- Results show per-entity counts, warnings, errors, and the API correlation reference.
+- Desktop and mobile layouts were checked at 1024 px and 390 px without document-level horizontal overflow.
 
 ## Testing Plan
 
 ### Unit Tests
 
 - [x] Serialization/deserialization for envelope and entity payloads.
-- [~] Import mode behavior (`insertOnly`, `upsert`, `replace`).
+- [x] Import mode behavior (`insertOnly`, `upsert`, `replace`).
 - [x] Dependency ordering and FK validation.
-- [~] Dry-run returns expected report with no DB mutation.
+- [x] Dry-run returns expected report with no DB mutation.
 
 Current implementation note:
 
@@ -318,7 +326,7 @@ Current implementation note:
 - Added focused coverage for transactional `replace + allowDeletes`, including dry-run, soft deletes, and expense-tag link synchronization.
 - Added wire-contract coverage for the reference envelope and expense, work-location, and leave payloads using the API's web JSON settings.
 - Added expense dependency coverage for same-payload expense tags and missing source, bank, and tag references.
-- Full import-mode coverage remains pending.
+- Added reference and transactional mode coverage for create, update/restore, insert-only skip, and replace deletion behavior.
 
 ## Application Module Organization
 
@@ -336,7 +344,14 @@ Create a separate project only if this module gains independent consumers, depen
 
 - [ ] Large export/download in browser.
 - [ ] Large import upload and progress feedback.
-- [ ] Error messages readable for malformed files.
+- [x] Error messages readable for malformed files.
+
+Current implementation note:
+
+- Verified a reference export download and an empty reference dry-run through the Angular proxy against the local API.
+- Verified successful validation renders four entity summaries and enables the guarded import action.
+- Verified malformed JSON is rejected locally with a readable error and no enabled validation action.
+- Large-payload verification remains pending until representative fixtures are available.
 
 ## Performance Considerations
 
@@ -389,8 +404,7 @@ Create a separate project only if this module gains independent consumers, depen
   - Rollback of imports containing validation errors
   - Streamed export responses
   - Phase 4 safety/observability items
+  - Frontend admin data-transfer screen with dry-run-first workflow
 - Pending:
-  - Complete import-mode unit coverage
   - Bulk import optimization and batching
-  - Frontend admin data-transfer screen
   - Manual roundtrip and large-payload verification

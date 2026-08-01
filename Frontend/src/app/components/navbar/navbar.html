@@ -3,12 +3,20 @@
 
 	<span class="spacer"></span>
 
-	<a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
-	<a mat-button routerLink="/expenses" routerLinkActive="active-link">Expenses</a>
-	<a mat-button routerLink="/time-tracking" routerLinkActive="active-link">Time Tracking</a>
-	<a mat-button routerLink="/calendar-batch-entry" routerLinkActive="active-link">Calendar Batch</a>
-	<a mat-button routerLink="/public-holidays" routerLinkActive="active-link">Holidays</a>
-	<a mat-button routerLink="/trackers" routerLinkActive="active-link">Trackers</a>
-	<a mat-button routerLink="/tags" routerLinkActive="active-link">Tags</a>
-	<a mat-button routerLink="/banks" routerLinkActive="active-link">Banks</a>
+	<nav class="nav-links" aria-label="Primary navigation">
+		<a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+		<a mat-button routerLink="/expenses" routerLinkActive="active-link">Expenses</a>
+		<a mat-button routerLink="/time-tracking" routerLinkActive="active-link">Time Tracking</a>
+		<a mat-button routerLink="/calendar-batch-entry" routerLinkActive="active-link">Calendar Batch</a>
+		<details #manageMenu class="manage-menu">
+			<summary>Manage</summary>
+			<nav class="manage-panel" aria-label="Management navigation">
+				<a routerLink="/public-holidays" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Holidays</a>
+				<a routerLink="/trackers" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Trackers</a>
+				<a routerLink="/tags" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Tags</a>
+				<a routerLink="/banks" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Banks</a>
+				<a routerLink="/data-transfer" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Data Transfer</a>
+			</nav>
+		</details>
+	</nav>
 </mat-toolbar>

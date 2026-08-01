@@ -1,0 +1,178 @@
+<section class="page">
+	<header class="page-header">
+		<div>
+			<h1>Data Transfer</h1>
+			<p>Download backups or validate and import JSON data.</p>
+		</div>
+	</header>
+
+	@if (errorMessage) {
+		<p class="error-message" role="alert">{{ errorMessage }}</p>
+	}
+
+	@if (infoMessage) {
+		<p class="info-message">{{ infoMessage }}</p>
+	}
+
+	<div class="transfer-grid">
+		<mat-card>
+			<mat-card-header>
+				<mat-icon mat-card-avatar>download</mat-icon>
+				<mat-card-title>Export</mat-card-title>
+				<mat-card-subtitle>Create a JSON backup</mat-card-subtitle>
+			</mat-card-header>
+			<mat-card-content class="panel-content">
+				<mat-form-field appearance="outline" subscriptSizing="dynamic">
+					<mat-label>Data set</mat-label>
+					<mat-select [(value)]="exportKind">
+						@for (option of exportOptions; track option.value) {
+							<mat-option [value]="option.value">{{ option.label }}</mat-option>
+						}
+					</mat-select>
+				</mat-form-field>
+
+				<mat-checkbox [(ngModel)]="includeSoftDeleted">Include deleted records</mat-checkbox>
+			</mat-card-content>
+			<mat-card-actions align="end">
+				<button mat-flat-button color="primary" type="button" (click)="downloadExport()" [disabled]="isExporting">
+					@if (isExporting) {
+						<mat-spinner diameter="18"></mat-spinner>
+					} @else {
+						<mat-icon>download</mat-icon>
+					}
+					Download JSON
+				</button>
+			</mat-card-actions>
+		</mat-card>
+
+		<mat-card>
+			<mat-card-header>
+				<mat-icon mat-card-avatar>upload_file</mat-icon>
+				<mat-card-title>Import</mat-card-title>
+				<mat-card-subtitle>Validate before writing changes</mat-card-subtitle>
+			</mat-card-header>
+			<mat-card-content class="panel-content">
+				<div class="import-fields">
+					<mat-form-field appearance="outline" subscriptSizing="dynamic">
+						<mat-label>Import type</mat-label>
+						<mat-select [(value)]="importKind" (selectionChange)="settingsChanged()">
+							@for (option of importOptions; track option.value) {
+								<mat-option [value]="option.value">{{ option.label }}</mat-option>
+							}
+						</mat-select>
+					</mat-form-field>
+
+					<mat-form-field appearance="outline" subscriptSizing="dynamic">
+						<mat-label>Mode</mat-label>
+						<mat-select [(value)]="importMode" (selectionChange)="settingsChanged()">
+							@for (option of modeOptions; track option.value) {
+								<mat-option [value]="option.value">{{ option.label }}</mat-option>
+							}
+						</mat-select>
+					</mat-form-field>
+				</div>
+
+				<div class="file-row">
+					<input #fileInput type="file" accept="application/json,.json" (change)="selectFile($event)" hidden />
+					<button mat-stroked-button type="button" (click)="fileInput.click()">
+						<mat-icon>attach_file</mat-icon>
+						Choose JSON
+					</button>
+					<span class="file-name">{{ selectedFile?.name || 'No file selected' }}</span>
+				</div>
+
+				<div class="option-row">
+					<mat-checkbox
+						[checked]="dryRun"
+						(change)="toggleDryRun($event.checked)"
+						[disabled]="!validationPassed && dryRun"
+					>
+						Dry run
+					</mat-checkbox>
+					<mat-checkbox
+						[(ngModel)]="allowDeletes"
+						(change)="settingsChanged()"
+						[disabled]="importMode !== 'Replace'"
+					>
+						Delete records missing from payload
+					</mat-checkbox>
+				</div>
+			</mat-card-content>
+			<mat-card-actions align="end">
+				<button
+					mat-flat-button
+					color="primary"
+					type="button"
+					(click)="runImport()"
+					[disabled]="isImporting || parsedPayload === null || (!dryRun && !validationPassed)"
+				>
+					@if (isImporting) {
+						<mat-spinner diameter="18"></mat-spinner>
+					} @else {
+						<mat-icon>{{ dryRun ? 'fact_check' : 'upload' }}</mat-icon>
+					}
+					{{ dryRun ? 'Validate' : 'Import' }}
+				</button>
+			</mat-card-actions>
+		</mat-card>
+	</div>
+
+	@if (result) {
+		<section class="results" aria-live="polite">
+			<div class="results-header">
+				<h2>{{ result.dryRun ? 'Validation result' : 'Import result' }}</h2>
+				@if (result.correlationId) {
+					<span>Reference: {{ result.correlationId }}</span>
+				}
+			</div>
+
+			<div class="table-scroll">
+				<table mat-table [dataSource]="result.results" class="result-table">
+					<ng-container matColumnDef="entity">
+						<th mat-header-cell *matHeaderCellDef>Entity</th>
+						<td mat-cell *matCellDef="let item">{{ item.entity }}</td>
+					</ng-container>
+					<ng-container matColumnDef="received">
+						<th mat-header-cell *matHeaderCellDef>Received</th>
+						<td mat-cell *matCellDef="let item">{{ item.receivedCount }}</td>
+					</ng-container>
+					<ng-container matColumnDef="created">
+						<th mat-header-cell *matHeaderCellDef>Created</th>
+						<td mat-cell *matCellDef="let item">{{ item.createdCount }}</td>
+					</ng-container>
+					<ng-container matColumnDef="updated">
+						<th mat-header-cell *matHeaderCellDef>Updated</th>
+						<td mat-cell *matCellDef="let item">{{ item.updatedCount }}</td>
+					</ng-container>
+					<ng-container matColumnDef="skipped">
+						<th mat-header-cell *matHeaderCellDef>Skipped</th>
+						<td mat-cell *matCellDef="let item">{{ item.skippedCount }}</td>
+					</ng-container>
+					<ng-container matColumnDef="warnings">
+						<th mat-header-cell *matHeaderCellDef>Warnings</th>
+						<td mat-cell *matCellDef="let item" class="issues-cell">
+							@for (warning of item.warnings; track $index) {
+								<span class="warning-text">{{ warning }}</span>
+							} @empty {
+								<span>-</span>
+							}
+						</td>
+					</ng-container>
+					<ng-container matColumnDef="errors">
+						<th mat-header-cell *matHeaderCellDef>Errors</th>
+						<td mat-cell *matCellDef="let item" class="issues-cell">
+							@for (error of item.errors; track $index) {
+								<span class="error-text">{{ error }}</span>
+							} @empty {
+								<span>-</span>
+							}
+						</td>
+					</ng-container>
+
+					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+					<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+				</table>
+			</div>
+		</section>
+	}
+</section>

@@ -91,6 +91,66 @@ public class DataTransferExpenseImportHandlerTests
     }
 
     [Fact]
+    public async Task ImportAsync_Upsert_CreatesMissingExpense()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+        var expenseId = Guid.NewGuid();
+
+        var results = await handler.ImportAsync(
+            CreatePayload(repository, expenseId),
+            new DataTransferImportOptions(DataTransferImportMode.Upsert));
+
+        var result = Assert.Single(results, x => x.Entity == "expenses");
+        var expense = Assert.Single(repository.Expenses);
+        Assert.Equal(expenseId, expense.Id);
+        Assert.Equal("Laptop", expense.Description);
+        Assert.Equal(1, result.CreatedCount);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
+    public async Task ImportAsync_Upsert_UpdatesAndRestoresExistingExpense()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var existing = TaxExpense.Create("Old", new DateTime(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
+        existing.SoftDelete(TestTime.TimeProvider);
+        repository.Expenses.Add(existing);
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+
+        var results = await handler.ImportAsync(
+            CreatePayload(repository, existing.Id),
+            new DataTransferImportOptions(DataTransferImportMode.Upsert));
+
+        var result = Assert.Single(results, x => x.Entity == "expenses");
+        Assert.Equal("Laptop", existing.Description);
+        Assert.Equal(1200m, existing.Price);
+        Assert.False(existing.IsDeleted);
+        Assert.Equal(1, result.UpdatedCount);
+        Assert.True(repository.SaveChangesCalled);
+    }
+
+    [Fact]
+    public async Task ImportAsync_InsertOnly_SkipsExistingExpenseWithoutMutation()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var existing = TaxExpense.Create("Original", new DateTime(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
+        repository.Expenses.Add(existing);
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+
+        var results = await handler.ImportAsync(
+            CreatePayload(repository, existing.Id),
+            new DataTransferImportOptions(DataTransferImportMode.InsertOnly));
+
+        var result = Assert.Single(results, x => x.Entity == "expenses");
+        Assert.Equal("Original", existing.Description);
+        Assert.Equal(10m, existing.Price);
+        Assert.Equal(1, result.SkippedCount);
+        Assert.Contains(result.Warnings, x => x.Code == "WARN_INSERT_ONLY_SKIPPED");
+        Assert.False(repository.SaveChangesCalled);
+    }
+
+    [Fact]
     public async Task ImportAsync_ReplaceWithDeletes_SoftDeletesExpenseMissingFromPayload()
     {
         var repository = new DataTransferExpenseRepository();
