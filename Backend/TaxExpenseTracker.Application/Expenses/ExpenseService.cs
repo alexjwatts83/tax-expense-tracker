@@ -42,11 +42,11 @@ public sealed class ExpenseService : IExpenseService
     {
         var sourceExists = await _expenseRepository.SourceExistsAsync(command.SourceId, cancellationToken);
         if (!sourceExists)
-            ThrowHelper.InvalidOperation("Source tracker does not exist.");
+            ThrowHelper.MissingReference("Source tracker", command.SourceId);
 
         var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
         if (!bankExists)
-            ThrowHelper.InvalidOperation("Bank does not exist.");
+            ThrowHelper.MissingReference("Bank", command.BankId);
 
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 
@@ -82,11 +82,11 @@ public sealed class ExpenseService : IExpenseService
 
         var sourceExists = await _expenseRepository.SourceExistsAsync(command.SourceId, cancellationToken);
         if (!sourceExists)
-            ThrowHelper.InvalidOperation("Source tracker does not exist.");
+            ThrowHelper.MissingReference("Source tracker", command.SourceId);
 
         var bankExists = await _expenseRepository.BankExistsAsync(command.BankId, cancellationToken);
         if (!bankExists)
-            ThrowHelper.InvalidOperation("Bank does not exist.");
+            ThrowHelper.MissingReference("Bank", command.BankId);
 
         var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
 

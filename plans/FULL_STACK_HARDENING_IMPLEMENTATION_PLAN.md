@@ -1,10 +1,10 @@
 # Full-Stack Hardening Implementation Plan
 
 Last Updated: 2026-08-02
-Status: Planned
-Overall Progress: 0/74 tasks (0%)
-Current Stage: Stage 0 - Baseline and Contract Decisions
-Next Task: S0-01
+Status: In Progress
+Overall Progress: 11/74 tasks (15%)
+Current Stage: Stage 1 - Error Contract and Immediate Defects
+Next Task: S1-03
 
 ## Purpose
 
@@ -31,8 +31,8 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 
 | Stage | Scope | Done | Total | Progress | Status | Depends On |
 |---|---|---:|---:|---:|---|---|
-| 0 | Baseline and contract decisions | 0 | 9 | 0% | Not Started | None |
-| 1 | Error contract and immediate defects | 0 | 8 | 0% | Not Started | Stage 0 |
+| 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
+| 1 | Error contract and immediate defects | 2 | 8 | 25% | In Progress | Stage 0 |
 | 2 | Authentication and authorization | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
@@ -40,7 +40,7 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **0** | **74** | **0%** | **Planned** |  |
+| **Total** |  | **11** | **74** | **15%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -59,23 +59,23 @@ Goal: create reliable test boundaries and decide the contracts that later stages
 
 ### Tasks
 
-- [ ] **S0-01** Add backend API test hosting with an isolated test database.
-- [ ] **S0-02** Add frontend HTTP service test infrastructure and a non-watch CI command.
-- [ ] **S0-03** Add backend architecture tests for project dependency direction.
-- [ ] **S0-04** Capture representative API route, JSON, correlation-ID, batch-result, and DataTransfer contracts.
-- [ ] **S0-05** Decide identity provider, credential flow, claims, admin policy, and Development behavior (`DEC-HARD-001`).
-- [ ] **S0-06** Decide the common API problem/error shape (`DEC-HARD-002`).
-- [ ] **S0-07** Decide calendar-date versus instant contracts and expense-date semantics (`DEC-HARD-003`).
-- [ ] **S0-08** Decide calendar partial-success versus atomic change-set behavior (`DEC-HARD-004`).
-- [ ] **S0-09** Decide API and browser DataTransfer size/progress limits (`DEC-HARD-005`) and pass the stage validation gate.
+- [x] **S0-01** Add backend API test hosting with an isolated test database.
+- [x] **S0-02** Add frontend HTTP service test infrastructure and a non-watch CI command.
+- [x] **S0-03** Add backend architecture tests for project dependency direction.
+- [x] **S0-04** Capture representative API route, JSON, correlation-ID, batch-result, and DataTransfer contracts.
+- [x] **S0-05** Decide identity provider, credential flow, claims, admin policy, and Development behavior (`DEC-HARD-001`).
+- [x] **S0-06** Decide the common API problem/error shape (`DEC-HARD-002`).
+- [x] **S0-07** Decide calendar-date versus instant contracts and expense-date semantics (`DEC-HARD-003`).
+- [x] **S0-08** Decide calendar partial-success versus atomic change-set behavior (`DEC-HARD-004`).
+- [x] **S0-09** Decide API and browser DataTransfer size/progress limits (`DEC-HARD-005`); stage validation gate tracked separately below.
 
 ### Recommended Decisions
 
-- Identity: Microsoft Entra ID/App Service Authentication with ASP.NET Core policy enforcement; no browser API key.
-- Errors: ProblemDetails-compatible response with stable code/type, safe detail, correlation ID, and optional field errors.
-- Dates: `yyyy-MM-dd` calendar dates; UTC ISO timestamps for audit instants; treat expense date as a calendar purchase date unless product requirements say otherwise.
-- Calendar: preserve mixed results initially, then consider one atomic change-set endpoint only if partial updates remain a user problem.
-- DataTransfer: browser preflight limit below or equal to the API request limit; no fake progress indicator.
+- Identity: single-tenant Microsoft Entra ID with separate SPA and API registrations; Angular MSAL authorization-code flow with PKCE; bearer-token validation in App Service and ASP.NET Core; only the configured Entra object ID is authorized; no browser secret or app-owned user store.
+- Errors: RFC 9457 ProblemDetails with stable `code`/`type`, title, status, safe detail, request instance, matching correlation ID, and optional field-error dictionary.
+- Dates: `yyyy-MM-dd`/`DateOnly` for expense purchase, work, leave, and holiday dates; UTC ISO timestamps for audit instants; no timezone conversion of calendar dates.
+- Calendar: preserve mixed partial-success results with deterministic per-item statuses; do not add an atomic change-set endpoint without a new product decision.
+- DataTransfer: 10 MiB browser file limit and 12 MiB API request limit; reject before reading, parse supported files in a worker, and show stage-based status without invented percentages.
 
 ### Validation Gate
 
@@ -96,8 +96,8 @@ Goal: establish predictable errors before authentication and invariant changes, 
 
 ### Tasks
 
-- [ ] **S1-01** Add typed backend application exceptions or result types for validation, conflict, not found, and missing references.
-- [ ] **S1-02** Log unexpected exceptions with route, method, exception, and correlation ID.
+- [x] **S1-01** Add typed backend application exceptions or result types for validation, conflict, not found, and missing references.
+- [x] **S1-02** Log unexpected exceptions with route, method, exception, and correlation ID.
 - [ ] **S1-03** Map backend errors to the agreed ProblemDetails contract and status codes.
 - [ ] **S1-04** Add middleware/API integration tests for 400, 404, 409, and 500 responses.
 - [ ] **S1-05** Add typed frontend `ApiProblem` parsing/classification for JSON, text, and Blob responses.
@@ -126,17 +126,19 @@ Land the backend contract before converting every frontend component, but deploy
 
 Goal: protect API data and complete a usable browser session flow in one release capability.
 
+Start this stage immediately after the Stage 1 shared error contract is complete. Validate it in Azure dev before beginning date, aggregate, or calendar refactors.
+
 ### Tasks
 
-- [ ] **S2-01** Add validated backend identity/security options.
-- [ ] **S2-02** Register authentication and place `UseAuthentication()` before authorization.
-- [ ] **S2-03** Add authenticated-user and DataTransfer-administrator policies.
+- [ ] **S2-01** Add validated single-tenant Entra options, including tenant, API audience, and allowed user object ID.
+- [ ] **S2-02** Register JWT bearer validation and place `UseAuthentication()` before authorization.
+- [ ] **S2-03** Add an allowed-user policy and a named DataTransfer policy; both authorize the sole configured identity without introducing application roles.
 - [ ] **S2-04** Apply policies to every controller and document intentionally anonymous endpoints.
 - [ ] **S2-05** Add backend 401/403/authenticated/admin integration tests.
-- [ ] **S2-06** Add frontend authentication/session service for the selected provider.
+- [ ] **S2-06** Add MSAL Angular using authorization code with PKCE, in-memory token caching, and an API-scope interceptor.
 - [ ] **S2-07** Add authenticated and administrator route guards plus role-aware navigation.
 - [ ] **S2-08** Add login, logout, loading, expired-session, access-denied, and deep-link behavior.
-- [ ] **S2-09** Configure Development and Azure identity settings without browser-delivered secrets.
+- [ ] **S2-09** Provision separate SPA/API Entra registrations, expose and consent the API scope, assign only the owner, configure API Easy Auth, CORS, redirect URIs, and a Development-only test scheme.
 - [ ] **S2-10** Run the anonymous/user/admin end-to-end matrix and pass the stage validation gate.
 
 ### Rollout Constraint
@@ -146,10 +148,11 @@ Backend enforcement and frontend authentication UX must be deployed together or 
 ### Acceptance Criteria
 
 - Anonymous API writes and exports/imports are rejected.
-- Authenticated users can use normal workflows.
-- Only administrators can access DataTransfer APIs and UI.
+- The configured Entra identity can use normal workflows and DataTransfer.
+- Other tenant users are rejected even if they can authenticate with Entra.
 - 401 recovers the session as designed; 403 does not cause redirect loops.
 - Production startup fails clearly for invalid identity configuration.
+- Azure dev authentication is verified before Stage 3 begins.
 
 ### Suggested Commits
 
@@ -337,7 +340,7 @@ dotnet test Backend/TaxExpenseTracker.Tests.Integration/TaxExpenseTracker.Tests.
 dotnet ef migrations script --project Backend/TaxExpenseTracker.Infrastructure --startup-project Backend/TaxExpenseTracker.Api
 
 Set-Location Frontend
-npm test -- --watch=false
+npm run test:ci
 npm run build
 ```
 
@@ -358,11 +361,11 @@ If a running API locks build outputs, stop it through the repository script befo
 
 | ID | Date | Decision | Choice | Rationale | Impacted Stages | Status |
 |---|---|---|---|---|---|---|
-| DEC-HARD-001 |  | Identity/session architecture |  |  | 2, 7, 8 | Open |
-| DEC-HARD-002 |  | API problem/error contract |  |  | 1-5, 7 | Open |
-| DEC-HARD-003 |  | Calendar and expense date semantics |  |  | 3-7 | Open |
-| DEC-HARD-004 |  | Calendar batch transaction semantics |  |  | 5 | Open |
-| DEC-HARD-005 |  | DataTransfer browser/API limits |  |  | 7 | Open |
+| DEC-HARD-001 | 2026-08-02 | Identity/session architecture | Single-tenant Entra; separate SPA/API registrations; MSAL code + PKCE; JWT validation in Easy Auth and ASP.NET Core; one allowed object ID; sole user is DataTransfer admin | Planned Azure topology uses separate Static Web App and API App Service origins. This avoids app-owned passwords while restricting all data to the owner and keeping server authorization authoritative. | 2, 7, 8 | Decided |
+| DEC-HARD-002 | 2026-08-02 | API problem/error contract | RFC 9457 ProblemDetails with `code`, stable `type`, `title`, `status`, safe `detail`, request `instance`, `correlationId`, and optional `errors` | Current exceptions, bare 404s, DataTransfer errors, and Angular extraction are inconsistent. One contract supports typed frontend behavior and correlated diagnostics without exposing internals. | 1-5, 7 | Decided |
+| DEC-HARD-003 | 2026-08-02 | Calendar and expense date semantics | Expense purchase, work, leave, and holiday dates are timezone-free calendar dates serialized as `yyyy-MM-dd` and represented by `DateOnly` in backend contracts; audit values are UTC instants | Users enter and report these values by calendar day. Converting them through UTC can shift the day. Existing non-midnight values retain their stored year/month/day during normalization. | 3-7 | Decided |
+| DEC-HARD-004 | 2026-08-02 | Calendar batch transaction semantics | Preserve partial success with deterministic per-item results and aggregate counts; malformed requests fail wholly, but one item failure does not roll back valid items | The API and Angular workflow already expose mixed outcomes, and users can correct only failed rows. Preserving this contract avoids a breaking endpoint and keeps feedback granular. | 5 | Decided |
+| DEC-HARD-005 | 2026-08-02 | DataTransfer browser/API limits | 10 MiB maximum selected file; 12 MiB API request limit; reject before reading; worker-based parse/validation; stage-based status and cancellation only where real | The current 100 MiB API allowance and main-thread `file.text()`/`JSON.parse()` combination can exhaust or freeze the browser. A small solo-use ceiling is safer and can be raised later from measurements. | 7 | Decided |
 | DEC-HARD-006 |  | Reference entity audit timestamps |  |  | 6 | Open |
 
 ## Blocker Log
@@ -379,6 +382,26 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-02 | Baseline | Backend integration tests | Pass: 2 | Existing baseline |
 | 2026-08-02 | Baseline | Frontend tests | Pass: 2 | Existing smoke tests only |
 | 2026-08-02 | Baseline | Frontend production build | Pass with 2 existing budget warnings | Initial bundle and calendar day-cell SCSS |
+| 2026-08-02 | S0-01 | Isolated API hosting test | Pass: 1 | Real HTTP pipeline and separate in-memory SQLite databases |
+| 2026-08-02 | S0-01 | Backend integration suite | Pass: 3 | Includes API hosting and large DataTransfer roundtrip tests |
+| 2026-08-02 | S0-05 | Identity architecture review | Decided | Separate Azure hosts require MSAL bearer-token flow; implementation follows Stage 1 |
+| 2026-08-02 | S0-02 | Frontend HTTP test suite | Pass: 3 | `npm run test:ci`; includes first HttpClient request contract test and exits without watch mode |
+| 2026-08-02 | S0-02 | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged from baseline |
+| 2026-08-02 | S0-03 | Backend architecture tests | Pass: 3 | Domain, Application, and Infrastructure outward-dependency rules enforced with NetArchTest |
+| 2026-08-02 | S0-03 | Backend integration suite | Pass: 6 | Existing API host and DataTransfer tests remain green with architecture rules |
+| 2026-08-02 | S0-04 | API contract tests | Pass: 4 | Route/JSON casing, correlation ID, mixed batch result, and streamed DataTransfer export characterized |
+| 2026-08-02 | S0-04 | Backend integration suite | Pass: 10 | API contracts, hosting isolation, architecture, smoke, and DataTransfer roundtrip all green |
+| 2026-08-02 | S0-06 | API error contract review | Decided | RFC 9457 shape and status/code mapping recorded; Stage 1 implements it before Azure authentication |
+| 2026-08-02 | S0-07 | Date semantics review | Decided | Calendar dates use `yyyy-MM-dd`/`DateOnly`; audit timestamps remain UTC instants |
+| 2026-08-02 | S0-08 | Calendar batch semantics review | Decided | Preserve partial success and deterministic per-item status/count contracts |
+| 2026-08-02 | S0-09 | DataTransfer limits review | Decided | 10 MiB browser, 12 MiB API, worker parsing, truthful stage-based status |
+| 2026-08-02 | Stage 0 gate | Backend unit tests | Pass: 96 | Full unit suite |
+| 2026-08-02 | Stage 0 gate | Backend integration tests | Pass: 10 | Hosting, architecture, API contracts, smoke, and DataTransfer roundtrip |
+| 2026-08-02 | Stage 0 gate | Frontend tests | Pass: 3 | Deterministic non-watch suite including HTTP service contract |
+| 2026-08-02 | Stage 0 gate | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
+| 2026-08-02 | S1-01 | Backend unit tests | Pass: 100 | Typed validation, conflict, not-found, and missing-reference failures covered |
+| 2026-08-02 | S1-02 | Exception middleware test | Pass: 1 | Unexpected exception and request context logged; response detail remains generic |
+| 2026-08-02 | S1-02 | Backend integration suite | Pass: 11 | Middleware logging change validated through the real API host |
 
 ## Progress Update Procedure
 

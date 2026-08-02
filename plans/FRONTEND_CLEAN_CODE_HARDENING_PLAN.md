@@ -73,72 +73,85 @@ The expense filter currently uses a truthiness check for price. A valid price ca
 
 ### FL-001: Identity and Session UX
 
-Decide jointly with API authentication:
+Decision: Decided 2026-08-02 (`DEC-HARD-001`)
 
-- Identity provider and login/logout mechanism.
-- How the Angular app obtains and refreshes credentials.
-- Which claims identify a DataTransfer administrator.
-- Local-development authentication behavior.
-- 401 session-expired behavior and 403 access-denied behavior.
+- Use single-tenant Microsoft Entra with a dedicated SPA registration and MSAL Angular.
+- Use authorization code with PKCE and request the delegated API scope from the separate API registration.
+- Keep the MSAL cache in memory. Do not persist access tokens in local or session storage.
+- Attach bearer tokens only to the configured API origin/scope through an interceptor.
+- The backend authorizes one configured `oid`; the sole signed-in user is also the DataTransfer administrator, so no role-management UI is required.
+- Restore protected deep links after interactive login. On 401, attempt silent renewal once and then sign in; on 403, show access denied without retrying.
+- Automated frontend tests mock the session boundary. Local development uses the real Entra flow or the explicitly configured Development-only backend identity mode.
 
 Do not store a reusable API secret in browser code, local storage, or committed environment files.
 
 ### FL-002: Error Contract
 
-Adopt one stable problem response shape for non-successful API requests:
+Decision: Decided 2026-08-02 (`DEC-HARD-002`)
 
-- HTTP status
-- stable machine-readable code or type
-- user-safe title/detail
-- correlation ID
-- optional validation errors keyed by field
+Adopt RFC 9457 ProblemDetails for every non-successful API request:
 
-The frontend should classify status/code centrally and let components choose contextual fallback copy.
+- `type`, `title`, `status`, user-safe `detail`, and request `instance`.
+- Stable snake-case `code` for application behavior.
+- `correlationId` matching the response header.
+- Optional `errors: Record<string, string[]>` for field validation.
+
+The frontend classifies by code first and HTTP status second, accepts JSON/text/Blob transport bodies, and lets components supply contextual fallback copy. Authentication behavior uses `authentication_required` for session recovery and `access_denied` for a terminal access-denied state. Unknown or malformed bodies fall back safely and preserve a correlation ID when available.
 
 ### FL-003: Date Contract
+
+Decision: Decided 2026-08-02 (`DEC-HARD-003`)
 
 Use two explicit concepts:
 
 - Calendar date: ISO `yyyy-MM-dd`, never parsed through UTC.
 - Instant/audit timestamp: ISO UTC timestamp with offset or `Z`.
 
-Work location, leave, public holidays, filters, and summary anchors are calendar dates. Expense date semantics must be confirmed separately because it may represent either a purchase date or timestamp.
+Expense purchase date, work location, leave, public holidays, filters, and summary anchors are calendar dates. Calendar utilities validate and manipulate year/month/day components directly and never use `new Date('yyyy-MM-dd')`, `toISOString()`, or timezone conversion as a formatting shortcut. Audit timestamps may use JavaScript `Date` only at display boundaries and must retain their UTC meaning.
+
+Existing non-midnight backend values normalize to their stored year/month/day. Date ranges are inclusive, and DataTransfer preserves calendar dates as `yyyy-MM-dd` strings.
 
 ### FL-004: Calendar Change-Set Semantics
 
-Current behavior sends create batches plus individual update/delete requests in parallel and reports partial success.
+Decision: Decided 2026-08-02 (`DEC-HARD-004`)
 
-Decide whether this remains the product contract:
+Preserve the current partial-success product contract:
 
-- Option A: preserve partial success and make the orchestration explicit/testable.
-- Option B: add one backend calendar change-set endpoint with a transaction and deterministic per-row results.
+- Create batches return ordered item statuses and aggregate counts.
+- Individual update/delete operations may succeed or fail independently.
+- Reconciliation marks successful rows complete and retains skipped/failed rows with contextual messages for correction or retry.
+- A request-level ProblemDetails response becomes a synthetic failure only for the affected operation group; it does not erase known successes from other groups.
+- The UI must not claim that the combined save is atomic.
 
-Do not make frontend orchestration appear atomic if the API contract is not atomic.
+An atomic change-set endpoint is deferred unless partial updates prove to be a product problem. Extraction work should make current orchestration explicit and testable rather than silently changing semantics.
 
 ### FL-005: DataTransfer File Limits
 
-Coordinate:
+Decision: Decided 2026-08-02 (`DEC-HARD-005`)
 
-- Maximum accepted request size.
-- Maximum browser-parse size.
-- Whether large validation runs synchronously, in a Web Worker, or as an uploaded background job.
-- Progress and cancellation behavior.
+- Reject files larger than 10 MiB from `File.size` before `file.text()`, `arrayBuffer()`, or parsing.
+- Accept JSON files only and display an explicit unsupported-type/oversized error without starting dry-run state.
+- Parse and perform structural validation in a Web Worker for supported files; transfer the result back without retaining duplicate raw text longer than necessary.
+- The API limit is 12 MiB, leaving transport overhead above the browser ceiling.
+- Show truthful stages such as `Reading`, `Validating`, `Dry run`, and `Importing`; do not display a percentage unless backed by real byte or server-job progress.
+- Allow cancellation during worker parsing and pending HTTP requests. Reset dry-run approval whenever the file or import options change.
+- Revisit these values only after measuring representative files and browser memory behavior.
 
-The browser limit may need to be lower than the API transport limit.
+An uploaded background job is deferred because the current single-user payload target does not justify its operational complexity.
 
 ## Phase 0: Frontend Test Foundation
 
-Status: Not Started
+Status: In Progress
 
 ### Tasks
 
-- [ ] Add service tests using Angular HTTP testing providers.
+- [x] Add service tests using Angular HTTP testing providers.
 - [ ] Add tests for query-parameter construction, especially zero-valued filters.
 - [ ] Add tests for shared error extraction from JSON, text, and Blob responses.
 - [ ] Add tests for date-only parsing, formatting, leap days, and invalid dates.
 - [ ] Add focused component tests for expense submit, restore conflict, and DataTransfer dry-run gating.
 - [ ] Add pure-unit tests for calendar change-set construction and result reconciliation before extraction.
-- [ ] Define a practical frontend CI test command and coverage reporting.
+- [ ] Add coverage reporting to the established `npm run test:ci` command.
 
 ### Acceptance Criteria
 
@@ -293,12 +306,15 @@ Depends On: FL-001, FL-005
 Status: Not Started
 Depends On: FL-001
 
+Execution order: implement with backend authentication immediately after the shared error contract and validate against Azure dev before later domain/frontend refactors.
+
 ### Tasks
 
-- [ ] Add an authentication/session service around the selected identity SDK.
-- [ ] Add credential attachment or rely on secure same-site hosting as designed.
-- [ ] Add route guards for authenticated and administrator routes.
-- [ ] Make navigation role-aware.
+- [ ] Add MSAL Angular and an authentication/session facade using authorization code with PKCE and in-memory caching.
+- [ ] Add environment-driven Entra client, tenant, API origin, and API scope configuration with no browser secret.
+- [ ] Attach tokens only to the configured API origin and delegated scope.
+- [ ] Add guards for authenticated and DataTransfer routes; the sole allowed identity has both capabilities.
+- [ ] Hide DataTransfer navigation until the allowed session is established.
 - [ ] Add login, logout, loading, expired-session, and access-denied states.
 - [ ] Prevent redirect loops when token acquisition fails.
 - [ ] Test deep links and return URLs.
@@ -309,7 +325,8 @@ Depends On: FL-001
 - Reloading a protected deep link restores or requests a valid session.
 - 401 initiates the agreed session recovery flow.
 - 403 shows access denied without repeated retries.
-- DataTransfer visibility follows administrator claims.
+- DataTransfer visibility follows the established allowed-owner session.
+- A signed-in but non-allowed tenant identity receives access denied and no repeated API retries.
 - Logout clears local session state and protected cached data.
 
 ### Suggested Commit
@@ -377,7 +394,7 @@ Authentication backend enforcement and frontend UX should ship as one deployable
 
 ```powershell
 Set-Location Frontend
-npm test -- --watch=false
+npm run test:ci
 npm run build
 ```
 

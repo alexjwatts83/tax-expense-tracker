@@ -357,7 +357,7 @@ Current implementation note:
 - Verified successful validation renders four entity summaries and enables the guarded import action.
 - Verified malformed JSON is rejected locally with a readable error and no enabled validation action.
 - Automated backend large-payload and relationship roundtrip verification is complete with generated fixtures.
-- Browser download/upload and progress-feedback verification with a representative file remains pending.
+- Browser download/upload verification with a representative file remains pending. Hardening contract: 10 MiB browser-selected file limit, 12 MiB API request limit, worker-based parsing/validation, and stage-based status without fabricated percentages.
 
 ## Performance Considerations
 

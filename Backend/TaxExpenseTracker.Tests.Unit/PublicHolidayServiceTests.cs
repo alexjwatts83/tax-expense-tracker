@@ -1,4 +1,5 @@
 using TaxExpenseTracker.Application.PublicHolidays;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Tests.Unit;
@@ -30,7 +31,7 @@ public class PublicHolidayServiceTests
         var repository = new InMemoryPublicHolidayRepository();
         var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+        var ex = await Assert.ThrowsAsync<ApplicationValidationException>(() =>
             service.ImportAsync("When,Title\n2026-01-01,New Year's Day", null));
 
         Assert.Contains("Missing required Date column", ex.Message);
@@ -42,7 +43,7 @@ public class PublicHolidayServiceTests
         var repository = new InMemoryPublicHolidayRepository();
         var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+        var ex = await Assert.ThrowsAsync<ApplicationValidationException>(() =>
             service.ImportAsync("Date,Name\nnot-a-date,Holiday", null));
 
         Assert.Contains("Invalid date", ex.Message);
@@ -85,7 +86,7 @@ public class PublicHolidayServiceTests
         var repository = new InMemoryPublicHolidayRepository();
         var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
-        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+        var ex = await Assert.ThrowsAsync<ApplicationValidationException>(() =>
             service.ImportAsync("Date,Name,Workable\n2026-01-01,New Year's Day,maybe", null));
 
         Assert.Contains("Invalid workable value", ex.Message);

@@ -53,7 +53,7 @@ public class WorkLocationServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() =>
             service.CreateAsync(new CreateWorkLocationCommand(new DateTime(2026, 1, 12), DayEntryType.HalfDay, null, null)));
 
         Assert.Equal("A work-location entry already exists for this date.", ex.Message);
@@ -148,7 +148,7 @@ public class WorkLocationServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() =>
             service.UpdateAsync(entry.Id, new UpdateWorkLocationCommand(new DateTime(2026, 2, 3), DayEntryType.FullDay, null, null)));
 
         Assert.Equal("A work-location entry already exists for this date.", ex.Message);

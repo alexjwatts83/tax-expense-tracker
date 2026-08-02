@@ -56,7 +56,7 @@ public sealed class WorkLocationService : IWorkLocationService
     {
         var existsForDate = await _workLocationRepository.ExistsForDateAsync(command.WorkDate, cancellationToken: cancellationToken);
         if (existsForDate)
-            ThrowHelper.InvalidOperation("A work-location entry already exists for this date.");
+            ThrowHelper.Conflict("A work-location entry already exists for this date.");
 
         var entry = WorkLocationEntry.Create(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
 
@@ -202,7 +202,7 @@ public sealed class WorkLocationService : IWorkLocationService
 
         var existsForDate = await _workLocationRepository.ExistsForDateAsync(command.WorkDate, id, cancellationToken);
         if (existsForDate)
-            ThrowHelper.InvalidOperation("A work-location entry already exists for this date.");
+            ThrowHelper.Conflict("A work-location entry already exists for this date.");
 
         entry.Update(command.WorkDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
         await _workLocationRepository.SaveChangesAsync(cancellationToken);

@@ -17,7 +17,7 @@ public class ExpenseServiceTests
 
         var service = new ExpenseService(repository, TestTime.TimeProvider);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var exception = await Assert.ThrowsAsync<MissingReferenceException>(() =>
             service.CreateAsync(new CreateExpenseCommand(
                 "Work machine",
                 TestTime.FixedUtcNow.UtcDateTime,
@@ -25,6 +25,9 @@ public class ExpenseServiceTests
                 1200m,
                 Guid.NewGuid(),
                 [])));
+
+        Assert.Equal("Source tracker", exception.ReferenceType);
+        Assert.NotEqual(Guid.Empty, exception.ReferenceId);
     }
 
     [Fact]

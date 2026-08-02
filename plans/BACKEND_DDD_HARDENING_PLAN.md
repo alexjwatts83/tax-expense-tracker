@@ -54,61 +54,119 @@ Resolve these decisions before the related phase begins.
 
 ### DG-001: Authentication Strategy
 
-Recommended direction:
+Decision: Decided 2026-08-02 (`DEC-HARD-001`)
 
-- Use Microsoft Entra ID / App Service Authentication for deployed browser-to-API access.
-- Validate authenticated principals and authorization policies in ASP.NET Core.
-- Use a development authentication scheme or explicit local bypass restricted to Development.
-- Do not place a reusable API key in the Angular client.
+- Use a single-tenant Microsoft Entra tenant with separate SPA and API app registrations because Azure plans separate frontend and API hosts.
+- Expose one delegated API scope. Angular obtains access tokens through authorization code with PKCE; no client secret is present in the browser.
+- Configure App Service Authentication on the API to reject unauthenticated requests and accept only the API audience.
+- Validate the bearer token again in ASP.NET Core and require the configured tenant, audience, and sole allowed user object ID.
+- Treat the sole allowed identity as the DataTransfer administrator through a named policy; do not build application roles, user tables, registration, or password flows.
+- Use an explicit test authentication scheme in automated tests. Any local convenience identity must be available only when the host environment is `Development`; Production has no bypass.
+- Keep tokens in memory through MSAL and never place a reusable API key or access token in committed files or browser local storage.
 
-Alternatives:
+Deferred alternative:
 
-- ASP.NET Core JWT bearer validation with tokens issued by a trusted identity provider.
-- API key authentication only for non-browser automation endpoints, stored outside source control.
+- If the frontend and API later move behind one same-origin authenticated host, reassess whether platform cookies can replace the SPA token flow.
 
-Required outcome:
+Claims and authorization contract:
 
-- Record the selected identity provider, local-development behavior, and admin policy for DataTransfer operations.
-- Define the Angular login/session flow, claim mapping, deep-link behavior, and 401/403 handling before implementation.
+- `tid` must match the configured tenant ID.
+- `aud` must match the API application ID URI/client ID.
+- `oid` must match `Authentication:AllowedUserObjectId`.
+- The API scope must be present for delegated browser calls.
+- A missing/invalid token returns 401; a valid token for a different user returns 403.
+
+### DG-001A: API Error Contract
+
+Decision: Decided 2026-08-02 (`DEC-HARD-002`)
+
+Use `application/problem+json` and RFC 9457 ProblemDetails for every API error. Responses contain:
+
+- `type`: stable URI ending in the machine-readable code.
+- `title`: stable short category, not raw exception text.
+- `status`: HTTP status code.
+- `detail`: user-safe contextual message.
+- `instance`: request path.
+- `code`: stable snake-case application code.
+- `correlationId`: the same value returned in `X-Correlation-ID`.
+- `errors`: optional dictionary of field names to string arrays for validation failures.
+
+Initial status/code mapping:
+
+| HTTP | Code | Use |
+|---:|---|---|
+| 400 | `validation_error` | Invalid command, body, query, or field values |
+| 400 | `invalid_reference` | Requested source, bank, tag, or related ID does not exist |
+| 401 | `authentication_required` | Missing, expired, or invalid credential |
+| 403 | `access_denied` | Authenticated identity is not the configured owner or lacks the required scope |
+| 404 | `not_found` | Route or requested entity does not exist |
+| 408 | `request_timeout` | Server-side operation timeout |
+| 409 | `conflict` | Duplicate active date, restore collision, uniqueness race, or incompatible state |
+| 413 | `payload_too_large` | Request exceeds the supported API limit |
+| 500 | `server_error` | Unexpected failure; detail remains generic |
+
+Do not expose exception types, stack traces, SQL details, tokens, or secrets. Framework model validation, middleware failures, authorization results, controller not-found results, and DataTransfer errors must use this contract.
 
 ### DG-002: Date Storage Contract
 
-Recommended direction:
+Decision: Decided 2026-08-02 (`DEC-HARD-003`)
 
-- Use `DateOnly` for `WorkLocationEntry.WorkDate`, `LeaveEntry.LeaveDate`, and `PublicHoliday.HolidayDate` where no time-of-day meaning exists.
+- Use `DateOnly` for expense purchase date, `WorkLocationEntry.WorkDate`, `LeaveEntry.LeaveDate`, and `PublicHoliday.HolidayDate`.
 - Preserve API JSON as ISO date values (`yyyy-MM-dd`).
-- Normalize and migrate existing values before adding uniqueness constraints.
+- Treat calendar dates as timezone-free values. Do not call `ToUniversalTime`, construct a UTC midnight, or otherwise shift a calendar date.
+- Normalize existing `DateTime` values by retaining their stored year, month, and day, then add uniqueness constraints.
+- Use UTC instants for `CreatedAt`, `UpdatedAt`, and other audit timestamps, represented consistently as `DateTimeOffset` or explicitly UTC `DateTime` according to the later audit decision.
+- Make date-range endpoints inclusive at both ends and compare calendar values rather than timestamp boundaries.
+- Preserve these meanings and formats in DataTransfer payloads.
 
-Required outcome:
+Migration rule:
 
-- Confirm whether historical non-midnight values should be truncated to their local calendar date or UTC calendar date. Current frontend behavior indicates local calendar date is intended.
-- Preserve the frontend calendar-date wire contract as ISO `yyyy-MM-dd` and distinguish it from UTC audit timestamps.
+- A stored value such as `2026-08-02 23:30` normalizes to `2026-08-02`, regardless of server timezone.
+- Duplicate-date preflight runs after normalization and before unique indexes are created.
+- Migration rollback and duplicate-repair steps are documented before applying the migration to Azure.
 
 ### DG-003: Batch Atomicity
 
-Recommended direction:
+Decision: Decided 2026-08-02 (`DEC-HARD-004`)
 
 - Preserve the current mixed-result contract: valid items may succeed while invalid/conflicting items are reported individually.
 - Optimize database access without changing partial-success semantics.
+- Return HTTP 200 for a structurally valid batch with aggregate requested/created/skipped/failed counts and one ordered result per requested item.
+- Keep stable item statuses such as `Created`, `SkippedDuplicate`, `FailedValidation`, and `FailedConflict` until a versioned contract intentionally changes them.
+- Reject a malformed request body or invalid top-level contract before processing any item using the shared ProblemDetails response.
+- Do not roll back successful items because a neighboring item is skipped or fails.
+- Preserve request order in the item-result collection so the frontend can reconcile rows deterministically.
 
 Frontend constraint:
 
-- Calendar batch currently combines create batches with individual update/delete requests and explicitly reconciles partial results. Decide whether to preserve that contract or replace it with one transactional calendar change-set endpoint before refactoring either layer.
+- Calendar batch currently combines create batches with individual update/delete requests and explicitly reconciles partial results. Keep that orchestration truthful: update/delete requests can also succeed independently, and the UI must retain failed rows for correction.
 
-Alternative:
+Deferred alternative:
 
-- Make each batch all-or-nothing and change the API result contract accordingly.
+- A single atomic calendar change-set endpoint requires a new product decision, versioned contract, and corresponding frontend simplification. Do not introduce it as part of performance refactoring.
+
+### DG-004: DataTransfer Limits and Progress
+
+Decision: Decided 2026-08-02 (`DEC-HARD-005`)
+
+- Set the maximum DataTransfer HTTP request body to 12 MiB at both ASP.NET Core and Azure hosting/proxy boundaries.
+- Keep the browser-selected file limit at 10 MiB so request encoding and transport overhead stay below the server ceiling.
+- Return the shared `payload_too_large` ProblemDetails response for API limit failures where the request reaches ASP.NET Core.
+- Preserve the existing five-minute operation timeout initially and return `request_timeout` on expiry.
+- Keep imports atomic. Cancellation before commit rolls back the operation; do not report cancellation after the transaction has committed.
+- Do not expose fabricated percentage progress from a synchronous request. The API may report only real transport or server-job progress if a later design introduces it.
+- Revisit limits only from measured representative payload size, browser memory, Azure proxy behavior, and import duration.
 
 ## Phase 0: Characterization and Safety Net
 
-Status: Not Started
+Status: In Progress
 
 ### Tasks
 
-- [ ] Capture current route, serialization, and result contracts for critical workflows.
+- [x] Capture representative route, JSON serialization, correlation-ID, mixed batch-result, and DataTransfer stream contracts.
 - [ ] Add middleware characterization tests for existing validation and correlation-ID responses.
-- [ ] Add API integration test infrastructure using `WebApplicationFactory` or an equivalent test host.
-- [ ] Add architecture tests enforcing project dependency direction.
+- [x] Add API integration test infrastructure using `WebApplicationFactory` with isolated in-memory SQLite databases.
+- [x] Add architecture tests enforcing project dependency direction.
 - [ ] Record representative database fixtures for migration and duplicate-date testing.
 
 ### Acceptance Criteria
@@ -126,25 +184,27 @@ Status: Not Started
 Status: Not Started
 Depends On: DG-001
 
+Execution order: begin immediately after the shared API error contract is complete, deploy to Azure dev, and pass the real-account smoke test before date or aggregate refactors.
+
 ### Tasks
 
-- [ ] Add strongly typed authentication/security options with startup validation.
-- [ ] Register the selected authentication handler and call `UseAuthentication()` before `UseAuthorization()`.
-- [ ] Define a default authenticated-user policy for application endpoints.
-- [ ] Define a separate administrator policy for DataTransfer import/export operations.
+- [ ] Add strongly typed Entra options for tenant, audience, API scope, and allowed user object ID with Production startup validation.
+- [ ] Register JWT bearer validation and call `UseAuthentication()` before `UseAuthorization()`.
+- [ ] Define a default allowed-user policy validating tenant, audience, scope, and object ID.
+- [ ] Define a named DataTransfer policy over the same sole allowed identity, preserving an explicit security boundary without adding roles.
 - [ ] Apply authorization consistently to all controllers.
 - [ ] Keep health endpoints anonymous if introduced or already required by hosting.
-- [ ] Configure local-development authentication without weakening Production defaults.
+- [ ] Add integration-test authentication and an explicit Development-only local identity mode without weakening Production defaults.
 - [ ] Remove obsolete API key/JWT settings that are not part of the selected design.
-- [ ] Add 401, 403, authenticated CRUD, and DataTransfer-admin integration tests.
-- [ ] Update Angular authentication only as required by the selected provider.
-- [ ] Update Azure and local setup documentation.
+- [ ] Add 401, wrong-user 403, allowed-user CRUD, missing-scope, wrong-audience, and DataTransfer integration tests.
+- [ ] Configure API App Service Easy Auth, allowed audiences, and the frontend CORS origin through Terraform.
+- [ ] Update Azure and local setup documentation, including Entra app registration and owner assignment.
 
 ### Acceptance Criteria
 
 - Anonymous mutation and export/import requests are rejected.
-- Authenticated users can perform normal application workflows.
-- Only the administrator policy can use DataTransfer endpoints.
+- The configured owner identity can perform normal application and DataTransfer workflows.
+- Other identities are forbidden even if they belong to the tenant.
 - Production startup fails clearly when required identity settings are missing.
 - No browser-delivered secret is used as an API credential.
 
@@ -297,10 +357,10 @@ Status: Not Started
 ### Tasks
 
 - [ ] Add middleware tests for unexpected exceptions and correlated problem responses.
-- [ ] Inject a logger into `ApiExceptionHandlingMiddleware`.
-- [ ] Log unexpected exceptions with correlation ID, route, and method.
-- [ ] Keep internal exception details out of 500 responses.
-- [ ] Introduce typed application exceptions or problem mappings for validation, not-found, and conflict cases.
+- [x] Inject a logger into `ApiExceptionHandlingMiddleware`.
+- [x] Log unexpected exceptions with correlation ID, route, and method.
+- [x] Keep internal exception details out of 500 responses.
+- [x] Introduce typed application exceptions for validation, conflict, not-found, and missing-reference cases.
 - [ ] Return `409 Conflict` for uniqueness and state conflicts rather than treating all invalid operations as `400`.
 - [ ] Add middleware and controller integration tests for problem details.
 - [ ] Publish one stable problem contract for frontend classification, including status, code/type, detail, correlation ID, and optional field errors.

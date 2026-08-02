@@ -56,7 +56,7 @@ public sealed class LeaveService : ILeaveService
     {
         var existsForDate = await _leaveRepository.ExistsForDateAsync(command.LeaveDate, cancellationToken: cancellationToken);
         if (existsForDate)
-            ThrowHelper.InvalidOperation("A leave entry already exists for this date.");
+            ThrowHelper.Conflict("A leave entry already exists for this date.");
 
         var entry = LeaveEntry.Create(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.LeaveType);
 
@@ -202,7 +202,7 @@ public sealed class LeaveService : ILeaveService
 
         var existsForDate = await _leaveRepository.ExistsForDateAsync(command.LeaveDate, id, cancellationToken);
         if (existsForDate)
-            ThrowHelper.InvalidOperation("A leave entry already exists for this date.");
+            ThrowHelper.Conflict("A leave entry already exists for this date.");
 
         entry.Update(command.LeaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.LeaveType);
         await _leaveRepository.SaveChangesAsync(cancellationToken);

@@ -1,6 +1,6 @@
 # Azure Deployment Tracker
 
-Last Updated: 2026-07-23
+Last Updated: 2026-08-02
 Owner: 
 Environment Scope: dev (single environment)
 
@@ -25,6 +25,7 @@ Track Azure deployment implementation progress, key decisions, risks, and rollou
 - [ ] Confirm production CORS configuration
 - [ ] Confirm health checks and startup behavior
 - [ ] Confirm migration execution strategy for cloud
+- [x] Decide production identity and browser credential flow
 
 ### 3. Infrastructure as Code
 - [x] Terraform Lite module structure created (minimal modules)
@@ -44,6 +45,13 @@ Scope for first pass:
 - [ ] Key Vault created
 - [ ] Secrets loaded (DB connection, API settings, etc.)
 - [ ] App Service configured with Key Vault references
+- [ ] Create single-tenant SPA and API Entra app registrations
+- [ ] Expose and consent the delegated API scope
+- [ ] Require assignment and assign only the owner identity
+- [ ] Configure API App Service Authentication with the API audience and 401 behavior
+- [ ] Configure ASP.NET Core tenant, audience, scope, and allowed object-ID validation
+- [ ] Configure Static Web App redirect URIs, API origin, and API CORS origin
+- [ ] Validate login, logout, token renewal, wrong-user 403, and DataTransfer access in Azure dev
 - [ ] Access controls and least privilege reviewed
 
 ### 5. Database Cutover
@@ -87,6 +95,7 @@ Use this section to record major decisions and rationale.
 | DEC-003 | 2026-07-22 | Naming and tagging standard | Custom per team, Azure baseline standard | Azure baseline naming + mandatory tags | Keeps resource discovery, cost reporting, and policy automation consistent while moving quickly. | Affects all Terraform module inputs, resource naming, cost governance, and operations. | You | Decided |
 | DEC-004 | 2026-07-22 | Environment strategy | Separate dev/prod, single environment | Single environment (dev only) | Solo usage; lower operational overhead and faster setup. | Simplifies subscription/RG strategy, Terragrunt structure, and deployment workflow. | You | Decided |
 | DEC-005 | 2026-07-23 | UI testing strategy | Automated UI tests, manual UI validation | Manual UI validation only (no automated UI tests) | Solo project; faster delivery and lower maintenance overhead for now. | Validation relies on API automation plus manual frontend smoke/flow checks. | You | Decided |
+| DEC-006 | 2026-08-02 | Identity and session architecture | Same-origin Easy Auth cookies, app-owned login, split-origin Entra/MSAL | Single-tenant Entra with separate SPA/API registrations, MSAL code + PKCE, API Easy Auth, and ASP.NET Core JWT/owner validation | Planned Static Web App and API App Service use separate origins. This supplies a hosted sign-in without passwords in the app and restricts access to the sole owner. | Adds app registrations, delegated scope, CORS, redirect URIs, API audience validation, and an owner object-ID setting; no user-management feature is needed. | You | Decided |
 
 ## Naming and Tag Standard (Baseline)
 
@@ -132,6 +141,7 @@ Track meaningful deployment changes and outcomes.
 | 2026-07-22 | Tracker file created | N/A | Done | Initial baseline |
 | 2026-07-22 | Terraform Lite scaffold created (modules + live/dev Terragrunt) | dev | Done | Step 1 complete |
 | 2026-07-22 | Remote state strategy wired and bootstrap script added | dev | Done | Step 2 prepared; run bootstrap script to create backend |
+| 2026-08-02 | Single-user Entra architecture selected | dev | Planned | Implement immediately after the shared API error contract and before domain refactors |
 
 ## Risks and Blockers
 
@@ -139,11 +149,11 @@ Track meaningful deployment changes and outcomes.
 |------|--------------|----------|------------|-------|--------|
 
 ## Next Actions (Top 5)
-1. Run backend bootstrap script to create Azure state resources in your subscription.
-2. Run Terragrunt plan for `foundation`, then `data`, then `app`.
-3. Provision core stack in Australia East (API, frontend host, Azure SQL, Key Vault).
-4. Validate end-to-end expense flows in Azure.
-5. Add CI/CD pipeline with OIDC and a single deployment lane.
+1. Complete the shared API error contract and frontend 401/403 classification.
+2. Create the SPA/API Entra registrations and record tenant, client, scope, and owner object IDs outside source control.
+3. Add API authentication, frontend MSAL, and Terraform App Service authentication/CORS configuration.
+4. Provision or update the Australia East dev stack and validate the sole owner login end to end.
+5. Resume date and domain hardening only after the Azure authentication smoke matrix passes.
 
 ## Notes
 - Keep this file updated at least once per work session.

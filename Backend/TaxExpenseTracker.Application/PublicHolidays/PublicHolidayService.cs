@@ -1,4 +1,5 @@
 using System.Globalization;
+using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Application.PublicHolidays;
@@ -40,7 +41,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
     {
         if (string.IsNullOrWhiteSpace(csvContent))
         {
-            throw new ArgumentException("CSV content is required.", nameof(csvContent));
+            ThrowHelper.Validation("CSV content is required.", nameof(csvContent));
         }
 
         var normalizedSource = string.IsNullOrWhiteSpace(source) ? "CSV Import" : source.Trim();
@@ -49,7 +50,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
 
         if (parseResult.Errors.Count > 0)
         {
-            throw new ArgumentException("CSV validation failed: " + string.Join(" | ", parseResult.Errors));
+            ThrowHelper.Validation("CSV validation failed: " + string.Join(" | ", parseResult.Errors));
         }
 
         if (parseResult.Rows.Count == 0)

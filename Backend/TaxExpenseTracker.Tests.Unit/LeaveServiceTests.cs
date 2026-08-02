@@ -86,7 +86,7 @@ public class LeaveServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() =>
             service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.HalfDay, null, null)));
 
         Assert.Equal("A leave entry already exists for this date.", ex.Message);
@@ -163,7 +163,7 @@ public class LeaveServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() =>
             service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateTime(2026, 4, 3), DayEntryType.FullDay, null, null)));
 
         Assert.Equal("A leave entry already exists for this date.", ex.Message);
