@@ -46,6 +46,9 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Leave type rollout tracked in [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md)
 - Azure deployment tracked in [plans/AZURE_DEPLOYMENT_TRACKER.md](plans/AZURE_DEPLOYMENT_TRACKER.md)
 - JSON import/export approach tracked in [plans/JSON_IMPORT_EXPORT_PLAN.md](plans/JSON_IMPORT_EXPORT_PLAN.md)
+- Backend DDD, security, and invariant hardening tracked in [plans/BACKEND_DDD_HARDENING_PLAN.md](plans/BACKEND_DDD_HARDENING_PLAN.md)
+- Frontend clean-code, workflow, and contract hardening tracked in [plans/FRONTEND_CLEAN_CODE_HARDENING_PLAN.md](plans/FRONTEND_CLEAN_CODE_HARDENING_PLAN.md)
+- Full-stack hardening delivery order and progress tracked in [plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
 ## Tech Stack
 

@@ -230,6 +230,8 @@ Current expense filter query parameters:
 - [~] Coverage expansion ongoing
 - [x] UI testing approach confirmed: manual UI validation only (no automated UI tests)
 
+Backend details are tracked in [BACKEND_DDD_HARDENING_PLAN.md](BACKEND_DDD_HARDENING_PLAN.md), frontend details in [FRONTEND_CLEAN_CODE_HARDENING_PLAN.md](FRONTEND_CLEAN_CODE_HARDENING_PLAN.md), and the combined implementation order and progress in [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md).
+
 ---
 
 ## Delivery Phases
