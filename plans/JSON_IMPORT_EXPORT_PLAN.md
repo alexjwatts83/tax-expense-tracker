@@ -1,6 +1,6 @@
 # JSON Import/Export Plan
 
-Last Updated: 2026-07-24
+Last Updated: 2026-08-02
 
 ## Objective
 
@@ -330,6 +330,8 @@ Current implementation note:
 - Added wire-contract coverage for the reference envelope and expense, work-location, and leave payloads using the API's web JSON settings.
 - Added expense dependency coverage for same-payload expense tags and missing source, bank, and tag references.
 - Added reference and transactional mode coverage for create, update/restore, insert-only skip, and replace deletion behavior.
+- Added an in-memory SQLite integration roundtrip covering 1,500 generated reference records.
+- The roundtrip exports from one database, restores into a clean database, and verifies an expense can reference the restored bank/tracker and retain its restored tag link.
 
 ## Application Module Organization
 
@@ -354,7 +356,8 @@ Current implementation note:
 - Verified a reference export download and an empty reference dry-run through the Angular proxy against the local API.
 - Verified successful validation renders four entity summaries and enables the guarded import action.
 - Verified malformed JSON is rejected locally with a readable error and no enabled validation action.
-- Large-payload verification remains pending until representative fixtures are available.
+- Automated backend large-payload and relationship roundtrip verification is complete with generated fixtures.
+- Browser download/upload and progress-feedback verification with a representative file remains pending.
 
 ## Performance Considerations
 
@@ -410,4 +413,4 @@ Current implementation note:
   - Frontend admin data-transfer screen with dry-run-first workflow
 - Pending:
   - Large-payload write batching/chunking
-  - Manual roundtrip and large-payload verification
+  - Manual browser roundtrip and large-payload progress verification
