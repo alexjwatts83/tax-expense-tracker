@@ -36,4 +36,18 @@ public sealed class EfWorkLocationRepository : EfSoftDeleteRepository<WorkLocati
             x => x.WorkDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value),
             cancellationToken);
     }
+
+    public async Task<IReadOnlyList<WorkLocationEntry>> GetByDatesAsync(
+        IReadOnlyCollection<DateTime> workDates,
+        CancellationToken cancellationToken = default)
+    {
+        if (workDates.Count == 0)
+            return [];
+
+        var dates = workDates.Select(x => x.Date).Distinct().ToList();
+        return await DbSet
+            .AsNoTracking()
+            .Where(x => dates.Contains(x.WorkDate))
+            .ToListAsync(cancellationToken);
+    }
 }

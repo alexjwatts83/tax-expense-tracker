@@ -25,6 +25,10 @@ public sealed class DataTransferPublicHolidayImportHandler
         var warnings = new List<DataTransferImportIssue>();
         var errors = new List<DataTransferImportIssue>();
         var deleted = 0;
+        var existingItems = options.Mode == DataTransferImportMode.Replace && options.AllowDeletes
+            ? await _publicHolidayRepository.GetAllForUpdateAsync(cancellationToken)
+            : await _publicHolidayRepository.GetByIdsForUpdateAsync(items.Select(x => x.Id).ToList(), cancellationToken);
+        var existingById = existingItems.ToDictionary(x => x.Id);
 
         foreach (var item in items)
         {
@@ -40,7 +44,7 @@ public sealed class DataTransferPublicHolidayImportHandler
                 continue;
             }
 
-            var existing = await _publicHolidayRepository.GetByIdAsync(item.Id, cancellationToken);
+            existingById.TryGetValue(item.Id, out var existing);
             if (existing is null)
             {
                 created += 1;
@@ -83,12 +87,15 @@ public sealed class DataTransferPublicHolidayImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            deleted = await DataTransferReplaceDeleteUtility.DeleteMissingAsync<PublicHoliday>(
-                items.Select(x => x.Id).ToList(),
-                ct => _publicHolidayRepository.GetAllAsync(ct),
-                (ids, ct) => _publicHolidayRepository.RemoveByIdsAsync(ids, ct),
-                options.DryRun,
-                cancellationToken);
+            var payloadIdSet = items.Select(x => x.Id).ToHashSet();
+            var idsToDelete = existingItems
+                .Where(x => !payloadIdSet.Contains(x.Id))
+                .Select(x => x.Id)
+                .ToList();
+
+            deleted = idsToDelete.Count;
+            if (!options.DryRun && deleted > 0)
+                await _publicHolidayRepository.RemoveByIdsAsync(idsToDelete, cancellationToken);
 
             if (deleted > 0)
                 warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceDeletedMissing, $"Replace mode: deleted {deleted} public holiday records not present in payload."));

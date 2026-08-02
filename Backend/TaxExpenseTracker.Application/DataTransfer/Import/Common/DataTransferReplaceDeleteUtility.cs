@@ -4,53 +4,24 @@ namespace TaxExpenseTracker.Application.DataTransfer;
 
 internal static class DataTransferReplaceDeleteUtility
 {
-    public static async Task<int> SoftDeleteMissingAsync<T>(
+    public static int SoftDeleteMissing<T>(
         IReadOnlyCollection<Guid> payloadIds,
-        Func<CancellationToken, Task<IReadOnlyList<T>>> getAllAsync,
-        Func<Guid, CancellationToken, Task<T?>> getByIdAsync,
+        IReadOnlyCollection<T> existingItems,
         Action<T> softDelete,
-        bool dryRun,
-        CancellationToken cancellationToken)
+        bool dryRun)
         where T : class, ISoftDeletableEntity
     {
         var payloadIdSet = payloadIds.ToHashSet();
-        var existingItems = await getAllAsync(cancellationToken);
-        var idsToDelete = existingItems
+        var itemsToDelete = existingItems
             .Where(x => !x.IsDeleted && !payloadIdSet.Contains(x.Id))
-            .Select(x => x.Id)
             .ToList();
 
         if (!dryRun)
         {
-            foreach (var id in idsToDelete)
-            {
-                var entity = await getByIdAsync(id, cancellationToken);
-                if (entity is not null && !entity.IsDeleted)
-                    softDelete(entity);
-            }
+            foreach (var entity in itemsToDelete)
+                softDelete(entity);
         }
 
-        return idsToDelete.Count;
-    }
-
-    public static async Task<int> DeleteMissingAsync<T>(
-        IReadOnlyCollection<Guid> payloadIds,
-        Func<CancellationToken, Task<IReadOnlyList<T>>> getAllAsync,
-        Func<IReadOnlyCollection<Guid>, CancellationToken, Task> deleteByIdsAsync,
-        bool dryRun,
-        CancellationToken cancellationToken)
-        where T : class, IEntity
-    {
-        var payloadIdSet = payloadIds.ToHashSet();
-        var existingItems = await getAllAsync(cancellationToken);
-        var idsToDelete = existingItems
-            .Where(x => !payloadIdSet.Contains(x.Id))
-            .Select(x => x.Id)
-            .ToList();
-
-        if (!dryRun && idsToDelete.Count > 0)
-            await deleteByIdsAsync(idsToDelete, cancellationToken);
-
-        return idsToDelete.Count;
+        return itemsToDelete.Count;
     }
 }

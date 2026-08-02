@@ -28,6 +28,13 @@ public sealed class DataTransferLeaveImportHandler
         var updated = 0;
         var skipped = 0;
         var deleted = 0;
+        var existingItems = options.Mode == DataTransferImportMode.Replace && options.AllowDeletes
+            ? await _leaveRepository.GetAllForUpdateIncludingDeletedAsync(cancellationToken)
+            : await _leaveRepository.GetByIdsForUpdateIncludingDeletedAsync(items.Select(x => x.Id).ToList(), cancellationToken);
+        var existingById = existingItems.ToDictionary(x => x.Id);
+        var entriesOnRequestedDates = await _leaveRepository.GetByDatesAsync(items.Select(x => x.LeaveDate).ToList(), cancellationToken);
+        var existingIdByDate = entriesOnRequestedDates.ToDictionary(x => x.LeaveDate.Date, x => x.Id);
+        var acceptedIdByDate = new Dictionary<DateTime, Guid>();
 
         foreach (var item in items)
         {
@@ -43,13 +50,17 @@ public sealed class DataTransferLeaveImportHandler
                 continue;
             }
 
-            var existing = await _leaveRepository.GetByIdIncludingDeletedAsync(item.Id, cancellationToken);
-            var duplicateDateExists = await _leaveRepository.ExistsForDateAsync(item.LeaveDate, item.Id, cancellationToken);
-            if (duplicateDateExists)
+            existingById.TryGetValue(item.Id, out var existing);
+            var leaveDate = item.LeaveDate.Date;
+            var conflictsWithExisting = existingIdByDate.TryGetValue(leaveDate, out var existingId) && existingId != item.Id;
+            var conflictsWithinPayload = acceptedIdByDate.TryGetValue(leaveDate, out var acceptedId) && acceptedId != item.Id;
+            if (conflictsWithExisting || conflictsWithinPayload)
             {
                 errors.Add(new DataTransferImportIssue(DataTransferIssueCodes.ErrDuplicateConflict, $"LeaveEntry {item.Id}: another entry already exists for {item.LeaveDate:yyyy-MM-dd}."));
                 continue;
             }
+
+            acceptedIdByDate[leaveDate] = item.Id;
 
             if (existing is null)
             {
@@ -107,13 +118,11 @@ public sealed class DataTransferLeaveImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            deleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<LeaveEntry>(
+            deleted = DataTransferReplaceDeleteUtility.SoftDeleteMissing<LeaveEntry>(
                 items.Select(x => x.Id).ToList(),
-                ct => _leaveRepository.GetAllIncludingDeletedAsync(ct),
-                (id, ct) => _leaveRepository.GetByIdIncludingDeletedAsync(id, ct),
+                existingItems,
                 entity => entity.SoftDelete(_timeProvider),
-                options.DryRun,
-                cancellationToken);
+                options.DryRun);
 
             if (deleted > 0)
                 warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {deleted} leave records not present in payload."));

@@ -26,6 +26,23 @@ public sealed class EfPublicHolidayRepository : IPublicHolidayRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<PublicHoliday>> GetAllForUpdateAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.PublicHolidays.ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<PublicHoliday>> GetByIdsForUpdateAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+            return [];
+
+        return await _dbContext.PublicHolidays
+            .Where(x => ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
     {
         var query = _dbContext.PublicHolidays

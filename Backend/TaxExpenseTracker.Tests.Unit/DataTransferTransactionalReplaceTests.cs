@@ -47,6 +47,44 @@ public class DataTransferTransactionalReplaceTests
         Assert.Contains(result.Warnings, x => x.Code == "WARN_REPLACE_SOFT_DELETED_MISSING");
     }
 
+    [Fact]
+    public async Task WorkLocationImport_DuplicateDatesInPayload_ReturnsConflict()
+    {
+        var repository = new WorkLocationRepository();
+        var handler = new DataTransferWorkLocationImportHandler(repository, TestTime.TimeProvider);
+        var workDate = new DateTime(2026, 7, 1);
+
+        var result = await handler.ImportAsync(
+            new WorkLocationImportPayloadDto(
+            [
+                new WorkLocationEntryImportItemDto(Guid.NewGuid(), workDate, DayEntryType.FullDay, null, null, WorkLocationType.Wfh, null, null, false),
+                new WorkLocationEntryImportItemDto(Guid.NewGuid(), workDate, DayEntryType.FullDay, null, null, WorkLocationType.Office, null, null, false),
+            ]),
+            new DataTransferImportOptions(DryRun: true));
+
+        Assert.Single(result.Errors);
+        Assert.Equal("ERR_DUPLICATE_CONFLICT", result.Errors[0].Code);
+    }
+
+    [Fact]
+    public async Task LeaveImport_DuplicateDatesInPayload_ReturnsConflict()
+    {
+        var repository = new LeaveRepository();
+        var handler = new DataTransferLeaveImportHandler(repository, TestTime.TimeProvider);
+        var leaveDate = new DateTime(2026, 7, 1);
+
+        var result = await handler.ImportAsync(
+            new LeaveImportPayloadDto(
+            [
+                new LeaveEntryImportItemDto(Guid.NewGuid(), leaveDate, DayEntryType.FullDay, null, null, LeaveType.Annual, null, null, false),
+                new LeaveEntryImportItemDto(Guid.NewGuid(), leaveDate, DayEntryType.FullDay, null, null, LeaveType.Sick, null, null, false),
+            ]),
+            new DataTransferImportOptions(DryRun: true));
+
+        Assert.Single(result.Errors);
+        Assert.Equal("ERR_DUPLICATE_CONFLICT", result.Errors[0].Code);
+    }
+
     private sealed class WorkLocationRepository : IWorkLocationRepository
     {
         public List<WorkLocationEntry> Entries { get; } = [];

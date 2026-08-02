@@ -25,6 +25,10 @@ public sealed class DataTransferTagImportHandler
         var warnings = new List<DataTransferImportIssue>();
         var errors = new List<DataTransferImportIssue>();
         var deleted = 0;
+        var existingItems = options.Mode == DataTransferImportMode.Replace && options.AllowDeletes
+            ? await _tagRepository.GetAllForUpdateIncludingDeletedAsync(cancellationToken)
+            : await _tagRepository.GetByIdsForUpdateIncludingDeletedAsync(items.Select(x => x.Id).ToList(), cancellationToken);
+        var existingById = existingItems.ToDictionary(x => x.Id);
 
         foreach (var item in items)
         {
@@ -34,7 +38,7 @@ public sealed class DataTransferTagImportHandler
                 continue;
             }
 
-            var existing = await _tagRepository.GetByIdIncludingDeletedAsync(item.Id, cancellationToken);
+            existingById.TryGetValue(item.Id, out var existing);
             if (existing is null)
             {
                 created += 1;
@@ -69,13 +73,11 @@ public sealed class DataTransferTagImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            deleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<Tag>(
+            deleted = DataTransferReplaceDeleteUtility.SoftDeleteMissing<Tag>(
                 items.Select(x => x.Id).ToList(),
-                ct => _tagRepository.GetAllIncludingDeletedAsync(ct),
-                (id, ct) => _tagRepository.GetByIdIncludingDeletedAsync(id, ct),
+                existingItems,
                 entity => entity.SoftDelete(_timeProvider),
-                options.DryRun,
-                cancellationToken);
+                options.DryRun);
 
             if (deleted > 0)
                 warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {deleted} tag records not present in payload."));

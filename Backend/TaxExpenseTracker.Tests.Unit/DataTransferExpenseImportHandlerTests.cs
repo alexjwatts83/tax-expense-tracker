@@ -151,6 +151,28 @@ public class DataTransferExpenseImportHandlerTests
     }
 
     [Fact]
+    public async Task ImportAsync_MultipleExpenses_UsesBulkRepositoryReads()
+    {
+        var repository = new DataTransferExpenseRepository();
+        var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
+        var payload = new ExpenseImportPayloadDto(
+            [
+                new ExpenseImportItemDto(Guid.NewGuid(), new DateTime(2026, 7, 1), "One", 10m, repository.BankId, repository.SourceId, null, null, false),
+                new ExpenseImportItemDto(Guid.NewGuid(), new DateTime(2026, 7, 2), "Two", 20m, repository.BankId, repository.SourceId, null, null, false),
+            ],
+            []);
+
+        await handler.ImportAsync(payload, new DataTransferImportOptions(DryRun: true));
+
+        Assert.Equal(1, repository.BulkExpenseReadCount);
+        Assert.Equal(1, repository.BulkSourceReadCount);
+        Assert.Equal(1, repository.BulkBankReadCount);
+        Assert.Equal(0, repository.SingleExpenseReadCount);
+        Assert.Equal(0, repository.SingleSourceReadCount);
+        Assert.Equal(0, repository.SingleBankReadCount);
+    }
+
+    [Fact]
     public async Task ImportAsync_ReplaceWithDeletes_SoftDeletesExpenseMissingFromPayload()
     {
         var repository = new DataTransferExpenseRepository();
@@ -228,6 +250,12 @@ public class DataTransferExpenseImportHandlerTests
         public Guid TagId { get; } = Guid.NewGuid();
         public List<TaxExpense> Expenses { get; } = [];
         public bool SaveChangesCalled { get; private set; }
+        public int BulkExpenseReadCount { get; private set; }
+        public int BulkSourceReadCount { get; private set; }
+        public int BulkBankReadCount { get; private set; }
+        public int SingleExpenseReadCount { get; private set; }
+        public int SingleSourceReadCount { get; private set; }
+        public int SingleBankReadCount { get; private set; }
 
         public Task<IReadOnlyList<TaxExpense>> GetAllAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses);
@@ -241,8 +269,23 @@ public class DataTransferExpenseImportHandlerTests
         public Task<TaxExpense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
             Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id && !x.IsDeleted));
 
-        public Task<TaxExpense?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default) =>
-            Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
+        public Task<TaxExpense?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            SingleExpenseReadCount += 1;
+            return Task.FromResult(Expenses.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Task<IReadOnlyList<TaxExpense>> GetAllForUpdateIncludingDeletedAsync(CancellationToken cancellationToken = default)
+        {
+            BulkExpenseReadCount += 1;
+            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses);
+        }
+
+        public Task<IReadOnlyList<TaxExpense>> GetByIdsForUpdateIncludingDeletedAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
+        {
+            BulkExpenseReadCount += 1;
+            return Task.FromResult<IReadOnlyList<TaxExpense>>(Expenses.Where(x => ids.Contains(x.Id)).ToList());
+        }
 
         public Task<TaxExpense?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default) =>
             GetByIdIncludingDeletedAsync(id, cancellationToken);
@@ -253,11 +296,29 @@ public class DataTransferExpenseImportHandlerTests
         public Task<TaxExpense?> GetByIdForUpdateIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default) =>
             GetByIdIncludingDeletedAsync(id, cancellationToken);
 
-        public Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default) =>
-            Task.FromResult(sourceId == SourceId);
+        public Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default)
+        {
+            SingleSourceReadCount += 1;
+            return Task.FromResult(sourceId == SourceId);
+        }
 
-        public Task<bool> BankExistsAsync(Guid bankId, CancellationToken cancellationToken = default) =>
-            Task.FromResult(bankId == BankId);
+        public Task<bool> BankExistsAsync(Guid bankId, CancellationToken cancellationToken = default)
+        {
+            SingleBankReadCount += 1;
+            return Task.FromResult(bankId == BankId);
+        }
+
+        public Task<IReadOnlyList<Guid>> GetExistingSourceIdsAsync(IReadOnlyCollection<Guid> sourceIds, CancellationToken cancellationToken = default)
+        {
+            BulkSourceReadCount += 1;
+            return Task.FromResult<IReadOnlyList<Guid>>(sourceIds.Where(x => x == SourceId).ToList());
+        }
+
+        public Task<IReadOnlyList<Guid>> GetExistingBankIdsAsync(IReadOnlyCollection<Guid> bankIds, CancellationToken cancellationToken = default)
+        {
+            BulkBankReadCount += 1;
+            return Task.FromResult<IReadOnlyList<Guid>>(bankIds.Where(x => x == BankId).ToList());
+        }
 
         public Task<IReadOnlyList<Guid>> GetExistingTagIdsAsync(IReadOnlyList<Guid> tagIds, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<Guid>>(tagIds.Where(x => x == TagId).ToList());

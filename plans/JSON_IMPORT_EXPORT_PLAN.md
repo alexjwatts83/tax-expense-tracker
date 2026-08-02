@@ -229,19 +229,22 @@ Current implementation note:
 
 ### Phase 2: Infrastructure and Persistence
 
-- [~] Add repository helpers for bulk read/write patterns.
+- [x] Add repository helpers for bulk read patterns.
 - [x] Add transaction support wrapping full import operations.
-- [~] Implement efficient lookup dictionaries keyed by ID for upsert.
+- [x] Implement efficient lookup dictionaries keyed by ID for upsert.
 - [~] Keep EF tracking/memory pressure low (batching + no-tracking reads for export).
 
 Current implementation note:
 
 - Added repository support for expense update including deleted rows.
-- Import logic uses per-entity lookups and staged processing.
+- Import handlers bulk-load tracked rows by payload IDs and use in-memory lookup dictionaries.
+- Expense source, bank, and tag references are validated with bounded bulk queries.
+- Work-location and leave date conflicts are loaded in one query per entity type; duplicate dates inside a payload are also rejected.
+- Replace synchronization reuses tracked import snapshots instead of reloading each omitted row.
 - Import operations now execute under explicit transaction boundaries when `dryRun=false`.
 - Imports with validation errors roll back instead of committing partial changes.
 - Expense export loads expenses and tag links with one no-tracking repository query.
-- Further bulk import optimization is still pending.
+- Write batching/chunking for unusually large payloads is still pending.
 
 ### Phase 3: API Endpoints
 
@@ -406,5 +409,5 @@ Current implementation note:
   - Phase 4 safety/observability items
   - Frontend admin data-transfer screen with dry-run-first workflow
 - Pending:
-  - Bulk import optimization and batching
+  - Large-payload write batching/chunking
   - Manual roundtrip and large-payload verification

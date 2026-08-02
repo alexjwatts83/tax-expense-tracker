@@ -25,6 +25,10 @@ public sealed class DataTransferTrackerImportHandler
         var warnings = new List<DataTransferImportIssue>();
         var errors = new List<DataTransferImportIssue>();
         var deleted = 0;
+        var existingItems = options.Mode == DataTransferImportMode.Replace && options.AllowDeletes
+            ? await _trackerRepository.GetAllForUpdateIncludingDeletedAsync(cancellationToken)
+            : await _trackerRepository.GetByIdsForUpdateIncludingDeletedAsync(items.Select(x => x.Id).ToList(), cancellationToken);
+        var existingById = existingItems.ToDictionary(x => x.Id);
 
         foreach (var item in items)
         {
@@ -34,19 +38,16 @@ public sealed class DataTransferTrackerImportHandler
                 continue;
             }
 
-            var existing = await _trackerRepository.GetByIdIncludingDeletedAsync(item.Id, cancellationToken);
+            existingById.TryGetValue(item.Id, out var existing);
             if (existing is null)
             {
-                if (options.Mode == DataTransferImportMode.InsertOnly || options.Mode == DataTransferImportMode.Upsert || options.Mode == DataTransferImportMode.Replace)
-                {
-                    created += 1;
+                created += 1;
 
-                    if (!options.DryRun)
-                    {
-                        var entity = Tracker.Create(item.Name, item.Description, _timeProvider);
-                        entity.Id = item.Id;
-                        await _trackerRepository.AddAsync(entity, cancellationToken);
-                    }
+                if (!options.DryRun)
+                {
+                    var entity = Tracker.Create(item.Name, item.Description, _timeProvider);
+                    entity.Id = item.Id;
+                    await _trackerRepository.AddAsync(entity, cancellationToken);
                 }
 
                 continue;
@@ -71,13 +72,11 @@ public sealed class DataTransferTrackerImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            deleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<Tracker>(
+            deleted = DataTransferReplaceDeleteUtility.SoftDeleteMissing<Tracker>(
                 items.Select(x => x.Id).ToList(),
-                ct => _trackerRepository.GetAllIncludingDeletedAsync(ct),
-                (id, ct) => _trackerRepository.GetByIdIncludingDeletedAsync(id, ct),
+                existingItems,
                 entity => entity.SoftDelete(_timeProvider),
-                options.DryRun,
-                cancellationToken);
+                options.DryRun);
 
             if (deleted > 0)
                 warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {deleted} tracker records not present in payload."));

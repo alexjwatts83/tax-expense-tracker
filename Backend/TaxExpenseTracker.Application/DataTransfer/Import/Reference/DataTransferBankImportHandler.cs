@@ -25,6 +25,10 @@ public sealed class DataTransferBankImportHandler
         var warnings = new List<DataTransferImportIssue>();
         var errors = new List<DataTransferImportIssue>();
         var deleted = 0;
+        var existingItems = options.Mode == DataTransferImportMode.Replace && options.AllowDeletes
+            ? await _bankRepository.GetAllForUpdateIncludingDeletedAsync(cancellationToken)
+            : await _bankRepository.GetByIdsForUpdateIncludingDeletedAsync(items.Select(x => x.Id).ToList(), cancellationToken);
+        var existingById = existingItems.ToDictionary(x => x.Id);
 
         foreach (var item in items)
         {
@@ -34,7 +38,7 @@ public sealed class DataTransferBankImportHandler
                 continue;
             }
 
-            var existing = await _bankRepository.GetByIdIncludingDeletedAsync(item.Id, cancellationToken);
+            existingById.TryGetValue(item.Id, out var existing);
             if (existing is null)
             {
                 created += 1;
@@ -68,13 +72,11 @@ public sealed class DataTransferBankImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            deleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<Bank>(
+            deleted = DataTransferReplaceDeleteUtility.SoftDeleteMissing<Bank>(
                 items.Select(x => x.Id).ToList(),
-                ct => _bankRepository.GetAllIncludingDeletedAsync(ct),
-                (id, ct) => _bankRepository.GetByIdIncludingDeletedAsync(id, ct),
+                existingItems,
                 entity => entity.SoftDelete(_timeProvider),
-                options.DryRun,
-                cancellationToken);
+                options.DryRun);
 
             if (deleted > 0)
                 warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {deleted} bank records not present in payload."));

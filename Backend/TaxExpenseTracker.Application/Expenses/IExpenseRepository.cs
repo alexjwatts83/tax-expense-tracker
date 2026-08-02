@@ -13,6 +13,34 @@ public interface IExpenseRepository : ISoftDeleteRepository<TaxExpense>
     Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default);
     Task<bool> BankExistsAsync(Guid bankId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Guid>> GetExistingTagIdsAsync(IReadOnlyList<Guid> tagIds, CancellationToken cancellationToken = default);
+
+    async Task<IReadOnlyList<Guid>> GetExistingSourceIdsAsync(
+        IReadOnlyCollection<Guid> sourceIds,
+        CancellationToken cancellationToken = default)
+    {
+        var existingIds = new List<Guid>();
+        foreach (var sourceId in sourceIds.Distinct())
+        {
+            if (await SourceExistsAsync(sourceId, cancellationToken))
+                existingIds.Add(sourceId);
+        }
+
+        return existingIds;
+    }
+
+    async Task<IReadOnlyList<Guid>> GetExistingBankIdsAsync(
+        IReadOnlyCollection<Guid> bankIds,
+        CancellationToken cancellationToken = default)
+    {
+        var existingIds = new List<Guid>();
+        foreach (var bankId in bankIds.Distinct())
+        {
+            if (await BankExistsAsync(bankId, cancellationToken))
+                existingIds.Add(bankId);
+        }
+
+        return existingIds;
+    }
     Task<decimal> GetTotalSpentAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ExpenseTotalByGroup>> GetTotalByBankAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ExpenseTotalByGroup>> GetTotalBySourceAsync(CancellationToken cancellationToken = default);

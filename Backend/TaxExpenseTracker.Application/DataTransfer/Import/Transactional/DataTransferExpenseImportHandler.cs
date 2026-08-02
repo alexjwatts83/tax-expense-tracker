@@ -29,7 +29,24 @@ public sealed class DataTransferExpenseImportHandler
         var expenseSkipped = 0;
         var expenseDeleted = 0;
 
-        var trackedExpenses = new Dictionary<Guid, TaxExpense>();
+        var payloadExpenseIds = expenses.Select(x => x.Id).ToHashSet();
+        var requestedExpenseIds = expenses.Select(x => x.Id)
+            .Concat(expenseTags.Select(x => x.TaxExpenseId))
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToList();
+        var existingItems = options.Mode == DataTransferImportMode.Replace && options.AllowDeletes
+            ? await _expenseRepository.GetAllForUpdateIncludingDeletedAsync(cancellationToken)
+            : await _expenseRepository.GetByIdsForUpdateIncludingDeletedAsync(requestedExpenseIds, cancellationToken);
+        var trackedExpenses = existingItems.ToDictionary(x => x.Id);
+        var existingSourceIds = await _expenseRepository.GetExistingSourceIdsAsync(
+            expenses.Where(x => x.SourceId != Guid.Empty).Select(x => x.SourceId).Distinct().ToList(),
+            cancellationToken);
+        var existingSourceIdSet = existingSourceIds.ToHashSet();
+        var existingBankIds = await _expenseRepository.GetExistingBankIdsAsync(
+            expenses.Where(x => x.BankId != Guid.Empty).Select(x => x.BankId).Distinct().ToList(),
+            cancellationToken);
+        var existingBankIdSet = existingBankIds.ToHashSet();
         var acceptedExpenseIds = new HashSet<Guid>();
 
         foreach (var item in expenses)
@@ -64,15 +81,13 @@ public sealed class DataTransferExpenseImportHandler
                 continue;
             }
 
-            var sourceExists = await _expenseRepository.SourceExistsAsync(item.SourceId, cancellationToken);
-            if (!sourceExists)
+            if (!existingSourceIdSet.Contains(item.SourceId))
             {
                 expenseErrors.Add(new DataTransferImportIssue(DataTransferIssueCodes.ErrReferenceNotFound, $"Expense {item.Id}: SourceId {item.SourceId} was not found."));
                 continue;
             }
 
-            var bankExists = await _expenseRepository.BankExistsAsync(item.BankId, cancellationToken);
-            if (!bankExists)
+            if (!existingBankIdSet.Contains(item.BankId))
             {
                 expenseErrors.Add(new DataTransferImportIssue(DataTransferIssueCodes.ErrReferenceNotFound, $"Expense {item.Id}: BankId {item.BankId} was not found."));
                 continue;
@@ -80,7 +95,7 @@ public sealed class DataTransferExpenseImportHandler
 
             acceptedExpenseIds.Add(item.Id);
 
-            var existing = await _expenseRepository.GetByIdForUpdateIncludingDeletedAsync(item.Id, cancellationToken);
+            trackedExpenses.TryGetValue(item.Id, out var existing);
             if (existing is null)
             {
                 expenseCreated += 1;
@@ -125,13 +140,11 @@ public sealed class DataTransferExpenseImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            expenseDeleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<TaxExpense>(
+            expenseDeleted = DataTransferReplaceDeleteUtility.SoftDeleteMissing<TaxExpense>(
                 expenses.Select(x => x.Id).ToList(),
-                ct => _expenseRepository.GetAllIncludingDeletedAsync(ct),
-                (id, ct) => _expenseRepository.GetByIdForUpdateIncludingDeletedAsync(id, ct),
+                existingItems,
                 entity => entity.SoftDelete(_timeProvider),
-                options.DryRun,
-                cancellationToken);
+                options.DryRun);
 
             if (expenseDeleted > 0)
                 expenseWarnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {expenseDeleted} expense records not present in payload."));
@@ -178,15 +191,8 @@ public sealed class DataTransferExpenseImportHandler
             trackedExpenses.TryGetValue(item.TaxExpenseId, out var expense);
             if (expense is null && !(options.DryRun && acceptedExpenseIds.Contains(item.TaxExpenseId)))
             {
-                var expenseEntity = await _expenseRepository.GetByIdForUpdateIncludingDeletedAsync(item.TaxExpenseId, cancellationToken);
-                if (expenseEntity is null)
-                {
-                    tagErrors.Add(new DataTransferImportIssue(DataTransferIssueCodes.ErrReferenceNotFound, $"ExpenseTag ({item.TaxExpenseId}, {item.TagId}): TaxExpenseId was not found."));
-                    continue;
-                }
-
-                expense = expenseEntity;
-                trackedExpenses[item.TaxExpenseId] = expenseEntity;
+                tagErrors.Add(new DataTransferImportIssue(DataTransferIssueCodes.ErrReferenceNotFound, $"ExpenseTag ({item.TaxExpenseId}, {item.TagId}): TaxExpenseId was not found."));
+                continue;
             }
 
             var alreadyLinked = expense?.TaxExpenseTags.Any(x => x.TagId == item.TagId) == true;
@@ -196,7 +202,7 @@ public sealed class DataTransferExpenseImportHandler
                 continue;
             }
 
-            if (options.Mode == DataTransferImportMode.InsertOnly && expenses.Any(x => x.Id == item.TaxExpenseId) is false)
+            if (options.Mode == DataTransferImportMode.InsertOnly && !payloadExpenseIds.Contains(item.TaxExpenseId))
             {
                 tagSkipped += 1;
                 tagWarnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnInsertOnlySkipped, $"ExpenseTag ({item.TaxExpenseId}, {item.TagId}): skipped in insertOnly mode for existing expense."));
@@ -215,7 +221,6 @@ public sealed class DataTransferExpenseImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            var payloadExpenseIds = expenses.Select(x => x.Id).ToHashSet();
             var payloadTagPairs = expenseTags
                 .Where(x => x.TaxExpenseId != Guid.Empty && x.TagId != Guid.Empty)
                 .Select(x => (x.TaxExpenseId, x.TagId))

@@ -28,6 +28,13 @@ public sealed class DataTransferWorkLocationImportHandler
         var updated = 0;
         var skipped = 0;
         var deleted = 0;
+        var existingItems = options.Mode == DataTransferImportMode.Replace && options.AllowDeletes
+            ? await _workLocationRepository.GetAllForUpdateIncludingDeletedAsync(cancellationToken)
+            : await _workLocationRepository.GetByIdsForUpdateIncludingDeletedAsync(items.Select(x => x.Id).ToList(), cancellationToken);
+        var existingById = existingItems.ToDictionary(x => x.Id);
+        var entriesOnRequestedDates = await _workLocationRepository.GetByDatesAsync(items.Select(x => x.WorkDate).ToList(), cancellationToken);
+        var existingIdByDate = entriesOnRequestedDates.ToDictionary(x => x.WorkDate.Date, x => x.Id);
+        var acceptedIdByDate = new Dictionary<DateTime, Guid>();
 
         foreach (var item in items)
         {
@@ -43,13 +50,17 @@ public sealed class DataTransferWorkLocationImportHandler
                 continue;
             }
 
-            var existing = await _workLocationRepository.GetByIdIncludingDeletedAsync(item.Id, cancellationToken);
-            var duplicateDateExists = await _workLocationRepository.ExistsForDateAsync(item.WorkDate, item.Id, cancellationToken);
-            if (duplicateDateExists)
+            existingById.TryGetValue(item.Id, out var existing);
+            var workDate = item.WorkDate.Date;
+            var conflictsWithExisting = existingIdByDate.TryGetValue(workDate, out var existingId) && existingId != item.Id;
+            var conflictsWithinPayload = acceptedIdByDate.TryGetValue(workDate, out var acceptedId) && acceptedId != item.Id;
+            if (conflictsWithExisting || conflictsWithinPayload)
             {
                 errors.Add(new DataTransferImportIssue(DataTransferIssueCodes.ErrDuplicateConflict, $"WorkLocationEntry {item.Id}: another entry already exists for {item.WorkDate:yyyy-MM-dd}."));
                 continue;
             }
+
+            acceptedIdByDate[workDate] = item.Id;
 
             if (existing is null)
             {
@@ -107,13 +118,11 @@ public sealed class DataTransferWorkLocationImportHandler
 
         if (options.Mode == DataTransferImportMode.Replace && options.AllowDeletes)
         {
-            deleted = await DataTransferReplaceDeleteUtility.SoftDeleteMissingAsync<WorkLocationEntry>(
+            deleted = DataTransferReplaceDeleteUtility.SoftDeleteMissing<WorkLocationEntry>(
                 items.Select(x => x.Id).ToList(),
-                ct => _workLocationRepository.GetAllIncludingDeletedAsync(ct),
-                (id, ct) => _workLocationRepository.GetByIdIncludingDeletedAsync(id, ct),
+                existingItems,
                 entity => entity.SoftDelete(_timeProvider),
-                options.DryRun,
-                cancellationToken);
+                options.DryRun);
 
             if (deleted > 0)
                 warnings.Add(new DataTransferImportIssue(DataTransferIssueCodes.WarnReplaceSoftDeletedMissing, $"Replace mode: soft-deleted {deleted} work location records not present in payload."));

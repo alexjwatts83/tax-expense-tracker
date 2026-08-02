@@ -97,6 +97,28 @@ public sealed class EfExpenseRepository : IExpenseRepository
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<TaxExpense>> GetAllForUpdateIncludingDeletedAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.TaxExpenses
+            .IgnoreQueryFilters()
+            .Include(x => x.TaxExpenseTags)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<TaxExpense>> GetByIdsForUpdateIncludingDeletedAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+            return [];
+
+        return await _dbContext.TaxExpenses
+            .IgnoreQueryFilters()
+            .Include(x => x.TaxExpenseTags)
+            .Where(x => ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<bool> SourceExistsAsync(Guid sourceId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Trackers.AnyAsync(x => x.Id == sourceId, cancellationToken);
@@ -105,6 +127,32 @@ public sealed class EfExpenseRepository : IExpenseRepository
     public Task<bool> BankExistsAsync(Guid bankId, CancellationToken cancellationToken = default)
     {
         return _dbContext.Banks.AnyAsync(x => x.Id == bankId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetExistingSourceIdsAsync(
+        IReadOnlyCollection<Guid> sourceIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (sourceIds.Count == 0)
+            return [];
+
+        return await _dbContext.Trackers
+            .Where(x => sourceIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Guid>> GetExistingBankIdsAsync(
+        IReadOnlyCollection<Guid> bankIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (bankIds.Count == 0)
+            return [];
+
+        return await _dbContext.Banks
+            .Where(x => bankIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<Guid>> GetExistingTagIdsAsync(IReadOnlyList<Guid> tagIds, CancellationToken cancellationToken = default)

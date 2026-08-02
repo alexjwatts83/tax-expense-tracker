@@ -85,10 +85,29 @@ public class DataTransferTrackerImportHandlerTests
         Assert.True(repository.SaveChangesCalled);
     }
 
+    [Fact]
+    public async Task ImportAsync_MultipleTrackers_UsesSingleBulkRead()
+    {
+        var repository = new TrackerRepository();
+        var handler = new DataTransferTrackerImportHandler(repository, TestTime.TimeProvider);
+
+        await handler.ImportAsync(
+            [
+                new ReferenceTrackerImportItemDto(Guid.NewGuid(), "One", null),
+                new ReferenceTrackerImportItemDto(Guid.NewGuid(), "Two", null),
+            ],
+            new DataTransferImportOptions(DryRun: true));
+
+        Assert.Equal(1, repository.BulkReadCount);
+        Assert.Equal(0, repository.SingleReadCount);
+    }
+
     private sealed class TrackerRepository : ITrackerRepository
     {
         public List<Tracker> Trackers { get; } = [];
         public bool SaveChangesCalled { get; private set; }
+        public int BulkReadCount { get; private set; }
+        public int SingleReadCount { get; private set; }
 
         public Task<IReadOnlyList<Tracker>> GetAllAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<Tracker>>(Trackers.Where(x => !x.IsDeleted).ToList());
@@ -99,8 +118,23 @@ public class DataTransferTrackerImportHandlerTests
         public Task<Tracker?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
             Task.FromResult(Trackers.FirstOrDefault(x => x.Id == id && !x.IsDeleted));
 
-        public Task<Tracker?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default) =>
-            Task.FromResult(Trackers.FirstOrDefault(x => x.Id == id));
+        public Task<Tracker?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            SingleReadCount += 1;
+            return Task.FromResult(Trackers.FirstOrDefault(x => x.Id == id));
+        }
+
+        public Task<IReadOnlyList<Tracker>> GetAllForUpdateIncludingDeletedAsync(CancellationToken cancellationToken = default)
+        {
+            BulkReadCount += 1;
+            return Task.FromResult<IReadOnlyList<Tracker>>(Trackers);
+        }
+
+        public Task<IReadOnlyList<Tracker>> GetByIdsForUpdateIncludingDeletedAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
+        {
+            BulkReadCount += 1;
+            return Task.FromResult<IReadOnlyList<Tracker>>(Trackers.Where(x => ids.Contains(x.Id)).ToList());
+        }
 
         public Task AddAsync(Tracker entity, CancellationToken cancellationToken = default)
         {

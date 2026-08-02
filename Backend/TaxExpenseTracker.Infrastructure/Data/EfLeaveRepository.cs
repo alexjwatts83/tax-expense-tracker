@@ -36,4 +36,18 @@ public sealed class EfLeaveRepository : EfSoftDeleteRepository<LeaveEntry>, ILea
             x => x.LeaveDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value),
             cancellationToken);
     }
+
+    public async Task<IReadOnlyList<LeaveEntry>> GetByDatesAsync(
+        IReadOnlyCollection<DateTime> leaveDates,
+        CancellationToken cancellationToken = default)
+    {
+        if (leaveDates.Count == 0)
+            return [];
+
+        var dates = leaveDates.Select(x => x.Date).Distinct().ToList();
+        return await DbSet
+            .AsNoTracking()
+            .Where(x => dates.Contains(x.LeaveDate))
+            .ToListAsync(cancellationToken);
+    }
 }
