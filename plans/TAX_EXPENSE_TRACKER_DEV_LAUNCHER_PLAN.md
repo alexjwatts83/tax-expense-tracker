@@ -93,8 +93,8 @@ walking upward from the launcher executable until `TaxExpenseTracker.sln` is fou
 | `api` | `dotnet` | `run --project Backend/TaxExpenseTracker.Api --launch-profile https` | repository root | 7152, 5158 | `Now listening on:` | `https://localhost:7152/swagger` |
 | `web` | `npm.cmd` | `start` | `Frontend` | 4200 | Angular local server ready output or successful HTTP probe | `http://localhost:4200` |
 
-Start All launches the API first, waits until it is ready, and then launches the frontend. Stop All
-uses the reverse order. Each command uses `ProcessStartInfo.ArgumentList`,
+Start All launches the API process first and then the frontend without making frontend startup
+depend on API readiness detection. Stop All uses the reverse order. Each command uses `ProcessStartInfo.ArgumentList`,
 `UseShellExecute = false`, and explicit working directories.
 
 The launcher's commands must remain aligned with `scripts/Start-Local.ps1`,
@@ -149,7 +149,7 @@ The launcher never silently kills an external process.
 - Compact header with launcher name and overall status.
 - Toolbar with Start All, Stop All, and Restart All commands.
 - One service row/card per service with state, process id, uptime, ports, local link, and controls.
-- Logs, API Log Files, and App tabs fill the remaining window height.
+- Logs, Frontend Output, API Log Files, and App tabs fill the remaining window height.
 - Status colors remain readable without relying on color alone.
 
 ### Logs Tab
@@ -160,6 +160,13 @@ The launcher never silently kills an external process.
 - Auto-scroll toggle, Clear action, and Save action.
 - Filtering uses an `ICollectionView` rather than copying log collections.
 - Auto-scroll pauses when disabled and does not steal the user's scroll position.
+
+### Frontend Output Tab
+
+- Display only redirected stdout, stderr, and launcher messages from the Web service.
+- Show npm and Angular startup progress independently from the combined Logs tab filters.
+- Provide Web Start and Stop controls alongside the current service state.
+- Support independent text filtering and auto-scroll without duplicating stored log lines.
 
 ### API Log Files Tab
 
@@ -230,13 +237,14 @@ The launcher never silently kills an external process.
 
 1. [x] Build service controls with state, pid, uptime, ports, and links.
 2. [x] Bind command availability to service lifecycle state.
-3. [ ] Add the Logs, API Log Files, and App tabs.
-4. [ ] Implement API log file discovery under `C:\logs\TaxExpenseTracker.Api`.
-5. [ ] Implement read-only file loading, live tailing, rotation handling, and bounded retention.
-6. [ ] Add API log file selection, text filtering, auto-scroll, refresh, and Open Folder actions.
-7. [ ] Initialize WebView2 and navigate when the frontend is ready.
-8. [ ] Add Reload and Open in Browser actions.
-9. [ ] Add unavailable, loading, and navigation-error states.
+3. [x] Add a dedicated Frontend Output tab with Web controls, filtering, and auto-scroll.
+4. [ ] Complete the Logs, API Log Files, and App tabs.
+5. [ ] Implement API log file discovery under `C:\logs\TaxExpenseTracker.Api`.
+6. [ ] Implement read-only file loading, live tailing, rotation handling, and bounded retention.
+7. [ ] Add API log file selection, text filtering, auto-scroll, refresh, and Open Folder actions.
+8. [ ] Initialize WebView2 and navigate when the frontend is ready.
+9. [ ] Add Reload and Open in Browser actions.
+10. [ ] Add unavailable, loading, and navigation-error states.
 
 ### Phase 5 - Robustness
 
@@ -272,6 +280,7 @@ The launcher never silently kills an external process.
 - [ ] Status, pid, uptime, and exit information remain accurate.
 - [ ] stdout and stderr appear live and remain responsive at the 5,000-line limit.
 - [ ] Every log toolbar control works with both services running.
+- [ ] Frontend Output tab shows live npm and Angular progress without API lines.
 - [ ] API Log Files tab lists and follows files from `C:\logs\TaxExpenseTracker.Api`.
 - [ ] API Log Files tab handles missing folders, empty folders, truncation, and rotation cleanly.
 - [ ] App tab loads the Angular application and recovers after a frontend restart.

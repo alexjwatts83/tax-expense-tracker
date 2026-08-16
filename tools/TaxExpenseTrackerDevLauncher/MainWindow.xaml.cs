@@ -18,6 +18,9 @@ public partial class MainWindow : Window
         {
             if (_viewModel.AutoScroll && LauncherLogList.Items.Count > 0)
                 LauncherLogList.ScrollIntoView(LauncherLogList.Items[^1]);
+
+            if (_viewModel.FrontendOutputAutoScroll && FrontendOutputList.Items.Count > 0)
+                FrontendOutputList.ScrollIntoView(FrontendOutputList.Items[^1]);
         };
     }
 

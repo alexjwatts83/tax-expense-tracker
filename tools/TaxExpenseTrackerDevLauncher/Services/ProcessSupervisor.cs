@@ -41,7 +41,7 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = runtime.Definition.Executable,
+                FileName = ExecutableResolver.Resolve(runtime.Definition.Executable),
                 WorkingDirectory = runtime.Definition.WorkingDirectory,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -72,7 +72,7 @@ public sealed class ProcessSupervisor : IAsyncDisposable
             runtime.Process = process;
             runtime.StartedAt = DateTimeOffset.Now;
             SetStatus(runtime, ServiceState.Starting, process.Id, runtime.StartedAt);
-            Emit(runtime.Definition.Id, "launcher", $"Started process {process.Id}: {runtime.Definition.Executable} {string.Join(' ', runtime.Definition.Arguments)}");
+            Emit(runtime.Definition.Id, "launcher", $"Started process {process.Id}: {startInfo.FileName} {string.Join(' ', runtime.Definition.Arguments)}");
 
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();

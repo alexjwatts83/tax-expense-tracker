@@ -20,9 +20,11 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     private readonly Dispatcher _dispatcher;
     private readonly DispatcherTimer _uptimeTimer;
     private string _logFilter = string.Empty;
+    private string _frontendOutputFilter = string.Empty;
     private bool _showApiLogs = true;
     private bool _showWebLogs = true;
     private bool _autoScroll = true;
+    private bool _frontendOutputAutoScroll = true;
     private Uri? _frontendSource;
 
     public MainViewModel()
@@ -36,6 +38,10 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 
         LogsView = CollectionViewSource.GetDefaultView(LogLines);
         LogsView.Filter = FilterLogLine;
+        FrontendLogsView = new ListCollectionView(LogLines)
+        {
+            Filter = FilterFrontendLogLine
+        };
 
         StartAllCommand = new AsyncRelayCommand(StartAllAsync);
         StopAllCommand = new AsyncRelayCommand(StopAllAsync);
@@ -53,8 +59,10 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 
     public string RepositoryRoot { get; }
     public ObservableCollection<ServiceViewModel> Services { get; }
+    public ServiceViewModel WebService => Services.First(service => service.Id == "web");
     public ObservableCollection<LogLine> LogLines { get; } = [];
     public ICollectionView LogsView { get; }
+    public ICollectionView FrontendLogsView { get; }
     public IAsyncRelayCommand StartAllCommand { get; }
     public IAsyncRelayCommand StopAllCommand { get; }
     public IAsyncRelayCommand RestartAllCommand { get; }
@@ -98,6 +106,22 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         set => SetProperty(ref _autoScroll, value);
     }
 
+    public string FrontendOutputFilter
+    {
+        get => _frontendOutputFilter;
+        set
+        {
+            if (SetProperty(ref _frontendOutputFilter, value))
+                FrontendLogsView.Refresh();
+        }
+    }
+
+    public bool FrontendOutputAutoScroll
+    {
+        get => _frontendOutputAutoScroll;
+        set => SetProperty(ref _frontendOutputAutoScroll, value);
+    }
+
     public Uri? FrontendSource
     {
         get => _frontendSource;
@@ -115,12 +139,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     private async Task StartAllAsync()
     {
         foreach (var service in Services)
-        {
             await service.StartAsync();
-            await WaitForStableStateAsync(service);
-            if (service.State != ServiceState.Running)
-                return;
-        }
     }
 
     private async Task StopAllAsync()
@@ -133,12 +152,6 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     {
         await StopAllAsync();
         await StartAllAsync();
-    }
-
-    private static async Task WaitForStableStateAsync(ServiceViewModel service)
-    {
-        while (service.State == ServiceState.Starting)
-            await Task.Delay(250);
     }
 
     private void OnLogReceived(LogLine line)
@@ -173,6 +186,15 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 
         return string.IsNullOrWhiteSpace(LogFilter) ||
                line.Text.Contains(LogFilter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool FilterFrontendLogLine(object item)
+    {
+        if (item is not LogLine line || !line.ServiceId.Equals("web", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return string.IsNullOrWhiteSpace(FrontendOutputFilter) ||
+               line.Text.Contains(FrontendOutputFilter, StringComparison.OrdinalIgnoreCase);
     }
 
     private void RefreshUptimes(object? sender, EventArgs args)

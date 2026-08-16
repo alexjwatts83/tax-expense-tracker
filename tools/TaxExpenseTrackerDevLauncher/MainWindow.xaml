@@ -55,7 +55,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock FontSize="17" FontWeight="SemiBold" Text="{Binding DisplayName}" />
+                                <TextBlock FontSize="17" FontWeight="SemiBold" Foreground="White" Text="{Binding DisplayName}" />
                                 <Border Grid.Column="1" Padding="9,3" Background="{StaticResource ElevatedSurfaceBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" CornerRadius="3">
                                     <TextBlock FontWeight="SemiBold" Foreground="{StaticResource BlueBrush}" Text="{Binding StateText}" />
                                 </Border>
@@ -66,7 +66,7 @@
                                 <TextBlock Margin="18,0,0,0" Foreground="{StaticResource MutedTextBrush}" Text="Uptime " />
                                 <TextBlock FontWeight="SemiBold" Text="{Binding Uptime}" />
                                 <TextBlock Margin="18,0,0,0" Foreground="{StaticResource MutedTextBrush}" Text="Ports " />
-                                <TextBlock FontWeight="SemiBold" Text="{Binding PortsText}" />
+                                <TextBlock FontWeight="SemiBold" Foreground="White" Text="{Binding PortsText}" />
                             </StackPanel>
                             <StackPanel Grid.Row="2" Orientation="Horizontal">
                                 <Button Command="{Binding StartCommand}" Content="Start" Style="{StaticResource PrimaryButtonStyle}" />
@@ -134,6 +134,58 @@
                                 <GridViewColumn Width="70" DisplayMemberBinding="{Binding ServiceId}" Header="Service" />
                                 <GridViewColumn Width="75" DisplayMemberBinding="{Binding Stream}" Header="Stream" />
                                 <GridViewColumn Width="760" DisplayMemberBinding="{Binding Text}" Header="Message" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Frontend Output">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding FrontendOutputFilter, UpdateSourceTrigger=PropertyChanged}" ToolTip="Filter frontend output" />
+                        <CheckBox Grid.Column="1" Margin="14,0,12,0" VerticalAlignment="Center" Content="Auto-scroll" IsChecked="{Binding FrontendOutputAutoScroll}" />
+                        <Button Grid.Column="2" Command="{Binding WebService.StartCommand}" Content="Start" Style="{StaticResource PrimaryButtonStyle}" />
+                        <Button Grid.Column="3" Command="{Binding WebService.StopCommand}" Content="Stop" />
+                        <StackPanel Grid.Column="5" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Foreground="{StaticResource MutedTextBrush}" Text="Status " />
+                            <TextBlock FontWeight="SemiBold" Foreground="{StaticResource BlueBrush}" Text="{Binding WebService.StateText}" />
+                        </StackPanel>
+                    </Grid>
+                    <ListView x:Name="FrontendOutputList"
+                              Grid.Row="1"
+                              ItemsSource="{Binding FrontendLogsView}"
+                              FontFamily="Cascadia Mono"
+                              FontSize="12"
+                              ScrollViewer.CanContentScroll="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn Width="95" DisplayMemberBinding="{Binding TimestampText}" Header="Time" />
+                                <GridViewColumn Width="80" DisplayMemberBinding="{Binding Stream}" Header="Stream" />
+                                <GridViewColumn Width="900" DisplayMemberBinding="{Binding Text}" Header="npm / Angular output" />
                             </GridView>
                         </ListView.View>
                     </ListView>
