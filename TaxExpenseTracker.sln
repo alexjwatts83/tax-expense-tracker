@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{07C2787E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxExpenseTrackerDevLauncher", "tools\TaxExpenseTrackerDevLauncher\TaxExpenseTrackerDevLauncher.csproj", "{642337C3-125E-4358-A927-1C1BE505F3D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxExpenseTrackerDevLauncher.Tests", "tools\TaxExpenseTrackerDevLauncher.Tests\TaxExpenseTrackerDevLauncher.Tests.csproj", "{728398C4-B55D-45E2-9E54-932D97558E2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,18 @@ Global
 		{642337C3-125E-4358-A927-1C1BE505F3D1}.Release|x64.Build.0 = Release|Any CPU
 		{642337C3-125E-4358-A927-1C1BE505F3D1}.Release|x86.ActiveCfg = Release|Any CPU
 		{642337C3-125E-4358-A927-1C1BE505F3D1}.Release|x86.Build.0 = Release|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Debug|x64.Build.0 = Debug|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Debug|x86.Build.0 = Debug|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Release|x64.ActiveCfg = Release|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Release|x64.Build.0 = Release|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Release|x86.ActiveCfg = Release|Any CPU
+		{728398C4-B55D-45E2-9E54-932D97558E2D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,5 +151,6 @@ Global
 		{168E3DA1-5894-4EEE-88C2-45A6F742E911} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
 		{23F098A1-9706-4441-8DCA-3D1B8C6C98D2} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
 		{642337C3-125E-4358-A927-1C1BE505F3D1} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+		{728398C4-B55D-45E2-9E54-932D97558E2D} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 EndGlobal

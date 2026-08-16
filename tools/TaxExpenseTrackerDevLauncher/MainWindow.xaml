@@ -49,6 +49,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -72,12 +73,21 @@
                                 <Button Command="{Binding StartCommand}" Content="Start" Style="{StaticResource PrimaryButtonStyle}" />
                                 <Button Command="{Binding StopCommand}" Content="Stop" />
                                 <Button Command="{Binding RestartCommand}" Content="Restart" />
+                                <Button Command="{Binding ForceFreePortCommand}"
+                                    Content="Force free port"
+                                    Visibility="{Binding HasPortConflict, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 <TextBlock Margin="8,0,0,0" VerticalAlignment="Center">
                                     <Hyperlink NavigateUri="{Binding Definition.LocalUri}" RequestNavigate="LocalLink_RequestNavigate">
                                         <Run Text="{Binding LocalUrl, Mode=OneWay}" />
                                     </Hyperlink>
                                 </TextBlock>
                             </StackPanel>
+                            <TextBlock Grid.Row="3"
+                                       Margin="0,10,0,0"
+                                       Foreground="{StaticResource ErrorBrush}"
+                                       Text="{Binding PortConflictText}"
+                                       TextWrapping="Wrap"
+                                       Visibility="{Binding HasPortConflict, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         </Grid>
                     </Border>
                 </DataTemplate>
@@ -192,8 +202,55 @@
                 </Grid>
             </TabItem>
             <TabItem Header="API Log Files">
-                <Grid Margin="16">
-                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="API file log viewer is the next implementation step." />
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="340" />
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox ItemsSource="{Binding ApiLogFiles}"
+                                  SelectedItem="{Binding SelectedApiLogFile}"
+                                  DisplayMemberPath="DisplayName"
+                                  ToolTip="Select an API log file" />
+                        <TextBox Grid.Column="1" Margin="10,0,0,0" Text="{Binding ApiLogFileFilter, UpdateSourceTrigger=PropertyChanged}" ToolTip="Filter API file logs" />
+                        <CheckBox Grid.Column="2" Margin="14,0,0,0" VerticalAlignment="Center" Content="Auto-scroll" IsChecked="{Binding ApiLogFileAutoScroll}" />
+                        <Button Grid.Column="4" Command="{Binding RefreshApiLogFilesCommand}" Content="Refresh" />
+                        <Button Grid.Column="5" Command="{Binding OpenApiLogFolderCommand}" Content="Open folder" Margin="0" />
+                    </Grid>
+                    <TextBlock Grid.Row="1" Margin="2,0,0,8" Foreground="{StaticResource MutedTextBrush}" Text="{Binding ApiLogFileStatus}" />
+                    <ListView x:Name="ApiLogFileList"
+                              Grid.Row="2"
+                              ItemsSource="{Binding ApiLogFileLinesView}"
+                              FontFamily="Cascadia Mono"
+                              FontSize="12"
+                              ScrollViewer.CanContentScroll="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn Width="1050" DisplayMemberBinding="{Binding Text}" Header="API file output" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </Grid>
             </TabItem>
             <TabItem Header="App">
@@ -205,9 +262,22 @@
                     <StackPanel Margin="12,10" Orientation="Horizontal">
                         <Button Click="ReloadWebView_Click" Content="Reload" />
                         <Button Command="{Binding OpenFrontendCommand}" Content="Open in browser" />
-                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="The site loads when Web reaches Running." />
+                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="{Binding FrontendBrowserStatus}" />
                     </StackPanel>
-                    <wv2:WebView2 x:Name="AppWebView" Grid.Row="1" Source="{Binding FrontendSource}" />
+                    <Grid Grid.Row="1">
+                        <wv2:WebView2 x:Name="AppWebView"
+                                      Source="{Binding FrontendSource}"
+                                      Loaded="AppWebView_Loaded"
+                                      NavigationCompleted="AppWebView_NavigationCompleted" />
+                        <Border Background="{StaticResource SurfaceBrush}"
+                                Visibility="{Binding IsFrontendUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="SemiBold" Foreground="White" Text="Frontend unavailable" />
+                                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="{Binding FrontendBrowserStatus}" />
+                                <Button Margin="0,16,0,0" HorizontalAlignment="Center" Command="{Binding WebService.StartCommand}" Content="Start Web" Style="{StaticResource PrimaryButtonStyle}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

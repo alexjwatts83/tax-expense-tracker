@@ -22,6 +22,7 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 
     public event Action<LogLine>? LogReceived;
     public event Action<ServiceStatusChangedEventArgs>? StatusChanged;
+    public event Action<string, IReadOnlyList<PortOwner>>? PortConflictDetected;
 
     public async Task StartAsync(string serviceId)
     {
@@ -32,6 +33,17 @@ public sealed class ProcessSupervisor : IAsyncDisposable
         {
             if (runtime.State is ServiceState.Starting or ServiceState.Running)
                 return;
+
+            var portOwners = PortInspector.GetOwners(runtime.Definition.Ports);
+            if (portOwners.Count > 0)
+            {
+                foreach (var owner in portOwners)
+                    Emit(runtime.Definition.Id, "stderr", $"Port {owner.Port} is already used by {owner.ProcessName} (PID {owner.ProcessId}).");
+
+                PortConflictDetected?.Invoke(runtime.Definition.Id, portOwners);
+                SetStatus(runtime, ServiceState.Stopped);
+                return;
+            }
 
             runtime.IntentionalStop = false;
             runtime.ReadyLogSeen = false;

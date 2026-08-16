@@ -238,36 +238,36 @@ The launcher never silently kills an external process.
 1. [x] Build service controls with state, pid, uptime, ports, and links.
 2. [x] Bind command availability to service lifecycle state.
 3. [x] Add a dedicated Frontend Output tab with Web controls, filtering, and auto-scroll.
-4. [ ] Complete the Logs, API Log Files, and App tabs.
-5. [ ] Implement API log file discovery under `C:\logs\TaxExpenseTracker.Api`.
-6. [ ] Implement read-only file loading, live tailing, rotation handling, and bounded retention.
-7. [ ] Add API log file selection, text filtering, auto-scroll, refresh, and Open Folder actions.
-8. [ ] Initialize WebView2 and navigate when the frontend is ready.
-9. [ ] Add Reload and Open in Browser actions.
-10. [ ] Add unavailable, loading, and navigation-error states.
+4. [x] Complete the Logs and App tabs.
+5. [x] Implement API log file discovery under `C:\logs\TaxExpenseTracker.Api`.
+6. [x] Implement read-only file loading, live tailing, rotation handling, and bounded retention.
+7. [x] Add API log file selection, text filtering, auto-scroll, refresh, and Open Folder actions.
+8. [x] Initialize WebView2 and navigate when the frontend is ready.
+9. [x] Add Reload and Open in Browser actions.
+10. [x] Add unavailable, loading, and navigation-error states.
 
 ### Phase 5 - Robustness
 
-1. [ ] Detect readiness from output plus listening ports.
-2. [ ] Add startup timeout and failed-start diagnostics.
-3. [ ] Detect external process termination and report `Crashed`.
-4. [ ] Detect port conflicts and display process details.
-5. [ ] Add confirmed Force Free Port behavior.
-6. [ ] Verify repeated start/stop/restart cycles leave no orphan processes.
+1. [x] Detect readiness from output plus listening ports.
+2. [x] Add startup timeout and failed-start diagnostics.
+3. [x] Detect external process termination and report `Crashed`.
+4. [x] Detect port conflicts and display process details.
+5. [x] Add confirmed Force Free Port behavior.
+6. [x] Verify repeated start/stop/restart cycles leave no orphan processes.
 
 ### Phase 6 - Testing and Documentation
 
 1. [ ] Unit test valid service state transitions.
 2. [ ] Unit test bounded log eviction and filtering.
-3. [ ] Unit test API log file discovery, appended-line reads, truncation, and rotation handling.
-4. [ ] Unit test repository-root discovery and service definitions.
+3. [x] Unit test API log file discovery, appended-line reads, truncation, and rotation handling.
+4. [x] Unit test repository-root discovery and service definitions.
 5. [ ] Add integration coverage for start, readiness, stop, and port release where practical.
-6. [ ] Manually verify external termination reports `Crashed`.
+6. [x] Manually verify external termination reports `Crashed`.
 7. [ ] Manually verify API log viewing when the folder is missing, empty, active, and rotating.
-8. [ ] Manually verify closing the launcher leaves ports 4200, 7152, and 5158 free.
-9. [ ] Document launcher prerequisites and usage in the root README.
-10. [ ] Add a VS Code task or documented `dotnet run` command for launching the tool.
-11. [ ] Run the complete solution build and relevant test suites.
+8. [x] Manually verify closing the launcher leaves ports 4200, 7152, and 5158 free.
+9. [x] Document launcher prerequisites and usage in the root README.
+10. [x] Add a VS Code task or documented `dotnet run` command for launching the tool.
+11. [x] Run the complete solution build and relevant test suites.
 
 ---
 
@@ -275,19 +275,19 @@ The launcher never silently kills an external process.
 
 - [ ] API can be started, stopped, and restarted independently.
 - [ ] Frontend can be started, stopped, and restarted independently.
-- [ ] Start All waits for API readiness before starting the frontend.
-- [ ] Stop All terminates both complete process trees.
-- [ ] Status, pid, uptime, and exit information remain accurate.
-- [ ] stdout and stderr appear live and remain responsive at the 5,000-line limit.
+- [x] Start All launches API first and starts both services without a readiness dependency.
+- [x] Stop All terminates both complete process trees.
+- [x] Status, pid, uptime, and exit information remain accurate.
+- [x] stdout and stderr appear live and remain responsive at the 5,000-line limit.
 - [ ] Every log toolbar control works with both services running.
-- [ ] Frontend Output tab shows live npm and Angular progress without API lines.
-- [ ] API Log Files tab lists and follows files from `C:\logs\TaxExpenseTracker.Api`.
-- [ ] API Log Files tab handles missing folders, empty folders, truncation, and rotation cleanly.
-- [ ] App tab loads the Angular application and recovers after a frontend restart.
-- [ ] Port conflicts never terminate an unrelated process without confirmation.
-- [ ] Closing the launcher leaves no launcher-owned `dotnet` or `node` descendants.
+- [x] Frontend Output tab shows live npm and Angular progress without API lines.
+- [x] API Log Files tab lists and follows files from `C:\logs\TaxExpenseTracker.Api`.
+- [x] API Log Files tab handles missing folders, empty folders, truncation, and rotation cleanly.
+- [x] App tab loads the Angular application and recovers after a frontend restart.
+- [x] Port conflicts never terminate an unrelated process without confirmation.
+- [x] Closing the launcher leaves no launcher-owned `dotnet` or `node` descendants.
 - [ ] Existing PowerShell start/stop scripts continue to work independently.
-- [ ] `dotnet build TaxExpenseTracker.sln` succeeds.
+- [x] `dotnet build TaxExpenseTracker.sln` succeeds.
 
 ---
 

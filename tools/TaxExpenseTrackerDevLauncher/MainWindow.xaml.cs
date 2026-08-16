@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Navigation;
+using Microsoft.Web.WebView2.Core;
 using TaxExpenseTrackerDevLauncher.ViewModels;
 
 namespace TaxExpenseTrackerDevLauncher;
@@ -21,6 +22,11 @@ public partial class MainWindow : Window
 
             if (_viewModel.FrontendOutputAutoScroll && FrontendOutputList.Items.Count > 0)
                 FrontendOutputList.ScrollIntoView(FrontendOutputList.Items[^1]);
+        };
+        _viewModel.ApiLogFileLines.CollectionChanged += (_, _) =>
+        {
+            if (_viewModel.ApiLogFileAutoScroll && ApiLogFileList.Items.Count > 0)
+                ApiLogFileList.ScrollIntoView(ApiLogFileList.Items[^1]);
         };
     }
 
@@ -43,9 +49,39 @@ public partial class MainWindow : Window
         args.Handled = true;
     }
 
+    private async void AppWebView_Loaded(object sender, RoutedEventArgs args)
+    {
+        try
+        {
+            await AppWebView.EnsureCoreWebView2Async();
+        }
+        catch (Exception exception)
+        {
+            _viewModel.ReportBrowserStatus($"WebView2 initialization failed: {exception.Message}", isError: true);
+        }
+    }
+
+    private void AppWebView_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs args)
+    {
+        _viewModel.ReportBrowserStatus(args.IsSuccess
+            ? "Frontend loaded."
+            : $"Frontend navigation failed: {args.WebErrorStatus}",
+            isError: !args.IsSuccess);
+    }
+
     private void ReloadWebView_Click(object sender, RoutedEventArgs args)
     {
-        if (AppWebView.Source is not null)
-            AppWebView.Reload();
+        try
+        {
+            if (AppWebView.Source is not null)
+            {
+                _viewModel.ReportBrowserStatus("Reloading the frontend...");
+                AppWebView.Reload();
+            }
+        }
+        catch (Exception exception)
+        {
+            _viewModel.ReportBrowserStatus($"Frontend reload failed: {exception.Message}", isError: true);
+        }
     }
 }

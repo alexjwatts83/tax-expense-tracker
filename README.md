@@ -17,6 +17,7 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Dashboard summary totals grouped by bank and source
 - TaxExpense.Item removed end-to-end from domain, API, frontend models, and DB schema
 - Local run automation scripts with robust port handling
+- Windows WPF development launcher with service controls, live process output, API file-log tailing, and embedded frontend
 - Work-location (WFH/Office), leave, and public-holiday entities added to the domain and persistence model
 - Work-location/leave repositories and application services implemented and wired in DI
 - Work-location and leave API endpoints added for CRUD, restore, and optional date-range querying
@@ -49,6 +50,7 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Backend DDD, security, and invariant hardening tracked in [plans/BACKEND_DDD_HARDENING_PLAN.md](plans/BACKEND_DDD_HARDENING_PLAN.md)
 - Frontend clean-code, workflow, and contract hardening tracked in [plans/FRONTEND_CLEAN_CODE_HARDENING_PLAN.md](plans/FRONTEND_CLEAN_CODE_HARDENING_PLAN.md)
 - Full-stack hardening delivery order and progress tracked in [plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
+- WPF development launcher delivery tracked in [plans/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md](plans/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md)
 
 ## Tech Stack
 
@@ -225,6 +227,26 @@ powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scri
 ```
 
 ### Start Everything (recommended)
+
+On Windows, run the development launcher from the repository root:
+
+```powershell
+dotnet run --project tools/TaxExpenseTrackerDevLauncher/TaxExpenseTrackerDevLauncher.csproj
+```
+
+The launcher provides:
+
+- Start, stop, and restart controls for the API and Angular frontend
+- Combined process logs and a dedicated frontend npm/Angular output tab
+- Read-only live tailing of API logs from `C:\logs\TaxExpenseTracker.Api`
+- An embedded App tab using the Microsoft Edge WebView2 Runtime
+- Port-conflict details with an explicitly confirmed Force free port action
+- Automatic cleanup of launcher-owned child process trees when the window closes
+
+The .NET 10 SDK, Node.js/npm, and Microsoft Edge WebView2 Runtime are required. The PowerShell
+scripts remain the scriptable and CI-friendly workflow.
+
+### PowerShell Workflow
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "C:\dev\github\tax-expense-tracker\scripts\Start-Local.ps1"

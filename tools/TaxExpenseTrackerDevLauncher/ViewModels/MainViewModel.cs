@@ -17,6 +17,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 {
     private const int MaximumLogLines = 5000;
     private readonly ProcessSupervisor _supervisor;
+    private readonly ApiLogFileReader _apiLogFileReader;
     private readonly Dispatcher _dispatcher;
     private readonly DispatcherTimer _uptimeTimer;
     private string _logFilter = string.Empty;
@@ -25,7 +26,13 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     private bool _showWebLogs = true;
     private bool _autoScroll = true;
     private bool _frontendOutputAutoScroll = true;
+    private string _apiLogFileFilter = string.Empty;
+    private bool _apiLogFileAutoScroll = true;
+    private ApiLogFileInfo? _selectedApiLogFile;
+    private string _apiLogFileStatus = "Loading API log files...";
     private Uri? _frontendSource;
+    private bool _isFrontendRunning;
+    private string _frontendBrowserStatus = "Start the Web service to load the site.";
 
     public MainViewModel()
     {
@@ -33,6 +40,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         RepositoryRoot = RepositoryLocator.FindRepositoryRoot();
         var definitions = ServiceRegistry.Create(RepositoryRoot);
         _supervisor = new ProcessSupervisor(definitions);
+        _apiLogFileReader = new ApiLogFileReader();
         Services = new ObservableCollection<ServiceViewModel>(
             definitions.Select(definition => new ServiceViewModel(definition, _supervisor)));
 
@@ -42,6 +50,8 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         {
             Filter = FilterFrontendLogLine
         };
+        ApiLogFileLinesView = CollectionViewSource.GetDefaultView(ApiLogFileLines);
+        ApiLogFileLinesView.Filter = FilterApiLogFileLine;
 
         StartAllCommand = new AsyncRelayCommand(StartAllAsync);
         StopAllCommand = new AsyncRelayCommand(StopAllAsync);
@@ -49,12 +59,20 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         ClearLogsCommand = new RelayCommand(LogLines.Clear);
         SaveLogsCommand = new RelayCommand(SaveLogs);
         OpenFrontendCommand = new RelayCommand(OpenFrontend);
+        RefreshApiLogFilesCommand = new AsyncRelayCommand(_apiLogFileReader.RefreshFilesAsync);
+        OpenApiLogFolderCommand = new RelayCommand(OpenApiLogFolder);
 
         _supervisor.LogReceived += OnLogReceived;
         _supervisor.StatusChanged += OnStatusChanged;
+        _supervisor.PortConflictDetected += OnPortConflictDetected;
+        _apiLogFileReader.FilesChanged += OnApiLogFilesChanged;
+        _apiLogFileReader.LinesReset += OnApiLogLinesReset;
+        _apiLogFileReader.LinesAppended += OnApiLogLinesAppended;
+        _apiLogFileReader.StatusChanged += status => _dispatcher.InvokeAsync(() => ApiLogFileStatus = status);
 
         _uptimeTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, RefreshUptimes, _dispatcher);
         _uptimeTimer.Start();
+        _ = _apiLogFileReader.InitializeAsync();
     }
 
     public string RepositoryRoot { get; }
@@ -63,12 +81,17 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public ObservableCollection<LogLine> LogLines { get; } = [];
     public ICollectionView LogsView { get; }
     public ICollectionView FrontendLogsView { get; }
+    public ObservableCollection<ApiLogFileInfo> ApiLogFiles { get; } = [];
+    public ObservableCollection<ApiLogFileLine> ApiLogFileLines { get; } = [];
+    public ICollectionView ApiLogFileLinesView { get; }
     public IAsyncRelayCommand StartAllCommand { get; }
     public IAsyncRelayCommand StopAllCommand { get; }
     public IAsyncRelayCommand RestartAllCommand { get; }
     public IRelayCommand ClearLogsCommand { get; }
     public IRelayCommand SaveLogsCommand { get; }
     public IRelayCommand OpenFrontendCommand { get; }
+    public IAsyncRelayCommand RefreshApiLogFilesCommand { get; }
+    public IRelayCommand OpenApiLogFolderCommand { get; }
 
     public string LogFilter
     {
@@ -122,19 +145,77 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         set => SetProperty(ref _frontendOutputAutoScroll, value);
     }
 
+    public string ApiLogFileFilter
+    {
+        get => _apiLogFileFilter;
+        set
+        {
+            if (SetProperty(ref _apiLogFileFilter, value))
+                ApiLogFileLinesView.Refresh();
+        }
+    }
+
+    public bool ApiLogFileAutoScroll
+    {
+        get => _apiLogFileAutoScroll;
+        set => SetProperty(ref _apiLogFileAutoScroll, value);
+    }
+
+    public ApiLogFileInfo? SelectedApiLogFile
+    {
+        get => _selectedApiLogFile;
+        set
+        {
+            if (SetProperty(ref _selectedApiLogFile, value))
+                _ = _apiLogFileReader.SelectFileAsync(value?.FullPath);
+        }
+    }
+
+    public string ApiLogFileStatus
+    {
+        get => _apiLogFileStatus;
+        private set => SetProperty(ref _apiLogFileStatus, value);
+    }
+
     public Uri? FrontendSource
     {
         get => _frontendSource;
         private set => SetProperty(ref _frontendSource, value);
     }
 
+    public bool IsFrontendRunning
+    {
+        get => _isFrontendRunning;
+        private set
+        {
+            if (SetProperty(ref _isFrontendRunning, value))
+                OnPropertyChanged(nameof(IsFrontendUnavailable));
+        }
+    }
+
+    public bool IsFrontendUnavailable => !IsFrontendRunning;
+
+    public string FrontendBrowserStatus
+    {
+        get => _frontendBrowserStatus;
+        private set => SetProperty(ref _frontendBrowserStatus, value);
+    }
+
     public async Task ShutdownAsync()
     {
         _uptimeTimer.Stop();
+        await _apiLogFileReader.DisposeAsync();
         await _supervisor.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync() => await ShutdownAsync();
+
+    public void ReportBrowserStatus(string message, bool isError = false)
+    {
+        FrontendBrowserStatus = message;
+        if (isError)
+            OnLogReceived(new LogLine(DateTimeOffset.Now, "web", "stderr", message));
+    }
 
     private async Task StartAllAsync()
     {
@@ -172,7 +253,27 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
             service.ApplyStatus(status);
 
             if (service.Id == "web")
-                FrontendSource = status.State == ServiceState.Running ? service.Definition.LocalUri : null;
+            {
+                IsFrontendRunning = status.State == ServiceState.Running;
+                FrontendSource = IsFrontendRunning ? service.Definition.LocalUri : null;
+                FrontendBrowserStatus = status.State switch
+                {
+                    ServiceState.Starting => "Web service is starting...",
+                    ServiceState.Running => "Loading the frontend...",
+                    ServiceState.Stopping => "Web service is stopping...",
+                    ServiceState.Crashed => "Web service exited unexpectedly. Check Frontend Output.",
+                    _ => "Start the Web service to load the site."
+                };
+            }
+        });
+    }
+
+    private void OnPortConflictDetected(string serviceId, IReadOnlyList<PortOwner> owners)
+    {
+        _dispatcher.InvokeAsync(() =>
+        {
+            var service = Services.First(candidate => candidate.Id.Equals(serviceId, StringComparison.OrdinalIgnoreCase));
+            service.ApplyPortConflicts(owners);
         });
     }
 
@@ -195,6 +296,46 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 
         return string.IsNullOrWhiteSpace(FrontendOutputFilter) ||
                line.Text.Contains(FrontendOutputFilter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool FilterApiLogFileLine(object item) =>
+        item is ApiLogFileLine line &&
+        (string.IsNullOrWhiteSpace(ApiLogFileFilter) ||
+         line.Text.Contains(ApiLogFileFilter, StringComparison.OrdinalIgnoreCase));
+
+    private void OnApiLogFilesChanged(IReadOnlyList<ApiLogFileInfo> files)
+    {
+        _dispatcher.InvokeAsync(() =>
+        {
+            var selectedPath = SelectedApiLogFile?.FullPath;
+            ApiLogFiles.Clear();
+            foreach (var file in files)
+                ApiLogFiles.Add(file);
+
+            SelectedApiLogFile = ApiLogFiles.FirstOrDefault(file =>
+                string.Equals(file.FullPath, selectedPath, StringComparison.OrdinalIgnoreCase)) ?? ApiLogFiles.FirstOrDefault();
+        });
+    }
+
+    private void OnApiLogLinesReset(IReadOnlyList<string> lines)
+    {
+        _dispatcher.InvokeAsync(() =>
+        {
+            ApiLogFileLines.Clear();
+            AppendApiLogLines(lines);
+        });
+    }
+
+    private void OnApiLogLinesAppended(IReadOnlyList<string> lines) =>
+        _dispatcher.InvokeAsync(() => AppendApiLogLines(lines));
+
+    private void AppendApiLogLines(IEnumerable<string> lines)
+    {
+        foreach (var line in lines)
+            ApiLogFileLines.Add(new ApiLogFileLine(line));
+
+        while (ApiLogFileLines.Count > MaximumLogLines)
+            ApiLogFileLines.RemoveAt(0);
     }
 
     private void RefreshUptimes(object? sender, EventArgs args)
@@ -223,5 +364,13 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     private static void OpenFrontend()
     {
         Process.Start(new ProcessStartInfo("http://localhost:4200") { UseShellExecute = true });
+    }
+
+    private static void OpenApiLogFolder()
+    {
+        if (!Directory.Exists(ApiLogFileReader.DefaultLogDirectory))
+            return;
+
+        Process.Start(new ProcessStartInfo("explorer.exe", ApiLogFileReader.DefaultLogDirectory) { UseShellExecute = true });
     }
 }
