@@ -78,7 +78,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public string RepositoryRoot { get; }
     public ObservableCollection<ServiceViewModel> Services { get; }
     public ServiceViewModel WebService => Services.First(service => service.Id == "web");
-    public ObservableCollection<LogLine> LogLines { get; } = [];
+    public ObservableCollection<LogLine> LogLines { get; } = new LogLineCollection(MaximumLogLines);
     public ICollectionView LogsView { get; }
     public ICollectionView FrontendLogsView { get; }
     public ObservableCollection<ApiLogFileInfo> ApiLogFiles { get; } = [];
@@ -237,12 +237,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 
     private void OnLogReceived(LogLine line)
     {
-        _dispatcher.InvokeAsync(() =>
-        {
-            LogLines.Add(line);
-            while (LogLines.Count > MaximumLogLines)
-                LogLines.RemoveAt(0);
-        });
+        _dispatcher.InvokeAsync(() => LogLines.Add(line));
     }
 
     private void OnStatusChanged(ServiceStatusChangedEventArgs status)
@@ -282,20 +277,12 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         if (item is not LogLine line)
             return false;
 
-        if (line.ServiceId == "api" && !ShowApiLogs || line.ServiceId == "web" && !ShowWebLogs)
-            return false;
-
-        return string.IsNullOrWhiteSpace(LogFilter) ||
-               line.Text.Contains(LogFilter, StringComparison.OrdinalIgnoreCase);
+        return LauncherLogFilter.Include(line, ShowApiLogs, ShowWebLogs, LogFilter);
     }
 
     private bool FilterFrontendLogLine(object item)
     {
-        if (item is not LogLine line || !line.ServiceId.Equals("web", StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        return string.IsNullOrWhiteSpace(FrontendOutputFilter) ||
-               line.Text.Contains(FrontendOutputFilter, StringComparison.OrdinalIgnoreCase);
+        return item is LogLine line && LauncherLogFilter.IncludeFrontend(line, FrontendOutputFilter);
     }
 
     private bool FilterApiLogFileLine(object item) =>

@@ -2,10 +2,10 @@
 
 ## Plan Status Snapshot
 
-- **Status:** Mostly Complete - Functional Delivery Complete, Quality Gates Remaining
+- **Status:** Mostly Complete - 92% Complete, Manual Acceptance Remaining
 - **Assessed:** 2026-08-16T13:11:29+10:00
-- **Evidence:** 52 of 60 checklist items are complete. Service control, logs, API file tailing, embedded desktop and known-phone previews, port safety, documentation, and 15 launcher tests are present.
-- **Remaining gate:** Add service-state, bounded UI-log, and process integration tests; verify all toolbar controls, independent scripts, and remaining lifecycle scenarios.
+- **Evidence:** 55 of 60 checklist items are complete. Service control, logs, API file tailing, embedded desktop and known-phone previews, port safety, documentation, and 22 launcher tests are present. The full solution builds successfully.
+- **Remaining gate:** Manually verify independent API/frontend controls, all live log toolbar controls, API log viewing states, and the standalone PowerShell start/stop workflow.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 ## Project Overview
@@ -267,11 +267,11 @@ The launcher never silently kills an external process.
 
 ### Phase 6 - Testing and Documentation
 
-1. [ ] Unit test valid service state transitions.
-2. [ ] Unit test bounded log eviction and filtering.
+1. [x] Unit test valid service state transitions.
+2. [x] Unit test bounded log eviction and filtering.
 3. [x] Unit test API log file discovery, appended-line reads, truncation, and rotation handling.
 4. [x] Unit test repository-root discovery and service definitions.
-5. [ ] Add integration coverage for start, readiness, stop, and port release where practical.
+5. [x] Add integration coverage for start, readiness, stop, and port release where practical.
 6. [x] Manually verify external termination reports `Crashed`.
 7. [ ] Manually verify API log viewing when the folder is missing, empty, active, and rotating.
 8. [x] Manually verify closing the launcher leaves ports 4200, 7152, and 5158 free.
@@ -317,3 +317,6 @@ The launcher never silently kills an external process.
 
 - 2026-08-16: Created the `TaxExpenseTrackerDevLauncher` WPF shell, added it to the solution, and
   verified that the generated `net10.0-windows` project builds successfully.
+- 2026-08-16: Added testable bounded-log and filtering policies, service command/state coverage,
+  and a real child-process readiness/stop/port-release integration test. All 22 launcher tests pass,
+  and `dotnet build TaxExpenseTracker.sln --no-restore` succeeds. Five manual acceptance checks remain.
