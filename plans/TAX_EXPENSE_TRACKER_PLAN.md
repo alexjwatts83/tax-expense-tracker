@@ -145,9 +145,11 @@ tax-expense-tracker/
 ├── plans/
 │   ├── archive/
 │   │   └── DDD_CLEAN_ARCHITECTURE_PLAN.md
+│   ├── todo/
+│   │   ├── AZURE_DEPLOYMENT_TRACKER.md
+│   │   └── JSON_IMPORT_EXPORT_PLAN.md
 │   ├── TAX_EXPENSE_TRACKER_PLAN.md
-│   ├── LEAVE_TYPE_CLASSIFICATION_PLAN.md
-│   └── AZURE_DEPLOYMENT_TRACKER.md
+│   └── LEAVE_TYPE_CLASSIFICATION_PLAN.md
 └── README.md
 ```
 
@@ -238,7 +240,7 @@ Current expense filter query parameters:
 - [~] Coverage expansion ongoing
 - [x] UI testing approach confirmed: manual UI validation only (no automated UI tests)
 
-Backend details are tracked in [BACKEND_DDD_HARDENING_PLAN.md](BACKEND_DDD_HARDENING_PLAN.md), frontend details in [FRONTEND_CLEAN_CODE_HARDENING_PLAN.md](FRONTEND_CLEAN_CODE_HARDENING_PLAN.md), and the combined implementation order and progress in [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md).
+Backend, frontend, and cross-layer hardening details, delivery order, decisions, and progress are tracked in [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md).
 
 ---
 

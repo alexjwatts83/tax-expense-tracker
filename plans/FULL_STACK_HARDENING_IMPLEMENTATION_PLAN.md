@@ -8,7 +8,7 @@
 - **Remaining gate:** Finish Stage 1 error contracts and immediate defects before beginning authentication and dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
-Last Updated: 2026-08-02
+Last Updated: 2026-08-16
 Status: In Progress
 Overall Progress: 11/74 tasks (15%)
 Current Stage: Stage 1 - Error Contract and Immediate Defects
@@ -16,14 +16,22 @@ Next Task: S1-03
 
 ## Purpose
 
-Deliver the backend and frontend hardening work in the safest implementation order. Work is organized as vertical increments: agree the shared contract, implement backend authority, implement frontend behavior, then validate the complete workflow before moving on.
+Deliver backend DDD, API security and resilience, frontend clean-code, workflow, and contract hardening in the safest implementation order. Work is organized as vertical increments: agree the shared contract, implement backend authority, implement frontend behavior, then validate the complete workflow before moving on.
 
-Detailed technical guidance remains in:
+This is the sole hardening plan and progress tracker. It consolidates the former backend, frontend, and full-stack plans. Its stages control delivery order, its decision log controls shared contracts, and its implementation guidance controls layer-specific work.
 
-- [BACKEND_DDD_HARDENING_PLAN.md](BACKEND_DDD_HARDENING_PLAN.md)
-- [FRONTEND_CLEAN_CODE_HARDENING_PLAN.md](FRONTEND_CLEAN_CODE_HARDENING_PLAN.md)
+## Target Architecture
 
-This document is the execution and progress tracker. When sequencing or status differs, this document controls delivery order; the detailed plans control layer-specific implementation details.
+Preserve the existing Clean Architecture dependency direction:
+
+- API -> Application
+- Infrastructure -> Application + Domain
+- Application -> Domain
+- Domain -> no outward project dependencies
+
+Backend code remains the authority for security, persistence constraints, and domain invariants. Angular route guards and validation improve the experience but never replace API authorization or server-side validation. Preserve current routes and JSON contracts unless a recorded decision explicitly approves a breaking change.
+
+Frontend components should own interaction and presentation rather than multi-entity workflow policy. Keep HTTP services small, move reusable orchestration into focused facades or pure modules, and introduce shared state only after measuring a concrete need. Do not add NgRx or another global state library solely for reference lookups.
 
 ## Status Legend
 
@@ -60,6 +68,10 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 6. Do not start a dependent stage while its decision or validation gate is incomplete.
 7. Do not combine authentication rollout, date migration, and aggregate encapsulation in one release.
 8. Keep generated migrations and contract changes in separate reviewable commits when practical.
+9. Add characterization tests before changing established behavior.
+10. Keep domain entities persistence-compatible without exposing unrestricted mutation; EF configuration remains in Infrastructure.
+11. Use runtime validation at untrusted boundaries rather than duplicating it throughout the frontend.
+12. Preserve DataTransfer import atomicity and source-ID restoration while internals are hardened.
 
 ## Stage 0: Baseline and Contract Decisions
 
@@ -336,6 +348,40 @@ Goal: make the hardened architecture and workflows enforceable in CI and diagnos
 
 1. `enforce full stack quality gates`
 2. `finalize hardening operations`
+
+## Layer-Specific Implementation Guidance
+
+### Backend Domain and Persistence
+
+- `TaxExpense` owns expense-tag links through explicit behavior and a private backing collection.
+- Work-location and leave entries own their date, type, hours, notes, and deletion transitions.
+- Reference entities own rename, metadata, and soft-delete transitions.
+- Import and rehydration paths preserve source IDs through explicit, narrowly scoped factories rather than public setters.
+- Calendar-date fields use `DateOnly`; audit fields remain UTC instants. Existing non-midnight values normalize by retaining their stored year, month, and day.
+- Enforce one active work-location or leave entry per date with application checks and filtered unique indexes. Review generated migrations for both SQLite and the planned Azure SQL provider.
+- Keep unit tests focused on domain/application behavior and integration tests focused on HTTP, middleware, architecture, EF constraints, migrations, and serialization boundaries.
+
+### Frontend Components and Workflows
+
+- Error handling accepts `unknown` and produces a string from JSON, text, or Blob responses. Components provide contextual fallback copy while shared classification handles status, code, field errors, and correlation IDs.
+- Calendar dates and UTC timestamps use distinct types and utilities. Never format a calendar date through `new Date('yyyy-MM-dd')`, `toISOString()`, or timezone conversion.
+- Expense tag tokenization and resolution are shared by both expense entry points, including deterministic recovery after partial tag-creation failures.
+- Calendar change-set planning and result reconciliation live in pure tested modules; the component retains rendering and interaction responsibilities.
+- Share work-location and leave mechanics only where domain terminology remains explicit; avoid deeply generic base components.
+- DataTransfer rejects unsupported or oversized files before reading, parses supported files in a worker, exposes truthful stages, supports cancellation where real, and invalidates dry-run approval when payload or options change.
+- Frontend tests assert service contracts and user-visible behavior without depending on Angular Material internal markup.
+
+### Operational Risks and Mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Authentication blocks local development | Provide an explicit Development-only identity path and test Production startup separately. |
+| Security configuration diverges between local and Azure | Use strongly typed validated options and document environment values without committing secrets. |
+| Date migration changes historical calendar days | Back up data, normalize by stored calendar components, and report affected rows before migration. |
+| Unique index creation fails on existing duplicates | Run a duplicate preflight and document deterministic repair before creating indexes. |
+| Private setters break EF or DataTransfer | Refactor one aggregate at a time with real EF materialization and roundtrip tests. |
+| Shared batch abstractions hide domain language | Extract calculations and policies first; keep feature services separate unless substantial duplication remains. |
+| Browser import parsing freezes the UI | Enforce the 10 MiB pre-read limit and parse accepted files in a Web Worker. |
 
 ## Cross-Stage Validation Matrix
 

@@ -45,11 +45,9 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 
 - Product roadmap and backlog tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md)
 - Leave type rollout tracked in [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md)
-- Azure deployment tracked in [plans/AZURE_DEPLOYMENT_TRACKER.md](plans/AZURE_DEPLOYMENT_TRACKER.md)
-- JSON import/export approach tracked in [plans/JSON_IMPORT_EXPORT_PLAN.md](plans/JSON_IMPORT_EXPORT_PLAN.md)
-- Backend DDD, security, and invariant hardening tracked in [plans/BACKEND_DDD_HARDENING_PLAN.md](plans/BACKEND_DDD_HARDENING_PLAN.md)
-- Frontend clean-code, workflow, and contract hardening tracked in [plans/FRONTEND_CLEAN_CODE_HARDENING_PLAN.md](plans/FRONTEND_CLEAN_CODE_HARDENING_PLAN.md)
-- Full-stack hardening delivery order and progress tracked in [plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
+- Azure deployment tracked in [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md)
+- JSON import/export approach tracked in [plans/todo/JSON_IMPORT_EXPORT_PLAN.md](plans/todo/JSON_IMPORT_EXPORT_PLAN.md)
+- Backend, frontend, and full-stack hardening tracked in [plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 - WPF development launcher delivery tracked in [plans/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md](plans/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md)
 
 ## Tech Stack
@@ -188,7 +186,7 @@ Current filter query params:
 
 ### Planned Data Transfer (JSON)
 
-Planned JSON data-transfer functionality is not yet implemented and is tracked in [plans/JSON_IMPORT_EXPORT_PLAN.md](plans/JSON_IMPORT_EXPORT_PLAN.md).
+Planned JSON data-transfer functionality is not yet implemented and is tracked in [plans/todo/JSON_IMPORT_EXPORT_PLAN.md](plans/todo/JSON_IMPORT_EXPORT_PLAN.md).
 
 Planned shape:
 
@@ -318,4 +316,4 @@ Recent schema updates:
 - Unit tests passing: 69/69
 - Integration tests passing: 1/1
 
-Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md), and [plans/AZURE_DEPLOYMENT_TRACKER.md](plans/AZURE_DEPLOYMENT_TRACKER.md).
+Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md), and [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md).
