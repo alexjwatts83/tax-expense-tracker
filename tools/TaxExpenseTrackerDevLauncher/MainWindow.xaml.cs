@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Navigation;
 using Microsoft.Web.WebView2.Core;
+using TaxExpenseTrackerDevLauncher.Models;
 using TaxExpenseTrackerDevLauncher.ViewModels;
 
 namespace TaxExpenseTrackerDevLauncher;
@@ -13,6 +14,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        PhoneViewportPicker.ItemsSource = PhoneViewport.KnownPhones;
+        PhoneViewportPicker.SelectedItem = PhoneViewport.KnownPhones.First(phone => phone.Name == "iPhone 15");
         _viewModel = new MainViewModel();
         DataContext = _viewModel;
         _viewModel.LogLines.CollectionChanged += (_, _) =>
@@ -83,5 +86,47 @@ public partial class MainWindow : Window
         {
             _viewModel.ReportBrowserStatus($"Frontend reload failed: {exception.Message}", isError: true);
         }
+    }
+
+    private void DesktopPreview_Checked(object sender, RoutedEventArgs args)
+    {
+        if (AppPreviewFrame is null)
+            return;
+
+        AppPreviewFrame.Width = double.NaN;
+        AppPreviewFrame.MaxHeight = double.PositiveInfinity;
+        AppPreviewFrame.HorizontalAlignment = HorizontalAlignment.Stretch;
+        AppPreviewFrame.Margin = new Thickness(0);
+        AppPreviewFrame.BorderThickness = new Thickness(0);
+        PhoneViewportPicker.IsEnabled = false;
+        PreviewSizeText.Text = "Responsive desktop";
+    }
+
+    private void MobilePreview_Checked(object sender, RoutedEventArgs args)
+    {
+        if (AppPreviewFrame is null)
+            return;
+
+        PhoneViewportPicker.IsEnabled = true;
+        ApplyPhoneViewport();
+    }
+
+    private void PhoneViewportPicker_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs args)
+    {
+        if (PhoneViewportPicker.IsEnabled)
+            ApplyPhoneViewport();
+    }
+
+    private void ApplyPhoneViewport()
+    {
+        if (PhoneViewportPicker.SelectedItem is not PhoneViewport phone)
+            return;
+
+        AppPreviewFrame.Width = phone.Width;
+        AppPreviewFrame.MaxHeight = phone.Height;
+        AppPreviewFrame.HorizontalAlignment = HorizontalAlignment.Center;
+        AppPreviewFrame.Margin = new Thickness(0, 8, 0, 12);
+        AppPreviewFrame.BorderThickness = new Thickness(8);
+        PreviewSizeText.Text = $"{phone.Width} x {phone.Height} viewport";
     }
 }

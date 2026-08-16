@@ -239,7 +239,7 @@ The launcher provides:
 - Start, stop, and restart controls for the API and Angular frontend
 - Combined process logs and a dedicated frontend npm/Angular output tab
 - Read-only live tailing of API logs from `C:\logs\TaxExpenseTracker.Api`
-- An embedded App tab using the Microsoft Edge WebView2 Runtime
+- An embedded App tab with a full-width desktop preview and selectable Android/iPhone WebView2 viewport sizes
 - Port-conflict details with an explicitly confirmed Force free port action
 - Automatic cleanup of launcher-owned child process trees when the window closes
 

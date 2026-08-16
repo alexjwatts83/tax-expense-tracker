@@ -109,6 +109,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
@@ -259,23 +260,63 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <StackPanel Margin="12,10" Orientation="Horizontal">
+                    <Grid Margin="12,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
                         <Button Click="ReloadWebView_Click" Content="Reload" />
-                        <Button Command="{Binding OpenFrontendCommand}" Content="Open in browser" />
-                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="{Binding FrontendBrowserStatus}" />
-                    </StackPanel>
-                    <Grid Grid.Row="1">
-                        <wv2:WebView2 x:Name="AppWebView"
-                                      Source="{Binding FrontendSource}"
-                                      Loaded="AppWebView_Loaded"
-                                      NavigationCompleted="AppWebView_NavigationCompleted" />
-                        <Border Background="{StaticResource SurfaceBrush}"
-                                Visibility="{Binding IsFrontendUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="SemiBold" Foreground="White" Text="Frontend unavailable" />
-                                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="{Binding FrontendBrowserStatus}" />
-                                <Button Margin="0,16,0,0" HorizontalAlignment="Center" Command="{Binding WebService.StartCommand}" Content="Start Web" Style="{StaticResource PrimaryButtonStyle}" />
-                            </StackPanel>
+                        <Button Grid.Column="1" Command="{Binding OpenFrontendCommand}" Content="Open in browser" />
+                        <Border Grid.Column="2" Width="1" Margin="4,2,12,2" Background="{StaticResource BorderBrush}" />
+                        <RadioButton Grid.Column="3"
+                                     GroupName="AppPreviewMode"
+                                     Content="Desktop"
+                                     IsChecked="True"
+                                     Checked="DesktopPreview_Checked"
+                                     Style="{StaticResource PreviewModeStyle}" />
+                        <RadioButton Grid.Column="4"
+                                     Margin="4,0,0,0"
+                                     GroupName="AppPreviewMode"
+                                     Content="Mobile"
+                                     Checked="MobilePreview_Checked"
+                                     Style="{StaticResource PreviewModeStyle}" />
+                        <ComboBox x:Name="PhoneViewportPicker"
+                                  Grid.Column="5"
+                                  Width="250"
+                                  Margin="8,0,0,0"
+                                  DisplayMemberPath="DisplayName"
+                                  IsEnabled="False"
+                                  SelectionChanged="PhoneViewportPicker_SelectionChanged"
+                                  ToolTip="Choose a known phone CSS viewport" />
+                        <StackPanel Grid.Column="6" Margin="12,0,0,0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="PreviewSizeText" Margin="0,0,12,0" Foreground="{StaticResource BlueBrush}" Text="Responsive desktop" />
+                            <TextBlock Foreground="{StaticResource MutedTextBrush}" Text="{Binding FrontendBrowserStatus}" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1" Background="{StaticResource WindowBrush}">
+                        <Border x:Name="AppPreviewFrame"
+                                HorizontalAlignment="Stretch"
+                                Background="{StaticResource SurfaceBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0">
+                            <Grid>
+                                <wv2:WebView2 x:Name="AppWebView"
+                                              Source="{Binding FrontendSource}"
+                                              Loaded="AppWebView_Loaded"
+                                              NavigationCompleted="AppWebView_NavigationCompleted" />
+                                <Border Background="{StaticResource SurfaceBrush}"
+                                        Visibility="{Binding IsFrontendUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock HorizontalAlignment="Center" FontSize="18" FontWeight="SemiBold" Foreground="White" Text="Frontend unavailable" />
+                                        <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="{Binding FrontendBrowserStatus}" />
+                                        <Button Margin="0,16,0,0" HorizontalAlignment="Center" Command="{Binding WebService.StartCommand}" Content="Start Web" Style="{StaticResource PrimaryButtonStyle}" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
                         </Border>
                     </Grid>
                 </Grid>

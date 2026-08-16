@@ -183,6 +183,7 @@ The launcher never silently kills an external process.
 ### App Tab
 
 - WebView2 navigates to `http://localhost:4200` after the Web service reaches `Running`.
+- Switch between a full-width desktop preview and known Android/iPhone viewport sizes for responsive development.
 - Show a useful stopped/starting/error state while the site is unavailable.
 - Provide Reload and Open in Browser actions.
 - Repeated service restarts reuse the browser control and navigate again when ready.
@@ -245,6 +246,7 @@ The launcher never silently kills an external process.
 8. [x] Initialize WebView2 and navigate when the frontend is ready.
 9. [x] Add Reload and Open in Browser actions.
 10. [x] Add unavailable, loading, and navigation-error states.
+11. [x] Add desktop and selectable known-phone mobile preview modes.
 
 ### Phase 5 - Robustness
 

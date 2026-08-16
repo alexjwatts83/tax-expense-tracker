@@ -53,6 +53,15 @@ public sealed class LauncherFoundationTests
     }
 
     [Fact]
+    public void PhoneViewport_KnownPhonesIncludeCommonAndroidAndIphoneSizes()
+    {
+        Assert.Contains(PhoneViewport.KnownPhones, phone => phone.Name == "Samsung Galaxy S24" && phone.Width == 360 && phone.Height == 780);
+        Assert.Contains(PhoneViewport.KnownPhones, phone => phone.Name == "Google Pixel 8" && phone.Width == 412 && phone.Height == 915);
+        Assert.Contains(PhoneViewport.KnownPhones, phone => phone.Name == "iPhone 15" && phone.Width == 393 && phone.Height == 852);
+        Assert.All(PhoneViewport.KnownPhones, phone => Assert.Equal($"{phone.Name} ({phone.Width} x {phone.Height})", phone.DisplayName));
+    }
+
+    [Fact]
     public void PortInspector_FindsCurrentProcessListener()
     {
         using var listener = new TcpListener(IPAddress.Loopback, 0);
