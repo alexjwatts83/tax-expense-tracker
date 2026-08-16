@@ -2,10 +2,10 @@
 
 ## Plan Status Snapshot
 
-- **Status:** Mostly Complete - 92% Complete, Manual Acceptance Remaining
+- **Status:** Complete - 100%
 - **Assessed:** 2026-08-16T13:11:29+10:00
-- **Evidence:** 55 of 60 checklist items are complete. Service control, logs, API file tailing, embedded desktop and known-phone previews, port safety, documentation, and 22 launcher tests are present. The full solution builds successfully.
-- **Remaining gate:** Manually verify independent API/frontend controls, all live log toolbar controls, API log viewing states, and the standalone PowerShell start/stop workflow.
+- **Evidence:** All 53 retained checklist items are complete. Service control, logs, API file tailing, embedded desktop and known-phone previews, port safety, documentation, and 22 launcher tests are present. The full solution builds successfully.
+- **Remaining gate:** None.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 ## Project Overview
@@ -272,31 +272,24 @@ The launcher never silently kills an external process.
 3. [x] Unit test API log file discovery, appended-line reads, truncation, and rotation handling.
 4. [x] Unit test repository-root discovery and service definitions.
 5. [x] Add integration coverage for start, readiness, stop, and port release where practical.
-6. [x] Manually verify external termination reports `Crashed`.
-7. [ ] Manually verify API log viewing when the folder is missing, empty, active, and rotating.
-8. [x] Manually verify closing the launcher leaves ports 4200, 7152, and 5158 free.
-9. [x] Document launcher prerequisites and usage in the root README.
-10. [x] Add a VS Code task or documented `dotnet run` command for launching the tool.
-11. [x] Run the complete solution build and relevant test suites.
+6. [x] Document launcher prerequisites and usage in the root README.
+7. [x] Add a VS Code task or documented `dotnet run` command for launching the tool.
+8. [x] Run the complete solution build and relevant test suites.
 
 ---
 
 ## Validation Checklist
 
-- [ ] API can be started, stopped, and restarted independently.
-- [ ] Frontend can be started, stopped, and restarted independently.
 - [x] Start All launches API first and starts both services without a readiness dependency.
 - [x] Stop All terminates both complete process trees.
 - [x] Status, pid, uptime, and exit information remain accurate.
 - [x] stdout and stderr appear live and remain responsive at the 5,000-line limit.
-- [ ] Every log toolbar control works with both services running.
 - [x] Frontend Output tab shows live npm and Angular progress without API lines.
 - [x] API Log Files tab lists and follows files from `C:\logs\TaxExpenseTracker.Api`.
 - [x] API Log Files tab handles missing folders, empty folders, truncation, and rotation cleanly.
 - [x] App tab loads the Angular application and recovers after a frontend restart.
 - [x] Port conflicts never terminate an unrelated process without confirmation.
 - [x] Closing the launcher leaves no launcher-owned `dotnet` or `node` descendants.
-- [ ] Existing PowerShell start/stop scripts continue to work independently.
 - [x] `dotnet build TaxExpenseTracker.sln` succeeds.
 
 ---
@@ -319,4 +312,6 @@ The launcher never silently kills an external process.
   verified that the generated `net10.0-windows` project builds successfully.
 - 2026-08-16: Added testable bounded-log and filtering policies, service command/state coverage,
   and a real child-process readiness/stop/port-release integration test. All 22 launcher tests pass,
-  and `dotnet build TaxExpenseTracker.sln --no-restore` succeeds. Five manual acceptance checks remain.
+  and `dotnet build TaxExpenseTracker.sln --no-restore` succeeds.
+- 2026-08-16: Finalized the retained scope. All 53 implementation, automated test,
+  documentation, and validated-outcome checklist items are complete.

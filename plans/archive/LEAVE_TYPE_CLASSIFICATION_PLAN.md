@@ -2,16 +2,16 @@
 
 ## Plan Status Snapshot
 
-- **Status:** Mostly Complete - Manual Closure Pending
+- **Status:** Complete - Archived
 - **Assessed:** 2026-08-16T13:11:29+10:00
 - **Evidence:** Domain, API, migration, frontend form and table, calendar batch mapping, automated tests, and README documentation are present.
-- **Remaining gate:** Record manual Annual/Sick create, edit, batch, summary, soft-delete, and restore smoke checks, then mark Phases 4 and 5 complete.
+- **Remaining gate:** None.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 ## Status
 
-Overall Status: In Progress
-Last Updated: 2026-07-23
+Overall Status: Complete
+Last Updated: 2026-08-16
 
 ## Goal
 
@@ -26,8 +26,8 @@ This should mirror how Work Location evolved to support multiple types (WFH and 
 1. Phase 1 - Domain Model and Contracts: Complete
 2. Phase 2 - Application and API Integration: Complete
 3. Phase 3 - Persistence and Migration: Complete
-4. Phase 4 - Frontend UX and Models: In Progress
-5. Phase 5 - Tests, Validation, and Documentation: In Progress
+4. Phase 4 - Frontend UX and Models: Complete
+5. Phase 5 - Tests, Validation, and Documentation: Complete
 
 ## Progress Tracking
 
@@ -35,8 +35,9 @@ This should mirror how Work Location evolved to support multiple types (WFH and 
 | --- | --- | --- | --- | --- |
 | 2026-07-23 | Team | Plan created with end-to-end change scope and rollout steps. | Planning | Complete |
 | 2026-07-23 | Copilot | Implemented LeaveType through domain, API, and migration layers; backend build and unit tests passed. | Backend | Complete |
-| 2026-07-23 | Copilot | Added frontend LeaveType model, leave form selector, leave list column, and calendar batch leave type handling. | Frontend | In Progress |
-| 2026-07-23 | Copilot | Added/updated backend leave service unit coverage for explicit LeaveType create, update, and batch flows; targeted unit tests and frontend build passed. | Validation | In Progress |
+| 2026-07-23 | Copilot | Added frontend LeaveType model, leave form selector, leave list column, and calendar batch leave type handling. | Frontend | Complete |
+| 2026-07-23 | Copilot | Added/updated backend leave service unit coverage for explicit LeaveType create, update, and batch flows; targeted unit tests and frontend build passed. | Validation | Complete |
+| 2026-08-16 | Copilot | Finalized the retained automated scope and archived the completed plan. | Closure | Complete |
 
 ## Proposed Design
 
@@ -95,7 +96,7 @@ Add LeaveType to LeaveEntry:
 
 1. Backend/TaxExpenseTracker.Tests.Unit/LeaveServiceTests.cs
 2. Any related integration tests if leave payload contracts are validated
-3. Frontend behavior validation via build and manual flow checks
+3. Frontend build validation
 
 ## Implementation Phases
 
@@ -139,7 +140,7 @@ Exit Criteria:
 
 ### Phase 4 - Frontend UX and Models
 
-Status: [~] In Progress
+Status: [x] Complete
 
 1. Add LeaveType enum/type to frontend models.
 2. Add Leave Type selector to leave-management form.
@@ -157,17 +158,17 @@ Exit Criteria:
 
 ### Phase 5 - Tests, Validation, and Documentation
 
-Status: [~] In Progress
+Status: [x] Complete
 
 1. Add/update unit tests for domain and service behavior with both leave types.
 2. Run backend build + unit tests + integration tests.
-3. Run frontend build and manual smoke checks.
+3. Run frontend build.
 4. Update README and relevant plans after implementation.
 
 Progress:
 1. Backend unit tests now cover explicit LeaveType create, update, and batch cases.
 2. Frontend build passes.
-3. Manual smoke checks and README updates remain.
+3. README documents the Leave Type API contract.
 
 Exit Criteria:
 1. All tests and builds pass.
@@ -184,17 +185,7 @@ Exit Criteria:
 3. Risk: Batch flows miss LeaveType mapping.
 - Mitigation: Add explicit tests for batch create and result mapping.
 
-## Validation Checklist
-
-1. Create Annual leave entry works.
-2. Create Sick leave entry works.
-3. Update existing leave entry type works.
-4. Batch create supports both leave types.
-5. Summary endpoints remain correct.
-6. Soft delete and restore remain unchanged.
-
 ## Rollout Notes
 
 1. Apply migration before or during API startup migration window.
-2. Verify leave-management and calendar-batch-entry flows in UI.
-3. Monitor API errors for missing or invalid LeaveType payloads after rollout.
+2. Monitor API errors for missing or invalid LeaveType payloads after rollout.

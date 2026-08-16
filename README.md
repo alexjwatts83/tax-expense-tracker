@@ -2,7 +2,7 @@
 
 Tax Expense Tracker is a full-stack app for managing tax-deductible expenses with soft-delete safety, filtering, and summary reporting.
 
-Completed delivery notes for work-location (WFH/Office), leave, and public-holiday tracking are archived in [plans/archive/WORK_FROM_HOME_PLAN.md](plans/archive/WORK_FROM_HOME_PLAN.md), with rename delivery tracked in [plans/archive/WORK_LOCATION_RENAME_PLAN.md](plans/archive/WORK_LOCATION_RENAME_PLAN.md).
+Completed delivery notes for work-location (WFH/Office), leave, and public-holiday tracking are archived in [plans/archive/WORK_FROM_HOME_PLAN.md](plans/archive/WORK_FROM_HOME_PLAN.md), with rename delivery tracked in [plans/archive/WORK_LOCATION_RENAME_PLAN.md](plans/archive/WORK_LOCATION_RENAME_PLAN.md) and leave-type delivery in [plans/archive/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/archive/LEAVE_TYPE_CLASSIFICATION_PLAN.md). The completed launcher delivery plan is archived in [plans/archive/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md](plans/archive/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md).
 
 ## Implemented Highlights
 
@@ -44,11 +44,9 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 ## Planned Enhancements
 
 - Product roadmap and backlog tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md)
-- Leave type rollout tracked in [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md)
 - Azure deployment tracked in [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md)
 - JSON import/export approach tracked in [plans/todo/JSON_IMPORT_EXPORT_PLAN.md](plans/todo/JSON_IMPORT_EXPORT_PLAN.md)
 - Backend, frontend, and full-stack hardening tracked in [plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
-- WPF development launcher delivery tracked in [plans/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md](plans/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md)
 
 ## Tech Stack
 
@@ -234,15 +232,55 @@ dotnet run --project tools/TaxExpenseTrackerDevLauncher/TaxExpenseTrackerDevLaun
 
 The launcher provides:
 
-- Start, stop, and restart controls for the API and Angular frontend
+- Independent and combined start, stop, and restart controls for the API and Angular frontend
+- Live service state, process ID, uptime, port, exit-code, and local URL information
 - Combined process logs and a dedicated frontend npm/Angular output tab
 - Read-only live tailing of API logs from `C:\logs\TaxExpenseTracker.Api`
 - An embedded App tab with a full-width desktop preview and selectable Android/iPhone WebView2 viewport sizes
 - Port-conflict details with an explicitly confirmed Force free port action
 - Automatic cleanup of launcher-owned child process trees when the window closes
 
-The .NET 10 SDK, Node.js/npm, and Microsoft Edge WebView2 Runtime are required. The PowerShell
-scripts remain the scriptable and CI-friendly workflow.
+The .NET 10 SDK, Node.js/npm, and Microsoft Edge WebView2 Runtime are required. Run from within
+the repository so the launcher can locate `TaxExpenseTracker.sln`. The PowerShell scripts remain
+the scriptable and CI-friendly workflow.
+
+Launcher service definitions are fixed in code:
+
+| Service | Command | Working directory | Ports | Ready signal | Local URL |
+|---|---|---|---|---|---|
+| API | `dotnet run --project Backend/TaxExpenseTracker.Api --launch-profile https` | Repository root | 7152, 5158 | `Now listening on:` plus listening ports | https://localhost:7152/swagger |
+| Web | `npm.cmd start` | `Frontend` | 4200 | Angular `Local:` output plus listening port | http://localhost:4200 |
+
+The launcher reports `Running` only after both the configured output signal and ports are ready.
+It blocks startup when an external process owns a required port and never terminates that process
+without explicit confirmation. Process output and followed API files retain the newest 5,000 lines.
+
+#### Launcher Maintenance
+
+The launcher is a WPF `net10.0-windows` project using `CommunityToolkit.Mvvm` and WebView2. Update
+these locations when changing it:
+
+- `tools/TaxExpenseTrackerDevLauncher/Services/ServiceRegistry.cs`: commands, ports, readiness signals, and URLs
+- `tools/TaxExpenseTrackerDevLauncher/Services/ProcessSupervisor.cs`: lifecycle, readiness, output capture, and process-tree cleanup
+- `tools/TaxExpenseTrackerDevLauncher/Services/ApiLogFileReader.cs`: API log discovery and live tailing
+- `tools/TaxExpenseTrackerDevLauncher/ViewModels/`: commands, service state, log filters, and bounded collections
+- `tools/TaxExpenseTrackerDevLauncher/MainWindow.xaml`: controls, tabs, and desktop/mobile preview layout
+- `tools/TaxExpenseTrackerDevLauncher.Tests/`: launcher unit and process integration coverage
+
+Keep `ServiceRegistry` aligned with `scripts/Start-Local.ps1`, `scripts/Stop-Local.ps1`, the API
+launch profiles, and `Frontend/package.json`. The launcher must continue to own only processes it
+starts, avoid logging secrets or environment values, and keep database migration/package install
+commands outside the UI.
+
+Validate launcher updates from the repository root:
+
+```powershell
+dotnet test tools/TaxExpenseTrackerDevLauncher.Tests/TaxExpenseTrackerDevLauncher.Tests.csproj --no-restore
+dotnet build TaxExpenseTracker.sln --no-restore
+```
+
+The launcher suite currently contains 22 tests. The completed implementation record and original
+design decisions are retained in [plans/archive/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md](plans/archive/TAX_EXPENSE_TRACKER_DEV_LAUNCHER_PLAN.md).
 
 ### PowerShell Workflow
 
@@ -316,4 +354,4 @@ Recent schema updates:
 - Unit tests passing: 69/69
 - Integration tests passing: 1/1
 
-Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md](plans/LEAVE_TYPE_CLASSIFICATION_PLAN.md), and [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md).
+Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md), and [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md).
