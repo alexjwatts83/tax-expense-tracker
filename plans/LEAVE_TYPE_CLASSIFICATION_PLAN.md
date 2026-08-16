@@ -1,5 +1,13 @@
 # Leave Type Classification Plan
 
+## Plan Status Snapshot
+
+- **Status:** Mostly Complete - Manual Closure Pending
+- **Assessed:** 2026-08-16T13:11:29+10:00
+- **Evidence:** Domain, API, migration, frontend form and table, calendar batch mapping, automated tests, and README documentation are present.
+- **Remaining gate:** Record manual Annual/Sick create, edit, batch, summary, soft-delete, and restore smoke checks, then mark Phases 4 and 5 complete.
+- **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+
 ## Status
 
 Overall Status: In Progress

@@ -1,5 +1,13 @@
 # Azure Deployment Tracker
 
+## Plan Status Snapshot
+
+- **Status:** In Progress - Foundation Scaffold Only
+- **Assessed:** 2026-08-16T13:11:29+10:00
+- **Evidence:** 7 of 44 checklist items are complete. Terraform/Terragrunt modules and the dev scaffold exist, but no environment has been planned or applied.
+- **Remaining gate:** Complete remote state, Entra authentication, Key Vault and database provisioning, CI/CD, Azure dev validation, and production readiness.
+- **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+
 Last Updated: 2026-08-02
 Owner: 
 Environment Scope: dev (single environment)

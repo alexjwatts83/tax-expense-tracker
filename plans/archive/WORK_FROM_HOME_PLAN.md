@@ -1,5 +1,13 @@
 # Work Location and Leave Tracker Plan
 
+## Plan Status Snapshot
+
+- **Status:** Complete - Archived
+- **Assessed:** 2026-08-16T13:11:29+10:00
+- **Evidence:** Work-location and leave CRUD, entry types, summaries, public-holiday import, soft delete and restore, API delivery, and frontend workflows are implemented.
+- **Remaining gate:** None for this delivery plan.
+- **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+
 Last Updated: 2026-07-23
 Plan Status: Complete (Delivered)
 

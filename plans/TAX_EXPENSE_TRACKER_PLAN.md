@@ -1,5 +1,13 @@
 # Tax Expense Tracker - Project Plan
 
+## Plan Status Snapshot
+
+- **Status:** Core Product Complete - Phase 4 Roadmap In Progress
+- **Assessed:** 2026-08-16T13:11:29+10:00
+- **Evidence:** Phases 1 through 3 and 16 of 20 explicit checklist items are complete. Current validation passes 127 .NET tests and 3 Angular tests.
+- **Remaining gate:** Complete or explicitly defer cloud deployment, CSV export, charts, query tuning, and continuing coverage expansion.
+- **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+
 Last Updated: 2026-07-23
 
 ## Project Overview

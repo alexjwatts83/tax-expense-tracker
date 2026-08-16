@@ -1,5 +1,13 @@
 # Tax Expense Tracker - DDD and Clean Architecture Refactor Plan
 
+## Plan Status Snapshot
+
+- **Status:** Complete as Scoped - Archived
+- **Assessed:** 2026-08-16T13:11:29+10:00
+- **Evidence:** Domain, Application, Infrastructure, and API layering; persistence ownership; thin controllers; migrations; and baseline unit/integration coverage are implemented.
+- **Remaining gate:** None for this refactor. Further encapsulation and hardening are tracked in the active hardening plans.
+- **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+
 ## Goal
 
 Refactor the current solution into a layered DDD and Clean Architecture structure while preserving existing behavior and API contracts.

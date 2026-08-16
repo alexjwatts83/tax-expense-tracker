@@ -1,5 +1,13 @@
 # Work Location Rename Plan
 
+## Plan Status Snapshot
+
+- **Status:** Complete - Archived
+- **Assessed:** 2026-08-16T13:11:29+10:00
+- **Evidence:** Canonical Work Location naming is implemented across domain, application, API, frontend, DataTransfer, routes, and persistence migration; legacy compatibility routes are removed.
+- **Remaining gate:** None for this rename plan.
+- **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+
 ## Status
 
 Overall Status: Complete

@@ -1,5 +1,13 @@
 # Calendar Batch Entry Plan (Work Location and Leave)
 
+## Plan Status Snapshot
+
+- **Status:** Complete - Archived
+- **Assessed:** 2026-08-16T13:11:29+10:00
+- **Evidence:** All four delivery phases and subsequent UX, accessibility, batch API, edge-case test, and work-location refinements are implemented.
+- **Remaining gate:** None. Continue operational monitoring outside this delivery plan.
+- **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+
 Last Updated: 2026-07-23
 
 ## Goal
