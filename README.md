@@ -43,6 +43,7 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 
 ## Planned Enhancements
 
+- Start or resume work from [plans/NEXT_WORK.md](plans/NEXT_WORK.md)
 - Product roadmap and backlog tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md)
 - Azure deployment tracked in [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md)
 - JSON import/export approach tracked in [plans/todo/JSON_IMPORT_EXPORT_PLAN.md](plans/todo/JSON_IMPORT_EXPORT_PLAN.md)
