@@ -3,10 +3,162 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TaxExpenseTrackerDevLauncher"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Tax Expense Tracker Dev Launcher"
+        Width="1180"
+        Height="780"
+        MinWidth="900"
+        MinHeight="600"
+        Closed="Window_Closed">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock FontFamily="Segoe UI Variable Display" FontSize="25" FontWeight="SemiBold" Text="Tax Expense Tracker" />
+                <TextBlock Margin="0,3,0,0" Foreground="{StaticResource MutedTextBrush}" Text="Local development launcher" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Command="{Binding StartAllCommand}" Content="Start all" Style="{StaticResource PrimaryButtonStyle}" />
+                <Button Command="{Binding StopAllCommand}" Content="Stop all" />
+                <Button Command="{Binding RestartAllCommand}" Content="Restart all" Margin="0" />
+            </StackPanel>
+        </Grid>
+
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Services}" Margin="0,0,0,16">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="2" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,0,12,0" Padding="16" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock FontSize="17" FontWeight="SemiBold" Text="{Binding DisplayName}" />
+                                <Border Grid.Column="1" Padding="9,3" Background="{StaticResource ElevatedSurfaceBrush}" BorderBrush="{StaticResource AccentBrush}" BorderThickness="1" CornerRadius="3">
+                                    <TextBlock FontWeight="SemiBold" Foreground="{StaticResource BlueBrush}" Text="{Binding StateText}" />
+                                </Border>
+                            </Grid>
+                            <StackPanel Grid.Row="1" Margin="0,12,0,12" Orientation="Horizontal">
+                                <TextBlock Foreground="{StaticResource MutedTextBrush}" Text="PID " />
+                                <TextBlock FontWeight="SemiBold" Text="{Binding ProcessText}" />
+                                <TextBlock Margin="18,0,0,0" Foreground="{StaticResource MutedTextBrush}" Text="Uptime " />
+                                <TextBlock FontWeight="SemiBold" Text="{Binding Uptime}" />
+                                <TextBlock Margin="18,0,0,0" Foreground="{StaticResource MutedTextBrush}" Text="Ports " />
+                                <TextBlock FontWeight="SemiBold" Text="{Binding PortsText}" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                <Button Command="{Binding StartCommand}" Content="Start" Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Command="{Binding StopCommand}" Content="Stop" />
+                                <Button Command="{Binding RestartCommand}" Content="Restart" />
+                                <TextBlock Margin="8,0,0,0" VerticalAlignment="Center">
+                                    <Hyperlink NavigateUri="{Binding Definition.LocalUri}" RequestNavigate="LocalLink_RequestNavigate">
+                                        <Run Text="{Binding LocalUrl, Mode=OneWay}" />
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border Grid.Row="2" Height="1" Margin="0,0,0,12" Background="{StaticResource BorderBrush}" />
+
+        <TabControl Grid.Row="3">
+            <TabItem Header="Logs">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding LogFilter, UpdateSourceTrigger=PropertyChanged}" ToolTip="Filter log text" />
+                        <CheckBox Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center" Content="API" IsChecked="{Binding ShowApiLogs}" />
+                        <CheckBox Grid.Column="2" Margin="14,0,0,0" VerticalAlignment="Center" Content="Web" IsChecked="{Binding ShowWebLogs}" />
+                        <CheckBox Grid.Column="3" Margin="14,0,0,0" VerticalAlignment="Center" Content="Auto-scroll" IsChecked="{Binding AutoScroll}" />
+                        <Button Grid.Column="5" Command="{Binding ClearLogsCommand}" Content="Clear" />
+                        <Button Grid.Column="6" Command="{Binding SaveLogsCommand}" Content="Save" Margin="0" />
+                    </Grid>
+                    <ListView x:Name="LauncherLogList"
+                              Grid.Row="1"
+                              ItemsSource="{Binding LogsView}"
+                              FontFamily="Cascadia Mono"
+                              FontSize="12"
+                              ScrollViewer.CanContentScroll="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
+                                <GridViewColumn Width="95" DisplayMemberBinding="{Binding TimestampText}" Header="Time" />
+                                <GridViewColumn Width="70" DisplayMemberBinding="{Binding ServiceId}" Header="Service" />
+                                <GridViewColumn Width="75" DisplayMemberBinding="{Binding Stream}" Header="Stream" />
+                                <GridViewColumn Width="760" DisplayMemberBinding="{Binding Text}" Header="Message" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+            <TabItem Header="API Log Files">
+                <Grid Margin="16">
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="API file log viewer is the next implementation step." />
+                </Grid>
+            </TabItem>
+            <TabItem Header="App">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="12,10" Orientation="Horizontal">
+                        <Button Click="ReloadWebView_Click" Content="Reload" />
+                        <Button Command="{Binding OpenFrontendCommand}" Content="Open in browser" />
+                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}" Text="The site loads when Web reaches Running." />
+                    </StackPanel>
+                    <wv2:WebView2 x:Name="AppWebView" Grid.Row="1" Source="{Binding FrontendSource}" />
+                </Grid>
+            </TabItem>
+        </TabControl>
 
     </Grid>
 </Window>

@@ -205,31 +205,31 @@ The launcher never silently kills an external process.
 1. [x] Create `tools/TaxExpenseTrackerDevLauncher` as a WPF project targeting `net10.0-windows`.
 2. [x] Add `TaxExpenseTrackerDevLauncher.csproj` to `TaxExpenseTracker.sln`.
 3. [x] Verify the generated WPF project builds.
-4. [ ] Add `CommunityToolkit.Mvvm` and `Microsoft.Web.WebView2` dependencies.
-5. [ ] Add the planned folders and application theme resources.
+4. [x] Add `CommunityToolkit.Mvvm` and `Microsoft.Web.WebView2` dependencies.
+5. [x] Add the planned folders and application theme resources.
 
 ### Phase 2 - Service Model and Process Control
 
-1. [ ] Implement repository-root discovery with a clear failure message.
-2. [ ] Define the fixed API and Web service metadata.
-3. [ ] Implement start, stop, restart, and process-tree termination.
-4. [ ] Implement service state transitions, pid, exit code, and uptime tracking.
-5. [ ] Implement Start All, Stop All, and Restart All ordering.
-6. [ ] Stop launcher-owned services during window shutdown.
+1. [x] Implement repository-root discovery with a clear failure message.
+2. [x] Define the fixed API and Web service metadata.
+3. [x] Implement start, stop, restart, and process-tree termination.
+4. [x] Implement service state transitions, pid, exit code, and uptime tracking.
+5. [x] Implement Start All, Stop All, and Restart All ordering.
+6. [x] Stop launcher-owned services during window shutdown.
 
 ### Phase 3 - Live Logs
 
-1. [ ] Capture stdout and stderr asynchronously using UTF-8.
-2. [ ] Marshal log events safely to the WPF dispatcher.
-3. [ ] Implement a bounded 5,000-line observable log collection.
-4. [ ] Add the virtualized, color-coded log list.
-5. [ ] Add service filters, text filtering, and auto-scroll.
-6. [ ] Add Clear and Save to File actions.
+1. [x] Capture stdout and stderr asynchronously using UTF-8.
+2. [x] Marshal log events safely to the WPF dispatcher.
+3. [x] Implement a bounded 5,000-line observable log collection.
+4. [x] Add the virtualized, color-coded log list.
+5. [x] Add service filters, text filtering, and auto-scroll.
+6. [x] Add Clear and Save to File actions.
 
 ### Phase 4 - Launcher UI and Embedded App
 
-1. [ ] Build service controls with state, pid, uptime, ports, and links.
-2. [ ] Bind command availability to service lifecycle state.
+1. [x] Build service controls with state, pid, uptime, ports, and links.
+2. [x] Bind command availability to service lifecycle state.
 3. [ ] Add the Logs, API Log Files, and App tabs.
 4. [ ] Implement API log file discovery under `C:\logs\TaxExpenseTracker.Api`.
 5. [ ] Implement read-only file loading, live tailing, rotation handling, and bounded retention.
