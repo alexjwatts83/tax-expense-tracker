@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+using TaxExpenseTracker.Application.Common;
 
 namespace TaxExpenseTracker.Api.Middleware;
 
@@ -21,13 +21,29 @@ public sealed class ApiExceptionHandlingMiddleware
         {
             await _next(context);
         }
+        catch (ApplicationValidationException ex)
+        {
+            await ApiProblemDetails.WriteAsync(context, StatusCodes.Status400BadRequest, "validation_error", "Validation error", ex.Message);
+        }
+        catch (MissingReferenceException ex)
+        {
+            await ApiProblemDetails.WriteAsync(context, StatusCodes.Status400BadRequest, "invalid_reference", "Invalid reference", ex.Message);
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            await ApiProblemDetails.WriteAsync(context, StatusCodes.Status404NotFound, "not_found", "Resource not found", ex.Message);
+        }
+        catch (ApplicationConflictException ex)
+        {
+            await ApiProblemDetails.WriteAsync(context, StatusCodes.Status409Conflict, "conflict", "Conflict", ex.Message);
+        }
         catch (ArgumentException ex)
         {
-            await WriteProblemAsync(context, StatusCodes.Status400BadRequest, ex.Message);
+            await ApiProblemDetails.WriteAsync(context, StatusCodes.Status400BadRequest, "validation_error", "Validation error", ex.Message);
         }
         catch (InvalidOperationException ex)
         {
-            await WriteProblemAsync(context, StatusCodes.Status400BadRequest, ex.Message);
+            await ApiProblemDetails.WriteAsync(context, StatusCodes.Status400BadRequest, "validation_error", "Validation error", ex.Message);
         }
         catch (Exception ex)
         {
@@ -38,24 +54,13 @@ public sealed class ApiExceptionHandlingMiddleware
                 context.Request.Path,
                 context.TraceIdentifier);
 
-            await WriteProblemAsync(context, StatusCodes.Status500InternalServerError, "An unexpected server error occurred.");
+            await ApiProblemDetails.WriteAsync(
+                context,
+                StatusCodes.Status500InternalServerError,
+                "server_error",
+                "Server error",
+                "An unexpected server error occurred.");
         }
     }
 
-    private static async Task WriteProblemAsync(HttpContext context, int statusCode, string detail)
-    {
-        context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/problem+json";
-
-        var problem = new ProblemDetails
-        {
-            Status = statusCode,
-            Title = statusCode == StatusCodes.Status400BadRequest ? "Validation error" : "Server error",
-            Detail = detail,
-        };
-
-        problem.Extensions["correlationId"] = context.TraceIdentifier;
-
-        await context.Response.WriteAsJsonAsync(problem);
-    }
 }

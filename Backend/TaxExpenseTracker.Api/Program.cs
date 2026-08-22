@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using NLog.Web;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Banks;
@@ -18,7 +19,27 @@ const string AppCorsPolicy = "AppCorsPolicy";
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+{
+    options.SuppressMapClientErrors = true;
+    options.InvalidModelStateResponseFactory = actionContext =>
+    {
+        var errors = actionContext.ModelState
+            .Where(entry => entry.Value?.Errors.Count > 0)
+            .ToDictionary(
+                entry => entry.Key,
+                entry => entry.Value!.Errors
+                    .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
+                        ? "The request is invalid."
+                        : error.ErrorMessage)
+                    .ToArray());
+        var problem = ApiProblemDetails.CreateValidation(actionContext.HttpContext, errors);
+        return new BadRequestObjectResult(problem)
+        {
+            ContentTypes = { "application/problem+json" },
+        };
+    };
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -85,6 +106,19 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ApiExceptionHandlingMiddleware>();
+app.UseStatusCodePages(async statusCodeContext =>
+{
+    var context = statusCodeContext.HttpContext;
+    if (context.Response.StatusCode == StatusCodes.Status404NotFound)
+    {
+        await ApiProblemDetails.WriteAsync(
+            context,
+            StatusCodes.Status404NotFound,
+            "not_found",
+            "Resource not found",
+            "The requested resource was not found.");
+    }
+});
 
 using (var scope = app.Services.CreateScope())
 {

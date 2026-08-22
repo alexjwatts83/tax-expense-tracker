@@ -1,12 +1,12 @@
 # Next Work
 
-Last Updated: 2026-08-16
+Last Updated: 2026-08-23
 
 Use this file as the starting point when resuming work or asking "what's next?". It is a pointer to the authoritative plan, not a duplicate progress tracker.
 
 ## Current Priority
 
-**Task:** `S1-03` - Map backend errors to the agreed ProblemDetails contract and status codes.
+**Task:** `S1-05` - Add typed frontend `ApiProblem` parsing and classification for JSON, text, and Blob responses.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,15 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Return RFC 9457 `application/problem+json` responses.
-- Map validation and invalid-reference failures to `400`.
-- Map not-found failures to `404`.
-- Map conflict failures to `409`.
-- Map unexpected failures to a sanitized, correlated `500`.
-- Include stable `type`, `title`, `status`, safe `detail`, request `instance`, `code`, and `correlationId` fields.
-- Preserve optional field-error dictionaries for validation failures.
+- Define typed frontend models for the agreed ProblemDetails shape and optional field errors.
+- Parse normal JSON problem bodies, plain-text bodies, and Blob responses from download/export requests.
+- Classify by stable `code` first and HTTP status second.
+- Always return safe string messages and preserve correlation IDs when available.
+- Distinguish validation, conflict, authentication, authorization, timeout, and server failures.
 
-**Immediate validation:** Add or update focused middleware/API tests, then run the backend integration suite. `S1-04` follows and completes explicit 400, 404, 409, and 500 contract coverage.
+**Immediate validation:** Add focused frontend utility tests for JSON, text, malformed, and Blob responses, then run `npm run test:ci`. `S1-06` follows by replacing duplicated component extraction with the shared utility.
 
 ## Work Order
 

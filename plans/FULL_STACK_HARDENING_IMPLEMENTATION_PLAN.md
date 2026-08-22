@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 15% Complete
-- **Assessed:** 2026-08-16T13:11:29+10:00
-- **Evidence:** 11 of 74 tasks are complete. Stage 0 is complete, Stage 1 is 2 of 8, and Stages 2 through 8 have not started.
-- **Remaining gate:** Finish Stage 1 error contracts and immediate defects before beginning authentication and dependent hardening stages.
+- **Status:** In Progress - 18% Complete
+- **Assessed:** 2026-08-23
+- **Evidence:** 13 of 74 tasks are complete. Stage 0 is complete, Stage 1 is 4 of 8, and Stages 2 through 8 have not started.
+- **Remaining gate:** Finish Stage 1 frontend error handling and the zero-price defect before beginning authentication and dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
-Last Updated: 2026-08-16
+Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 11/74 tasks (15%)
+Overall Progress: 13/74 tasks (18%)
 Current Stage: Stage 1 - Error Contract and Immediate Defects
-Next Task: S1-03
+Next Task: S1-05
 
 ## Purpose
 
@@ -48,7 +48,7 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | Stage | Scope | Done | Total | Progress | Status | Depends On |
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
-| 1 | Error contract and immediate defects | 2 | 8 | 25% | In Progress | Stage 0 |
+| 1 | Error contract and immediate defects | 4 | 8 | 50% | In Progress | Stage 0 |
 | 2 | Authentication and authorization | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
@@ -56,7 +56,7 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **11** | **74** | **15%** | **In Progress** |  |
+| **Total** |  | **13** | **74** | **18%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -118,8 +118,8 @@ Goal: establish predictable errors before authentication and invariant changes, 
 
 - [x] **S1-01** Add typed backend application exceptions or result types for validation, conflict, not found, and missing references.
 - [x] **S1-02** Log unexpected exceptions with route, method, exception, and correlation ID.
-- [ ] **S1-03** Map backend errors to the agreed ProblemDetails contract and status codes.
-- [ ] **S1-04** Add middleware/API integration tests for 400, 404, 409, and 500 responses.
+- [x] **S1-03** Map backend errors to the agreed ProblemDetails contract and status codes.
+- [x] **S1-04** Add middleware/API integration tests for 400, 404, 409, and 500 responses.
 - [ ] **S1-05** Add typed frontend `ApiProblem` parsing/classification for JSON, text, and Blob responses.
 - [ ] **S1-06** Replace duplicated component error extraction with the shared frontend utility.
 - [ ] **S1-07** Fix the frontend zero-price expense filter and add a request-parameter regression test.
@@ -456,6 +456,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-02 | S1-01 | Backend unit tests | Pass: 100 | Typed validation, conflict, not-found, and missing-reference failures covered |
 | 2026-08-02 | S1-02 | Exception middleware test | Pass: 1 | Unexpected exception and request context logged; response detail remains generic |
 | 2026-08-02 | S1-02 | Backend integration suite | Pass: 11 | Middleware logging change validated through the real API host |
+| 2026-08-23 | S1-03/S1-04 | ProblemDetails middleware/API tests | Pass: 7 | Typed exceptions, automatic validation, controller 404, correlation IDs, stable codes/types, and sanitized 500 responses |
+| 2026-08-23 | S1-03/S1-04 | Backend integration suite | Pass: 17 | Full integration suite remains green after the shared error contract |
 
 ## Progress Update Procedure
 
