@@ -125,6 +125,42 @@ public class WorkLocationServiceTests
     }
 
     [Fact]
+    public async Task RestoreAsync_Throws_WhenActiveEntryExistsForDate()
+    {
+        var repository = new InMemoryWorkLocationRepository();
+        var deleted = WorkLocationEntry.Create(new DateTime(2026, 2, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        deleted.SoftDelete(TestTime.TimeProvider);
+        var active = WorkLocationEntry.Create(new DateTime(2026, 2, 1), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
+        repository.Entries.Add(deleted);
+        repository.Entries.Add(active);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() => service.RestoreAsync(deleted.Id));
+
+        Assert.Equal("A work-location entry already exists for this date.", ex.Message);
+        Assert.True(deleted.IsDeleted);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_Throws_WhenActiveEntryExistsForSameDateDifferentTime()
+    {
+        var repository = new InMemoryWorkLocationRepository();
+        var deleted = WorkLocationEntry.Create(new DateTime(2026, 2, 1, 8, 0, 0), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        deleted.SoftDelete(TestTime.TimeProvider);
+        var active = WorkLocationEntry.Create(new DateTime(2026, 2, 1, 17, 30, 0), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
+        repository.Entries.Add(deleted);
+        repository.Entries.Add(active);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() => service.RestoreAsync(deleted.Id));
+
+        Assert.Equal("A work-location entry already exists for this date.", ex.Message);
+        Assert.True(deleted.IsDeleted);
+    }
+
+    [Fact]
     public async Task UpdateAsync_Throws_WhenSpecificHoursMissingForSpecificHoursType()
     {
         var repository = new InMemoryWorkLocationRepository();

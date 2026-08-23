@@ -232,6 +232,10 @@ public sealed class LeaveService : ILeaveService
             return false;
         }
 
+        var existsForDate = await _leaveRepository.ExistsForDateAsync(entry.LeaveDate, entry.Id, cancellationToken);
+        if (existsForDate)
+            ThrowHelper.Conflict("A leave entry already exists for this date.");
+
         entry.Restore(_timeProvider);
         await _leaveRepository.SaveChangesAsync(cancellationToken);
 

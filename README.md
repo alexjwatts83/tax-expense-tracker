@@ -32,7 +32,7 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Shared generic repository abstractions introduced (`IRepository<T>`, `ISoftDeleteRepository<T>`)
 - Domain guard clauses standardized with `ThrowIfNullOrWhiteSpace` and `ThrowIfEqual`
 - Domain/application clock handling standardized on required `TimeProvider`
-- One-entry-per-date validation enforced for work-location and leave records
+- One-entry-per-date validation enforced for work-location and leave records on create, update, and restore
 - Unit tests use a shared `FakeTimeProvider` with fixed deterministic dates
 - Angular service/model layer added for Work Location (WFH/Office), Leave, and Public Holidays
 - Angular management screens added for Work Location, Leave, and Public Holidays, with Work Location and Leave combined under a shared time-tracking page

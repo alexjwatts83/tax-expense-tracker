@@ -140,6 +140,42 @@ public class LeaveServiceTests
     }
 
     [Fact]
+    public async Task RestoreAsync_Throws_WhenActiveEntryExistsForDate()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var deleted = LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        deleted.SoftDelete(TestTime.TimeProvider);
+        var active = LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
+        repository.Entries.Add(deleted);
+        repository.Entries.Add(active);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() => service.RestoreAsync(deleted.Id));
+
+        Assert.Equal("A leave entry already exists for this date.", ex.Message);
+        Assert.True(deleted.IsDeleted);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_Throws_WhenActiveEntryExistsForSameDateDifferentTime()
+    {
+        var repository = new InMemoryLeaveRepository();
+        var deleted = LeaveEntry.Create(new DateTime(2026, 4, 1, 8, 0, 0), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        deleted.SoftDelete(TestTime.TimeProvider);
+        var active = LeaveEntry.Create(new DateTime(2026, 4, 1, 19, 45, 0), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
+        repository.Entries.Add(deleted);
+        repository.Entries.Add(active);
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
+
+        var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() => service.RestoreAsync(deleted.Id));
+
+        Assert.Equal("A leave entry already exists for this date.", ex.Message);
+        Assert.True(deleted.IsDeleted);
+    }
+
+    [Fact]
     public async Task UpdateAsync_Throws_WhenSpecificHoursMissingForSpecificHoursType()
     {
         var repository = new InMemoryLeaveRepository();

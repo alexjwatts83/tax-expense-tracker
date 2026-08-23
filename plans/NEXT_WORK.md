@@ -6,21 +6,22 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S2-09` / `S2-10` - Provision the Azure Entra resources and run the deployed role matrix. This work is blocked until the target Azure tenant and registration values are available.
+**Task:** `S3-04` / `S3-05` with migration `S3-07` / `S3-08` - Convert backend date-only contracts to `DateOnly`, preserve `yyyy-MM-dd` JSON, and add the active-date uniqueness migration. This batch changes the persisted schema, so it must be a separate reviewable migration commit.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
-**Current stage:** Stage 2 - Authentication and Authorization
+**Current stage:** Stage 3 - Date Integrity and Restore Safety
 
 **Required outcome:**
 
-- Create separate single-tenant SPA and API Entra registrations.
-- Expose and consent the API scope, configure SPA redirect URIs, and assign the configured owner.
-- Configure API Easy Auth, CORS, and matching backend/frontend runtime values.
-- Deploy to Azure dev and run anonymous, non-owner, owner, expired-session, and DataTransfer checks.
-- Keep `Authentication:UseDevelopmentTestScheme` disabled in Azure and Production.
+- Convert domain/application date-only contracts (`LeaveDate`, `WorkDate`, expense `Date`, `HolidayDate`) to `DateOnly` where agreed.
+- Keep `yyyy-MM-dd` JSON stable across forms, filters, summaries, and DataTransfer.
+- Add filtered unique indexes for active work-location and leave dates plus migration normalization, duplicate preflight, repair, and rollback.
+- Apply the migration only after frontend compatibility tests are green, and keep it as its own commit.
 
-**Immediate validation:** The local matrix is complete: backend 172/172, frontend 35/35, and the production frontend build pass. Finish with the Azure dev matrix, then close S2-09, S2-10, Stage 2, and release checkpoint R2.
+**Immediate validation:** Run the full backend suite, the EF migration script, the complete Angular suite, and the production build. `S3-09`/`S3-10` follow with uniqueness-race conflict mapping and the stage gate.
+
+**Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning; Stage 3 started under an explicit gate override because the wire format stays stable.
 
 ## Work Order
 
@@ -41,6 +42,7 @@ At the end of each work session:
 
 ## Deferred Work
 
+- Stage 2 `S2-09`/`S2-10`: Azure/Entra provisioning and the deployed anonymous/non-owner/owner matrix. Blocked until the target tenant and registration values are available. Keep `Authentication:UseDevelopmentTestScheme` disabled in Azure and Production.
 - [Azure deployment](todo/AZURE_DEPLOYMENT_TRACKER.md)
 - [JSON import/export follow-up](todo/JSON_IMPORT_EXPORT_PLAN.md)
 

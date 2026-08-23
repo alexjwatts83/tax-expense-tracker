@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 34% Complete
+- **Status:** In Progress - 39% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 25 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 8 of 10, and Stages 3 through 8 have not started.
-- **Remaining gate:** Implement and validate the coordinated Stage 2 authentication and authorization capability before beginning dependent hardening stages.
+- **Evidence:** 29 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 3 is 4 of 10, and Stages 4 through 8 have not started.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked; Stage 3 code-only work began under an explicit gate override while the wire format stays stable.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 25/74 tasks (34%)
-Current Stage: Stage 2 - Authentication and Authorization
-Next Task: S2-09 (blocked on Azure/Entra provisioning)
+Overall Progress: 29/74 tasks (39%)
+Current Stage: Stage 3 - Date Integrity and Restore Safety
+Next Task: S3-05 (with migration S3-07/S3-08)
 
 ## Purpose
 
@@ -50,13 +50,13 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
 | 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
-| 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
+| 3 | Date integrity and restore safety | 4 | 10 | 40% | In Progress | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **25** | **74** | **34%** | **In Progress** |  |
+| **Total** |  | **29** | **74** | **39%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -186,12 +186,12 @@ Goal: make date-only rules consistent from Angular through the domain and databa
 
 ### Tasks
 
-- [ ] **S3-01** Add backend regression tests for restore conflicts and non-midnight date behavior.
-- [ ] **S3-02** Add frontend date utility/contract tests including invalid dates, leap days, and timezones.
-- [ ] **S3-03** Introduce frontend calendar-date and UTC-timestamp types and strict utilities.
+- [x] **S3-01** Add backend regression tests for restore conflicts and non-midnight date behavior.
+- [x] **S3-02** Add frontend date utility/contract tests including invalid dates, leap days, and timezones.
+- [x] **S3-03** Introduce frontend calendar-date and UTC-timestamp types and strict utilities.
 - [ ] **S3-04** Preserve `yyyy-MM-dd` calendar-date JSON across forms, filters, summaries, and DataTransfer.
 - [ ] **S3-05** Convert backend date-only domain/application contracts to `DateOnly` where agreed.
-- [ ] **S3-06** Add restore conflict checks for work-location and leave entries.
+- [x] **S3-06** Add restore conflict checks for work-location and leave entries.
 - [ ] **S3-07** Add filtered unique indexes for active work-location and leave dates.
 - [ ] **S3-08** Create migration normalization, duplicate preflight, repair, and rollback steps.
 - [ ] **S3-09** Translate database uniqueness races to the agreed conflict response and frontend UX.
@@ -487,6 +487,9 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S2-07/S2-08 | Frontend tests | Pass: 35 | Complete Angular suite remains green with authentication disabled by default |
 | 2026-08-23 | S2-07/S2-08 | Frontend production build | Pass with 2 warnings | Initial bundle is 804.35 kB; initial-bundle and calendar day-cell style budgets remain warnings |
 | 2026-08-23 | S2-09/S2-10 local | Backend tests and solution build | Pass: 172 | Complete suite includes 50 integration tests and proves Production cannot select the Development scheme |
+| 2026-08-23 | S3-01/S3-06 | Restore conflict and non-midnight date tests | Pass: 4 | Restoring leave or work-location entries onto an occupied date is rejected, including same-date different-time values |
+| 2026-08-23 | S3-02/S3-03 | Frontend calendar-date utility tests | Pass: 13 | Invalid dates, leap days, month/day bounds, ISO truncation, and timezone-stable round-trips covered |
+| 2026-08-23 | S3-01/S3-02/S3-03/S3-06 | Backend and frontend suites | Pass: 176 backend, 48 frontend | Stage 3 code-only slice green; `DateOnly` conversion and calendar-date JSON deferred to the migration batch |
 
 ## Progress Update Procedure
 

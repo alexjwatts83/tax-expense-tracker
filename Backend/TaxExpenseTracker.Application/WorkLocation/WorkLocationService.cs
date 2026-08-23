@@ -232,6 +232,10 @@ public sealed class WorkLocationService : IWorkLocationService
             return false;
         }
 
+        var existsForDate = await _workLocationRepository.ExistsForDateAsync(entry.WorkDate, entry.Id, cancellationToken);
+        if (existsForDate)
+            ThrowHelper.Conflict("A work-location entry already exists for this date.");
+
         entry.Restore(_timeProvider);
         await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
