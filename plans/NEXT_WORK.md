@@ -6,22 +6,21 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S4-03`/`S4-04`/`S4-05` (frontend tag workflow), then `S4-09` (stage gate). The Stage 4 backend is complete.
+**Task:** `S5-01` - Implement the recorded partial-success (or atomic change-set) contract for calendar batch entry. Stage 5 (Calendar and Day-Entry Workflow) depends on Stages 1 and 3, which are complete.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
-**Current stage:** Stage 4 - Expense References and Aggregate Ownership
+**Current stage:** Stage 5 - Calendar and Day-Entry Workflow
 
 **Required outcome:**
 
-- S4-03: recover from stale tags without losing unsaved form state (the backend now returns `invalid_reference` when a tag no longer exists).
-- S4-04: share manual-tag parsing and resolution across both expense entry points (inline list and expense form).
-- S4-05: define and test partial tag-creation failure/retry behavior.
-- S4-09: run expense UI, API, EF, and DataTransfer roundtrip tests and pass the stage gate.
+- Implement `DEC-HARD-004`: preserve partial success with deterministic per-item results and aggregate counts.
+- Prepare for bulk-loading occupied dates (S5-02) and reducing save calls (S5-03).
+- Extract calendar change-set planning and result reconciliation into pure tested modules (S5-05/S5-06).
 
-**Immediate validation:** Angular suite and production build, then the full backend suite for the gate.
+**Immediate validation:** Backend query-count and mixed-result tests, then the Angular suite and production build.
 
-**Done in this session:** S4-01, S4-02, S4-06, S4-07, and S4-08 are complete. Expenses reject missing references and de-duplicate tags; `TaxExpense` owns its tag links through a private backing collection and behavior methods, with an ID-preserving `Import` factory. Backend 112 unit / 54 integration and frontend 48 pass; production build ok.
+**Done in this session:** Stage 4 is complete. Expenses reject missing references and de-duplicate tags; `TaxExpense` owns its tag links; both expense entry points share tag parsing/resolution with partial-failure retry and stale-tag recovery. Backend 112 unit / 54 integration and frontend 55 pass; production build ok.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

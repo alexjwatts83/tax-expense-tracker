@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
-import { finalize, forkJoin, of, switchMap, take, timeout } from 'rxjs';
+import { finalize, forkJoin, of, switchMap, take, timeout, tap } from 'rxjs';
 import { Bank, Expense, Tag, Tracker } from '../../models/api.models';
 import { BankService } from '../../services/bank';
 import { ExpenseService } from '../../services/expense';
@@ -22,6 +22,7 @@ import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 import { parseApiError } from '../../utils/api-problem';
+import { parseManualTagNames, resolveTagIds, TagResolution } from '../../utils/tag-resolution';
 
 @Component({
   selector: 'app-expense-list',
@@ -281,22 +282,33 @@ export class ExpenseList implements OnInit {
 
     this.resolveInlineTagIds((value.tagIds ?? []) as string[], this.parseManualTags(value.manualTags))
       .pipe(
-        switchMap((tagIds) =>
-          this.expenseService.create({
+        switchMap((resolution) => {
+          if (resolution.failedNames.length > 0) {
+            this.handleFailedTagCreation(resolution);
+            this.createForm.patchValue({ tagIds: resolution.tagIds, manualTags: resolution.failedNames.join(', ') });
+            this.isCreating = false;
+            return of(null);
+          }
+
+          return this.expenseService.create({
             description: value.description?.trim() ?? '',
             date: value.date ?? '',
             bankId: value.bankId ?? '',
             price: Number(value.price),
             sourceId: value.sourceId ?? '',
-            tagIds,
-          }),
-        ),
+            tagIds: resolution.tagIds,
+          });
+        }),
         finalize(() => {
           this.isCreating = false;
         }),
       )
       .subscribe({
         next: (createdExpense) => {
+          if (createdExpense === null) {
+            return;
+          }
+
           if (this.hasActiveFilters) {
             this.applyFilters();
           } else {
@@ -324,11 +336,19 @@ export class ExpenseList implements OnInit {
 
     const value = this.createForm.value;
     this.resolveInlineTagIds((value.tagIds ?? []) as string[], this.parseManualTags(value.manualTags)).subscribe({
-      next: (tagIds) => {
-        this.createForm.patchValue({ tagIds, manualTags: '' });
+      next: (resolution) => {
+        this.createForm.patchValue({ tagIds: resolution.tagIds, manualTags: resolution.failedNames.join(', ') });
+        if (resolution.failedNames.length > 0) {
+          this.handleFailedTagCreation(resolution);
+        }
       },
       error: (error) => void this.showApiError(error, 'Unable to apply tags.'),
     });
+  }
+
+  private handleFailedTagCreation(resolution: TagResolution): void {
+    this.errorMessage = `Some tags could not be created and remain for retry: ${resolution.failedNames.join(', ')}.`;
+    this.cdr.detectChanges();
   }
 
   private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
@@ -412,46 +432,15 @@ export class ExpenseList implements OnInit {
   }
 
   private parseManualTags(rawValue: string | null | undefined): string[] {
-    if (!rawValue) {
-      return [];
-    }
-
-    const unique = new Map<string, string>();
-    for (const token of rawValue.split(',')) {
-      const trimmed = token.trim();
-      if (!trimmed) {
-        continue;
-      }
-
-      const key = trimmed.toLowerCase();
-      if (!unique.has(key)) {
-        unique.set(key, trimmed);
-      }
-    }
-
-    return [...unique.values()];
+    return parseManualTagNames(rawValue);
   }
 
   private resolveInlineTagIds(selectedTagIds: string[], manualTagNames: string[]) {
-    if (manualTagNames.length === 0) {
-      return of([...new Set(selectedTagIds)]);
-    }
-
-    const existingByName = new Map(this.tags.map((tag) => [tag.name.trim().toLowerCase(), tag]));
-    const existingIds = manualTagNames
-      .map((name) => existingByName.get(name.toLowerCase())?.id)
-      .filter((id): id is string => !!id);
-
-    const namesToCreate = manualTagNames.filter((name) => !existingByName.has(name.toLowerCase()));
-    if (namesToCreate.length === 0) {
-      return of([...new Set([...selectedTagIds, ...existingIds])]);
-    }
-
-    return forkJoin(namesToCreate.map((name) => this.tagService.create({ name }))).pipe(
-      switchMap((createdTags) => {
-        this.tags = [...this.tags, ...createdTags].sort((a, b) => a.name.localeCompare(b.name));
-        const createdIds = createdTags.map((tag) => tag.id);
-        return of([...new Set([...selectedTagIds, ...existingIds, ...createdIds])]);
+    return resolveTagIds(selectedTagIds, manualTagNames, this.tags, (name) => this.tagService.create({ name })).pipe(
+      tap((resolution) => {
+        if (resolution.createdTags.length > 0) {
+          this.tags = [...this.tags, ...resolution.createdTags].sort((a, b) => a.name.localeCompare(b.name));
+        }
       }),
     );
   }

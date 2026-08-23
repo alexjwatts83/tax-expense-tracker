@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 54% Complete
+- **Status:** In Progress - 59% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 40 of 74 tasks are complete. Stages 0, 1, and 3 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 4 is 5 of 9, and Stages 5 through 8 have not started.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 4 backend reference rejection and aggregate encapsulation are complete; the frontend tag workflow (S4-03..S4-05) and the stage gate (S4-09) remain.
+- **Evidence:** 44 of 74 tasks are complete. Stages 0, 1, 3, and 4 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stages 5 through 8 have not started.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 4 is complete. Stage 5 (calendar and day-entry workflow) can start next; it depends on Stages 1 and 3, which are done.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 40/74 tasks (54%)
-Current Stage: Stage 4 - Expense References and Aggregate Ownership
-Next Task: S4-03
+Overall Progress: 44/74 tasks (59%)
+Current Stage: Stage 5 - Calendar and Day-Entry Workflow
+Next Task: S5-01
 
 ## Purpose
 
@@ -51,12 +51,12 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
 | 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
 | 3 | Date integrity and restore safety | 10 | 10 | 100% | Complete | Stages 0-1 |
-| 4 | Expense references and aggregate ownership | 5 | 9 | 56% | In Progress | Stages 1, 3 |
+| 4 | Expense references and aggregate ownership | 9 | 9 | 100% | Complete | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **40** | **74** | **54%** | **In Progress** |  |
+| **Total** |  | **44** | **74** | **59%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -221,13 +221,13 @@ Goal: stop silent tag loss and make `TaxExpense` own its tag links and state tra
 
 - [x] **S4-01** Add backend tests for missing, duplicate, and stale expense tag IDs on create/update.
 - [x] **S4-02** Reject missing source, bank, and tag references consistently with stable codes.
-- [ ] **S4-03** Add frontend stale-tag recovery while preserving unsaved form state.
-- [ ] **S4-04** Extract shared frontend manual-tag parsing and resolution workflow.
-- [ ] **S4-05** Define and test partial tag-creation failure/retry behavior.
+- [x] **S4-03** Add frontend stale-tag recovery while preserving unsaved form state.
+- [x] **S4-04** Extract shared frontend manual-tag parsing and resolution workflow.
+- [x] **S4-05** Define and test partial tag-creation failure/retry behavior.
 - [x] **S4-06** Add `TaxExpense` tag-link behavior and private backing collection.
 - [x] **S4-07** Replace direct tag collection assignment/mutation in Application and DataTransfer.
 - [x] **S4-08** Restrict `TaxExpense` mutation and add explicit import/rehydration behavior preserving IDs.
-- [ ] **S4-09** Run expense UI, API, EF, and DataTransfer roundtrip tests and pass the stage gate.
+- [x] **S4-09** Run expense UI, API, EF, and DataTransfer roundtrip tests and pass the stage gate.
 
 ### Acceptance Criteria
 
@@ -406,7 +406,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | R1 | 0-1 | Tested contracts, correlated errors, immediate frontend fixes | Not Started |
 | R2 | 2 | End-to-end authenticated application and admin authorization | Not Started |
 | R3 | 3 | Date-safe work/leave workflows and database uniqueness | Complete |
-| R4 | 4-5 | Strict expense references and maintainable calendar workflow | Not Started |
+| R4 | 4-5 | Strict expense references and maintainable calendar workflow | In Progress |
 | R5 | 6-7 | Encapsulated domain and hardened DataTransfer | Not Started |
 | R6 | 8 | CI-enforced, operationally ready hardening release | Not Started |
 
@@ -499,6 +499,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S4-01/S4-02 | Backend suite | Pass: 107 unit, 54 integration | Expense create/update reject missing source, bank, and tag references; DataTransfer already rejected missing references |
 | 2026-08-23 | S4-06/S4-07/S4-08 | Aggregate tag-link behavior tests | Pass: 5 | `ReplaceTagLinks` preserves link identities and dedupes, `AddTagLink` is idempotent with preserved IDs, `Import` preserves the supplied ID |
 | 2026-08-23 | S4-06/S4-07/S4-08 | Backend, frontend, and production build | Pass: 112 unit, 54 integration, 48 frontend, build ok | `TaxExpense` owns a private tag-link collection via behavior methods; EF field mapping and DataTransfer roundtrip preserve IDs and relationships |
+| 2026-08-23 | S4-03/S4-04/S4-05 | Shared tag-resolution tests | Pass: 7 | Parsing dedupe, existing-tag reuse, missing-tag creation, partial-failure retry, and stale-tag pruning covered |
+| 2026-08-23 | Stage 4 gate | Backend, frontend, and production build | Pass: 112 unit, 54 integration, 55 frontend, build ok | Both expense entry points share tag resolution; stale tags recover without losing form state and partial tag-creation failures remain for retry |
 
 ## Progress Update Procedure
 
