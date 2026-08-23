@@ -2,15 +2,15 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 50% Complete
+- **Status:** In Progress - 54% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 37 of 74 tasks are complete. Stages 0, 1, and 3 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 4 is 2 of 9, and Stages 5 through 8 have not started.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 4 backend reference rejection is in place; aggregate encapsulation (S4-06..S4-08) and the frontend tag workflow (S4-03..S4-05) remain.
+- **Evidence:** 40 of 74 tasks are complete. Stages 0, 1, and 3 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 4 is 5 of 9, and Stages 5 through 8 have not started.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 4 backend reference rejection and aggregate encapsulation are complete; the frontend tag workflow (S4-03..S4-05) and the stage gate (S4-09) remain.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 37/74 tasks (50%)
+Overall Progress: 40/74 tasks (54%)
 Current Stage: Stage 4 - Expense References and Aggregate Ownership
 Next Task: S4-03
 
@@ -51,12 +51,12 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
 | 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
 | 3 | Date integrity and restore safety | 10 | 10 | 100% | Complete | Stages 0-1 |
-| 4 | Expense references and aggregate ownership | 2 | 9 | 22% | In Progress | Stages 1, 3 |
+| 4 | Expense references and aggregate ownership | 5 | 9 | 56% | In Progress | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **37** | **74** | **50%** | **In Progress** |  |
+| **Total** |  | **40** | **74** | **54%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -224,9 +224,9 @@ Goal: stop silent tag loss and make `TaxExpense` own its tag links and state tra
 - [ ] **S4-03** Add frontend stale-tag recovery while preserving unsaved form state.
 - [ ] **S4-04** Extract shared frontend manual-tag parsing and resolution workflow.
 - [ ] **S4-05** Define and test partial tag-creation failure/retry behavior.
-- [ ] **S4-06** Add `TaxExpense` tag-link behavior and private backing collection.
-- [ ] **S4-07** Replace direct tag collection assignment/mutation in Application and DataTransfer.
-- [ ] **S4-08** Restrict `TaxExpense` mutation and add explicit import/rehydration behavior preserving IDs.
+- [x] **S4-06** Add `TaxExpense` tag-link behavior and private backing collection.
+- [x] **S4-07** Replace direct tag collection assignment/mutation in Application and DataTransfer.
+- [x] **S4-08** Restrict `TaxExpense` mutation and add explicit import/rehydration behavior preserving IDs.
 - [ ] **S4-09** Run expense UI, API, EF, and DataTransfer roundtrip tests and pass the stage gate.
 
 ### Acceptance Criteria
@@ -497,6 +497,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | Stage 3 gate | Backend, frontend, and production build | Pass: 104 unit, 54 integration, 48 frontend, build ok | Date-only contracts, restore conflicts, active-date uniqueness, race conflict mapping, and timezone-safe calendar dates validated |
 | 2026-08-23 | S4-01/S4-02 | Expense reference rejection tests | Pass: 3 | Missing tag references throw `invalid_reference`, duplicate tag IDs are de-duplicated, and stale tags on update are rejected |
 | 2026-08-23 | S4-01/S4-02 | Backend suite | Pass: 107 unit, 54 integration | Expense create/update reject missing source, bank, and tag references; DataTransfer already rejected missing references |
+| 2026-08-23 | S4-06/S4-07/S4-08 | Aggregate tag-link behavior tests | Pass: 5 | `ReplaceTagLinks` preserves link identities and dedupes, `AddTagLink` is idempotent with preserved IDs, `Import` preserves the supplied ID |
+| 2026-08-23 | S4-06/S4-07/S4-08 | Backend, frontend, and production build | Pass: 112 unit, 54 integration, 48 frontend, build ok | `TaxExpense` owns a private tag-link collection via behavior methods; EF field mapping and DataTransfer roundtrip preserve IDs and relationships |
 
 ## Progress Update Procedure
 

@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S4-03`/`S4-04`/`S4-05` (frontend tag workflow) and `S4-06`/`S4-07`/`S4-08` (backend aggregate encapsulation). Two separable slices remain in Stage 4.
+**Task:** `S4-03`/`S4-04`/`S4-05` (frontend tag workflow), then `S4-09` (stage gate). The Stage 4 backend is complete.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,12 +14,14 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Frontend (S4-03..S4-05): recover from stale tags without losing unsaved form state, share manual-tag parsing/resolution across both expense entry points, and define partial tag-creation failure/retry behavior. Now that the backend rejects missing tag references, stale-tag recovery is required UX.
-- Backend (S4-06..S4-08): give `TaxExpense` a private backing collection with explicit tag-link behavior, replace direct collection mutation in Application and DataTransfer, restrict mutation with private setters, and add explicit import/rehydration that preserves IDs. This touches the EF backing-field mapping and the DataTransfer granular tag mutation, so treat it as its own careful slice.
+- S4-03: recover from stale tags without losing unsaved form state (the backend now returns `invalid_reference` when a tag no longer exists).
+- S4-04: share manual-tag parsing and resolution across both expense entry points (inline list and expense form).
+- S4-05: define and test partial tag-creation failure/retry behavior.
+- S4-09: run expense UI, API, EF, and DataTransfer roundtrip tests and pass the stage gate.
 
-**Immediate validation:** Backend suite, DataTransfer roundtrip, Angular suite, and production build.
+**Immediate validation:** Angular suite and production build, then the full backend suite for the gate.
 
-**Done in this session:** S4-01 and S4-02 are complete. Expense create/update reject missing source, bank, and tag references and de-duplicate tag IDs; DataTransfer already rejected missing references. Backend 107 unit / 54 integration pass.
+**Done in this session:** S4-01, S4-02, S4-06, S4-07, and S4-08 are complete. Expenses reject missing references and de-duplicate tags; `TaxExpense` owns its tag links through a private backing collection and behavior methods, with an ID-preserving `Import` factory. Backend 112 unit / 54 integration and frontend 48 pass; production build ok.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

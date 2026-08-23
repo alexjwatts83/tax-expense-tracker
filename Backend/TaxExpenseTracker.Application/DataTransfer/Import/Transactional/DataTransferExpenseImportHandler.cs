@@ -102,8 +102,7 @@ public sealed class DataTransferExpenseImportHandler
 
                 if (!options.DryRun)
                 {
-                    var entity = TaxExpense.Create(item.Description, item.Date, item.BankId, item.Price, item.SourceId, _timeProvider);
-                    entity.Id = item.Id;
+                    var entity = TaxExpense.Import(item.Id, item.Description, item.Date, item.BankId, item.Price, item.SourceId, _timeProvider);
 
                     if (item.IsDeleted == true)
                         entity.SoftDelete(_timeProvider);
@@ -195,7 +194,7 @@ public sealed class DataTransferExpenseImportHandler
                 continue;
             }
 
-            var alreadyLinked = expense?.TaxExpenseTags.Any(x => x.TagId == item.TagId) == true;
+            var alreadyLinked = expense?.HasTagLink(item.TagId) == true;
             if (alreadyLinked)
             {
                 tagSkipped += 1;
@@ -213,9 +212,7 @@ public sealed class DataTransferExpenseImportHandler
 
             if (!options.DryRun)
             {
-                var link = TaxExpenseTag.Create(item.TaxExpenseId, item.TagId);
-                link.Id = item.Id == Guid.Empty ? link.Id : item.Id;
-                expense!.TaxExpenseTags.Add(link);
+                expense!.AddTagLink(item.TagId, item.Id == Guid.Empty ? null : item.Id);
             }
         }
 
@@ -236,7 +233,7 @@ public sealed class DataTransferExpenseImportHandler
                 if (!options.DryRun)
                 {
                     foreach (var link in linksToDelete)
-                        expense.TaxExpenseTags.Remove(link);
+                        expense.RemoveTagLink(link.TagId);
                 }
             }
 

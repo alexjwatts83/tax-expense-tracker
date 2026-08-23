@@ -58,9 +58,7 @@ public sealed class ExpenseService : IExpenseService
             command.SourceId,
             _timeProvider);
 
-        expense.TaxExpenseTags = validTagIds
-            .Select(tagId => TaxExpenseTag.Create(expense.Id, tagId))
-            .ToList();
+        expense.ReplaceTagLinks(validTagIds);
 
         await _expenseRepository.AddAsync(expense, cancellationToken);
         await _expenseRepository.SaveChangesAsync(cancellationToken);
@@ -98,25 +96,7 @@ public sealed class ExpenseService : IExpenseService
             command.SourceId,
             _timeProvider);
 
-        var desiredTagIds = validTagIds.ToHashSet();
-
-        var tagsToRemove = expense.TaxExpenseTags
-            .Where(x => !desiredTagIds.Contains(x.TagId))
-            .ToList();
-
-        foreach (var tag in tagsToRemove)
-        {
-            expense.TaxExpenseTags.Remove(tag);
-        }
-
-        var existingTagIds = expense.TaxExpenseTags
-            .Select(x => x.TagId)
-            .ToHashSet();
-
-        foreach (var tagId in desiredTagIds.Where(tagId => !existingTagIds.Contains(tagId)))
-        {
-            expense.TaxExpenseTags.Add(TaxExpenseTag.Create(expense.Id, tagId));
-        }
+        expense.ReplaceTagLinks(validTagIds);
 
         await _expenseRepository.SaveChangesAsync(cancellationToken);
 

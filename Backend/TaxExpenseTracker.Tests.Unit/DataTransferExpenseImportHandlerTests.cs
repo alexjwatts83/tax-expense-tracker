@@ -178,7 +178,7 @@ public class DataTransferExpenseImportHandlerTests
         var repository = new DataTransferExpenseRepository();
         var kept = TaxExpense.Create("Kept", new DateOnly(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
         var missing = TaxExpense.Create("Missing", new DateOnly(2026, 7, 2), repository.BankId, 20m, repository.SourceId, TestTime.TimeProvider);
-        kept.TaxExpenseTags.Add(TaxExpenseTag.Create(kept.Id, repository.TagId));
+        kept.AddTagLink(repository.TagId);
         repository.Expenses.AddRange([kept, missing]);
         var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
 

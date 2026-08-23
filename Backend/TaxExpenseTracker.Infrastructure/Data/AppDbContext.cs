@@ -67,6 +67,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithMany(x => x.TaxExpenseTags)
             .HasForeignKey(x => x.TaxExpenseId);
 
+        modelBuilder.Entity<TaxExpense>()
+            .Metadata.FindNavigation(nameof(TaxExpense.TaxExpenseTags))!
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
+
         modelBuilder.Entity<TaxExpenseTag>()
             .HasOne(x => x.Tag)
             .WithMany(x => x.TaxExpenseTags)
