@@ -318,20 +318,29 @@ Goal: make DataTransfer efficient, role-restricted, and safe for supported brows
 
 ### Tasks
 
-- [ ] **S7-01** Avoid reference-data queries for unrelated per-entity exports.
-- [ ] **S7-02** Validate import modes and maintain atomic rollback for all writes.
-- [ ] **S7-03** Define and enforce matching API/browser file limits.
-- [ ] **S7-04** Reject unsupported files before frontend `file.text()`/`JSON.parse()`.
-- [ ] **S7-05** Move supported large parsing off the UI thread if measurements require it.
-- [ ] **S7-06** Add readable Blob errors, correlation IDs, authorization states, cancellation, and truthful progress behavior.
+- [ ] **S7-01** Route per-entity exports to only the owning repository, and make the reference `publicHolidays` export honor `includeSoftDeleted` like trackers, tags, and banks.
+- [ ] **S7-02** Verify and test that a single import wraps all its entity handlers in one transaction so any failure rolls back the whole payload; confirm mode behavior (Upsert/InsertOnly/Replace) and dry-run non-persistence.
+- [ ] **S7-03** Enforce the `DEC-HARD-005` limits (10 MiB selected file, 12 MiB API request) by replacing the current 100 MiB `RequestSizeLimit` on the DataTransfer endpoints.
+- [ ] **S7-04** Reject oversized or non-JSON files in the frontend before `file.text()`/`JSON.parse()`, using the same 10 MiB ceiling from `DEC-HARD-005`.
+- [ ] **S7-05** Move supported large parsing off the UI thread only if measurements against the 10 MiB ceiling justify it.
+- [ ] **S7-06** Complete the DataTransfer UX parts not already implemented: authorization states, cancellation only where the request is truly abortable, and truthful stage-based progress. Correlation IDs and Blob/problem error parsing already exist; reuse them.
 - [ ] **S7-07** Run malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip tests and pass the stage gate.
+
+### Delivery Slices
+
+- [ ] **Slice A (S7-01 + S7-02): Backend DataTransfer boundaries.** Route per-entity exports to their owning repository, fix the `publicHolidays` soft-delete inconsistency, and verify/test single-transaction import atomicity and mode/dry-run behavior. Backend-only and lowest risk; validate with service/repository and query-count tests.
+- [ ] **Slice B (S7-03 + S7-04): File-limit contract.** Enforce the `DEC-HARD-005` limits on both sides of the boundary by lowering the API `RequestSizeLimit` from 100 MiB to 12 MiB and rejecting oversized or non-JSON files in the browser at the 10 MiB ceiling before reading. Ship together so API and browser cannot drift; validate with one oversized-payload roundtrip plus focused frontend rejection tests.
+- [ ] **Slice C (S7-05 + S7-06 + S7-07): Frontend UX and stage gate.** Complete authorization states, real cancellation, and truthful stage-based progress, reusing existing correlation IDs and error parsing; add a worker-based parse only if measurements against the 10 MiB ceiling justify it. Then run the full malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip matrix and pass the stage gate.
+
+Run Slice A before Slice B, and Slice C last because its test matrix and progress behavior depend on the enforced limit. Slice B is the highest-value, lowest-effort security fix and may be pulled first if prioritizing by risk over layer.
 
 ### Acceptance Criteria
 
-- Per-entity exports query only required data.
-- Unsupported or oversized files do not freeze the browser.
+- Per-entity exports query only required data, and reference exports apply `includeSoftDeleted` consistently across all four entities.
+- Unsupported or oversized files are rejected before reading and do not freeze the browser.
+- API and browser limits both match `DEC-HARD-005` (10 MiB file, 12 MiB API request).
 - DataTransfer remains dry-run-first and administrator-only.
-- Import atomicity and ID/relationship restoration remain intact.
+- Import atomicity and ID/relationship restoration remain intact under single-transaction rollback.
 
 ### Suggested Commits
 
@@ -349,8 +358,16 @@ Goal: make the hardened architecture and workflows enforceable in CI and diagnos
 - [ ] **S8-03** Add CI checks for backend build/tests, migration script, frontend tests, and production build.
 - [ ] **S8-04** Measure reference-data requests and add lightweight frontend caching only if justified.
 - [ ] **S8-05** Profile expense paging/filtering and DataTransfer chunking before further optimization.
-- [ ] **S8-06** Finalize Production startup validation, migration execution policy, monitoring, and correlated logs.
+- [ ] **S8-06** Finalize Production startup validation, migration execution policy, monitoring, and correlated logs, and confirm whether Azure SQL provider parity is in scope or SQLite remains the sole provider.
 - [ ] **S8-07** Run local and Azure smoke matrices, update all plans/docs, and pass final sign-off.
+
+### Delivery Slices
+
+- [ ] **Slice A (S8-01 + S8-02 + S8-03): Coverage and CI enforcement.** Complete backend architecture/route/repository/query-filter/FK/uniqueness coverage and frontend service/component/guard/accessibility/error-state coverage, then add CI checks that run backend build/tests, migration-script generation, frontend tests, and the production build. Group these because CI enforces the very suites completed here; use plain (non-idempotent) SQLite migration scripts in CI. Maps to the `enforce full stack quality gates` commit.
+- [ ] **Slice B (S8-04 + S8-05): Measured performance work.** Measure reference-data request patterns and profile expense paging/filtering and DataTransfer chunking, adding caching or optimization only where a measurement justifies it and a cache-invalidation strategy exists. Independent of Slice A; likely near no-op and must not add speculative optimization.
+- [ ] **Slice C (S8-06 + S8-07): Operational readiness and final sign-off.** Finalize Production startup validation, migration execution policy, monitoring, correlated logs, and the Azure SQL provider-scope decision, then run the local and Azure smoke matrices, update all plans/docs, and pass final sign-off.
+
+Run Slice A first because CI must enforce the completed suites before sign-off, and run Slice C last because `S8-07` is the final gate. Slice B is measurement-gated and can run any time before Slice C. Slice C's Azure smoke matrix shares the external Azure/Entra provisioning blocker with `S2-09`/`S2-10`; the local matrix and all non-Azure items can complete independently.
 
 ### Acceptance Criteria
 
@@ -374,7 +391,7 @@ Goal: make the hardened architecture and workflows enforceable in CI and diagnos
 - Reference entities own rename, metadata, and soft-delete transitions.
 - Import and rehydration paths preserve source IDs through explicit, narrowly scoped factories rather than public setters.
 - Calendar-date fields use `DateOnly`; audit fields remain UTC instants. Existing non-midnight values normalize by retaining their stored year, month, and day.
-- Enforce one active work-location or leave entry per date with application checks and filtered unique indexes. Review generated migrations for both SQLite and the planned Azure SQL provider.
+- Enforce one active work-location or leave entry per date with application checks and filtered unique indexes. SQLite is the current provider; treat Azure SQL provider parity as out of scope unless confirmed in Stage 8 (`S8-06`).
 - Keep unit tests focused on domain/application behavior and integration tests focused on HTTP, middleware, architecture, EF constraints, migrations, and serialization boundaries.
 
 ### Frontend Components and Workflows
