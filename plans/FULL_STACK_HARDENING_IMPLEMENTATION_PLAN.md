@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 23% Complete
+- **Status:** In Progress - 24% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 17 of 74 tasks are complete. Stages 0 and 1 are complete, and Stages 2 through 8 have not started.
+- **Evidence:** 18 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 1 of 10, and Stages 3 through 8 have not started.
 - **Remaining gate:** Implement and validate the coordinated Stage 2 authentication and authorization capability before beginning dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 17/74 tasks (23%)
+Overall Progress: 18/74 tasks (24%)
 Current Stage: Stage 2 - Authentication and Authorization
-Next Task: S2-01
+Next Task: S2-02
 
 ## Purpose
 
@@ -49,14 +49,14 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
-| 2 | Authentication and authorization | 0 | 10 | 0% | Not Started | Stages 0-1 |
+| 2 | Authentication and authorization | 1 | 10 | 10% | In Progress | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **17** | **74** | **23%** | **In Progress** |  |
+| **Total** |  | **18** | **74** | **24%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -150,7 +150,7 @@ Start this stage immediately after the Stage 1 shared error contract is complete
 
 ### Tasks
 
-- [ ] **S2-01** Add validated single-tenant Entra options, including tenant, API audience, and allowed user object ID.
+- [x] **S2-01** Add validated single-tenant Entra options, including tenant, API audience, and allowed user object ID.
 - [ ] **S2-02** Register JWT bearer validation and place `UseAuthentication()` before authorization.
 - [ ] **S2-03** Add an allowed-user policy and a named DataTransfer policy; both authorize the sole configured identity without introducing application roles.
 - [ ] **S2-04** Apply policies to every controller and document intentionally anonymous endpoints.
@@ -468,6 +468,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | Stage 1 gate | Backend tests and solution build | Pass: 139 | Complete unit and integration suites; solution test build succeeded |
 | 2026-08-23 | Stage 1 gate | Frontend tests | Pass: 15 | Complete Angular suite includes normal JSON, Blob error, parser, and zero-price request coverage |
 | 2026-08-23 | Stage 1 gate | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
+| 2026-08-23 | S2-01 | Entra options validation tests | Pass: 8 | Valid GUID/URI audiences accepted; invalid tenant, audience, and user IDs fail API startup with clear key names |
+| 2026-08-23 | S2-01 | Backend tests and solution build | Pass: 147 | Complete unit and integration suites use deterministic valid test identity configuration |
 
 ## Progress Update Procedure
 

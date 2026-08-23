@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NLog.Web;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Banks;
@@ -13,6 +14,7 @@ using TaxExpenseTracker.Application.WorkLocation;
 using TaxExpenseTracker.Infrastructure.Data;
 using TaxExpenseTracker.Api.Middleware;
 using TaxExpenseTracker.Api.Extensions;
+using TaxExpenseTracker.Api.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 const string AppCorsPolicy = "AppCorsPolicy";
@@ -42,6 +44,11 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services
+    .AddOptions<EntraOptions>()
+    .BindConfiguration(EntraOptions.SectionName)
+    .ValidateOnStart();
+builder.Services.AddSingleton<IValidateOptions<EntraOptions>, EntraOptionsValidator>();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")

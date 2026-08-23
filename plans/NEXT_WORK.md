@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S2-01` - Add validated single-tenant Entra options, including tenant, API audience, and allowed user object ID.
+**Task:** `S2-02` - Register JWT bearer validation and place authentication before authorization.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Define a strongly typed backend options model for tenant ID, API audience, and the sole allowed user object ID.
-- Bind the model from configuration using the repository's existing options conventions.
-- Validate required values and GUID/identifier shape at startup so invalid production configuration fails clearly.
-- Add focused options validation tests without introducing authentication middleware or controller policies yet.
-- Preserve the coordinated rollout boundary: JWT registration begins in S2-02 and Azure provisioning remains S2-09.
+- Register ASP.NET Core JWT bearer authentication against the configured single-tenant Entra authority and API audience.
+- Enforce issuer, audience, signing-key, and token-lifetime validation without browser secrets or custom token issuance.
+- Place `UseAuthentication()` before `UseAuthorization()` in the API pipeline.
+- Add focused authentication registration and middleware-order coverage while leaving controller policy application to S2-03/S2-04.
+- Keep integration tests deterministic through the planned Development/testing scheme boundary rather than weakening production validation.
 
-**Immediate validation:** Run focused options validation tests, then the complete backend unit and integration suites. `S2-02` follows with JWT bearer registration and middleware ordering.
+**Immediate validation:** Run focused authentication configuration tests, then the complete backend unit and integration suites. `S2-03` follows with the allowed-user and DataTransfer policies.
 
 ## Work Order
 
