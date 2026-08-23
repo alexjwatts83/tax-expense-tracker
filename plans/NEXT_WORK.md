@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S1-05` - Add typed frontend `ApiProblem` parsing and classification for JSON, text, and Blob responses.
+**Task:** `S1-06` - Replace duplicated component error extraction with the shared frontend utility.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Define typed frontend models for the agreed ProblemDetails shape and optional field errors.
-- Parse normal JSON problem bodies, plain-text bodies, and Blob responses from download/export requests.
-- Classify by stable `code` first and HTTP status second.
-- Always return safe string messages and preserve correlation IDs when available.
-- Distinguish validation, conflict, authentication, authorization, timeout, and server failures.
+- Replace component-local `error?.error` extraction with `parseApiError`.
+- Ensure each async error path updates the component message and change detection correctly.
+- Preserve each workflow's existing user-facing fallback message.
+- Remove obsolete local error helpers and avoid displaying object values as messages.
+- Apply the shared parser to DataTransfer export errors so Blob ProblemDetails are decoded.
 
-**Immediate validation:** Add focused frontend utility tests for JSON, text, malformed, and Blob responses, then run `npm run test:ci`. `S1-06` follows by replacing duplicated component extraction with the shared utility.
+**Immediate validation:** Add focused component coverage where async parsing changes behavior, then run `npm run test:ci` and `npm run build`. `S1-07` follows with the zero-price expense filter regression fix.
 
 ## Work Order
 
