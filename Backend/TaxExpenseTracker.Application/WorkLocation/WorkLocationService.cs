@@ -84,6 +84,9 @@ public sealed class WorkLocationService : IWorkLocationService
             .Where(x => !x.CanBeWorkedOn)
             .Select(x => x.HolidayDate)
             .ToHashSet();
+        var requestedDates = commands.Select(x => x.WorkDate).ToHashSet();
+        var existingEntries = await _workLocationRepository.GetByDatesAsync(requestedDates, cancellationToken);
+        var occupiedDates = existingEntries.Select(x => x.WorkDate).ToHashSet();
 
         var seenDates = new HashSet<DateOnly>();
         var results = new List<BatchCreateWorkLocationItemResult>(commands.Count);
@@ -123,8 +126,7 @@ public sealed class WorkLocationService : IWorkLocationService
                 continue;
             }
 
-            var existsForDate = await _workLocationRepository.ExistsForDateAsync(workDate, cancellationToken: cancellationToken);
-            if (existsForDate)
+            if (occupiedDates.Contains(workDate))
             {
                 skippedCount += 1;
                 results.Add(new BatchCreateWorkLocationItemResult(
@@ -143,7 +145,6 @@ public sealed class WorkLocationService : IWorkLocationService
             {
                 var entry = WorkLocationEntry.Create(workDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.WorkLocation);
                 await _workLocationRepository.AddAsync(entry, cancellationToken);
-                await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
                 createdCount += 1;
                 results.Add(new BatchCreateWorkLocationItemResult(
@@ -181,6 +182,9 @@ public sealed class WorkLocationService : IWorkLocationService
                     null));
             }
         }
+
+        if (createdCount > 0)
+            await _workLocationRepository.SaveChangesAsync(cancellationToken);
 
         var failedCount = results.Count - createdCount - skippedCount;
 

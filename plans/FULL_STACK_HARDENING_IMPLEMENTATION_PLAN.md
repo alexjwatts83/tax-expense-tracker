@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 59% Complete
+- **Status:** In Progress - 68% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 44 of 74 tasks are complete. Stages 0, 1, 3, and 4 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stages 5 through 8 have not started.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 4 is complete. Stage 5 (calendar and day-entry workflow) can start next; it depends on Stages 1 and 3, which are done.
+- **Evidence:** 50 of 74 tasks are complete. Stages 0, 1, 3, and 4 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stage 5 is 6 of 8.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 5 Slice C (S5-07/S5-08) is next.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 44/74 tasks (59%)
+Overall Progress: 50/74 tasks (68%)
 Current Stage: Stage 5 - Calendar and Day-Entry Workflow
-Next Task: S5-01
+Next Task: S5-07
 
 ## Purpose
 
@@ -248,14 +248,22 @@ Goal: bound backend batch queries and move complex frontend workflow policy out 
 
 ### Tasks
 
-- [ ] **S5-01** Implement the recorded partial-success or atomic change-set contract.
-- [ ] **S5-02** Bulk-load occupied work/leave dates and remove per-item existence queries.
-- [ ] **S5-03** Reduce save calls while preserving the selected transaction semantics.
-- [ ] **S5-04** Add backend query-count and mixed-result regression tests.
-- [ ] **S5-05** Extract frontend calendar change-set planning into a pure tested module.
-- [ ] **S5-06** Extract result reconciliation into a pure reducer/facade with mixed-outcome tests.
+- [x] **S5-01** Implement the recorded partial-success or atomic change-set contract.
+- [x] **S5-02** Bulk-load occupied work/leave dates and remove per-item existence queries.
+- [x] **S5-03** Reduce save calls while preserving the selected transaction semantics.
+- [x] **S5-04** Add backend query-count and mixed-result regression tests.
+- [x] **S5-05** Extract frontend calendar change-set planning into a pure tested module.
+- [x] **S5-06** Extract result reconciliation into a pure reducer/facade with mixed-outcome tests.
 - [ ] **S5-07** Share work/leave form and paging policies only where domain language stays clear.
 - [ ] **S5-08** Validate create/update/delete mixtures, retries, conflicts, and partial failures and pass the stage gate.
+
+### Delivery Slices
+
+- [x] **Slice A (S5-01-S5-04): Backend batch efficiency.** Preserve deterministic partial-success results, bulk-load occupied dates, save at most once, and enforce bounded repository operations with mixed-result and large-batch tests.
+- [x] **Slice B (S5-05-S5-06): Pure calendar workflow.** Extract create/update/delete change-set planning and mixed-result reconciliation together, including retention of failed or skipped rows for correction and retry. Validate with focused pure-module tests and existing component tests before integration work.
+- [ ] **Slice C (S5-07-S5-08): Integration and stage gate.** Adopt shared work/leave form or paging policy only where behavior substantially matches, keep domain terminology explicit, cover mixed operations, retries, conflicts, and partial failures at component level, then run the full backend/frontend suites and production build.
+
+Implement Slice B before Slice C so planning and reconciliation have a stable tested contract before component integration and any policy sharing decisions.
 
 ### Acceptance Criteria
 
@@ -501,6 +509,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S4-06/S4-07/S4-08 | Backend, frontend, and production build | Pass: 112 unit, 54 integration, 48 frontend, build ok | `TaxExpense` owns a private tag-link collection via behavior methods; EF field mapping and DataTransfer roundtrip preserve IDs and relationships |
 | 2026-08-23 | S4-03/S4-04/S4-05 | Shared tag-resolution tests | Pass: 7 | Parsing dedupe, existing-tag reuse, missing-tag creation, partial-failure retry, and stale-tag pruning covered |
 | 2026-08-23 | Stage 4 gate | Backend, frontend, and production build | Pass: 112 unit, 54 integration, 55 frontend, build ok | Both expense entry points share tag resolution; stale tags recover without losing form state and partial tag-creation failures remain for retry |
+| 2026-08-23 | S5-01/S5-02/S5-03/S5-04 | Batch service and API contract tests | Pass: 48 | Leave and work-location batches preserve mixed statuses while using one occupied-date lookup, zero per-item existence queries, and at most one save; bounded behavior verified with 100-item batches |
+| 2026-08-23 | S5-05/S5-06 | Frontend tests and production build | Pass: 6 focused, 61 frontend, build ok | Pure planning covers all create/update/delete groups; reconciliation preserves mixed results and retries only the unfinished half of partial category transitions; existing bundle warnings unchanged |
 
 ## Progress Update Procedure
 

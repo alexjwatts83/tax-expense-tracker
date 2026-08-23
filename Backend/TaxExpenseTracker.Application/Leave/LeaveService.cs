@@ -84,6 +84,9 @@ public sealed class LeaveService : ILeaveService
             .Where(x => !x.CanBeWorkedOn)
             .Select(x => x.HolidayDate)
             .ToHashSet();
+        var requestedDates = commands.Select(x => x.LeaveDate).ToHashSet();
+        var existingEntries = await _leaveRepository.GetByDatesAsync(requestedDates, cancellationToken);
+        var occupiedDates = existingEntries.Select(x => x.LeaveDate).ToHashSet();
 
         var seenDates = new HashSet<DateOnly>();
         var results = new List<BatchCreateLeaveItemResult>(commands.Count);
@@ -123,8 +126,7 @@ public sealed class LeaveService : ILeaveService
                 continue;
             }
 
-            var existsForDate = await _leaveRepository.ExistsForDateAsync(leaveDate, cancellationToken: cancellationToken);
-            if (existsForDate)
+            if (occupiedDates.Contains(leaveDate))
             {
                 skippedCount += 1;
                 results.Add(new BatchCreateLeaveItemResult(
@@ -143,7 +145,6 @@ public sealed class LeaveService : ILeaveService
             {
                 var entry = LeaveEntry.Create(leaveDate, command.EntryType, command.SpecificHours, command.Notes, _timeProvider, command.LeaveType);
                 await _leaveRepository.AddAsync(entry, cancellationToken);
-                await _leaveRepository.SaveChangesAsync(cancellationToken);
 
                 createdCount += 1;
                 results.Add(new BatchCreateLeaveItemResult(
@@ -181,6 +182,9 @@ public sealed class LeaveService : ILeaveService
                     null));
             }
         }
+
+        if (createdCount > 0)
+            await _leaveRepository.SaveChangesAsync(cancellationToken);
 
         var failedCount = results.Count - createdCount - skippedCount;
 

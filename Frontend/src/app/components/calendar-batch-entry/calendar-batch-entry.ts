@@ -5,8 +5,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
-  CreateLeaveRequest,
-  CreateWorkLocationRequest,
   DayEntryType,
   LeaveEntry,
   LeaveBatchCreateResult,
@@ -19,29 +17,26 @@ import { LeaveService } from '../../services/leave';
 import { PublicHolidayService } from '../../services/public-holiday';
 import { WorkLocationService } from '../../services/work-location';
 import { parseApiError } from '../../utils/api-problem';
+import {
+  CalendarChangeRow,
+  CalendarDayCategory,
+  CalendarOperationResult,
+  isCalendarRowChanged,
+  planCalendarChanges,
+  reconcileCalendarChanges,
+} from '../../utils/calendar-change-set';
 import { CalendarBatchDayCellComponent } from './calendar-batch-day-cell.component';
 
-type DayCategory = 'none' | 'wfh' | 'office' | 'annual' | 'sick';
+type DayCategory = CalendarDayCategory;
 
 interface HolidayDayInfo {
   name: string;
   canBeWorkedOn: boolean;
 }
 
-interface CalendarDayRowVm {
-  dateIso: string;
+interface CalendarDayRowVm extends CalendarChangeRow {
   dayLabel: string;
   isToday: boolean;
-  category: DayCategory;
-  originalCategory: DayCategory;
-  entryType: DayEntryType;
-  originalEntryType: DayEntryType;
-  specificHours: number | null;
-  originalSpecificHours: number | null;
-  leaveType: LeaveType;
-  originalLeaveType: LeaveType;
-  leaveId: string | null;
-  workLocationId: string | null;
   isHoliday: boolean;
   holidayName: string;
   canBeWorkedOnHoliday: boolean;
@@ -240,78 +235,12 @@ export class CalendarBatchEntry implements OnInit {
       return;
     }
 
-    const changedRows = this.rows.filter((row) => this.isRowChanged(row));
-
-    const workCreateOps = changedRows
-      .filter((row) => this.requiresWorkCreate(row))
-      .map((row) => ({
-        row,
-        payload: {
-          workDate: row.dateIso,
-          workLocation: this.toWorkLocationType(row.category),
-          entryType: row.entryType,
-          specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
-          notes: null,
-        } as CreateWorkLocationRequest,
-      }));
-
-    const leaveCreateOps = changedRows
-      .filter((row) => this.requiresLeaveCreate(row))
-      .map((row) => ({
-        row,
-        payload: {
-          leaveDate: row.dateIso,
-          leaveType: row.leaveType,
-          entryType: row.entryType,
-          specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
-          notes: null,
-        } as CreateLeaveRequest,
-      }));
-
-    const workDeleteOps = changedRows
-      .filter((row) => this.requiresWorkDelete(row) && row.workLocationId)
-      .map((row) => ({
-        row,
-        id: row.workLocationId as string,
-      }));
-
-    const leaveDeleteOps = changedRows
-      .filter((row) => this.requiresLeaveDelete(row) && row.leaveId)
-      .map((row) => ({
-        row,
-        id: row.leaveId as string,
-      }));
-
-    const workUpdateOps = changedRows
-      .filter((row) => this.requiresWorkUpdate(row) && row.workLocationId)
-      .map((row) => ({
-        row,
-        id: row.workLocationId as string,
-        payload: {
-          workDate: row.dateIso,
-          workLocation: this.toWorkLocationType(row.category),
-          entryType: row.entryType,
-          specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
-          notes: null,
-        } as CreateWorkLocationRequest,
-      }));
-
-    const leaveUpdateOps = changedRows
-      .filter((row) => this.requiresLeaveUpdate(row) && row.leaveId)
-      .map((row) => ({
-        row,
-        id: row.leaveId as string,
-        payload: {
-          leaveDate: row.dateIso,
-          leaveType: row.leaveType,
-          entryType: row.entryType,
-          specificHours: row.entryType === DayEntryType.SpecificHours ? row.specificHours : null,
-          notes: null,
-        } as CreateLeaveRequest,
-      }));
-
-    for (const row of changedRows) {
-      this.clearRowResult(row);
+    const plan = planCalendarChanges(this.rows);
+    const rowsByDate = new Map(this.rows.map((row) => [row.dateIso, row]));
+    for (const dateIso of plan.changedDateIsos) {
+      const row = rowsByDate.get(dateIso);
+      if (row)
+        this.clearRowResult(row);
     }
 
     this.isSubmitting = true;
@@ -319,188 +248,103 @@ export class CalendarBatchEntry implements OnInit {
     this.infoMessage = '';
 
     forkJoin({
-      wfhCreate: workCreateOps.length === 0
-        ? of<WorkLocationBatchCreateResult>(this.emptyWfhBatchResult())
-        : this.workLocationService.createBatch({ items: workCreateOps.map((x) => x.payload) }).pipe(
+      wfhCreate: plan.workCreates.length === 0
+        ? of({ result: this.emptyWfhBatchResult(), error: undefined as string | undefined })
+        : this.workLocationService.createBatch({ items: plan.workCreates.map((operation) => operation.payload) }).pipe(
+            map((result) => ({ result, error: undefined as string | undefined })),
             catchError((error) =>
               from(parseApiError(error, 'Work-location batch request failed.')).pipe(
-                map((parsedError) => this.failedWfhBatchResult(workCreateOps.length, parsedError.message)),
+                map((parsedError) => ({
+                  result: this.failedWfhBatchResult(plan.workCreates.length, parsedError.message),
+                  error: parsedError.message,
+                })),
               ),
             ),
           ),
-      leaveCreate: leaveCreateOps.length === 0
-        ? of<LeaveBatchCreateResult>(this.emptyLeaveBatchResult())
-        : this.leaveService.createBatch({ items: leaveCreateOps.map((x) => x.payload) }).pipe(
+      leaveCreate: plan.leaveCreates.length === 0
+        ? of({ result: this.emptyLeaveBatchResult(), error: undefined as string | undefined })
+        : this.leaveService.createBatch({ items: plan.leaveCreates.map((operation) => operation.payload) }).pipe(
+            map((result) => ({ result, error: undefined as string | undefined })),
             catchError((error) =>
               from(parseApiError(error, 'Leave batch request failed.')).pipe(
-                map((parsedError) => this.failedLeaveBatchResult(leaveCreateOps.length, parsedError.message)),
+                map((parsedError) => ({
+                  result: this.failedLeaveBatchResult(plan.leaveCreates.length, parsedError.message),
+                  error: parsedError.message,
+                })),
               ),
             ),
           ),
-      wfhDelete: workDeleteOps.length === 0
-        ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
+      wfhDelete: plan.workDeletes.length === 0
+        ? of([] as CalendarOperationResult[])
         : forkJoin(
-            workDeleteOps.map((op) =>
+            plan.workDeletes.map((op) =>
               this.workLocationService.softDelete(op.id).pipe(
-                map(() => ({ row: op.row, ok: true, message: '' })),
-                catchError(() => of({ row: op.row, ok: false, message: 'Failed to remove existing work-location entry.' })),
+                map(() => ({ dateIso: op.dateIso, ok: true, message: '' })),
+                catchError(() => of({ dateIso: op.dateIso, ok: false, message: 'Failed to remove existing work-location entry.' })),
               ),
             ),
           ),
-      leaveDelete: leaveDeleteOps.length === 0
-        ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
+      leaveDelete: plan.leaveDeletes.length === 0
+        ? of([] as CalendarOperationResult[])
         : forkJoin(
-            leaveDeleteOps.map((op) =>
+            plan.leaveDeletes.map((op) =>
               this.leaveService.softDelete(op.id).pipe(
-                map(() => ({ row: op.row, ok: true, message: '' })),
-                catchError(() => of({ row: op.row, ok: false, message: 'Failed to remove existing leave entry.' })),
+                map(() => ({ dateIso: op.dateIso, ok: true, message: '' })),
+                catchError(() => of({ dateIso: op.dateIso, ok: false, message: 'Failed to remove existing leave entry.' })),
               ),
             ),
           ),
-      wfhUpdate: workUpdateOps.length === 0
-        ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
+      wfhUpdate: plan.workUpdates.length === 0
+        ? of([] as CalendarOperationResult[])
         : forkJoin(
-            workUpdateOps.map((op) =>
-              this.workLocationService.update(op.id, op.payload).pipe(
-                map(() => ({ row: op.row, ok: true, message: '' })),
-                catchError(() => of({ row: op.row, ok: false, message: 'Failed to update existing work-location entry.' })),
+            plan.workUpdates.map((op) =>
+              this.workLocationService.update(op.id, op.payload!).pipe(
+                map(() => ({ dateIso: op.dateIso, ok: true, message: '' })),
+                catchError(() => of({ dateIso: op.dateIso, ok: false, message: 'Failed to update existing work-location entry.' })),
               ),
             ),
           ),
-      leaveUpdate: leaveUpdateOps.length === 0
-        ? of([] as Array<{ row: CalendarDayRowVm; ok: boolean; message: string }>)
+      leaveUpdate: plan.leaveUpdates.length === 0
+        ? of([] as CalendarOperationResult[])
         : forkJoin(
-            leaveUpdateOps.map((op) =>
-              this.leaveService.update(op.id, op.payload).pipe(
-                map(() => ({ row: op.row, ok: true, message: '' })),
-                catchError(() => of({ row: op.row, ok: false, message: 'Failed to update existing leave entry.' })),
+            plan.leaveUpdates.map((op) =>
+              this.leaveService.update(op.id, op.payload!).pipe(
+                map(() => ({ dateIso: op.dateIso, ok: true, message: '' })),
+                catchError(() => of({ dateIso: op.dateIso, ok: false, message: 'Failed to update existing leave entry.' })),
               ),
             ),
           ),
     })
       .pipe(
         map(({ wfhCreate, leaveCreate, wfhDelete, leaveDelete, wfhUpdate, leaveUpdate }) => {
-          let skipped = 0;
-          let failed = 0;
-          const addedDates = new Set<string>();
-          const updatedDates = new Set<string>();
-          const recordAppliedDay = (row: CalendarDayRowVm): void => {
-            if (row.originalCategory === 'none') {
-              addedDates.add(row.dateIso);
-            } else {
-              updatedDates.add(row.dateIso);
-            }
-          };
-          const recordUnappliedDay = (row: CalendarDayRowVm): void => {
-            addedDates.delete(row.dateIso);
-            updatedDates.delete(row.dateIso);
-          };
+          const reconciliation = reconcileCalendarChanges(this.rows, plan, {
+            workCreates: wfhCreate.result,
+            leaveCreates: leaveCreate.result,
+            workDeletes: wfhDelete,
+            leaveDeletes: leaveDelete,
+            workUpdates: wfhUpdate,
+            leaveUpdates: leaveUpdate,
+            workCreateError: wfhCreate.error,
+            leaveCreateError: leaveCreate.error,
+          });
 
-          const wfhCreateByDate = new Map(workCreateOps.map((x) => [x.row.dateIso, x.row]));
-          for (const result of wfhCreate.results) {
-            const row = wfhCreateByDate.get(this.toDateKey(result.workDate));
-            if (!row) {
+          for (const result of reconciliation.rows) {
+            const row = rowsByDate.get(result.dateIso);
+            if (!row)
               continue;
-            }
 
-            if (result.status === 'Created' && result.entry) {
-              row.workLocationId = result.entry.id;
-              recordAppliedDay(row);
-              this.markApplied(row, `Created ${this.workLocationLabel(result.entry.workLocation)} entry.`);
+            if (result.workLocationId !== undefined)
+              row.workLocationId = result.workLocationId;
+            if (result.leaveId !== undefined)
+              row.leaveId = result.leaveId;
+
+            row.resultState = result.state;
+            row.resultMessage = result.message;
+            if (result.syncOriginal)
               this.syncOriginalState(row);
-              continue;
-            }
-
-            if (result.status === 'SkippedDuplicate') {
-              skipped += 1;
-              recordUnappliedDay(row);
-              this.markSkipped(row, result.message ?? 'Skipped duplicate work-location entry.');
-              continue;
-            }
-
-            failed += 1;
-            recordUnappliedDay(row);
-            this.markFailed(row, result.message ?? 'Work-location create failed.');
           }
 
-          const leaveCreateByDate = new Map(leaveCreateOps.map((x) => [x.row.dateIso, x.row]));
-          for (const result of leaveCreate.results) {
-            const row = leaveCreateByDate.get(this.toDateKey(result.leaveDate));
-            if (!row) {
-              continue;
-            }
-
-            if (result.status === 'Created' && result.entry) {
-              row.leaveId = result.entry.id;
-              recordAppliedDay(row);
-              this.markApplied(row, 'Created leave entry.');
-              this.syncOriginalState(row);
-              continue;
-            }
-
-            if (result.status === 'SkippedDuplicate') {
-              skipped += 1;
-              recordUnappliedDay(row);
-              this.markSkipped(row, result.message ?? 'Skipped duplicate leave entry.');
-              continue;
-            }
-
-            failed += 1;
-            recordUnappliedDay(row);
-            this.markFailed(row, result.message ?? 'Leave create failed.');
-          }
-
-          for (const result of wfhDelete) {
-            if (result.ok) {
-              result.row.workLocationId = null;
-              recordAppliedDay(result.row);
-              this.markApplied(result.row, 'Removed existing work-location entry.');
-              this.syncOriginalState(result.row);
-            } else {
-              failed += 1;
-              recordUnappliedDay(result.row);
-              this.markFailed(result.row, result.message);
-            }
-          }
-
-          for (const result of leaveDelete) {
-            if (result.ok) {
-              result.row.leaveId = null;
-              recordAppliedDay(result.row);
-              this.markApplied(result.row, 'Removed existing leave entry.');
-              this.syncOriginalState(result.row);
-            } else {
-              failed += 1;
-              recordUnappliedDay(result.row);
-              this.markFailed(result.row, result.message);
-            }
-          }
-
-          for (const result of wfhUpdate) {
-            if (result.ok) {
-              recordAppliedDay(result.row);
-              this.markApplied(result.row, 'Updated existing work-location entry.');
-              this.syncOriginalState(result.row);
-            } else {
-              failed += 1;
-              recordUnappliedDay(result.row);
-              this.markFailed(result.row, result.message);
-            }
-          }
-
-          for (const result of leaveUpdate) {
-            if (result.ok) {
-              recordAppliedDay(result.row);
-              this.markApplied(result.row, 'Updated existing leave entry.');
-              this.syncOriginalState(result.row);
-            } else {
-              failed += 1;
-              recordUnappliedDay(result.row);
-              this.markFailed(result.row, result.message);
-            }
-          }
-
-          return { skipped, failed, added: addedDates.size, updated: updatedDates.size };
+          return reconciliation;
         }),
         finalize(() => {
           this.isSubmitting = false;
@@ -739,63 +583,11 @@ export class CalendarBatchEntry implements OnInit {
   }
 
   isRowChanged(row: CalendarDayRowVm): boolean {
-    if (row.category !== row.originalCategory) {
-      return true;
-    }
-
-    if (row.category === 'none') {
-      return false;
-    }
-
-    if (row.entryType !== row.originalEntryType) {
-      return true;
-    }
-
-    if (row.entryType === DayEntryType.SpecificHours) {
-      return row.specificHours !== row.originalSpecificHours;
-    }
-
-    if (this.isLeaveCategory(row.category) && row.leaveType !== row.originalLeaveType) {
-      return true;
-    }
-
-    return false;
-  }
-
-  private isWorkCategory(category: DayCategory): boolean {
-    return category === 'wfh' || category === 'office';
+    return isCalendarRowChanged(row);
   }
 
   private isLeaveCategory(category: DayCategory): boolean {
     return category === 'annual' || category === 'sick';
-  }
-
-  private requiresLeaveCreate(row: CalendarDayRowVm): boolean {
-    return this.isLeaveCategory(row.category) && !this.isLeaveCategory(row.originalCategory);
-  }
-
-  private requiresLeaveDelete(row: CalendarDayRowVm): boolean {
-    return this.isLeaveCategory(row.originalCategory) && !this.isLeaveCategory(row.category);
-  }
-
-  private requiresLeaveUpdate(row: CalendarDayRowVm): boolean {
-    return this.isLeaveCategory(row.originalCategory) && this.isLeaveCategory(row.category) && this.isRowChanged(row);
-  }
-
-  private requiresWorkCreate(row: CalendarDayRowVm): boolean {
-    return this.isWorkCategory(row.category) && !this.isWorkCategory(row.originalCategory);
-  }
-
-  private requiresWorkDelete(row: CalendarDayRowVm): boolean {
-    return this.isWorkCategory(row.originalCategory) && !this.isWorkCategory(row.category);
-  }
-
-  private requiresWorkUpdate(row: CalendarDayRowVm): boolean {
-    return this.isWorkCategory(row.originalCategory) && this.isWorkCategory(row.category) && this.isRowChanged(row);
-  }
-
-  private toWorkLocationType(category: DayCategory): WorkLocationType {
-    return category === 'office' ? WorkLocationType.Office : WorkLocationType.Wfh;
   }
 
   private toCategoryFromWorkLocation(workLocation: WorkLocationType): DayCategory {
@@ -810,10 +602,6 @@ export class CalendarBatchEntry implements OnInit {
     return category === 'sick' ? LeaveType.Sick : LeaveType.Annual;
   }
 
-  private workLocationLabel(workLocation: WorkLocationType): string {
-    return workLocation === WorkLocationType.Office ? 'Office' : 'WFH';
-  }
-
   private dayCountLabel(count: number): string {
     return `${count} ${count === 1 ? 'day' : 'days'}`;
   }
@@ -821,21 +609,6 @@ export class CalendarBatchEntry implements OnInit {
   private clearRowResult(row: CalendarDayRowVm): void {
     row.resultState = null;
     row.resultMessage = '';
-  }
-
-  private markApplied(row: CalendarDayRowVm, message: string): void {
-    row.resultState = 'applied';
-    row.resultMessage = message;
-  }
-
-  private markFailed(row: CalendarDayRowVm, message: string): void {
-    row.resultState = 'failed';
-    row.resultMessage = message;
-  }
-
-  private markSkipped(row: CalendarDayRowVm, message: string): void {
-    row.resultState = 'skipped';
-    row.resultMessage = message;
   }
 
   private syncOriginalState(row: CalendarDayRowVm): void {

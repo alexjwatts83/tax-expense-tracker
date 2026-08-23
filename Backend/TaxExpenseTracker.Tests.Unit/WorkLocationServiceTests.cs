@@ -242,6 +242,27 @@ public class WorkLocationServiceTests
         Assert.Contains(result.Results, x => x.Status == "Created" && x.WorkDate == new DateOnly(2026, 1, 12));
         Assert.Contains(result.Results, x => x.Status == "FailedConflict" && x.WorkDate == new DateOnly(2026, 1, 13));
         Assert.Contains(result.Results, x => x.Status == "FailedValidation" && x.WorkDate == new DateOnly(2026, 1, 15));
+        Assert.Equal(1, repository.GetByDatesCallCount);
+        Assert.Equal(0, repository.ExistsForDateCallCount);
+        Assert.Equal(1, repository.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task BatchCreateAsync_BoundsRepositoryCalls_WhenBatchSizeGrows()
+    {
+        var repository = new InMemoryWorkLocationRepository();
+        var holidayRepository = new InMemoryPublicHolidayRepository();
+        var service = new WorkLocationService(repository, holidayRepository, TestTime.TimeProvider);
+        var commands = Enumerable.Range(1, 100)
+            .Select(day => new CreateWorkLocationCommand(new DateOnly(2026, 1, 1).AddDays(day), DayEntryType.FullDay, null, null))
+            .ToList();
+
+        var result = await service.BatchCreateAsync(commands);
+
+        Assert.Equal(100, result.CreatedCount);
+        Assert.Equal(1, repository.GetByDatesCallCount);
+        Assert.Equal(0, repository.ExistsForDateCallCount);
+        Assert.Equal(1, repository.SaveChangesCallCount);
     }
 
     [Fact]
@@ -419,6 +440,9 @@ public class WorkLocationServiceTests
     {
         public List<WorkLocationEntry> Entries { get; } = [];
         public bool SaveChangesCalled { get; private set; }
+        public int GetByDatesCallCount { get; private set; }
+        public int ExistsForDateCallCount { get; private set; }
+        public int SaveChangesCallCount { get; private set; }
 
         public Task<IReadOnlyList<WorkLocationEntry>> GetAllAsync(CancellationToken cancellationToken = default)
         {
@@ -454,8 +478,19 @@ public class WorkLocationServiceTests
 
         public Task<bool> ExistsForDateAsync(DateOnly workDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
         {
+            ExistsForDateCallCount += 1;
             var exists = Entries.Any(x => !x.IsDeleted && x.WorkDate == workDate && (!excludingId.HasValue || x.Id != excludingId.Value));
             return Task.FromResult(exists);
+        }
+
+        public Task<IReadOnlyList<WorkLocationEntry>> GetByDatesAsync(
+            IReadOnlyCollection<DateOnly> workDates,
+            CancellationToken cancellationToken = default)
+        {
+            GetByDatesCallCount += 1;
+            var dates = workDates.ToHashSet();
+            return Task.FromResult<IReadOnlyList<WorkLocationEntry>>(
+                Entries.Where(x => !x.IsDeleted && dates.Contains(x.WorkDate)).ToList());
         }
 
         public Task<WorkLocationEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default)
@@ -472,6 +507,7 @@ public class WorkLocationServiceTests
         public Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             SaveChangesCalled = true;
+            SaveChangesCallCount += 1;
             return Task.CompletedTask;
         }
     }

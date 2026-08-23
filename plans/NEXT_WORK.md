@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S5-01` - Implement the recorded partial-success (or atomic change-set) contract for calendar batch entry. Stage 5 (Calendar and Day-Entry Workflow) depends on Stages 1 and 3, which are complete.
+**Task:** Stage 5 Slice C (`S5-07-S5-08`) - Integrate shared day-entry policies where justified and pass the Stage 5 gate.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Implement `DEC-HARD-004`: preserve partial success with deterministic per-item results and aggregate counts.
-- Prepare for bulk-loading occupied dates (S5-02) and reducing save calls (S5-03).
-- Extract calendar change-set planning and result reconciliation into pure tested modules (S5-05/S5-06).
+- Share work-location and leave form or paging policy only where behavior substantially matches, while preserving explicit domain terminology (S5-07).
+- Cover mixed create/update/delete operations, retries, conflicts, and partial failures at component or workflow-integration level (S5-08).
+- Run the full backend/frontend suites and production build, then close the Stage 5 gate.
 
-**Immediate validation:** Backend query-count and mixed-result tests, then the Angular suite and production build.
+**Immediate validation:** Focused integration tests while adopting Slice B, then the full backend/frontend suites and production build.
 
-**Done in this session:** Stage 4 is complete. Expenses reject missing references and de-duplicate tags; `TaxExpense` owns its tag links; both expense entry points share tag parsing/resolution with partial-failure retry and stale-tag recovery. Backend 112 unit / 54 integration and frontend 55 pass; production build ok.
+**Done in this session:** Stage 5 Slices A and B (S5-01-S5-06) are complete. Calendar change-set planning and mixed-result reconciliation now live in a pure tested module; partial category transitions retain retryable state and retry only unfinished operations. Frontend 61/61 and production build pass.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
