@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Complete Stage 8 task `S8-06`: operational readiness.
+**Task:** Complete Stage 8 task `S8-07`: final local and Azure sign-off.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Finalize Production startup validation and migration execution policy.
-- Verify monitoring and correlated structured logs are actionable in deployment.
-- Confirm SQLite remains the sole provider or explicitly scope Azure SQL parity.
+- Run the complete local build/test/migration/health smoke matrix.
+- Run the deployed anonymous/non-owner/owner Azure matrix when tenant resources exist.
+- Update final plan status and documentation; mark externally blocked Azure checks explicitly rather than inferring success.
 
-**Immediate validation:** Exercise Production startup validation with valid and invalid configuration, verify the documented migration command/policy, and inspect correlation propagation through request logs and ProblemDetails.
+**Immediate validation:** Run the CI-equivalent local gate, then exercise local API health and representative endpoints. Check Azure/Entra availability before attempting the deployed role matrix.
 
-**Done in this session:** Stage 8 Slice B is complete. Reference caches reduce list-to-form lookups from six GETs to three. At 34,000 expenses, paging used two queries in 435 ms, filtering used one query in 52 ms, and a 10,283,581-byte DataTransfer export used one query in 685 ms; no query or chunking change was justified. The full .NET gate passed 215/215.
+**Done in this session:** S8-06 is complete. SQLite is the sole supported provider; Production uses explicit pre-deploy migrations by default, `/health` checks database connectivity, and structured completion logs carry correlation IDs. Startup/health/log tests and the full 219/219 .NET gate passed.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

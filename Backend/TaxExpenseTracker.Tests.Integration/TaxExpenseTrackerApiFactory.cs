@@ -41,6 +41,8 @@ public class TaxExpenseTrackerApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Entra:Audience", "api://22222222-2222-2222-2222-222222222222");
         builder.UseSetting("Entra:AllowedUserObjectId", "33333333-3333-3333-3333-333333333333");
         builder.UseSetting("Features:EnableDataTransferEndpoints", dataTransferEnabled.ToString());
+        builder.UseSetting("ConnectionStrings:DefaultConnection", "Data Source=:memory:");
+        builder.UseSetting("Database:ApplyMigrationsOnStartup", "true");
         builder.UseSetting(
             AuthenticationExtensions.DevelopmentSchemeConfigKey,
             developmentAuthenticationEnabled.ToString());
@@ -53,6 +55,8 @@ public class TaxExpenseTrackerApiFactory : WebApplicationFactory<Program>
                 ["Entra:Audience"] = "api://22222222-2222-2222-2222-222222222222",
                 ["Entra:AllowedUserObjectId"] = "33333333-3333-3333-3333-333333333333",
                 ["Features:EnableDataTransferEndpoints"] = dataTransferEnabled.ToString(),
+                ["ConnectionStrings:DefaultConnection"] = "Data Source=:memory:",
+                ["Database:ApplyMigrationsOnStartup"] = "true",
                 [AuthenticationExtensions.DevelopmentSchemeConfigKey] = developmentAuthenticationEnabled.ToString(),
             });
         });

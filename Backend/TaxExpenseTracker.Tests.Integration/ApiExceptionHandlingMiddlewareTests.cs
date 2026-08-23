@@ -116,6 +116,32 @@ public class ApiExceptionHandlingMiddlewareTests
         Assert.DoesNotContain("Sensitive failure detail", problem.RootElement.GetRawText());
     }
 
+    [Fact]
+    public async Task CorrelationMiddleware_LogsCompletedRequestWithCorrelationId()
+    {
+        var logger = new CapturingLogger<CorrelationIdMiddleware>();
+        var middleware = new CorrelationIdMiddleware(
+            context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status204NoContent;
+                return Task.CompletedTask;
+            },
+            logger);
+        var context = CreateContext();
+        context.Request.Method = HttpMethods.Get;
+        context.Request.Path = "/health";
+        context.Request.Headers[CorrelationIdMiddleware.HeaderName] = "request-correlation-id";
+
+        await middleware.InvokeAsync(context);
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Information, entry.Level);
+        Assert.Contains("GET", entry.Message);
+        Assert.Contains("/health", entry.Message);
+        Assert.Contains("204", entry.Message);
+        Assert.Contains("request-correlation-id", entry.Message);
+    }
+
     private static DefaultHttpContext CreateContext()
     {
         var context = new DefaultHttpContext

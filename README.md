@@ -59,6 +59,19 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - NLog logging
 - Swagger in Development
 
+## Production Operations
+
+SQLite is the sole supported database provider. Azure SQL provider parity is out of scope for the current deployment; do not deploy the dormant `infra/modules/data` Azure SQL scaffold without a separate provider implementation and migration test matrix.
+
+Production startup requires a nonblank `ConnectionStrings__DefaultConnection`. Store the SQLite database on persistent, single-instance storage and keep `Database__ApplyMigrationsOnStartup=false` (the Production default). Apply migrations as an explicit deployment step before routing traffic:
+
+```powershell
+dotnet tool restore
+dotnet ef database update --project Backend/TaxExpenseTracker.Infrastructure/TaxExpenseTracker.Infrastructure.csproj --startup-project Backend/TaxExpenseTracker.Api/TaxExpenseTracker.Api.csproj --context AppDbContext --connection $env:ConnectionStrings__DefaultConnection
+```
+
+Use `GET /health` as the anonymous readiness probe. It returns success only when the configured SQLite database is reachable. Every response includes `X-Correlation-ID`; API completion, exception, and DataTransfer logs include the same `correlationId` value for investigation. In hosted environments, collect standard output from the NLog console target; the local rolling file remains under `C:\logs\TaxExpenseTracker.Api`.
+
 ### Frontend
 
 - Angular 22

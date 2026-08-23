@@ -44,6 +44,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database");
 builder.Services
     .AddOptions<EntraOptions>()
     .BindConfiguration(EntraOptions.SectionName)
@@ -82,8 +83,9 @@ builder.Services.AddCors(options =>
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
 
-var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException(
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(defaultConnection))
+    throw new InvalidOperationException(
         "Missing connection string 'DefaultConnection'. Configure ConnectionStrings__DefaultConnection for cloud environments.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -139,11 +141,14 @@ app.UseStatusCodePages(async statusCodeContext =>
     }
 });
 
-using (var scope = app.Services.CreateScope())
+var applyMigrationsOnStartup = builder.Configuration.GetValue("Database:ApplyMigrationsOnStartup", true);
+if (applyMigrationsOnStartup)
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
 }
+else
+    app.Logger.LogInformation("Automatic database migrations are disabled. Apply migrations before routing production traffic.");
 
 app.UseHttpsRedirection();
 
@@ -155,6 +160,7 @@ if (authenticationEnabled)
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health").AllowAnonymous();
 
 app.Run();
 
