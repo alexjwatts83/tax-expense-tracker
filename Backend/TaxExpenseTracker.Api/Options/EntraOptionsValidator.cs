@@ -6,6 +6,9 @@ public sealed class EntraOptionsValidator : IValidateOptions<EntraOptions>
 {
     public ValidateOptionsResult Validate(string? name, EntraOptions options)
     {
+        if (!options.Enabled)
+            return ValidateOptionsResult.Success;
+
         var failures = new List<string>();
 
         if (!Guid.TryParse(options.TenantId, out _))

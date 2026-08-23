@@ -22,6 +22,7 @@ public sealed class TaxExpenseTrackerApiFactory : WebApplicationFactory<Program>
         {
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
+                ["Entra:Enabled"] = "false",
                 ["Entra:TenantId"] = "11111111-1111-1111-1111-111111111111",
                 ["Entra:Audience"] = "api://22222222-2222-2222-2222-222222222222",
                 ["Entra:AllowedUserObjectId"] = "33333333-3333-3333-3333-333333333333",

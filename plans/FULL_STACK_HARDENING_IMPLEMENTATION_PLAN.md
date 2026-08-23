@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 24% Complete
+- **Status:** In Progress - 27% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 18 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 1 of 10, and Stages 3 through 8 have not started.
+- **Evidence:** 20 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 3 of 10, and Stages 3 through 8 have not started.
 - **Remaining gate:** Implement and validate the coordinated Stage 2 authentication and authorization capability before beginning dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 18/74 tasks (24%)
+Overall Progress: 20/74 tasks (27%)
 Current Stage: Stage 2 - Authentication and Authorization
-Next Task: S2-02
+Next Task: S2-04
 
 ## Purpose
 
@@ -49,14 +49,14 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
-| 2 | Authentication and authorization | 1 | 10 | 10% | In Progress | Stages 0-1 |
+| 2 | Authentication and authorization | 3 | 10 | 30% | In Progress | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **18** | **74** | **24%** | **In Progress** |  |
+| **Total** |  | **20** | **74** | **27%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -151,8 +151,8 @@ Start this stage immediately after the Stage 1 shared error contract is complete
 ### Tasks
 
 - [x] **S2-01** Add validated single-tenant Entra options, including tenant, API audience, and allowed user object ID.
-- [ ] **S2-02** Register JWT bearer validation and place `UseAuthentication()` before authorization.
-- [ ] **S2-03** Add an allowed-user policy and a named DataTransfer policy; both authorize the sole configured identity without introducing application roles.
+- [x] **S2-02** Register JWT bearer validation and place `UseAuthentication()` before authorization.
+- [x] **S2-03** Add an allowed-user policy and a named DataTransfer policy; both authorize the sole configured identity without introducing application roles.
 - [ ] **S2-04** Apply policies to every controller and document intentionally anonymous endpoints.
 - [ ] **S2-05** Add backend 401/403/authenticated/admin integration tests.
 - [ ] **S2-06** Add MSAL Angular using authorization code with PKCE, in-memory token caching, and an API-scope interceptor.
@@ -470,6 +470,10 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | Stage 1 gate | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
 | 2026-08-23 | S2-01 | Entra options validation tests | Pass: 8 | Valid GUID/URI audiences accepted; invalid tenant, audience, and user IDs fail API startup with clear key names |
 | 2026-08-23 | S2-01 | Backend tests and solution build | Pass: 147 | Complete unit and integration suites use deterministic valid test identity configuration |
+| 2026-08-23 | S2-02 | Authentication configuration tests | Pass: 11 | Disabled mode permits blank IDs and registers no scheme; enabled mode uses strict Entra JWT bearer validation |
+| 2026-08-23 | S2-02 | Backend tests and solution build | Pass: 150 | Complete suite remains green with authentication disabled by default and conditional middleware ordering |
+| 2026-08-23 | S2-03 | Authorization policy tests | Pass: 8 | Both policies allow disabled mode and enforce authenticated matching `oid` claims when enabled |
+| 2026-08-23 | S2-03 | Backend tests and solution build | Pass: 158 | Complete suite remains green before controller policy application |
 
 ## Progress Update Procedure
 

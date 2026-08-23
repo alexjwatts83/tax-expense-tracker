@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S2-02` - Register JWT bearer validation and place authentication before authorization.
+**Task:** `S2-04` - Apply authorization policies to every controller and document intentionally anonymous endpoints.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Register ASP.NET Core JWT bearer authentication against the configured single-tenant Entra authority and API audience.
-- Enforce issuer, audience, signing-key, and token-lifetime validation without browser secrets or custom token issuance.
-- Place `UseAuthentication()` before `UseAuthorization()` in the API pipeline.
-- Add focused authentication registration and middleware-order coverage while leaving controller policy application to S2-03/S2-04.
-- Keep integration tests deterministic through the planned Development/testing scheme boundary rather than weakening production validation.
+- Apply the allowed-user policy to every normal API controller.
+- Apply the named DataTransfer policy to the DataTransfer controller.
+- Keep local and deferred Azure workflows available through the disabled-mode permissive policy behavior.
+- Inventory and explicitly document any endpoint intentionally left anonymous; do not leave accidental gaps.
+- Add reflection or integration coverage proving every controller has the expected policy.
 
-**Immediate validation:** Run focused authentication configuration tests, then the complete backend unit and integration suites. `S2-03` follows with the allowed-user and DataTransfer policies.
+**Immediate validation:** Run focused controller-policy coverage, then the complete backend unit and integration suites. `S2-05` follows with 401, 403, authenticated-user, and DataTransfer authorization integration tests.
 
 ## Work Order
 

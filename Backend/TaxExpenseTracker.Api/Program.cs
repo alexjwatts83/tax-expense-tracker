@@ -49,6 +49,8 @@ builder.Services
     .BindConfiguration(EntraOptions.SectionName)
     .ValidateOnStart();
 builder.Services.AddSingleton<IValidateOptions<EntraOptions>, EntraOptionsValidator>();
+var authenticationEnabled = builder.Services.AddEntraAuthentication(builder.Configuration);
+builder.Services.AddApplicationAuthorization(builder.Configuration);
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
@@ -104,6 +106,9 @@ builder.Services.AddDataTransferServices();
 
 var app = builder.Build();
 
+if (!authenticationEnabled)
+    app.Logger.LogWarning("Authentication is disabled. Set Entra:Enabled to true before exposing the API publicly.");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -136,6 +141,9 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 
 app.UseCors(AppCorsPolicy);
+
+if (authenticationEnabled)
+    app.UseAuthentication();
 
 app.UseAuthorization();
 

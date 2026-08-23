@@ -8,6 +8,14 @@ public class EntraOptionsValidatorTests
 {
     private readonly EntraOptionsValidator validator = new();
 
+    [Fact]
+    public void DisabledConfiguration_AllowsEmptyIdentifiers()
+    {
+        var result = validator.Validate(null, new EntraOptions());
+
+        Assert.True(result.Succeeded);
+    }
+
     [Theory]
     [InlineData("22222222-2222-2222-2222-222222222222")]
     [InlineData("api://22222222-2222-2222-2222-222222222222")]
@@ -22,7 +30,7 @@ public class EntraOptionsValidatorTests
     [Fact]
     public void InvalidConfiguration_ReportsEveryInvalidSetting()
     {
-        var result = validator.Validate(null, new EntraOptions());
+        var result = validator.Validate(null, new EntraOptions { Enabled = true });
 
         Assert.True(result.Failed);
         Assert.Contains(result.Failures, failure => failure.Contains("Entra:TenantId"));
@@ -50,6 +58,7 @@ public class EntraOptionsValidatorTests
             builder.ConfigureAppConfiguration((_, configuration) =>
                 configuration.AddInMemoryCollection(new Dictionary<string, string?>
                 {
+                    ["Entra:Enabled"] = "true",
                     ["Entra:TenantId"] = "invalid",
                     ["Entra:Audience"] = "invalid",
                     ["Entra:AllowedUserObjectId"] = "invalid",
@@ -64,6 +73,7 @@ public class EntraOptionsValidatorTests
 
     private static EntraOptions CreateValidOptions(string audience) => new()
     {
+        Enabled = true,
         TenantId = "11111111-1111-1111-1111-111111111111",
         Audience = audience,
         AllowedUserObjectId = "33333333-3333-3333-3333-333333333333",

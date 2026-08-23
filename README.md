@@ -321,6 +321,19 @@ npm start
 
 Frontend proxy targets https://localhost:7152.
 
+### Authentication Toggle
+
+Authentication is disabled by default so local and Azure environments can run before Entra registration is ready. Configure it with the `Entra` settings or equivalent environment variables:
+
+```text
+Entra__Enabled=true
+Entra__TenantId=<tenant-guid>
+Entra__Audience=api://<api-app-registration-guid>
+Entra__AllowedUserObjectId=<user-object-guid>
+```
+
+When `Entra__Enabled=false`, the API does not register or run authentication middleware and the identifier values may be blank. When enabled, all three identifiers are validated at startup and the API validates Entra bearer-token issuer, audience, signature, and lifetime. Endpoint authorization policies are being added separately during Stage 2 hardening; do not treat the toggle alone as endpoint protection until that work is complete.
+
 ## EF Migrations
 
 Migrations are owned by Infrastructure:
