@@ -2,11 +2,11 @@ namespace TaxExpenseTracker.Domain.Entities;
 
 public class LeaveEntry : AuditableSoftDeletableEntity
 {
-    public DateOnly LeaveDate { get; set; }
-    public LeaveType LeaveType { get; set; } = LeaveType.Annual;
-    public DayEntryType EntryType { get; set; }
-    public decimal HoursWorked { get; set; }
-    public string? Notes { get; set; }
+    public DateOnly LeaveDate { get; private set; }
+    public LeaveType LeaveType { get; private set; } = LeaveType.Annual;
+    public DayEntryType EntryType { get; private set; }
+    public decimal HoursWorked { get; private set; }
+    public string? Notes { get; private set; }
 
     public static LeaveEntry Create(
         DateOnly leaveDate,
@@ -31,6 +31,21 @@ public class LeaveEntry : AuditableSoftDeletableEntity
             CreatedAt = now,
             UpdatedAt = now,
         };
+    }
+
+    public static LeaveEntry Import(
+        Guid id,
+        DateOnly leaveDate,
+        DayEntryType entryType,
+        decimal? specificHours,
+        string? notes,
+        TimeProvider timeProvider,
+        LeaveType leaveType = LeaveType.Annual)
+    {
+        ArgumentOutOfRangeException.ThrowIfEqual(id, Guid.Empty, nameof(id));
+        var entry = Create(leaveDate, entryType, specificHours, notes, timeProvider, leaveType);
+        entry.Id = id;
+        return entry;
     }
 
     public void Update(

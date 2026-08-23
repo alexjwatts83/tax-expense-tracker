@@ -2,11 +2,11 @@ namespace TaxExpenseTracker.Domain.Entities;
 
 public class WorkLocationEntry : AuditableSoftDeletableEntity
 {
-    public DateOnly WorkDate { get; set; }
-    public WorkLocationType WorkLocation { get; set; }
-    public DayEntryType EntryType { get; set; }
-    public decimal HoursWorked { get; set; }
-    public string? Notes { get; set; }
+    public DateOnly WorkDate { get; private set; }
+    public WorkLocationType WorkLocation { get; private set; }
+    public DayEntryType EntryType { get; private set; }
+    public decimal HoursWorked { get; private set; }
+    public string? Notes { get; private set; }
 
     public static WorkLocationEntry Create(
         DateOnly workDate,
@@ -31,6 +31,21 @@ public class WorkLocationEntry : AuditableSoftDeletableEntity
             CreatedAt = now,
             UpdatedAt = now,
         };
+    }
+
+    public static WorkLocationEntry Import(
+        Guid id,
+        DateOnly workDate,
+        DayEntryType entryType,
+        decimal? specificHours,
+        string? notes,
+        TimeProvider timeProvider,
+        WorkLocationType workLocation = WorkLocationType.Wfh)
+    {
+        ArgumentOutOfRangeException.ThrowIfEqual(id, Guid.Empty, nameof(id));
+        var entry = Create(workDate, entryType, specificHours, notes, timeProvider, workLocation);
+        entry.Id = id;
+        return entry;
     }
 
     public void Update(

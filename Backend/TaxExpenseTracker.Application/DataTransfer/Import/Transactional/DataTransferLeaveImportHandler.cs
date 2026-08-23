@@ -70,8 +70,7 @@ public sealed class DataTransferLeaveImportHandler
                 {
                     try
                     {
-                        var entity = LeaveEntry.Create(item.LeaveDate, item.EntryType, item.SpecificHours, item.Notes, _timeProvider, item.LeaveType);
-                        entity.Id = item.Id;
+                        var entity = LeaveEntry.Import(item.Id, item.LeaveDate, item.EntryType, item.SpecificHours, item.Notes, _timeProvider, item.LeaveType);
 
                         if (item.IsDeleted == true)
                             entity.SoftDelete(_timeProvider);

@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S6-01` - Encapsulate time-entry state behind domain behavior without breaking EF materialization or API contracts.
+**Task:** Stage 6 Slice B (`S6-02`) - Centralize genuinely shared day-entry hours rules without hiding work-location and leave terminology.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,14 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Replace public work-location and leave entry mutation with private or protected setters and explicit domain methods (S6-01).
-- Centralize genuinely shared day-entry hours rules without hiding work-location and leave terminology (S6-02).
-- Validate EF materialization, service updates, imports, and API serialization after each aggregate change.
+- Centralize the identical full-day, half-day, and specific-hours validation/calculation rules used by both time-entry aggregates (Slice B: S6-02).
+- Keep `LeaveEntry` and `WorkLocationEntry` factories, update methods, exceptions, and feature terminology explicit.
+- Encapsulate reference entities and implement audit timestamps once `DEC-HARD-006` is decided (Slice C: S6-03 + reference-entity part of S6-04 + S6-05).
+- Note: Slice C is blocked until `DEC-HARD-006` (reference entity audit timestamps) is resolved in the decision log.
 
-**Immediate validation:** Focused domain/service tests for one time-entry aggregate, followed by EF materialization and DataTransfer roundtrip coverage before applying the pattern to the second aggregate.
+**Immediate validation:** Focused domain tests for full-day, half-day, valid/invalid specific hours, and invalid entry types in both aggregates, followed by service and full backend suites.
 
-**Done in this session:** Stage 5 is complete. Work-location and leave batches have bounded backend operations; calendar planning and reconciliation are pure and retry-safe; management screens share only identical hours and paging policies. The Stage 5 gate passes with 187 discovered .NET tests, 67 frontend tests, and a successful production build.
+**Done in this session:** Stage 6 Slice A is complete. `LeaveEntry` and `WorkLocationEntry` expose encapsulated state, retain explicit validated create/update behavior, and use narrow import factories for identity restoration. EF SQLite materialization and DataTransfer roundtrip pass; the backend suite is 190/190.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

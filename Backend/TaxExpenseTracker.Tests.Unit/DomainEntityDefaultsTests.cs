@@ -65,4 +65,32 @@ public class DomainEntityDefaultsTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             LeaveEntry.Create(new DateOnly(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider, (LeaveType)99));
     }
+
+    [Fact]
+    public void TimeEntry_StateSetters_AreNotPublic()
+    {
+        var leaveProperties = new[] { "LeaveDate", "LeaveType", "EntryType", "HoursWorked", "Notes" };
+        var workProperties = new[] { "WorkDate", "WorkLocation", "EntryType", "HoursWorked", "Notes" };
+
+        Assert.All(leaveProperties, name => Assert.False(typeof(LeaveEntry).GetProperty(name)!.SetMethod!.IsPublic));
+        Assert.All(workProperties, name => Assert.False(typeof(WorkLocationEntry).GetProperty(name)!.SetMethod!.IsPublic));
+    }
+
+    [Fact]
+    public void TimeEntry_Import_PreservesProvidedIdentity()
+    {
+        var leaveId = Guid.NewGuid();
+        var workId = Guid.NewGuid();
+
+        var leave = LeaveEntry.Import(leaveId, new DateOnly(2026, 3, 11), DayEntryType.HalfDay, null, " Leave ", TestTime.TimeProvider, LeaveType.Sick);
+        var work = WorkLocationEntry.Import(workId, new DateOnly(2026, 3, 12), DayEntryType.SpecificHours, 4.5m, " Work ", TestTime.TimeProvider, WorkLocationType.Office);
+
+        Assert.Equal(leaveId, leave.Id);
+        Assert.Equal(LeaveType.Sick, leave.LeaveType);
+        Assert.Equal("Leave", leave.Notes);
+        Assert.Equal(workId, work.Id);
+        Assert.Equal(WorkLocationType.Office, work.WorkLocation);
+        Assert.Equal(4.5m, work.HoursWorked);
+        Assert.Equal("Work", work.Notes);
+    }
 }

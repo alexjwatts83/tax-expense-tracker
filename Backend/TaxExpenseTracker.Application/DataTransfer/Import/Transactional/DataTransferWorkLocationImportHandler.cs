@@ -70,8 +70,7 @@ public sealed class DataTransferWorkLocationImportHandler
                 {
                     try
                     {
-                        var entity = WorkLocationEntry.Create(item.WorkDate, item.EntryType, item.SpecificHours, item.Notes, _timeProvider, item.WorkLocation);
-                        entity.Id = item.Id;
+                        var entity = WorkLocationEntry.Import(item.Id, item.WorkDate, item.EntryType, item.SpecificHours, item.Notes, _timeProvider, item.WorkLocation);
 
                         if (item.IsDeleted == true)
                             entity.SoftDelete(_timeProvider);

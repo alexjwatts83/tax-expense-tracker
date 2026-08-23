@@ -10,6 +10,7 @@ using TaxExpenseTracker.Application.PublicHolidays;
 using TaxExpenseTracker.Application.Tags;
 using TaxExpenseTracker.Application.Trackers;
 using TaxExpenseTracker.Application.WorkLocation;
+using TaxExpenseTracker.Domain.Entities;
 using TaxExpenseTracker.Infrastructure.Data;
 
 namespace TaxExpenseTracker.Tests.Integration;
@@ -66,6 +67,58 @@ public class DataTransferRoundtripTests
         var expense = Assert.Single(exportedExpenseItems, x => x.Id == expenseId);
         var expenseTag = Assert.Single(exportedExpenseTags, x => x.TaxExpenseId == expense.Id);
         Assert.Equal(tagId, expenseTag.TagId);
+    }
+
+    [Fact]
+    public async Task TimeEntries_ImportedIntoCleanDatabase_RoundtripEncapsulatedState()
+    {
+        await using var database = await TestDatabase.CreateAsync();
+        var service = database.Services.GetRequiredService<IDataTransferService>();
+        var workId = Guid.NewGuid();
+        var leaveId = Guid.NewGuid();
+
+        var workResult = await service.ImportWorkLocationsAsync(
+            new WorkLocationImportPayloadDto([
+                new WorkLocationEntryImportItemDto(
+                    workId,
+                    new DateOnly(2026, 8, 3),
+                    DayEntryType.SpecificHours,
+                    4.5m,
+                    "Office morning",
+                    WorkLocationType.Office,
+                    null,
+                    null,
+                    false),
+            ]),
+            new DataTransferImportOptions());
+        var leaveResult = await service.ImportLeaveAsync(
+            new LeaveImportPayloadDto([
+                new LeaveEntryImportItemDto(
+                    leaveId,
+                    new DateOnly(2026, 8, 4),
+                    DayEntryType.HalfDay,
+                    null,
+                    "Medical appointment",
+                    LeaveType.Sick,
+                    null,
+                    null,
+                    false),
+            ]),
+            new DataTransferImportOptions());
+
+        Assert.All(workResult.Results, result => Assert.Empty(result.Errors));
+        Assert.All(leaveResult.Results, result => Assert.Empty(result.Errors));
+
+        var exportedWork = Assert.Single((await service.ExportWorkLocationsAsync(true)).WorkLocationEntries!);
+        var exportedLeave = Assert.Single((await service.ExportLeaveAsync(true)).LeaveEntries!);
+        Assert.Equal(workId, exportedWork.Id);
+        Assert.Equal(WorkLocationType.Office, exportedWork.WorkLocation);
+        Assert.Equal(4.5m, exportedWork.SpecificHours);
+        Assert.Equal("Office morning", exportedWork.Notes);
+        Assert.Equal(leaveId, exportedLeave.Id);
+        Assert.Equal(LeaveType.Sick, exportedLeave.LeaveType);
+        Assert.Equal(DayEntryType.HalfDay, exportedLeave.EntryType);
+        Assert.Equal("Medical appointment", exportedLeave.Notes);
     }
 
     private sealed class TestDatabase : IAsyncDisposable
