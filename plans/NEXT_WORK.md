@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S3-07` with migration `S3-08` - Add filtered unique indexes for active work-location and leave dates, then normalization, duplicate preflight, repair, and rollback for existing data. Keep the migration a separate reviewable commit.
+**Task:** `S3-09` - Translate database uniqueness races to the agreed conflict response and frontend UX, then `S3-10` runs the Stage 3 validation gate.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,14 +14,14 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Add filtered unique indexes for active (non-deleted) work-location and leave dates.
-- Normalize existing non-midnight stored date values to their calendar day.
-- Run a duplicate preflight and document deterministic repair before creating indexes.
-- Provide a rollback path and review the migration against SQLite and the planned Azure SQL provider.
+- Catch the unique-index `DbUpdateException` on create, update, restore, batch, and import paths.
+- Map it to the agreed `409 conflict` ProblemDetails response instead of a 500.
+- Surface the conflict clearly in the affected frontend workflows.
+- Add coverage for the race path and pass the Stage 3 gate (upgrade, roundtrip, timezone, restore, batch, import).
 
-**Immediate validation:** Run the full backend suite, the EF migration script, the Angular suite, and the production build. `S3-09`/`S3-10` follow with uniqueness-race conflict mapping and the stage gate.
+**Immediate validation:** Run the full backend suite, the EF migration script, the Angular suite, and the production build.
 
-**Done in this session:** S3-04 and S3-05 are complete. Calendar dates are `DateOnly` end to end and serialize as `yyyy-MM-dd`. The `ConvertCalendarDatesToDateOnly` migration is generated (type change and holiday re-seed only). Backend 104 unit / 50 integration and frontend 48 tests pass.
+**Done in this session:** S3-07 and S3-08 are complete. Filtered unique indexes enforce one active entry per date at the database level; the `AddActiveDateUniqueIndexes` migration normalizes legacy values and deterministically repairs duplicates with a rollback. Backend 104 unit / 53 integration pass.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

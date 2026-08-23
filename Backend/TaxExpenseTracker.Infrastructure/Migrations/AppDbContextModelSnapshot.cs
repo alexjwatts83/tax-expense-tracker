@@ -93,6 +93,10 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LeaveDate")
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = 0");
+
                     b.ToTable("LeaveEntries");
                 });
 
@@ -614,6 +618,10 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("WorkDate")
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = 0");
 
                     b.ToTable("WorkLocationEntries", (string)null);
                 });

@@ -28,6 +28,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Tag>().HasQueryFilter(x => !x.IsDeleted);
         modelBuilder.Entity<TaxExpenseTag>().HasQueryFilter(x => !x.TaxExpense!.IsDeleted && !x.Tag!.IsDeleted);
 
+        // Enforce one active entry per calendar date; soft-deleted rows are excluded via the filter.
+        modelBuilder.Entity<WorkLocationEntry>()
+            .HasIndex(x => x.WorkDate)
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = 0");
+        modelBuilder.Entity<LeaveEntry>()
+            .HasIndex(x => x.LeaveDate)
+            .IsUnique()
+            .HasFilter("\"IsDeleted\" = 0");
+
         modelBuilder.Entity<PublicHoliday>()
             .HasIndex(x => new { x.HolidayDate, x.Name })
             .IsUnique();
