@@ -56,6 +56,67 @@ public class ExpenseServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_Throws_WhenTagReferenceMissing()
+    {
+        var repository = new InMemoryExpenseRepository { SourceExistsResult = true, BankExistsResult = true };
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
+
+        var exception = await Assert.ThrowsAsync<MissingReferenceException>(() =>
+            service.CreateAsync(new CreateExpenseCommand(
+                "Work machine",
+                DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
+                repository.BankId,
+                1200m,
+                repository.SourceId,
+                [Guid.NewGuid()])));
+
+        Assert.Equal("Tag", exception.ReferenceType);
+    }
+
+    [Fact]
+    public async Task CreateAsync_DeduplicatesDuplicateTagIds()
+    {
+        var repository = new InMemoryExpenseRepository { SourceExistsResult = true, BankExistsResult = true };
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
+
+        await service.CreateAsync(new CreateExpenseCommand(
+            "Work machine",
+            DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
+            repository.BankId,
+            1200m,
+            repository.SourceId,
+            [repository.TagId, repository.TagId]));
+
+        Assert.Single(repository.Expenses[0].TaxExpenseTags);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Throws_WhenTagReferenceStale()
+    {
+        var repository = new InMemoryExpenseRepository { SourceExistsResult = true, BankExistsResult = true };
+        var expense = TaxExpense.Create(
+            "Desc",
+            DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
+            repository.BankId,
+            100m,
+            repository.SourceId,
+            TestTime.TimeProvider);
+        repository.Expenses.Add(expense);
+        var service = new ExpenseService(repository, TestTime.TimeProvider);
+
+        var exception = await Assert.ThrowsAsync<MissingReferenceException>(() =>
+            service.UpdateAsync(expense.Id, new UpdateExpenseCommand(
+                "Desc",
+                DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
+                repository.BankId,
+                100m,
+                repository.SourceId,
+                [Guid.NewGuid()])));
+
+        Assert.Equal("Tag", exception.ReferenceType);
+    }
+
+    [Fact]
     public async Task UpdateAsync_ReturnsNull_WhenExpenseMissing()
     {
         var repository = new InMemoryExpenseRepository

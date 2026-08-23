@@ -48,7 +48,7 @@ public sealed class ExpenseService : IExpenseService
         if (!bankExists)
             ThrowHelper.MissingReference("Bank", command.BankId);
 
-        var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
+        var validTagIds = await ResolveTagIdsAsync(command.TagIds, cancellationToken);
 
         var expense = TaxExpense.Create(
             command.Description,
@@ -88,7 +88,7 @@ public sealed class ExpenseService : IExpenseService
         if (!bankExists)
             ThrowHelper.MissingReference("Bank", command.BankId);
 
-        var validTagIds = await _expenseRepository.GetExistingTagIdsAsync(command.TagIds, cancellationToken);
+        var validTagIds = await ResolveTagIdsAsync(command.TagIds, cancellationToken);
 
         expense.UpdateDetails(
             command.Description,
@@ -172,6 +172,22 @@ public sealed class ExpenseService : IExpenseService
 
         var expenses = await _expenseRepository.FilterWithDetailsAsync(query, cancellationToken);
         return expenses.Select(MapExpense).ToList();
+    }
+
+    private async Task<IReadOnlyList<Guid>> ResolveTagIdsAsync(
+        IReadOnlyList<Guid> requestedTagIds,
+        CancellationToken cancellationToken)
+    {
+        var distinctTagIds = requestedTagIds.Where(x => x != Guid.Empty).Distinct().ToList();
+        if (distinctTagIds.Count == 0)
+            return [];
+
+        var existingTagIds = (await _expenseRepository.GetExistingTagIdsAsync(distinctTagIds, cancellationToken)).ToHashSet();
+        var missingTagId = distinctTagIds.FirstOrDefault(id => !existingTagIds.Contains(id));
+        if (missingTagId != Guid.Empty)
+            ThrowHelper.MissingReference("Tag", missingTagId);
+
+        return distinctTagIds;
     }
 
     private static ExpenseReadDto MapExpense(TaxExpense expense)

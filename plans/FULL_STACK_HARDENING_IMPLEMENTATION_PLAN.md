@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 47% Complete
+- **Status:** In Progress - 50% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 35 of 74 tasks are complete. Stages 0, 1, and 3 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stages 4 through 8 have not started.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 3 is complete for the SQLite target; the filtered-index `HasFilter` SQL must be reviewed for the planned Azure SQL provider when it is added.
+- **Evidence:** 37 of 74 tasks are complete. Stages 0, 1, and 3 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 4 is 2 of 9, and Stages 5 through 8 have not started.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 4 backend reference rejection is in place; aggregate encapsulation (S4-06..S4-08) and the frontend tag workflow (S4-03..S4-05) remain.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 35/74 tasks (47%)
+Overall Progress: 37/74 tasks (50%)
 Current Stage: Stage 4 - Expense References and Aggregate Ownership
-Next Task: S4-01
+Next Task: S4-03
 
 ## Purpose
 
@@ -51,12 +51,12 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
 | 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
 | 3 | Date integrity and restore safety | 10 | 10 | 100% | Complete | Stages 0-1 |
-| 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
+| 4 | Expense references and aggregate ownership | 2 | 9 | 22% | In Progress | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **35** | **74** | **47%** | **In Progress** |  |
+| **Total** |  | **37** | **74** | **50%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -219,8 +219,8 @@ Goal: stop silent tag loss and make `TaxExpense` own its tag links and state tra
 
 ### Tasks
 
-- [ ] **S4-01** Add backend tests for missing, duplicate, and stale expense tag IDs on create/update.
-- [ ] **S4-02** Reject missing source, bank, and tag references consistently with stable codes.
+- [x] **S4-01** Add backend tests for missing, duplicate, and stale expense tag IDs on create/update.
+- [x] **S4-02** Reject missing source, bank, and tag references consistently with stable codes.
 - [ ] **S4-03** Add frontend stale-tag recovery while preserving unsaved form state.
 - [ ] **S4-04** Extract shared frontend manual-tag parsing and resolution workflow.
 - [ ] **S4-05** Define and test partial tag-creation failure/retry behavior.
@@ -495,6 +495,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S3-07/S3-08 | Backend suite and migration script | Pass: 104 unit, 53 integration | `AddActiveDateUniqueIndexes` normalizes legacy values, soft-deletes duplicate active entries deterministically, and creates filtered unique indexes |
 | 2026-08-23 | S3-09 | Unique-constraint race translation test | Pass: 1 | A duplicate active-date insert via the repository surfaces as `ApplicationConflictException` and the 409 conflict response |
 | 2026-08-23 | Stage 3 gate | Backend, frontend, and production build | Pass: 104 unit, 54 integration, 48 frontend, build ok | Date-only contracts, restore conflicts, active-date uniqueness, race conflict mapping, and timezone-safe calendar dates validated |
+| 2026-08-23 | S4-01/S4-02 | Expense reference rejection tests | Pass: 3 | Missing tag references throw `invalid_reference`, duplicate tag IDs are de-duplicated, and stale tags on update are rejected |
+| 2026-08-23 | S4-01/S4-02 | Backend suite | Pass: 107 unit, 54 integration | Expense create/update reject missing source, bank, and tag references; DataTransfer already rejected missing references |
 
 ## Progress Update Procedure
 

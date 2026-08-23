@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S4-01` - Add backend tests for missing, duplicate, and stale expense tag IDs on create/update. Stage 4 (Expense References and Aggregate Ownership) depends on Stages 1 and 3, which are complete.
+**Task:** `S4-03`/`S4-04`/`S4-05` (frontend tag workflow) and `S4-06`/`S4-07`/`S4-08` (backend aggregate encapsulation). Two separable slices remain in Stage 4.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,14 +14,14 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Add characterization tests for how expense create/update handles missing, duplicate, and stale tag IDs today.
-- Establish the baseline before rejecting missing references (S4-02) and encapsulating the aggregate (S4-06..S4-08).
+- Frontend (S4-03..S4-05): recover from stale tags without losing unsaved form state, share manual-tag parsing/resolution across both expense entry points, and define partial tag-creation failure/retry behavior. Now that the backend rejects missing tag references, stale-tag recovery is required UX.
+- Backend (S4-06..S4-08): give `TaxExpense` a private backing collection with explicit tag-link behavior, replace direct collection mutation in Application and DataTransfer, restrict mutation with private setters, and add explicit import/rehydration that preserves IDs. This touches the EF backing-field mapping and the DataTransfer granular tag mutation, so treat it as its own careful slice.
 
-**Immediate validation:** Run the backend unit and integration suites.
+**Immediate validation:** Backend suite, DataTransfer roundtrip, Angular suite, and production build.
 
-**Done in this session:** Stage 3 is complete. Calendar dates are `DateOnly` end to end, restore conflicts are enforced, active-date uniqueness is guaranteed by filtered indexes, and unique-constraint races map to the 409 conflict response. Backend 104 unit / 54 integration and frontend 48 pass; production build ok.
+**Done in this session:** S4-01 and S4-02 are complete. Expense create/update reject missing source, bank, and tag references and de-duplicate tag IDs; DataTransfer already rejected missing references. Backend 107 unit / 54 integration pass.
 
-**Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning. The Stage 3 filtered-index SQL should also be reviewed for the Azure SQL provider when it is added.
+**Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
 ## Work Order
 

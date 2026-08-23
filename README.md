@@ -11,6 +11,7 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Expense filtering (single date, bank, price cap, tracker, tags)
 - Inline expense creation on the Expenses page
 - Manual tag entry with explicit Apply Tags flow (create missing tags, then attach)
+- Expense create/update reject missing source, bank, or tag references instead of silently dropping them, and de-duplicate repeated tag IDs
 - Expense table header filters using Angular Material controls for date, bank, tracker, and tags
 - Clear-filters icon in the Actions header to reset filter inputs and reload full table data
 - Filter request guard logic to avoid stale/in-flight filter responses overriding cleared results
