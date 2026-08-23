@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S1-07` - Fix the frontend zero-price expense filter and add a request-parameter regression test.
+**Task:** `S1-08` - Validate normal and Blob errors end to end and pass the Stage 1 validation gate.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,12 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Preserve `0` as a valid expense price filter instead of treating it as an empty value.
-- Continue omitting the price parameter when the filter field is actually blank.
-- Add a regression test that verifies the request parameter sent for a zero-price filter.
-- Preserve filter deduplication, timeout handling, paging, and all other existing filter behavior.
+- Verify a normal API ProblemDetails response is emitted by the backend contract and rendered through the shared frontend parser.
+- Verify a ProblemDetails error from a Blob-response export is decoded and rendered as a string.
+- Run the complete backend unit and integration suites.
+- Run the complete frontend test suite and production build.
+- Record the Stage 1 gate evidence and begin Stage 2 only after every gate passes.
 
-**Immediate validation:** Run the focused expense filter test, then `npm run test:ci` and `npm run build`. `S1-08` follows with end-to-end normal and Blob error validation and the Stage 1 gate.
+**Immediate validation:** Run focused cross-layer error contract checks, then all backend and frontend quality gates. When S1-08 passes, mark Stage 1 complete and advance to the first Stage 2 task.
 
 ## Work Order
 

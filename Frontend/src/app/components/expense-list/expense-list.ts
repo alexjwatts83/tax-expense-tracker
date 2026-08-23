@@ -61,7 +61,7 @@ export class ExpenseList implements OnInit {
   readonly filterForm = this.formBuilder.group({
     date: [''],
     bankId: [''],
-    price: [''],
+    price: [null as number | null],
     sourceId: [''],
     tagIds: [[] as string[]],
   });
@@ -204,7 +204,7 @@ export class ExpenseList implements OnInit {
     const request = {
       date: value.date || undefined,
       bankId: value.bankId || undefined,
-      price: value.price ? Number(value.price) : undefined,
+      price: value.price === null ? undefined : value.price,
       sourceId: value.sourceId || undefined,
       tagIds: value.tagIds && value.tagIds.length > 0 ? value.tagIds : undefined,
     };
@@ -340,7 +340,7 @@ export class ExpenseList implements OnInit {
     this.filterForm.reset({
       date: '',
       bankId: '',
-      price: '',
+      price: null,
       sourceId: '',
       tagIds: [],
     });
