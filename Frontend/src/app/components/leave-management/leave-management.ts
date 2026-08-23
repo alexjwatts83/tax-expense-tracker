@@ -18,6 +18,7 @@ import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
 import { parseApiError } from '../../utils/api-problem';
 import { toLocalDateInputValue } from '../../utils/date';
+import { applySpecificHoursPolicy, DAY_ENTRY_PAGE_SIZES, getPageSlice } from '../../utils/day-entry-policies';
 
 @Component({
   selector: 'app-leave-management',
@@ -46,7 +47,7 @@ export class LeaveManagement implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly displayedColumns: string[] = ['leaveDate', 'leaveType', 'entryType', 'hoursWorked', 'notes', 'actions'];
-  readonly pageSizes = [10, 20, 50];
+  readonly pageSizes = DAY_ENTRY_PAGE_SIZES;
   readonly entryTypeOptions = [
     { value: DayEntryType.FullDay, label: 'Full Day' },
     { value: DayEntryType.HalfDay, label: 'Half Day' },
@@ -291,17 +292,11 @@ export class LeaveManagement implements OnInit {
   }
 
   get totalPages(): number {
-    return Math.max(1, Math.ceil(this.entries.length / this.pageSize));
+    return getPageSlice(this.entries, this.page, this.pageSize).totalPages;
   }
 
   get rangeLabel(): string {
-    if (this.entries.length === 0) {
-      return '0 of 0';
-    }
-
-    const start = (this.page - 1) * this.pageSize + 1;
-    const end = Math.min(this.page * this.pageSize, this.entries.length);
-    return `${start}-${end} of ${this.entries.length}`;
+    return getPageSlice(this.entries, this.page, this.pageSize).rangeLabel;
   }
 
   get needsSpecificHours(): boolean {
@@ -309,22 +304,11 @@ export class LeaveManagement implements OnInit {
   }
 
   private updateSpecificHoursValidation(entryType: DayEntryType): void {
-    const control = this.entryForm.controls.specificHours;
-
-    if (entryType === DayEntryType.SpecificHours) {
-      control.setValidators([Validators.required, Validators.min(0.25), Validators.max(24)]);
-    } else {
-      control.clearValidators();
-      control.setValue(null);
-    }
-
-    control.updateValueAndValidity();
+    applySpecificHoursPolicy(this.entryForm.controls.specificHours, entryType);
   }
 
   private updatePagedEntries(): void {
-    const start = (this.page - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.pagedEntries = this.entries.slice(start, end);
+    this.pagedEntries = getPageSlice(this.entries, this.page, this.pageSize).items;
   }
 
   private today(): string {

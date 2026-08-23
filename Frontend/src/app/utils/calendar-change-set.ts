@@ -268,6 +268,11 @@ export function reconcileCalendarChanges(
     });
   }
 
+  const dateOrder = new Map(plan.changedDateIsos.map((dateIso, index) => [dateIso, index]));
+  reconciledRows.sort((left, right) =>
+    (dateOrder.get(left.dateIso) ?? Number.MAX_SAFE_INTEGER)
+    - (dateOrder.get(right.dateIso) ?? Number.MAX_SAFE_INTEGER));
+
   return { rows: reconciledRows, added, updated, skipped, failed };
 }
 

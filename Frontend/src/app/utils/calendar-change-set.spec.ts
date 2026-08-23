@@ -131,6 +131,58 @@ describe('planCalendarChanges', () => {
 });
 
 describe('reconcileCalendarChanges', () => {
+  it('reconciles a successful mixture of create, update, and delete rows', () => {
+    const rows = [
+      row({ dateIso: '2026-08-03', category: 'office' }),
+      row({
+        dateIso: '2026-08-04',
+        category: 'office',
+        originalCategory: 'wfh',
+        workLocationId: 'update-work',
+      }),
+      row({
+        dateIso: '2026-08-05',
+        category: 'none',
+        originalCategory: 'annual',
+        leaveId: 'delete-leave',
+      }),
+    ];
+    const plan = planCalendarChanges(rows);
+
+    const result = reconcileCalendarChanges(rows, plan, execution({
+      workCreates: {
+        totalRequested: 1,
+        createdCount: 1,
+        skippedCount: 0,
+        failedCount: 0,
+        results: [{
+          workDate: '2026-08-03',
+          workLocation: WorkLocationType.Office,
+          entryType: DayEntryType.FullDay,
+          status: 'Created',
+          entry: {
+            id: 'new-work',
+            workDate: '2026-08-03',
+            workLocation: WorkLocationType.Office,
+            entryType: DayEntryType.FullDay,
+            hoursWorked: 7.6,
+            createdAt: '2026-08-01T00:00:00Z',
+            updatedAt: '2026-08-01T00:00:00Z',
+          },
+        }],
+      },
+      workUpdates: [{ dateIso: '2026-08-04', ok: true, message: '' }],
+      leaveDeletes: [{ dateIso: '2026-08-05', ok: true, message: '' }],
+    }));
+
+    expect(result).toMatchObject({ added: 1, updated: 2, skipped: 0, failed: 0 });
+    expect(result.rows).toEqual([
+      expect.objectContaining({ dateIso: '2026-08-03', state: 'applied', syncOriginal: true }),
+      expect.objectContaining({ dateIso: '2026-08-04', state: 'applied', syncOriginal: true }),
+      expect.objectContaining({ dateIso: '2026-08-05', state: 'applied', syncOriginal: true, leaveId: null }),
+    ]);
+  });
+
   it('reconciles created and skipped rows without mutating inputs', () => {
     const rows = [
       row({ dateIso: '2026-08-03', category: 'office' }),
@@ -193,6 +245,34 @@ describe('reconcileCalendarChanges', () => {
     expect(result.rows[0]).toMatchObject({ state: 'failed', message: 'Request unavailable.', syncOriginal: false });
   });
 
+  it('keeps a conflicting create available for correction and retry', () => {
+    const rows = [row({ category: 'annual' })];
+    const plan = planCalendarChanges(rows);
+
+    const result = reconcileCalendarChanges(rows, plan, execution({
+      leaveCreates: {
+        totalRequested: 1,
+        createdCount: 0,
+        skippedCount: 0,
+        failedCount: 1,
+        results: [{
+          leaveDate: '2026-08-03',
+          leaveType: LeaveType.Annual,
+          entryType: DayEntryType.FullDay,
+          status: 'FailedConflict',
+          message: 'Cannot create leave on a public holiday.',
+        }],
+      },
+    }));
+
+    expect(result).toMatchObject({ added: 0, updated: 0, skipped: 0, failed: 1 });
+    expect(result.rows[0]).toMatchObject({
+      state: 'failed',
+      message: 'Cannot create leave on a public holiday.',
+      syncOriginal: false,
+    });
+  });
+
   it('keeps a transition pending when create succeeds but delete fails', () => {
     const rows = [row({
       category: 'annual',
@@ -232,6 +312,11 @@ describe('reconcileCalendarChanges', () => {
       syncOriginal: false,
       leaveId: 'new-leave',
     });
+
+    const retryRow = { ...rows[0], leaveId: result.rows[0].leaveId ?? null };
+    const retryPlan = planCalendarChanges([retryRow]);
+    expect(retryPlan.leaveCreates).toEqual([]);
+    expect(retryPlan.workDeletes).toHaveLength(1);
   });
 
   it('keeps a transition pending when delete succeeds but create fails', () => {
@@ -253,5 +338,10 @@ describe('reconcileCalendarChanges', () => {
       syncOriginal: false,
       workLocationId: null,
     });
+
+    const retryRow = { ...rows[0], workLocationId: result.rows[0].workLocationId ?? null };
+    const retryPlan = planCalendarChanges([retryRow]);
+    expect(retryPlan.leaveCreates).toHaveLength(1);
+    expect(retryPlan.workDeletes).toEqual([]);
   });
 });

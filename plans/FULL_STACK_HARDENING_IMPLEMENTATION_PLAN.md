@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 68% Complete
+- **Status:** In Progress - 70% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 50 of 74 tasks are complete. Stages 0, 1, 3, and 4 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stage 5 is 6 of 8.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 5 Slice C (S5-07/S5-08) is next.
+- **Evidence:** 52 of 74 tasks are complete. Stages 0, 1, 3, 4, and 5 are complete, and Stage 2 is 8 of 10 (blocked on Azure).
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 6 domain encapsulation starts with S6-01.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 50/74 tasks (68%)
-Current Stage: Stage 5 - Calendar and Day-Entry Workflow
-Next Task: S5-07
+Overall Progress: 52/74 tasks (70%)
+Current Stage: Stage 6 - Remaining Domain Encapsulation
+Next Task: S6-01
 
 ## Purpose
 
@@ -254,14 +254,14 @@ Goal: bound backend batch queries and move complex frontend workflow policy out 
 - [x] **S5-04** Add backend query-count and mixed-result regression tests.
 - [x] **S5-05** Extract frontend calendar change-set planning into a pure tested module.
 - [x] **S5-06** Extract result reconciliation into a pure reducer/facade with mixed-outcome tests.
-- [ ] **S5-07** Share work/leave form and paging policies only where domain language stays clear.
-- [ ] **S5-08** Validate create/update/delete mixtures, retries, conflicts, and partial failures and pass the stage gate.
+- [x] **S5-07** Share work/leave form and paging policies only where domain language stays clear.
+- [x] **S5-08** Validate create/update/delete mixtures, retries, conflicts, and partial failures and pass the stage gate.
 
 ### Delivery Slices
 
 - [x] **Slice A (S5-01-S5-04): Backend batch efficiency.** Preserve deterministic partial-success results, bulk-load occupied dates, save at most once, and enforce bounded repository operations with mixed-result and large-batch tests.
 - [x] **Slice B (S5-05-S5-06): Pure calendar workflow.** Extract create/update/delete change-set planning and mixed-result reconciliation together, including retention of failed or skipped rows for correction and retry. Validate with focused pure-module tests and existing component tests before integration work.
-- [ ] **Slice C (S5-07-S5-08): Integration and stage gate.** Adopt shared work/leave form or paging policy only where behavior substantially matches, keep domain terminology explicit, cover mixed operations, retries, conflicts, and partial failures at component level, then run the full backend/frontend suites and production build.
+- [x] **Slice C (S5-07-S5-08): Integration and stage gate.** Adopt shared work/leave form or paging policy only where behavior substantially matches, keep domain terminology explicit, cover mixed operations, retries, conflicts, and partial failures at component level, then run the full backend/frontend suites and production build.
 
 Implement Slice B before Slice C so planning and reconciliation have a stable tested contract before component integration and any policy sharing decisions.
 
@@ -414,7 +414,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | R1 | 0-1 | Tested contracts, correlated errors, immediate frontend fixes | Not Started |
 | R2 | 2 | End-to-end authenticated application and admin authorization | Not Started |
 | R3 | 3 | Date-safe work/leave workflows and database uniqueness | Complete |
-| R4 | 4-5 | Strict expense references and maintainable calendar workflow | In Progress |
+| R4 | 4-5 | Strict expense references and maintainable calendar workflow | Complete |
 | R5 | 6-7 | Encapsulated domain and hardened DataTransfer | Not Started |
 | R6 | 8 | CI-enforced, operationally ready hardening release | Not Started |
 
@@ -511,6 +511,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | Stage 4 gate | Backend, frontend, and production build | Pass: 112 unit, 54 integration, 55 frontend, build ok | Both expense entry points share tag resolution; stale tags recover without losing form state and partial tag-creation failures remain for retry |
 | 2026-08-23 | S5-01/S5-02/S5-03/S5-04 | Batch service and API contract tests | Pass: 48 | Leave and work-location batches preserve mixed statuses while using one occupied-date lookup, zero per-item existence queries, and at most one save; bounded behavior verified with 100-item batches |
 | 2026-08-23 | S5-05/S5-06 | Frontend tests and production build | Pass: 6 focused, 61 frontend, build ok | Pure planning covers all create/update/delete groups; reconciliation preserves mixed results and retries only the unfinished half of partial category transitions; existing bundle warnings unchanged |
+| 2026-08-23 | Stage 5 gate | Solution tests, frontend tests, and production build | Pass: 187 discovered .NET tests, solution test/build succeeded, 67 frontend, build ok | Shared only identical hours and paging policies; mixed create/update/delete, skips, conflicts, request failures, deterministic ordering, and retry-only unfinished operations covered; existing bundle warnings unchanged |
 
 ## Progress Update Procedure
 

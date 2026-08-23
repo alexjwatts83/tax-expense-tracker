@@ -6,21 +6,21 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Stage 5 Slice C (`S5-07-S5-08`) - Integrate shared day-entry policies where justified and pass the Stage 5 gate.
+**Task:** `S6-01` - Encapsulate time-entry state behind domain behavior without breaking EF materialization or API contracts.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
-**Current stage:** Stage 5 - Calendar and Day-Entry Workflow
+**Current stage:** Stage 6 - Remaining Domain Encapsulation
 
 **Required outcome:**
 
-- Share work-location and leave form or paging policy only where behavior substantially matches, while preserving explicit domain terminology (S5-07).
-- Cover mixed create/update/delete operations, retries, conflicts, and partial failures at component or workflow-integration level (S5-08).
-- Run the full backend/frontend suites and production build, then close the Stage 5 gate.
+- Replace public work-location and leave entry mutation with private or protected setters and explicit domain methods (S6-01).
+- Centralize genuinely shared day-entry hours rules without hiding work-location and leave terminology (S6-02).
+- Validate EF materialization, service updates, imports, and API serialization after each aggregate change.
 
-**Immediate validation:** Focused integration tests while adopting Slice B, then the full backend/frontend suites and production build.
+**Immediate validation:** Focused domain/service tests for one time-entry aggregate, followed by EF materialization and DataTransfer roundtrip coverage before applying the pattern to the second aggregate.
 
-**Done in this session:** Stage 5 Slices A and B (S5-01-S5-06) are complete. Calendar change-set planning and mixed-result reconciliation now live in a pure tested module; partial category transitions retain retryable state and retry only unfinished operations. Frontend 61/61 and production build pass.
+**Done in this session:** Stage 5 is complete. Work-location and leave batches have bounded backend operations; calendar planning and reconciliation are pure and retry-safe; management screens share only identical hours and paging policies. The Stage 5 gate passes with 187 discovered .NET tests, 67 frontend tests, and a successful production build.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
