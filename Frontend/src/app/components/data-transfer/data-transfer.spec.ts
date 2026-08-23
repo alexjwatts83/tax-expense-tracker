@@ -66,16 +66,22 @@ describe('DataTransfer', () => {
 		);
 	});
 
-	it('cancels an active export request', () => {
+	it('cancels an active export request', async () => {
 		const teardown = vi.fn();
 		dataTransferService.export.mockReturnValue(new Observable(() => teardown));
 		const fixture = TestBed.createComponent(DataTransfer);
 		fixture.detectChanges();
 
 		fixture.componentInstance.downloadExport();
+		await fixture.whenStable();
+		fixture.detectChanges();
 
 		expect(fixture.componentInstance.isExporting).toBe(true);
 		expect(fixture.componentInstance.infoMessage).toBe('Downloading export...');
+		expect((fixture.nativeElement as HTMLElement).querySelector('.info-message[aria-live="polite"]')?.textContent).toContain(
+			'Downloading export...',
+		);
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Cancel');
 
 		fixture.componentInstance.cancelExport();
 

@@ -19,6 +19,16 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
       - name: Restore
         run: dotnet restore TaxExpenseTracker.sln
 
@@ -27,3 +37,24 @@ jobs:
 
       - name: Test
         run: dotnet test TaxExpenseTracker.sln --configuration Release --no-build
+
+      - name: Generate migration script
+        run: >-
+          dotnet ef migrations script
+          --project Backend/TaxExpenseTracker.Infrastructure/TaxExpenseTracker.Infrastructure.csproj
+          --startup-project Backend/TaxExpenseTracker.Api/TaxExpenseTracker.Api.csproj
+          --configuration Release
+          --no-build
+          --output migration.sql
+
+      - name: Install frontend dependencies
+        working-directory: Frontend
+        run: npm ci
+
+      - name: Test frontend
+        working-directory: Frontend
+        run: npm run test:ci
+
+      - name: Build frontend
+        working-directory: Frontend
+        run: npm run build

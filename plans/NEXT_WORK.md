@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Complete Stage 8 Slice A (`S8-01` + `S8-02` + `S8-03`): coverage and CI enforcement.
+**Task:** Complete Stage 8 Slice B (`S8-04` + `S8-05`): measured performance work.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Complete backend architecture, API route, repository, query-filter, FK, and uniqueness coverage.
-- Complete frontend service, critical component, guard, accessibility, and error-state coverage.
-- Add CI checks for backend build/tests, plain SQLite migration-script generation, frontend tests, and the production build.
+- Measure reference-data request patterns and add frontend caching only if repeated requests justify it and invalidation is explicit.
+- Profile expense paging/filtering and DataTransfer export/import behavior at supported sizes.
+- Add caching, query, or chunking changes only when measurements identify a meaningful bottleneck.
 
-**Immediate validation:** Inventory the existing focused coverage and CI workflows, close only demonstrated gaps, then run the exact CI commands locally.
+**Immediate validation:** Establish repeatable request-count and latency measurements for reference data, expense paging/filtering, and supported DataTransfer payloads before selecting any optimization.
 
-**Done in this session:** Stage 7 is complete. Near-ceiling parsing measured 7.35 ms median / 8.29 ms p95, so no worker was added. Active exports/imports have real unsubscribe-based cancellation and truthful stages; malformed and dry-run HTTP behavior is covered. The gate passed with 210/210 .NET tests, 72/72 frontend tests, and a successful production build.
+**Done in this session:** Stage 8 Slice A is complete. Model metadata, repository registrations, and attributed API routes have direct regression coverage; DataTransfer service contracts and accessibility states are covered. CI now runs Release backend build/tests, plain SQLite migration generation, frontend tests, and the production build. The local CI-equivalent gate passed with 214/214 .NET tests and 74/74 frontend tests.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
