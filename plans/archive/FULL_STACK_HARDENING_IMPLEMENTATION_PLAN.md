@@ -5,7 +5,7 @@
 - **Status:** Complete - 100%
 - **Assessed:** 2026-08-23
 - **Evidence:** 74 of 74 local hardening tasks are complete and all eight stage gates pass. The final gate includes 219 .NET tests, 75 frontend tests, migration generation, production build, and live local Production API smoke.
-- **Remaining gate:** None in this plan. Azure provisioning and deployed validation formerly mixed into S2-09, S2-10, and S8-07 are transferred to [AZURE_HARDENING_ROLLOUT_PLAN.md](../AZURE_HARDENING_ROLLOUT_PLAN.md).
+- **Remaining gate:** None in this plan. Azure provisioning and deployed validation formerly mixed into S2-09, S2-10, and S8-07 are transferred to [AZURE_HARDENING_ROLLOUT_PLAN.md](../todo/AZURE_HARDENING_ROLLOUT_PLAN.md).
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23

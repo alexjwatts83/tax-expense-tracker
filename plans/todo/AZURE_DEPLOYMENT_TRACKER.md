@@ -7,7 +7,7 @@
 - **Evidence:** 11 of 44 checklist items are complete. Local Production startup, explicit SQLite migration policy, health monitoring, CORS configuration, CI, and correlated logs are validated; no Azure environment has been planned or applied.
 - **Remaining gate:** Authenticate Azure CLI, finalize live inputs, provision persistent SQLite-capable hosting and Entra resources, configure CI/CD, then run the deployed role and workflow matrix.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
-- **Hardening rollout:** [../AZURE_HARDENING_ROLLOUT_PLAN.md](../AZURE_HARDENING_ROLLOUT_PLAN.md) is authoritative for the six transferred hardening deployment tasks and their validation sequence.
+- **Hardening rollout:** [AZURE_HARDENING_ROLLOUT_PLAN.md](AZURE_HARDENING_ROLLOUT_PLAN.md) is authoritative for the six transferred hardening deployment tasks and their validation sequence.
 
 Last Updated: 2026-08-23
 Owner: 

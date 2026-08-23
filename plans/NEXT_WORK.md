@@ -8,7 +8,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Task:** Begin Azure hardening rollout task `AZH-01`: establish Azure access and final inputs.
 
-**Authoritative plan:** [AZURE_HARDENING_ROLLOUT_PLAN.md](AZURE_HARDENING_ROLLOUT_PLAN.md)
+**Authoritative plan:** [todo/AZURE_HARDENING_ROLLOUT_PLAN.md](todo/AZURE_HARDENING_ROLLOUT_PLAN.md)
 
 **Current stage:** Azure Hardening Rollout
 
@@ -26,10 +26,10 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Work Order
 
-1. Continue the first incomplete task in [AZURE_HARDENING_ROLLOUT_PLAN.md](AZURE_HARDENING_ROLLOUT_PLAN.md).
+1. Continue the first incomplete task in [todo/AZURE_HARDENING_ROLLOUT_PLAN.md](todo/AZURE_HARDENING_ROLLOUT_PLAN.md).
 2. Do not begin a dependent stage until the current stage gate passes.
 3. Treat [TAX_EXPENSE_TRACKER_PLAN.md](TAX_EXPENSE_TRACKER_PLAN.md) as the high-level product roadmap only.
-4. Treat files under [todo](todo/) as intentionally deferred; do not select them unless explicitly requested.
+4. Treat files under [todo](todo/) as intentionally deferred unless this file explicitly names one as the authoritative plan.
 5. Treat files under [archive](archive/) as historical records, not active work queues.
 
 ## Update Rules

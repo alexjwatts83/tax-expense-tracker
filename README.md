@@ -46,7 +46,7 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 
 - Start or resume work from [plans/NEXT_WORK.md](plans/NEXT_WORK.md)
 - Product roadmap and backlog tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md)
-- Azure hardening rollout tracked in [plans/AZURE_HARDENING_ROLLOUT_PLAN.md](plans/AZURE_HARDENING_ROLLOUT_PLAN.md), with the broad infrastructure checklist in [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md)
+- Azure hardening rollout tracked in [plans/todo/AZURE_HARDENING_ROLLOUT_PLAN.md](plans/todo/AZURE_HARDENING_ROLLOUT_PLAN.md), with the broad infrastructure checklist in [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md)
 - JSON import/export approach tracked in [plans/todo/JSON_IMPORT_EXPORT_PLAN.md](plans/todo/JSON_IMPORT_EXPORT_PLAN.md)
 - Completed backend, frontend, and full-stack hardening record archived in [plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -399,4 +399,4 @@ Recent schema updates:
 - Unit tests passing: 69/69
 - Integration tests passing: 1/1
 
-Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/AZURE_HARDENING_ROLLOUT_PLAN.md](plans/AZURE_HARDENING_ROLLOUT_PLAN.md), and [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md). The completed hardening record is archived in [plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md).
+Current roadmap and backlog remain tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md), [plans/todo/AZURE_HARDENING_ROLLOUT_PLAN.md](plans/todo/AZURE_HARDENING_ROLLOUT_PLAN.md), and [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md). The completed hardening record is archived in [plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md).
