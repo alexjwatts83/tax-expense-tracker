@@ -128,6 +128,46 @@ public class DataTransferRoundtripTests
         Assert.Equal("Medical appointment", exportedLeave.Notes);
     }
 
+    [Fact]
+    public async Task ReferenceImport_WithEntityError_RollsBackAllEntitiesInOneTransaction()
+    {
+        await using var database = await TestDatabase.CreateAsync();
+        var trackerId = Guid.NewGuid();
+
+        // A valid tracker shares the payload with a tag whose blank name fails validation.
+        var invalidResult = await ImportReferenceAsync(database, new ReferenceDataImportPayloadDto(new ReferenceDataImportDataDto(
+            [new ReferenceTrackerImportItemDto(trackerId, "Valid tracker", null)],
+            [new ReferenceTagImportItemDto(Guid.NewGuid(), "  ", "#336699")],
+            [],
+            [])));
+
+        Assert.Contains(invalidResult.Results, r => r.Entity == "tags" && r.Errors.Count > 0);
+        Assert.DoesNotContain((await ExportReferenceAsync(database)).Data.Trackers, x => x.Id == trackerId);
+
+        var validResult = await ImportReferenceAsync(database, new ReferenceDataImportPayloadDto(new ReferenceDataImportDataDto(
+            [new ReferenceTrackerImportItemDto(trackerId, "Valid tracker", null)],
+            [],
+            [],
+            [])));
+
+        Assert.All(validResult.Results, r => Assert.Empty(r.Errors));
+        Assert.Contains((await ExportReferenceAsync(database)).Data.Trackers, x => x.Id == trackerId);
+    }
+
+    private static async Task<DataTransferImportResultDto> ImportReferenceAsync(TestDatabase database, ReferenceDataImportPayloadDto payload)
+    {
+        using var scope = database.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IDataTransferService>();
+        return await service.ImportReferenceDataAsync(payload, new DataTransferImportOptions());
+    }
+
+    private static async Task<ReferenceDataExportEnvelopeDto> ExportReferenceAsync(TestDatabase database)
+    {
+        using var scope = database.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IDataTransferService>();
+        return await service.ExportReferenceDataAsync(includeSoftDeleted: true);
+    }
+
     private sealed class TestDatabase : IAsyncDisposable
     {
         private readonly SqliteConnection _connection;

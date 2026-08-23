@@ -72,14 +72,12 @@ public class DataTransferController(
             includeSoftDeleted,
             HttpContext.TraceIdentifier);
 
-        var reference = await dataTransferService.ExportReferenceDataAsync(includeSoftDeleted, cancellationToken);
-
         object? payload = normalized switch
         {
-            "trackers" => reference.Data.Trackers,
-            "tags" => reference.Data.Tags,
-            "banks" => reference.Data.Banks,
-            "public-holidays" => reference.Data.PublicHolidays,
+            "trackers" => await dataTransferService.ExportTrackersAsync(includeSoftDeleted, cancellationToken),
+            "tags" => await dataTransferService.ExportTagsAsync(includeSoftDeleted, cancellationToken),
+            "banks" => await dataTransferService.ExportBanksAsync(includeSoftDeleted, cancellationToken),
+            "public-holidays" => await dataTransferService.ExportPublicHolidaysAsync(cancellationToken),
             "expenses" => await dataTransferService.ExportExpensesAsync(includeSoftDeleted, cancellationToken),
             "expense-tags" => (await dataTransferService.ExportExpensesAsync(includeSoftDeleted, cancellationToken)).ExpenseTags ?? [],
             "work-locations" => await dataTransferService.ExportWorkLocationsAsync(includeSoftDeleted, cancellationToken),

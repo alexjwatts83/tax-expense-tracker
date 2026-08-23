@@ -47,37 +47,76 @@ public sealed class DataTransferExportService
         bool includeSoftDeleted,
         CancellationToken cancellationToken = default)
     {
-        var trackers = includeSoftDeleted
-            ? await _trackerRepository.GetAllIncludingDeletedAsync(cancellationToken)
-            : await _trackerRepository.GetAllAsync(cancellationToken);
-
-        var tags = includeSoftDeleted
-            ? await _tagRepository.GetAllIncludingDeletedAsync(cancellationToken)
-            : await _tagRepository.GetAllAsync(cancellationToken);
-
-        var banks = includeSoftDeleted
-            ? await _bankRepository.GetAllIncludingDeletedAsync(cancellationToken)
-            : await _bankRepository.GetAllAsync(cancellationToken);
-
-        var publicHolidays = await _publicHolidayRepository.GetAllAsync(cancellationToken);
-
         return new ReferenceDataExportEnvelopeDto(
             SchemaVersion,
             _timeProvider.GetUtcNow().UtcDateTime,
             new DataTransferSourceDto(AppName, "unknown"),
             new ReferenceDataExportDataDto(
-                trackers.OrderBy(x => x.Name).Select(x => new ReferenceTrackerDto(x.Id, x.Name, x.Description, x.CreatedAt, x.UpdatedAt)).ToList(),
-                tags.OrderBy(x => x.Name).Select(x => new ReferenceTagDto(x.Id, x.Name, x.Color, x.CreatedAt, x.UpdatedAt)).ToList(),
-                banks.OrderBy(x => x.Name).Select(x => new ReferenceBankDto(x.Id, x.Name, x.CreatedAt, x.UpdatedAt)).ToList(),
-                publicHolidays.Select(x => new ReferencePublicHolidayDto(
-                    x.Id,
-                    x.HolidayDate,
-                    x.Name,
-                    x.Source,
-                    x.IsImported,
-                    x.CanBeWorkedOn,
-                    x.CreatedAt,
-                    x.UpdatedAt)).ToList()));
+                await ExportTrackersAsync(includeSoftDeleted, cancellationToken),
+                await ExportTagsAsync(includeSoftDeleted, cancellationToken),
+                await ExportBanksAsync(includeSoftDeleted, cancellationToken),
+                await ExportPublicHolidaysAsync(cancellationToken)));
+    }
+
+    public async Task<IReadOnlyList<ReferenceTrackerDto>> ExportTrackersAsync(
+        bool includeSoftDeleted,
+        CancellationToken cancellationToken = default)
+    {
+        var trackers = includeSoftDeleted
+            ? await _trackerRepository.GetAllIncludingDeletedAsync(cancellationToken)
+            : await _trackerRepository.GetAllAsync(cancellationToken);
+
+        return trackers
+            .OrderBy(x => x.Name)
+            .Select(x => new ReferenceTrackerDto(x.Id, x.Name, x.Description, x.CreatedAt, x.UpdatedAt))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<ReferenceTagDto>> ExportTagsAsync(
+        bool includeSoftDeleted,
+        CancellationToken cancellationToken = default)
+    {
+        var tags = includeSoftDeleted
+            ? await _tagRepository.GetAllIncludingDeletedAsync(cancellationToken)
+            : await _tagRepository.GetAllAsync(cancellationToken);
+
+        return tags
+            .OrderBy(x => x.Name)
+            .Select(x => new ReferenceTagDto(x.Id, x.Name, x.Color, x.CreatedAt, x.UpdatedAt))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<ReferenceBankDto>> ExportBanksAsync(
+        bool includeSoftDeleted,
+        CancellationToken cancellationToken = default)
+    {
+        var banks = includeSoftDeleted
+            ? await _bankRepository.GetAllIncludingDeletedAsync(cancellationToken)
+            : await _bankRepository.GetAllAsync(cancellationToken);
+
+        return banks
+            .OrderBy(x => x.Name)
+            .Select(x => new ReferenceBankDto(x.Id, x.Name, x.CreatedAt, x.UpdatedAt))
+            .ToList();
+    }
+
+    // PublicHoliday is a hard-delete entity, so there is no soft-deleted variant to include.
+    public async Task<IReadOnlyList<ReferencePublicHolidayDto>> ExportPublicHolidaysAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var publicHolidays = await _publicHolidayRepository.GetAllAsync(cancellationToken);
+
+        return publicHolidays
+            .Select(x => new ReferencePublicHolidayDto(
+                x.Id,
+                x.HolidayDate,
+                x.Name,
+                x.Source,
+                x.IsImported,
+                x.CanBeWorkedOn,
+                x.CreatedAt,
+                x.UpdatedAt))
+            .ToList();
     }
 
     public async Task<ExpenseImportPayloadDto> ExportExpensesAsync(

@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Begin Stage 7 with `S7-01`: avoid reference-data queries for unrelated per-entity exports.
+**Task:** Continue Stage 7 with Slice B (`S7-03` + `S7-04`): enforce the `DEC-HARD-005` file-limit contract on API and browser.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,14 +14,14 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Route per-entity exports to repositories for only the requested entity type.
-- Avoid loading all trackers, tags, banks, and public holidays for unrelated exports.
-- Preserve the existing streamed JSON response contracts and soft-delete behavior.
-- Add query-count or repository-call tests before advancing to import atomicity work.
+- Lower the DataTransfer endpoints' API `RequestSizeLimit` from 100 MiB to the `DEC-HARD-005` 12 MiB request limit.
+- Reject oversized (>10 MiB) or non-JSON files in the frontend before `file.text()`/`JSON.parse()`.
+- Keep API and browser limits in sync so neither can drift.
+- Validate with an oversized-payload roundtrip plus focused frontend rejection tests.
 
-**Immediate validation:** Add focused service/controller tests proving each per-entity export touches only its owning repository.
+**Immediate validation:** Add an oversized API request test and frontend file-rejection tests; keep the full backend suite green.
 
-**Done in this session:** Stage 6 is complete. A real SQLite upgrade test verifies reference audit backfills; streamed API exports expose camel-case audit fields; 198 backend tests and 67 frontend tests pass; the production build passes with the two existing budget warnings.
+**Done in this session:** Stage 7 Slice A is complete. Per-entity reference exports query only their owning table (verified by an EF command interceptor), and reference imports roll back the whole payload in one transaction on any entity error. Public holidays are confirmed hard-delete. Backend suite is 203/203.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

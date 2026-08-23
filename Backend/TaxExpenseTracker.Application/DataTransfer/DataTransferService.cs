@@ -26,6 +26,33 @@ public sealed class DataTransferService : IDataTransferService
         return _exportService.ExportReferenceDataAsync(includeSoftDeleted, cancellationToken);
     }
 
+    public Task<IReadOnlyList<ReferenceTrackerDto>> ExportTrackersAsync(
+        bool includeSoftDeleted,
+        CancellationToken cancellationToken = default)
+    {
+        return _exportService.ExportTrackersAsync(includeSoftDeleted, cancellationToken);
+    }
+
+    public Task<IReadOnlyList<ReferenceTagDto>> ExportTagsAsync(
+        bool includeSoftDeleted,
+        CancellationToken cancellationToken = default)
+    {
+        return _exportService.ExportTagsAsync(includeSoftDeleted, cancellationToken);
+    }
+
+    public Task<IReadOnlyList<ReferenceBankDto>> ExportBanksAsync(
+        bool includeSoftDeleted,
+        CancellationToken cancellationToken = default)
+    {
+        return _exportService.ExportBanksAsync(includeSoftDeleted, cancellationToken);
+    }
+
+    public Task<IReadOnlyList<ReferencePublicHolidayDto>> ExportPublicHolidaysAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return _exportService.ExportPublicHolidaysAsync(cancellationToken);
+    }
+
     public Task<ExpenseImportPayloadDto> ExportExpensesAsync(
         bool includeSoftDeleted,
         CancellationToken cancellationToken = default)
