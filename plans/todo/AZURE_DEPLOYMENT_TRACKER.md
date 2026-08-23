@@ -7,6 +7,7 @@
 - **Evidence:** 11 of 44 checklist items are complete. Local Production startup, explicit SQLite migration policy, health monitoring, CORS configuration, CI, and correlated logs are validated; no Azure environment has been planned or applied.
 - **Remaining gate:** Authenticate Azure CLI, finalize live inputs, provision persistent SQLite-capable hosting and Entra resources, configure CI/CD, then run the deployed role and workflow matrix.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
+- **Hardening rollout:** [../AZURE_HARDENING_ROLLOUT_PLAN.md](../AZURE_HARDENING_ROLLOUT_PLAN.md) is authoritative for the six transferred hardening deployment tasks and their validation sequence.
 
 Last Updated: 2026-08-23
 Owner: 
@@ -165,7 +166,7 @@ Track meaningful deployment changes and outcomes.
 2. Align the app-hosting Terraform design with persistent SQLite storage; keep the Azure SQL module disabled.
 3. Create the SPA/API Entra registrations and record tenant, client, scope, and owner object IDs outside source control.
 4. Provision the Australia East dev stack, apply EF migrations explicitly, and configure `/health` readiness monitoring.
-5. Run anonymous/non-owner/owner, correlation-log, DataTransfer, and core workflow smoke matrices; then close S2-09/S2-10 and S8-07.
+5. Run anonymous/non-owner/owner, correlation-log, DataTransfer, and core workflow smoke matrices; then close `AZH-05` and `AZH-06` in the Azure hardening rollout plan.
 
 ## Notes
 - Keep this file updated at least once per work session.

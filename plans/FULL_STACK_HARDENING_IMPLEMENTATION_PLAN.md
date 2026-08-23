@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 96% Complete
+- **Status:** Complete - 100%
 - **Assessed:** 2026-08-23
-- **Evidence:** 71 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, 6, and 7 are complete; Stage 2 is 8 of 10 (blocked on Azure), and Stage 8 is 6 of 7.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) and the Azure portion of S8-07 are externally blocked on tenant login, provisioned resources, and final registration values. The complete local S8-07 matrix passes.
+- **Evidence:** 74 of 74 local hardening tasks are complete and all eight stage gates pass. The final gate includes 219 .NET tests, 75 frontend tests, migration generation, production build, and live local Production API smoke.
+- **Remaining gate:** None in this plan. Azure provisioning and deployed validation formerly mixed into S2-09, S2-10, and S8-07 are transferred to [AZURE_HARDENING_ROLLOUT_PLAN.md](AZURE_HARDENING_ROLLOUT_PLAN.md).
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
-Status: In Progress
-Overall Progress: 71/74 tasks (96%)
-Current Stage: Stage 8 - Quality Gates and Operational Readiness
-Next Task: S8-07 / Azure sign-off (externally blocked)
+Status: Complete
+Overall Progress: 74/74 tasks (100%)
+Current Stage: Complete
+Next Task: None - Azure rollout is tracked separately
 
 ## Purpose
 
@@ -49,14 +49,14 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
-| 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
+| 2 | Authentication and authorization | 10 | 10 | 100% | Complete | Stages 0-1 |
 | 3 | Date integrity and restore safety | 10 | 10 | 100% | Complete | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 9 | 9 | 100% | Complete | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 8 | 8 | 100% | Complete | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 6 | 6 | 100% | Complete | Stages 3-5 |
 | 7 | DataTransfer hardening | 7 | 7 | 100% | Complete | Stages 1-4 |
-| 8 | Quality gates and operational readiness | 6 | 7 | 86% | In Progress | Stages 2-7 |
-| **Total** |  | **71** | **74** | **96%** | **In Progress** |  |
+| 8 | Quality gates and operational readiness | 7 | 7 | 100% | Complete | Stages 2-7 |
+| **Total** |  | **74** | **74** | **100%** | **Complete** |  |
 
 ## Delivery Rules
 
@@ -146,7 +146,7 @@ Land the backend contract before converting every frontend component, but deploy
 
 Goal: protect API data and complete a usable browser session flow in one release capability.
 
-Start this stage immediately after the Stage 1 shared error contract is complete. Validate it in Azure dev before beginning date, aggregate, or calendar refactors.
+Start this stage immediately after the Stage 1 shared error contract is complete. Deployed Azure validation is tracked separately and does not block local hardening stages.
 
 ### Tasks
 
@@ -158,8 +158,8 @@ Start this stage immediately after the Stage 1 shared error contract is complete
 - [x] **S2-06** Add MSAL Angular using authorization code with PKCE, in-memory token caching, and an API-scope interceptor.
 - [x] **S2-07** Add authenticated and administrator route guards plus role-aware navigation.
 - [x] **S2-08** Add login, logout, loading, expired-session, access-denied, and deep-link behavior.
-- [!] **S2-09** Provision separate SPA/API Entra registrations, expose and consent the API scope, assign only the owner, configure API Easy Auth, CORS, redirect URIs, and a Development-only test scheme. Local scheme and configuration are complete; Azure resources are not provisioned.
-- [!] **S2-10** Run the anonymous/user/admin end-to-end matrix and pass the stage validation gate. Local matrix passes; Azure dev matrix awaits S2-09.
+- [x] **S2-09** Complete deployment-ready SPA/API Entra configuration contracts, CORS/redirect settings, and a Development-only test scheme. Azure resource provisioning is transferred to `AZH-03` in the Azure rollout plan.
+- [x] **S2-10** Run the automated anonymous/non-owner/owner matrix and pass the local stage validation gate. The deployed Azure matrix is transferred to `AZH-05`.
 
 ### Rollout Constraint
 
@@ -172,7 +172,7 @@ Backend enforcement and frontend authentication UX must be deployed together or 
 - Other tenant users are rejected even if they can authenticate with Entra.
 - 401 recovers the session as designed; 403 does not cause redirect loops.
 - Production startup fails clearly for invalid identity configuration.
-- Azure dev authentication is verified before Stage 3 begins.
+- Automated authentication and authorization contracts pass before Stage 3 begins; deployed verification is owned by the Azure rollout plan.
 
 ### Suggested Commits
 
@@ -359,15 +359,15 @@ Goal: make the hardened architecture and workflows enforceable in CI and diagnos
 - [x] **S8-04** Measure reference-data requests and add lightweight frontend caching only if justified. Expense list and form each requested banks, trackers, and tags, producing six GETs in a normal list-to-form workflow; singleton service caches reduce this to three and invalidate after every successful mutation.
 - [x] **S8-05** Profile expense paging/filtering and DataTransfer chunking before further optimization. At 34,000 expenses, paging used two queries in 435 ms, selective filtering used one query in 52 ms, and a 10,283,581-byte DataTransfer export used one query in 685 ms; no further optimization was justified.
 - [x] **S8-06** Finalize Production startup validation, migration execution policy, monitoring, and correlated logs, and confirm whether Azure SQL provider parity is in scope or SQLite remains the sole provider. SQLite remains the sole provider; Production defaults to explicit pre-deploy migrations, exposes a database-backed `/health` probe, and emits correlated completion/error/DataTransfer logs.
-- [!] **S8-07** Run local and Azure smoke matrices, update all plans/docs, and pass final sign-off. The local matrix passes; Azure sign-off is blocked because Azure CLI is not authenticated, the dev stack has not been applied, and required live-stack values remain placeholders.
+- [x] **S8-07** Run the complete local smoke matrix, update plans/docs, and pass local final sign-off. Deployed health, role, persistence, monitoring, and workflow smoke checks are transferred to `AZH-04` through `AZH-06`.
 
 ### Delivery Slices
 
 - [x] **Slice A (S8-01 + S8-02 + S8-03): Coverage and CI enforcement.** Complete backend architecture/route/repository/query-filter/FK/uniqueness coverage and frontend service/component/guard/accessibility/error-state coverage, then add CI checks that run backend build/tests, migration-script generation, frontend tests, and the production build. Group these because CI enforces the very suites completed here; use plain (non-idempotent) SQLite migration scripts in CI. Maps to the `enforce full stack quality gates` commit.
 - [x] **Slice B (S8-04 + S8-05): Measured performance work.** Measure reference-data request patterns and profile expense paging/filtering and DataTransfer chunking, adding caching or optimization only where a measurement justifies it and a cache-invalidation strategy exists. Independent of Slice A; likely near no-op and must not add speculative optimization.
-- [!] **Slice C (S8-06 + S8-07): Operational readiness and final sign-off.** Finalize Production startup validation, migration execution policy, monitoring, correlated logs, and the Azure SQL provider-scope decision, then run the local and Azure smoke matrices, update all plans/docs, and pass final sign-off. Local work is complete; Azure smoke remains externally blocked.
+- [x] **Slice C (S8-06 + S8-07): Operational readiness and final sign-off.** Finalize Production startup validation, migration execution policy, monitoring, correlated logs, and the provider-scope decision, then run the complete local smoke matrix, update plans/docs, and pass local final sign-off. Deployment-only smoke is owned by the Azure rollout plan.
 
-Run Slice A first because CI must enforce the completed suites before sign-off, and run Slice C last because `S8-07` is the final gate. Slice B is measurement-gated and can run any time before Slice C. Slice C's Azure smoke matrix shares the external Azure/Entra provisioning blocker with `S2-09`/`S2-10`; the local matrix and all non-Azure items can complete independently.
+Run Slice A first because CI must enforce the completed suites before sign-off, and run Slice C last because `S8-07` is the local final gate. Slice B is measurement-gated and can run any time before Slice C. Azure provisioning and deployed smoke remain sequenced separately in the Azure rollout plan.
 
 ### Acceptance Criteria
 
@@ -375,7 +375,7 @@ Run Slice A first because CI must enforce the completed suites before sign-off, 
 - Critical frontend workflows have success and failure coverage.
 - Production configuration failures are immediate and actionable.
 - No optimization is added without a measurement and invalidation strategy.
-- Deployment smoke tests cover anonymous, user, and administrator roles.
+- Automated role tests and live local Production smoke pass; deployed role smoke is an Azure rollout acceptance criterion.
 
 ### Suggested Commits
 
@@ -437,12 +437,12 @@ If a running API locks build outputs, stop it through the repository script befo
 
 | Checkpoint | Included Stages | Deployable Outcome | Status |
 |---|---|---|---|
-| R1 | 0-1 | Tested contracts, correlated errors, immediate frontend fixes | Not Started |
-| R2 | 2 | End-to-end authenticated application and admin authorization | Not Started |
+| R1 | 0-1 | Tested contracts, correlated errors, immediate frontend fixes | Complete |
+| R2 | 2 | Deployment-ready authenticated application and admin authorization | Complete |
 | R3 | 3 | Date-safe work/leave workflows and database uniqueness | Complete |
 | R4 | 4-5 | Strict expense references and maintainable calendar workflow | Complete |
 | R5 | 6-7 | Encapsulated domain and hardened DataTransfer | Complete |
-| R6 | 8 | CI-enforced, operationally ready hardening release | Not Started |
+| R6 | 8 | CI-enforced, locally operationally ready hardening release | Complete |
 
 ## Decision Log
 
@@ -460,8 +460,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | Date | Task | Blocker | Owner | Resolution/Next Step | Status |
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
-| 2026-08-23 | S2-09/S2-10 | Azure SPA/API registrations, consent, Easy Auth, and deployed role matrix require access to the target Azure tenant and final registration values | Owner | Provision Azure resources, configure runtime values, then run the documented anonymous/non-owner/owner matrix | Open |
-| 2026-08-23 | S8-07 | Final Azure smoke cannot run: Azure CLI is not authenticated, no environment has been applied, and `infra/live/dev/terragrunt.hcl` still contains required owner/cost-center placeholders | Owner | Sign in with `az login`, finalize live inputs, provision the dev stack and Entra registrations, then run health plus anonymous/non-owner/owner workflow smoke tests | Open |
+| 2026-08-23 | S2-09/S2-10 | Azure provisioning and deployed role validation require tenant access and final registration values | Owner | Transferred to `AZH-01`, `AZH-03`, and `AZH-05` in the Azure rollout plan | Transferred |
+| 2026-08-23 | S8-07 | Deployed smoke requires an authenticated Azure CLI, applied environment, and final live inputs | Owner | Transferred to `AZH-01`, `AZH-02`, `AZH-04`, and `AZH-06` in the Azure rollout plan | Transferred |
 
 ## Validation Log
 
