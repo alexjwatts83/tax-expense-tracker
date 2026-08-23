@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 77% Complete
+- **Status:** In Progress - 78% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 57 of 74 tasks are complete. Stages 0, 1, 3, 4, and 5 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stage 6 is 5 of 6.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 6 Slice D must validate APIs and frontend contracts and pass the final stage gate.
+- **Evidence:** 58 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, and 6 are complete, and Stage 2 is 8 of 10 (blocked on Azure).
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 7 DataTransfer hardening is next.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 57/74 tasks (77%)
-Current Stage: Stage 6 - Remaining Domain Encapsulation
-Next Task: S6-06 / Slice D stage gate
+Overall Progress: 58/74 tasks (78%)
+Current Stage: Stage 7 - DataTransfer Hardening
+Next Task: S7-01 avoid unrelated reference-data export queries
 
 ## Purpose
 
@@ -289,14 +289,14 @@ Goal: enforce domain behavior across time-entry and reference entities without b
 - [x] **S6-03** Encapsulate Tracker, Tag, Bank, PublicHoliday, and soft-delete transitions.
 - [x] **S6-04** Remove hardcoded `DateTime.UtcNow` initializers and use explicit clock-driven creation.
 - [x] **S6-05** Decide and implement consistent audit timestamps for mutable reference entities.
-- [ ] **S6-06** Validate EF materialization, imports, migrations, APIs, and frontend contracts and pass the stage gate.
+- [x] **S6-06** Validate EF materialization, imports, migrations, APIs, and frontend contracts and pass the stage gate.
 
 ### Delivery Slices
 
 - [x] **Slice A (S6-01 + time-entry part of S6-04): Time-entry aggregates.** Replace public work-location and leave mutation with private/protected setters and domain methods, and move their creation to explicit clock-driven factories. Validate with focused domain/service tests plus EF materialization and DataTransfer roundtrip coverage before touching shared rules.
 - [x] **Slice B (S6-02): Shared day-entry rules.** Centralize only genuinely shared day-entry hours rules while keeping work-location and leave terminology explicit. Depends on Slice A so both aggregates are encapsulated first.
 - [x] **Slice C (S6-03 + reference-entity part of S6-04 + S6-05): Reference entities and audit policy.** Encapsulate Tracker, Tag, Bank, PublicHoliday, and soft-delete transitions, finish removing hardcoded `DateTime.UtcNow` initializers, and implement consistent audit timestamps. Reference imports preserve optional source timestamps while remaining compatible with payloads that omit them.
-- [ ] **Slice D (S6-06): Stage gate.** Validate EF materialization, imports, migrations, APIs, and frontend contracts, then run the full backend/frontend suites and production build.
+- [x] **Slice D (S6-06): Stage gate.** Validate EF materialization, imports, migrations, APIs, and frontend contracts, then run the full backend/frontend suites and production build.
 
 Implement Slice A before Slice B, resolve `DEC-HARD-006` before starting Slice C, and run Slice D only after the encapsulation slices are green.
 
@@ -524,6 +524,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S6-01 / Slice A | Domain, service, import, and EF roundtrip tests | Pass: 190 discovered .NET tests | Leave and work-location state has private setters; explicit import factories preserve identity; SQLite rematerialization and DataTransfer roundtrip preserve encapsulated state. S6-04 remains open for shared base/reference clock initialization in Slice C. |
 | 2026-08-23 | S6-02 / Slice B | Domain and full backend tests | Pass: 12 focused, 192 discovered .NET tests | Shared day-entry policy owns full-day, half-day, specific-hours, and invalid-type rules; aggregate APIs remain explicit and failed validation no longer partially mutates time-entry state. |
 | 2026-08-23 | S6-03/S6-04/S6-05 / Slice C | Domain, DataTransfer, migration, SQLite roundtrip, and full backend tests | Pass: migration script generated, 197 discovered .NET tests | Reference and soft-delete state is encapsulated; all reference mutations use `TimeProvider`; optional source audit timestamps survive export/import/rematerialization; legacy payloads remain compatible; migration backfills `UpdatedAt` from `CreatedAt`. |
+| 2026-08-23 | Stage 6 gate / S6-06 | Migration upgrade, API contract, backend/frontend suites, and production build | Pass: upgrade test, 198 discovered .NET tests, 67 frontend tests, build ok | Real SQLite upgrade backfills non-seed reference rows; streamed exports expose camel-case audit fields; DataTransfer remains opaque to frontend parsing; existing bundle warnings unchanged. |
 
 ## Progress Update Procedure
 

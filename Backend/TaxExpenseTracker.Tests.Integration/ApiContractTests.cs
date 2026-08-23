@@ -96,6 +96,9 @@ public class ApiContractTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
         Assert.Equal(JsonValueKind.Array, document.RootElement.ValueKind);
-        Assert.NotEmpty(document.RootElement.EnumerateArray());
+        var tracker = Assert.Single(document.RootElement.EnumerateArray().Take(1));
+        Assert.Equal(JsonValueKind.String, tracker.GetProperty("createdAt").ValueKind);
+        Assert.Equal(JsonValueKind.String, tracker.GetProperty("updatedAt").ValueKind);
+        Assert.False(tracker.TryGetProperty("UpdatedAt", out _));
     }
 }

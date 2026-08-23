@@ -6,22 +6,22 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Complete Stage 6 Slice D (`S6-06`) and pass the stage gate.
+**Task:** Begin Stage 7 with `S7-01`: avoid reference-data queries for unrelated per-entity exports.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
-**Current stage:** Stage 6 - Remaining Domain Encapsulation
+**Current stage:** Stage 7 - DataTransfer Hardening
 
 **Required outcome:**
 
-- Validate EF materialization, reference imports, and the `AddReferenceEntityUpdatedAt` migration.
-- Validate API and frontend contracts for the new reference `UpdatedAt` fields.
-- Run the full backend and frontend suites plus the frontend production build.
-- Mark Stage 6 complete only after the complete Slice D gate passes.
+- Route per-entity exports to repositories for only the requested entity type.
+- Avoid loading all trackers, tags, banks, and public holidays for unrelated exports.
+- Preserve the existing streamed JSON response contracts and soft-delete behavior.
+- Add query-count or repository-call tests before advancing to import atomicity work.
 
-**Immediate validation:** Run API contract coverage and frontend tests/build, then repeat the full backend suite if any contract changes are required.
+**Immediate validation:** Add focused service/controller tests proving each per-entity export touches only its owning repository.
 
-**Done in this session:** Stage 6 Slice C is complete. Reference and soft-delete state is encapsulated, hardcoded domain clocks are removed, reference mutations are audited through `TimeProvider`, optional import timestamps are backward-compatible and preserved, and the SQLite migration backfills existing rows. The backend suite is 197/197.
+**Done in this session:** Stage 6 is complete. A real SQLite upgrade test verifies reference audit backfills; streamed API exports expose camel-case audit fields; 198 backend tests and 67 frontend tests pass; the production build passes with the two existing budget warnings.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
