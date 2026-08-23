@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Complete Stage 8 task `S8-05`: profile expense paging/filtering and DataTransfer chunking before further optimization.
+**Task:** Complete Stage 8 task `S8-06`: operational readiness.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,12 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Profile expense paging/filtering and DataTransfer export/import behavior at supported sizes.
-- Add query or chunking changes only when measurements identify a meaningful bottleneck.
+- Finalize Production startup validation and migration execution policy.
+- Verify monitoring and correlated structured logs are actionable in deployment.
+- Confirm SQLite remains the sole provider or explicitly scope Azure SQL parity.
 
-**Immediate validation:** Establish repeatable latency/query-count measurements for expense paging/filtering and supported DataTransfer payloads before selecting any optimization.
+**Immediate validation:** Exercise Production startup validation with valid and invalid configuration, verify the documented migration command/policy, and inspect correlation propagation through request logs and ProblemDetails.
 
-**Done in this session:** S8-04 is complete. Expense list and form produced six bank/tracker/tag GETs in a normal workflow; singleton service caches reduce this to three shared responses and invalidate after successful mutations. The gate passed with 75/75 frontend tests and a successful production build.
+**Done in this session:** Stage 8 Slice B is complete. Reference caches reduce list-to-form lookups from six GETs to three. At 34,000 expenses, paging used two queries in 435 ms, filtering used one query in 52 ms, and a 10,283,581-byte DataTransfer export used one query in 685 ms; no query or chunking change was justified. The full .NET gate passed 215/215.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

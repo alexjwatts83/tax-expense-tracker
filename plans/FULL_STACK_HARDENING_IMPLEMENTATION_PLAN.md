@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 93% Complete
+- **Status:** In Progress - 95% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 69 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, 6, and 7 are complete; Stage 2 is 8 of 10 (blocked on Azure), and Stage 8 is 4 of 7.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 8 continues with Slice B (measured performance work).
+- **Evidence:** 70 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, 6, and 7 are complete; Stage 2 is 8 of 10 (blocked on Azure), and Stage 8 is 5 of 7.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 8 continues with Slice C (operational readiness and final sign-off).
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 69/74 tasks (93%)
+Overall Progress: 70/74 tasks (95%)
 Current Stage: Stage 8 - Quality Gates and Operational Readiness
-Next Task: S8-05 / Profile expense paging and DataTransfer
+Next Task: S8-06 / Operational readiness
 
 ## Purpose
 
@@ -55,8 +55,8 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 5 | Calendar and day-entry workflow | 8 | 8 | 100% | Complete | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 6 | 6 | 100% | Complete | Stages 3-5 |
 | 7 | DataTransfer hardening | 7 | 7 | 100% | Complete | Stages 1-4 |
-| 8 | Quality gates and operational readiness | 4 | 7 | 57% | In Progress | Stages 2-7 |
-| **Total** |  | **69** | **74** | **93%** | **In Progress** |  |
+| 8 | Quality gates and operational readiness | 5 | 7 | 71% | In Progress | Stages 2-7 |
+| **Total** |  | **70** | **74** | **95%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -357,14 +357,14 @@ Goal: make the hardened architecture and workflows enforceable in CI and diagnos
 - [x] **S8-02** Complete frontend service, critical component, guard, accessibility, and error-state coverage.
 - [x] **S8-03** Add CI checks for backend build/tests, migration script, frontend tests, and production build.
 - [x] **S8-04** Measure reference-data requests and add lightweight frontend caching only if justified. Expense list and form each requested banks, trackers, and tags, producing six GETs in a normal list-to-form workflow; singleton service caches reduce this to three and invalidate after every successful mutation.
-- [ ] **S8-05** Profile expense paging/filtering and DataTransfer chunking before further optimization.
+- [x] **S8-05** Profile expense paging/filtering and DataTransfer chunking before further optimization. At 34,000 expenses, paging used two queries in 435 ms, selective filtering used one query in 52 ms, and a 10,283,581-byte DataTransfer export used one query in 685 ms; no further optimization was justified.
 - [ ] **S8-06** Finalize Production startup validation, migration execution policy, monitoring, and correlated logs, and confirm whether Azure SQL provider parity is in scope or SQLite remains the sole provider.
 - [ ] **S8-07** Run local and Azure smoke matrices, update all plans/docs, and pass final sign-off.
 
 ### Delivery Slices
 
 - [x] **Slice A (S8-01 + S8-02 + S8-03): Coverage and CI enforcement.** Complete backend architecture/route/repository/query-filter/FK/uniqueness coverage and frontend service/component/guard/accessibility/error-state coverage, then add CI checks that run backend build/tests, migration-script generation, frontend tests, and the production build. Group these because CI enforces the very suites completed here; use plain (non-idempotent) SQLite migration scripts in CI. Maps to the `enforce full stack quality gates` commit.
-- [ ] **Slice B (S8-04 + S8-05): Measured performance work.** Measure reference-data request patterns and profile expense paging/filtering and DataTransfer chunking, adding caching or optimization only where a measurement justifies it and a cache-invalidation strategy exists. Independent of Slice A; likely near no-op and must not add speculative optimization.
+- [x] **Slice B (S8-04 + S8-05): Measured performance work.** Measure reference-data request patterns and profile expense paging/filtering and DataTransfer chunking, adding caching or optimization only where a measurement justifies it and a cache-invalidation strategy exists. Independent of Slice A; likely near no-op and must not add speculative optimization.
 - [ ] **Slice C (S8-06 + S8-07): Operational readiness and final sign-off.** Finalize Production startup validation, migration execution policy, monitoring, correlated logs, and the Azure SQL provider-scope decision, then run the local and Azure smoke matrices, update all plans/docs, and pass final sign-off.
 
 Run Slice A first because CI must enforce the completed suites before sign-off, and run Slice C last because `S8-07` is the final gate. Slice B is measurement-gated and can run any time before Slice C. Slice C's Azure smoke matrix shares the external Azure/Entra provisioning blocker with `S2-09`/`S2-10`; the local matrix and all non-Azure items can complete independently.
@@ -547,6 +547,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S7-05/S7-06/S7-07 / Slice C and Stage 7 gate | Parse benchmark, malformed/oversized/unauthorized/dry-run/rollback/large-roundtrip tests, frontend suite, and production build | Pass: 7.35 ms median / 8.29 ms p95 parse, 210 discovered .NET tests, 72 frontend tests, build ok | Worker parsing was not justified at the 10 MiB ceiling. Active HTTP operations expose real unsubscribe-based cancellation and truthful stages; malformed input returns correlated ProblemDetails; dry runs do not persist. Existing bundle warnings unchanged. |
 | 2026-08-23 | S8-01/S8-02/S8-03 / Slice A | Persistence/route/repository tests, DataTransfer service/accessibility tests, CI-equivalent suites, migration script, and production build | Pass: 4 focused backend tests, 9 focused frontend tests, 214 discovered .NET tests, 74 frontend tests, migration script generated, build ok | EF metadata now guards filters, FKs, and unique indexes; DI and MVC discovery guard repositories and attributed routes; DataTransfer HTTP contracts and announced cancel state are covered. CI now enforces all backend, migration, frontend test, and production build gates. Existing bundle warnings unchanged. |
 | 2026-08-23 | S8-04 | Reference request inventory, cache/invalidation tests, frontend suite, and production build | Pass: 2 focused tests, 75 frontend tests, build ok | Expense list-to-form navigation previously issued six reference GETs. Bank, tracker, and tag singleton caches reduce that to three shared responses and invalidate only after successful create/update/delete/restore operations. Existing bundle warnings unchanged. |
+| 2026-08-23 | S8-05 / Slice B gate | Repeatable expense paging/filtering/DataTransfer profile and full backend suite | Pass: 34,000-row profile, 215 discovered .NET tests | Paging: 2 queries / 435 ms. Selective filtering: 1 query / 52 ms. DataTransfer: 1 query / 10,283,581 bytes / 685 ms. No N+1 behavior or near-limit latency justified query or chunking changes; CI defaults to the same structural profile at 1,000 rows. |
 
 ## Progress Update Procedure
 
