@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 22% Complete
+- **Status:** In Progress - 23% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 16 of 74 tasks are complete. Stage 0 is complete, Stage 1 is 7 of 8, and Stages 2 through 8 have not started.
-- **Remaining gate:** Validate normal and Blob errors end to end and pass the Stage 1 quality gate before beginning authentication and dependent hardening stages.
+- **Evidence:** 17 of 74 tasks are complete. Stages 0 and 1 are complete, and Stages 2 through 8 have not started.
+- **Remaining gate:** Implement and validate the coordinated Stage 2 authentication and authorization capability before beginning dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 16/74 tasks (22%)
-Current Stage: Stage 1 - Error Contract and Immediate Defects
-Next Task: S1-08
+Overall Progress: 17/74 tasks (23%)
+Current Stage: Stage 2 - Authentication and Authorization
+Next Task: S2-01
 
 ## Purpose
 
@@ -48,7 +48,7 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | Stage | Scope | Done | Total | Progress | Status | Depends On |
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
-| 1 | Error contract and immediate defects | 7 | 8 | 88% | In Progress | Stage 0 |
+| 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
 | 2 | Authentication and authorization | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
@@ -56,7 +56,7 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **16** | **74** | **22%** | **In Progress** |  |
+| **Total** |  | **17** | **74** | **23%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -123,7 +123,7 @@ Goal: establish predictable errors before authentication and invariant changes, 
 - [x] **S1-05** Add typed frontend `ApiProblem` parsing/classification for JSON, text, and Blob responses.
 - [x] **S1-06** Replace duplicated component error extraction with the shared frontend utility.
 - [x] **S1-07** Fix the frontend zero-price expense filter and add a request-parameter regression test.
-- [ ] **S1-08** Validate normal and Blob errors end to end and pass the stage validation gate.
+- [x] **S1-08** Validate normal and Blob errors end to end and pass the stage validation gate.
 
 ### Backend First
 
@@ -464,6 +464,10 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S1-06 | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
 | 2026-08-23 | S1-07 | Frontend tests | Pass: 14 | ExpenseList sends `price=0` for a zero filter and omits price when the field is blank |
 | 2026-08-23 | S1-07 | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
+| 2026-08-23 | S1-08 | Focused frontend error rendering | Pass: 2 | DataTransfer renders normal JSON and Blob ProblemDetails messages through the shared parser |
+| 2026-08-23 | Stage 1 gate | Backend tests and solution build | Pass: 139 | Complete unit and integration suites; solution test build succeeded |
+| 2026-08-23 | Stage 1 gate | Frontend tests | Pass: 15 | Complete Angular suite includes normal JSON, Blob error, parser, and zero-price request coverage |
+| 2026-08-23 | Stage 1 gate | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
 
 ## Progress Update Procedure
 

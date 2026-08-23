@@ -39,4 +39,30 @@ describe('DataTransfer', () => {
 			'The export could not be completed.',
 		);
 	});
+
+	it('renders a ProblemDetails message returned as a JSON import error', async () => {
+		dataTransferService.import.mockReturnValue(
+			throwError(
+				() =>
+					new HttpErrorResponse({
+						status: 409,
+						error: {
+							code: 'conflict',
+							detail: 'The import conflicts with existing data.',
+						},
+					}),
+			),
+		);
+		const fixture = TestBed.createComponent(DataTransfer);
+		fixture.componentInstance.parsedPayload = {};
+		fixture.detectChanges();
+
+		fixture.componentInstance.runImport();
+		await vi.waitFor(() =>
+			expect(fixture.componentInstance.errorMessage).toBe('The import conflicts with existing data.'),
+		);
+		expect((fixture.nativeElement as HTMLElement).querySelector('[role="alert"]')?.textContent).toContain(
+			'The import conflicts with existing data.',
+		);
+	});
 });

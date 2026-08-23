@@ -6,21 +6,21 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S1-08` - Validate normal and Blob errors end to end and pass the Stage 1 validation gate.
+**Task:** `S2-01` - Add validated single-tenant Entra options, including tenant, API audience, and allowed user object ID.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
-**Current stage:** Stage 1 - Error Contract and Immediate Defects
+**Current stage:** Stage 2 - Authentication and Authorization
 
 **Required outcome:**
 
-- Verify a normal API ProblemDetails response is emitted by the backend contract and rendered through the shared frontend parser.
-- Verify a ProblemDetails error from a Blob-response export is decoded and rendered as a string.
-- Run the complete backend unit and integration suites.
-- Run the complete frontend test suite and production build.
-- Record the Stage 1 gate evidence and begin Stage 2 only after every gate passes.
+- Define a strongly typed backend options model for tenant ID, API audience, and the sole allowed user object ID.
+- Bind the model from configuration using the repository's existing options conventions.
+- Validate required values and GUID/identifier shape at startup so invalid production configuration fails clearly.
+- Add focused options validation tests without introducing authentication middleware or controller policies yet.
+- Preserve the coordinated rollout boundary: JWT registration begins in S2-02 and Azure provisioning remains S2-09.
 
-**Immediate validation:** Run focused cross-layer error contract checks, then all backend and frontend quality gates. When S1-08 passes, mark Stage 1 complete and advance to the first Stage 2 task.
+**Immediate validation:** Run focused options validation tests, then the complete backend unit and integration suites. `S2-02` follows with JWT bearer registration and middleware ordering.
 
 ## Work Order
 
