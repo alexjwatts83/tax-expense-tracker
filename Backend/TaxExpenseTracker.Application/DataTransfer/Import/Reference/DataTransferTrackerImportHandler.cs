@@ -45,8 +45,7 @@ public sealed class DataTransferTrackerImportHandler
 
                 if (!options.DryRun)
                 {
-                    var entity = Tracker.Create(item.Name, item.Description, _timeProvider);
-                    entity.Id = item.Id;
+                    var entity = Tracker.Import(item.Id, item.Name, item.Description, _timeProvider, item.CreatedAt, item.UpdatedAt);
                     await _trackerRepository.AddAsync(entity, cancellationToken);
                 }
 
@@ -64,9 +63,9 @@ public sealed class DataTransferTrackerImportHandler
 
             if (!options.DryRun)
             {
-                existing.Rename(item.Name, item.Description, _timeProvider);
                 if (existing.IsDeleted)
                     existing.Restore(_timeProvider);
+                existing.ApplyImport(item.Name, item.Description, _timeProvider, item.CreatedAt, item.UpdatedAt);
             }
         }
 

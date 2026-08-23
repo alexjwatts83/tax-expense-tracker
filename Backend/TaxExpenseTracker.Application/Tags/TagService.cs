@@ -50,8 +50,7 @@ public sealed class TagService : ITagService
             return false;
         }
 
-        tag.Rename(command.Name);
-        tag.SetColor(command.Color);
+        tag.Update(command.Name, command.Color, _timeProvider);
         await _tagRepository.SaveChangesAsync(cancellationToken);
 
         return true;

@@ -50,7 +50,7 @@ public sealed class BankService : IBankService
             return false;
         }
 
-        bank.Rename(command.Name);
+        bank.Rename(command.Name, _timeProvider);
         await _bankRepository.SaveChangesAsync(cancellationToken);
 
         return true;

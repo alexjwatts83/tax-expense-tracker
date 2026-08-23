@@ -45,8 +45,7 @@ public sealed class DataTransferBankImportHandler
 
                 if (!options.DryRun)
                 {
-                    var entity = Bank.Create(item.Name, _timeProvider);
-                    entity.Id = item.Id;
+                    var entity = Bank.Import(item.Id, item.Name, _timeProvider, item.CreatedAt, item.UpdatedAt);
                     await _bankRepository.AddAsync(entity, cancellationToken);
                 }
 
@@ -64,9 +63,9 @@ public sealed class DataTransferBankImportHandler
 
             if (!options.DryRun)
             {
-                existing.Rename(item.Name);
                 if (existing.IsDeleted)
                     existing.Restore(_timeProvider);
+                existing.ApplyImport(item.Name, _timeProvider, item.CreatedAt, item.UpdatedAt);
             }
         }
 

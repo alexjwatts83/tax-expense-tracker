@@ -33,6 +33,9 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.ToTable("Banks");
@@ -43,21 +46,24 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             Id = new Guid("f2c328b0-6d89-4b66-8ef4-fcbe9970a1fd"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
-                            Name = "ANZ"
+                            Name = "ANZ",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = new Guid("4c52ddd3-5208-4385-bf85-c1d3e0402ef4"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
-                            Name = "CBA"
+                            Name = "CBA",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = new Guid("69c4e618-d714-4429-b5a2-3a35eb50b343"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
-                            Name = "Westpac"
+                            Name = "Westpac",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -125,6 +131,9 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                     b.Property<string>("Source")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("HolidayDate", "Name")
@@ -141,7 +150,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 1, 1),
                             IsImported = false,
                             Name = "New Year's Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -151,7 +161,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 1, 1),
                             IsImported = false,
                             Name = "New Year's Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -161,7 +172,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 1, 26),
                             IsImported = false,
                             Name = "Australia Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -171,7 +183,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 1, 26),
                             IsImported = false,
                             Name = "Australia Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -181,7 +194,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 4, 3),
                             IsImported = false,
                             Name = "Good Friday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -191,7 +205,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 3, 26),
                             IsImported = false,
                             Name = "Good Friday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -201,7 +216,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 4, 4),
                             IsImported = false,
                             Name = "Easter Saturday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -211,7 +227,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 3, 27),
                             IsImported = false,
                             Name = "Easter Saturday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -221,7 +238,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 4, 5),
                             IsImported = false,
                             Name = "Easter Sunday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -231,7 +249,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 3, 28),
                             IsImported = false,
                             Name = "Easter Sunday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -241,7 +260,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 4, 6),
                             IsImported = false,
                             Name = "Easter Monday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -251,7 +271,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 3, 29),
                             IsImported = false,
                             Name = "Easter Monday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -261,7 +282,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 4, 25),
                             IsImported = false,
                             Name = "Anzac Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -271,7 +293,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 4, 25),
                             IsImported = false,
                             Name = "Anzac Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -281,7 +304,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 4, 27),
                             IsImported = false,
                             Name = "Additional Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -291,7 +315,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 4, 26),
                             IsImported = false,
                             Name = "Additional Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -301,7 +326,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 6, 8),
                             IsImported = false,
                             Name = "King's Birthday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -311,7 +337,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 6, 14),
                             IsImported = false,
                             Name = "King's Birthday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -321,7 +348,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 8, 3),
                             IsImported = false,
                             Name = "Bank Holiday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -331,7 +359,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 8, 2),
                             IsImported = false,
                             Name = "Bank Holiday",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -341,7 +370,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 10, 5),
                             IsImported = false,
                             Name = "Labour Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -351,7 +381,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 10, 4),
                             IsImported = false,
                             Name = "Labour Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -361,7 +392,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 12, 25),
                             IsImported = false,
                             Name = "Christmas Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -371,7 +403,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 12, 25),
                             IsImported = false,
                             Name = "Christmas Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -381,7 +414,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 12, 27),
                             IsImported = false,
                             Name = "Additional Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -391,7 +425,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 12, 26),
                             IsImported = false,
                             Name = "Boxing Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -401,7 +436,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 12, 26),
                             IsImported = false,
                             Name = "Boxing Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -411,7 +447,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2026, 12, 28),
                             IsImported = false,
                             Name = "Additional Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -421,7 +458,8 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
                             HolidayDate = new DateOnly(2027, 12, 28),
                             IsImported = false,
                             Name = "Additional Day",
-                            Source = "Seed"
+                            Source = "Seed",
+                            UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -443,6 +481,9 @@ namespace TaxExpenseTracker.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

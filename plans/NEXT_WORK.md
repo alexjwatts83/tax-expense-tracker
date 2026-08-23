@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Stage 6 Slice B (`S6-02`) - Centralize genuinely shared day-entry hours rules without hiding work-location and leave terminology.
+**Task:** Complete Stage 6 Slice D (`S6-06`) and pass the stage gate.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,14 +14,14 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Centralize the identical full-day, half-day, and specific-hours validation/calculation rules used by both time-entry aggregates (Slice B: S6-02).
-- Keep `LeaveEntry` and `WorkLocationEntry` factories, update methods, exceptions, and feature terminology explicit.
-- Encapsulate reference entities and implement audit timestamps once `DEC-HARD-006` is decided (Slice C: S6-03 + reference-entity part of S6-04 + S6-05).
-- Note: Slice C is blocked until `DEC-HARD-006` (reference entity audit timestamps) is resolved in the decision log.
+- Validate EF materialization, reference imports, and the `AddReferenceEntityUpdatedAt` migration.
+- Validate API and frontend contracts for the new reference `UpdatedAt` fields.
+- Run the full backend and frontend suites plus the frontend production build.
+- Mark Stage 6 complete only after the complete Slice D gate passes.
 
-**Immediate validation:** Focused domain tests for full-day, half-day, valid/invalid specific hours, and invalid entry types in both aggregates, followed by service and full backend suites.
+**Immediate validation:** Run API contract coverage and frontend tests/build, then repeat the full backend suite if any contract changes are required.
 
-**Done in this session:** Stage 6 Slice A is complete. `LeaveEntry` and `WorkLocationEntry` expose encapsulated state, retain explicit validated create/update behavior, and use narrow import factories for identity restoration. EF SQLite materialization and DataTransfer roundtrip pass; the backend suite is 190/190.
+**Done in this session:** Stage 6 Slice C is complete. Reference and soft-delete state is encapsulated, hardcoded domain clocks are removed, reference mutations are audited through `TimeProvider`, optional import timestamps are backward-compatible and preserved, and the SQLite migration backfills existing rows. The backend suite is 197/197.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

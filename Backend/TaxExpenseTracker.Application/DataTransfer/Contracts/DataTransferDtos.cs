@@ -23,11 +23,11 @@ public sealed record ReferenceDataExportDataDto(
     IReadOnlyList<ReferenceBankDto> Banks,
     IReadOnlyList<ReferencePublicHolidayDto> PublicHolidays);
 
-public sealed record ReferenceTrackerDto(Guid Id, string Name, string? Description, DateTime CreatedAt);
+public sealed record ReferenceTrackerDto(Guid Id, string Name, string? Description, DateTime CreatedAt, DateTime UpdatedAt);
 
-public sealed record ReferenceTagDto(Guid Id, string Name, string Color, DateTime CreatedAt);
+public sealed record ReferenceTagDto(Guid Id, string Name, string Color, DateTime CreatedAt, DateTime UpdatedAt);
 
-public sealed record ReferenceBankDto(Guid Id, string Name, DateTime CreatedAt);
+public sealed record ReferenceBankDto(Guid Id, string Name, DateTime CreatedAt, DateTime UpdatedAt);
 
 public sealed record ReferencePublicHolidayDto(
     Guid Id,
@@ -36,7 +36,8 @@ public sealed record ReferencePublicHolidayDto(
     string? Source,
     bool IsImported,
     bool CanBeWorkedOn,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    DateTime UpdatedAt);
 
 public sealed record ReferenceDataImportPayloadDto(ReferenceDataImportDataDto Data);
 
@@ -46,18 +47,34 @@ public sealed record ReferenceDataImportDataDto(
     IReadOnlyList<ReferenceBankImportItemDto>? Banks,
     IReadOnlyList<ReferencePublicHolidayImportItemDto>? PublicHolidays);
 
-public sealed record ReferenceTrackerImportItemDto(Guid Id, string Name, string? Description);
+public sealed record ReferenceTrackerImportItemDto(
+    Guid Id,
+    string Name,
+    string? Description,
+    DateTime? CreatedAt = null,
+    DateTime? UpdatedAt = null);
 
-public sealed record ReferenceTagImportItemDto(Guid Id, string Name, string Color);
+public sealed record ReferenceTagImportItemDto(
+    Guid Id,
+    string Name,
+    string Color,
+    DateTime? CreatedAt = null,
+    DateTime? UpdatedAt = null);
 
-public sealed record ReferenceBankImportItemDto(Guid Id, string Name);
+public sealed record ReferenceBankImportItemDto(
+    Guid Id,
+    string Name,
+    DateTime? CreatedAt = null,
+    DateTime? UpdatedAt = null);
 
 public sealed record ReferencePublicHolidayImportItemDto(
     Guid Id,
     DateOnly HolidayDate,
     string Name,
     string? Source,
-    bool CanBeWorkedOn);
+    bool CanBeWorkedOn,
+    DateTime? CreatedAt = null,
+    DateTime? UpdatedAt = null);
 
 public sealed record ExpenseImportPayloadDto(
     IReadOnlyList<ExpenseImportItemDto>? Expenses,

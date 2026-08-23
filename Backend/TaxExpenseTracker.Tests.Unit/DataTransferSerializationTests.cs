@@ -17,7 +17,7 @@ public class DataTransferSerializationTests
             TestTime.FixedUtcNow.UtcDateTime,
             new DataTransferSourceDto("TaxExpenseTracker", "test"),
             new ReferenceDataExportDataDto(
-                [new ReferenceTrackerDto(trackerId, "Work", "Work expenses", TestTime.FixedUtcNow.UtcDateTime)],
+                [new ReferenceTrackerDto(trackerId, "Work", "Work expenses", TestTime.FixedUtcNow.UtcDateTime, TestTime.FixedUtcNow.UtcDateTime)],
                 [],
                 [],
                 []));
@@ -79,6 +79,34 @@ public class DataTransferSerializationTests
         Assert.Equal(new DateOnly(2026, 7, 24), expense.Date);
         Assert.Equal(tagId, Assert.Single(payload.ExpenseTags!).TagId);
     }
+
+        [Fact]
+        public void ReferencePayload_WithoutAuditTimestamps_RemainsCompatible()
+        {
+                var trackerId = Guid.NewGuid();
+                var json = $$"""
+                        {
+                            "data": {
+                                "trackers": [{
+                                    "id": "{{trackerId}}",
+                                    "name": "Legacy tracker",
+                                    "description": null
+                                }],
+                                "tags": [],
+                                "banks": [],
+                                "publicHolidays": []
+                            }
+                        }
+                        """;
+
+                var payload = JsonSerializer.Deserialize<ReferenceDataImportPayloadDto>(json, SerializerOptions);
+
+                Assert.NotNull(payload);
+                var tracker = Assert.Single(payload.Data.Trackers!);
+                Assert.Equal(trackerId, tracker.Id);
+                Assert.Null(tracker.CreatedAt);
+                Assert.Null(tracker.UpdatedAt);
+        }
 
     [Fact]
     public void WorkLocationPayload_RoundTripsDomainEnumsAsNumbers()

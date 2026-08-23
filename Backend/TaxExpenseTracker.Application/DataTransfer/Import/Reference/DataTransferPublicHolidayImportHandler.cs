@@ -51,15 +51,17 @@ public sealed class DataTransferPublicHolidayImportHandler
 
                 if (!options.DryRun)
                 {
-                    var entity = PublicHoliday.Create(
+                    var entity = PublicHoliday.Import(
+                        item.Id,
                         item.HolidayDate,
                         item.Name,
                         item.Source,
                         true,
                         _timeProvider,
-                        item.CanBeWorkedOn);
+                        item.CanBeWorkedOn,
+                        item.CreatedAt,
+                        item.UpdatedAt);
 
-                    entity.Id = item.Id;
                     await _publicHolidayRepository.AddAsync(entity, cancellationToken);
                 }
 
@@ -77,11 +79,14 @@ public sealed class DataTransferPublicHolidayImportHandler
 
             if (!options.DryRun)
             {
-                existing.HolidayDate = item.HolidayDate;
-                existing.Rename(item.Name);
-                existing.Source = string.IsNullOrWhiteSpace(item.Source) ? null : item.Source.Trim();
-                existing.IsImported = true;
-                existing.SetWorkable(item.CanBeWorkedOn);
+                existing.ApplyImport(
+                    item.HolidayDate,
+                    item.Name,
+                    item.Source,
+                    item.CanBeWorkedOn,
+                    _timeProvider,
+                    item.CreatedAt,
+                    item.UpdatedAt);
             }
         }
 

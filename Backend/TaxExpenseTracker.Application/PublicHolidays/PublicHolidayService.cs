@@ -107,7 +107,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
             return null;
         }
 
-        holiday.SetWorkable(canBeWorkedOn);
+        holiday.SetWorkable(canBeWorkedOn, _timeProvider);
         await _publicHolidayRepository.SaveChangesAsync(cancellationToken);
 
         return ToReadDto(holiday);
@@ -121,12 +121,13 @@ public sealed class PublicHolidayService : IPublicHolidayService
             return null;
         }
 
-        ArgumentOutOfRangeException.ThrowIfEqual(command.HolidayDate, default, nameof(command.HolidayDate));
-
-        holiday.HolidayDate = command.HolidayDate;
-        holiday.Rename(command.Name);
-        holiday.Source = string.IsNullOrWhiteSpace(command.Source) ? null : command.Source.Trim();
-        holiday.SetWorkable(command.CanBeWorkedOn);
+        holiday.Update(
+            command.HolidayDate,
+            command.Name,
+            command.Source,
+            holiday.IsImported,
+            command.CanBeWorkedOn,
+            _timeProvider);
 
         await _publicHolidayRepository.SaveChangesAsync(cancellationToken);
 

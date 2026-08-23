@@ -18,14 +18,15 @@ public class LeaveEntry : AuditableSoftDeletableEntity
     {
         ArgumentNullException.ThrowIfNull(timeProvider);
         var now = timeProvider.GetUtcNow().UtcDateTime;
+        var hoursWorked = DayEntryHours.Resolve(entryType, specificHours);
 
         return new LeaveEntry
         {
             Id = Guid.NewGuid(),
             LeaveDate = ValidateDate(leaveDate),
             LeaveType = ValidateLeaveType(leaveType),
-            EntryType = ValidateEntryType(entryType),
-            HoursWorked = ResolveHours(entryType, specificHours),
+            EntryType = entryType,
+            HoursWorked = hoursWorked,
             Notes = NormalizeOptional(notes),
             IsDeleted = false,
             CreatedAt = now,
@@ -57,10 +58,11 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         LeaveType leaveType = LeaveType.Annual)
     {
         ArgumentNullException.ThrowIfNull(timeProvider);
+        var hoursWorked = DayEntryHours.Resolve(entryType, specificHours);
         LeaveDate = ValidateDate(leaveDate);
         LeaveType = ValidateLeaveType(leaveType);
-        EntryType = ValidateEntryType(entryType);
-        HoursWorked = ResolveHours(entryType, specificHours);
+        EntryType = entryType;
+        HoursWorked = hoursWorked;
         Notes = NormalizeOptional(notes);
         UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
     }
@@ -75,46 +77,10 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         return leaveType;
     }
 
-    private static DayEntryType ValidateEntryType(DayEntryType entryType)
-    {
-        if (!Enum.IsDefined(entryType))
-        {
-            throw new ArgumentOutOfRangeException(nameof(entryType), "Entry type is invalid.");
-        }
-
-        return entryType;
-    }
-
     private static DateOnly ValidateDate(DateOnly date)
     {
         ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;
-    }
-
-    private static decimal ResolveHours(DayEntryType entryType, decimal? specificHours)
-    {
-        return entryType switch
-        {
-            DayEntryType.FullDay => 7.6m,
-            DayEntryType.HalfDay => 3.8m,
-            DayEntryType.SpecificHours => ValidateSpecificHours(specificHours),
-            _ => throw new ArgumentOutOfRangeException(nameof(entryType), "Entry type is invalid."),
-        };
-    }
-
-    private static decimal ValidateSpecificHours(decimal? specificHours)
-    {
-        if (!specificHours.HasValue || specificHours.Value <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(specificHours), "Specific hours must be greater than 0.");
-        }
-
-        if (specificHours.Value > 24)
-        {
-            throw new ArgumentOutOfRangeException(nameof(specificHours), "Specific hours must be 24 or less.");
-        }
-
-        return specificHours.Value;
     }
 
     private static string? NormalizeOptional(string? value)

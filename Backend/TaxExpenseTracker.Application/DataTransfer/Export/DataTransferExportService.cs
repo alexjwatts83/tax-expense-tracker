@@ -66,9 +66,9 @@ public sealed class DataTransferExportService
             _timeProvider.GetUtcNow().UtcDateTime,
             new DataTransferSourceDto(AppName, "unknown"),
             new ReferenceDataExportDataDto(
-                trackers.OrderBy(x => x.Name).Select(x => new ReferenceTrackerDto(x.Id, x.Name, x.Description, x.CreatedAt)).ToList(),
-                tags.OrderBy(x => x.Name).Select(x => new ReferenceTagDto(x.Id, x.Name, x.Color, x.CreatedAt)).ToList(),
-                banks.OrderBy(x => x.Name).Select(x => new ReferenceBankDto(x.Id, x.Name, x.CreatedAt)).ToList(),
+                trackers.OrderBy(x => x.Name).Select(x => new ReferenceTrackerDto(x.Id, x.Name, x.Description, x.CreatedAt, x.UpdatedAt)).ToList(),
+                tags.OrderBy(x => x.Name).Select(x => new ReferenceTagDto(x.Id, x.Name, x.Color, x.CreatedAt, x.UpdatedAt)).ToList(),
+                banks.OrderBy(x => x.Name).Select(x => new ReferenceBankDto(x.Id, x.Name, x.CreatedAt, x.UpdatedAt)).ToList(),
                 publicHolidays.Select(x => new ReferencePublicHolidayDto(
                     x.Id,
                     x.HolidayDate,
@@ -76,7 +76,8 @@ public sealed class DataTransferExportService
                     x.Source,
                     x.IsImported,
                     x.CanBeWorkedOn,
-                    x.CreatedAt)).ToList()));
+                    x.CreatedAt,
+                    x.UpdatedAt)).ToList()));
     }
 
     public async Task<ExpenseImportPayloadDto> ExportExpensesAsync(

@@ -45,8 +45,7 @@ public sealed class DataTransferTagImportHandler
 
                 if (!options.DryRun)
                 {
-                    var entity = Tag.Create(item.Name, item.Color, _timeProvider);
-                    entity.Id = item.Id;
+                    var entity = Tag.Import(item.Id, item.Name, item.Color, _timeProvider, item.CreatedAt, item.UpdatedAt);
                     await _tagRepository.AddAsync(entity, cancellationToken);
                 }
 
@@ -64,10 +63,9 @@ public sealed class DataTransferTagImportHandler
 
             if (!options.DryRun)
             {
-                existing.Rename(item.Name);
-                existing.SetColor(item.Color);
                 if (existing.IsDeleted)
                     existing.Restore(_timeProvider);
+                existing.ApplyImport(item.Name, item.Color, _timeProvider, item.CreatedAt, item.UpdatedAt);
             }
         }
 

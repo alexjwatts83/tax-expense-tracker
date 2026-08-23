@@ -28,6 +28,23 @@ public class DataTransferTrackerImportHandlerTests
     }
 
     [Fact]
+    public async Task ImportAsync_MissingTracker_PreservesSourceAuditTimestamps()
+    {
+        var repository = new TrackerRepository();
+        var handler = new DataTransferTrackerImportHandler(repository, TestTime.TimeProvider);
+        var createdAt = new DateTime(2024, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+        var updatedAt = createdAt.AddDays(1);
+
+        await handler.ImportAsync(
+            [new ReferenceTrackerImportItemDto(Guid.NewGuid(), "Work", null, createdAt, updatedAt)],
+            new DataTransferImportOptions());
+
+        var tracker = Assert.Single(repository.Trackers);
+        Assert.Equal(createdAt, tracker.CreatedAt);
+        Assert.Equal(updatedAt, tracker.UpdatedAt);
+    }
+
+    [Fact]
     public async Task ImportAsync_Upsert_UpdatesAndRestoresExistingTracker()
     {
         var repository = new TrackerRepository();

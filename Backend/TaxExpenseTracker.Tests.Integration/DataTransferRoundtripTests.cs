@@ -45,13 +45,20 @@ public class DataTransferRoundtripTests
 
         var exported = await sourceService.ExportReferenceDataAsync(includeSoftDeleted: true);
         var restorePayload = new ReferenceDataImportPayloadDto(new ReferenceDataImportDataDto(
-            exported.Data.Trackers.Select(x => new ReferenceTrackerImportItemDto(x.Id, x.Name, x.Description)).ToList(),
-            exported.Data.Tags.Select(x => new ReferenceTagImportItemDto(x.Id, x.Name, x.Color)).ToList(),
-            exported.Data.Banks.Select(x => new ReferenceBankImportItemDto(x.Id, x.Name)).ToList(),
-            exported.Data.PublicHolidays.Select(x => new ReferencePublicHolidayImportItemDto(x.Id, x.HolidayDate, x.Name, x.Source, x.CanBeWorkedOn)).ToList()));
+            exported.Data.Trackers.Select(x => new ReferenceTrackerImportItemDto(x.Id, x.Name, x.Description, x.CreatedAt, x.UpdatedAt)).ToList(),
+            exported.Data.Tags.Select(x => new ReferenceTagImportItemDto(x.Id, x.Name, x.Color, x.CreatedAt, x.UpdatedAt)).ToList(),
+            exported.Data.Banks.Select(x => new ReferenceBankImportItemDto(x.Id, x.Name, x.CreatedAt, x.UpdatedAt)).ToList(),
+            exported.Data.PublicHolidays.Select(x => new ReferencePublicHolidayImportItemDto(x.Id, x.HolidayDate, x.Name, x.Source, x.CanBeWorkedOn, x.CreatedAt, x.UpdatedAt)).ToList()));
 
         var restoreResult = await destinationService.ImportReferenceDataAsync(restorePayload, new DataTransferImportOptions());
         Assert.All(restoreResult.Results, result => Assert.Empty(result.Errors));
+        var restored = await destinationService.ExportReferenceDataAsync(includeSoftDeleted: true);
+        Assert.Equal(exported.Data.Trackers.Single(x => x.Id == trackerId), restored.Data.Trackers.Single(x => x.Id == trackerId));
+        Assert.Equal(exported.Data.Tags.Single(x => x.Id == tagId), restored.Data.Tags.Single(x => x.Id == tagId));
+        Assert.Equal(exported.Data.Banks.Single(x => x.Id == bankId), restored.Data.Banks.Single(x => x.Id == bankId));
+        var restoredHoliday = restored.Data.PublicHolidays.Single(x => x.Id == exported.Data.PublicHolidays[0].Id);
+        Assert.Equal(exported.Data.PublicHolidays[0].CreatedAt, restoredHoliday.CreatedAt);
+        Assert.Equal(exported.Data.PublicHolidays[0].UpdatedAt, restoredHoliday.UpdatedAt);
 
         var expenseId = Guid.NewGuid();
         var expenseResult = await destinationService.ImportExpensesAsync(

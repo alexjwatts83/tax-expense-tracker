@@ -2,7 +2,7 @@ namespace TaxExpenseTracker.Domain.Entities;
 
 public abstract class AuditableSoftDeletableEntity : AuditableEntity, ISoftDeletableEntity
 {
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; protected set; }
 
     public virtual void SoftDelete(TimeProvider timeProvider)
     {
