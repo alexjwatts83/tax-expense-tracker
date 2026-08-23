@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxExpenseTracker.Api.Authorization;
 using TaxExpenseTracker.Api.Models;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Expenses;
@@ -7,6 +9,7 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/expenses")]
+[Authorize(Policy = AuthorizationPolicies.AllowedUser)]
 public class ExpensesController(IExpenseService expenseService) : ControllerBase
 {
     [HttpGet]

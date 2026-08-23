@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxExpenseTracker.Api.Authorization;
 using TaxExpenseTracker.Api.Models;
 using TaxExpenseTracker.Application.Tags;
 
@@ -6,6 +8,7 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/tags")]
+[Authorize(Policy = AuthorizationPolicies.AllowedUser)]
 public class TagsController(ITagService tagService) : ControllerBase
 {
     [HttpGet]

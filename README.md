@@ -332,7 +332,21 @@ Entra__Audience=api://<api-app-registration-guid>
 Entra__AllowedUserObjectId=<user-object-guid>
 ```
 
-When `Entra__Enabled=false`, the API does not register or run authentication middleware and the identifier values may be blank. When enabled, all three identifiers are validated at startup and the API validates Entra bearer-token issuer, audience, signature, and lifetime. Endpoint authorization policies are being added separately during Stage 2 hardening; do not treat the toggle alone as endpoint protection until that work is complete.
+When `Entra__Enabled=false`, the API does not register or run authentication middleware and the identifier values may be blank. Authorization policies permit requests in this mode so existing local and deferred Azure workflows remain available. When enabled, all three identifiers are validated at startup, the API validates Entra bearer-token issuer, audience, signature, and lifetime, and every API controller requires the configured owner identity. DataTransfer uses its own named policy. There are no intentionally anonymous API endpoints.
+
+The Angular application reads `Frontend/public/auth-config.json` at startup. It is also disabled by default. Enable it only when the SPA and API Entra registrations are ready:
+
+```json
+{
+	"enabled": true,
+	"tenantId": "<tenant-guid>",
+	"clientId": "<spa-app-registration-guid>",
+	"apiScope": "api://<api-app-registration-guid>/access_as_user",
+	"apiBasePath": "/api"
+}
+```
+
+Enable the frontend and backend settings together. MSAL uses authorization code with PKCE, keeps tokens in memory, and attaches the configured API scope only to same-origin requests under `apiBasePath`. Do not put a client secret or any other credential in browser configuration. The deployed `auth-config.json` can be replaced per environment without rebuilding the Angular bundles.
 
 ## EF Migrations
 

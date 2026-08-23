@@ -1,11 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using TaxExpenseTracker.Api.Authorization;
 using TaxExpenseTracker.Application.DataTransfer;
 
 namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/data-transfer")]
+[Authorize(Policy = AuthorizationPolicies.DataTransfer)]
 public class DataTransferController(
     IDataTransferService dataTransferService,
     ILogger<DataTransferController> logger,

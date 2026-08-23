@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxExpenseTracker.Api.Authorization;
 using TaxExpenseTracker.Api.Models;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.Leave;
@@ -7,6 +9,7 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/leave")]
+[Authorize(Policy = AuthorizationPolicies.AllowedUser)]
 public class LeaveController(
     ILeaveService leaveService,
     ILogger<LeaveController> logger) : ControllerBase

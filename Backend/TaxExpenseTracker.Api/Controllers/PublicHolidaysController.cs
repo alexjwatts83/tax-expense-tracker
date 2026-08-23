@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxExpenseTracker.Api.Authorization;
 using TaxExpenseTracker.Api.Models;
 using TaxExpenseTracker.Application.PublicHolidays;
 
@@ -6,6 +8,7 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/public-holidays")]
+[Authorize(Policy = AuthorizationPolicies.AllowedUser)]
 public class PublicHolidaysController(IPublicHolidayService publicHolidayService) : ControllerBase
 {
     [HttpGet]

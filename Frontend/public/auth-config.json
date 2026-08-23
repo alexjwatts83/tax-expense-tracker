@@ -1,0 +1,7 @@
+{
+  "enabled": false,
+  "tenantId": "",
+  "clientId": "",
+  "apiScope": "",
+  "apiBasePath": "/api"
+}

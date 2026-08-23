@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxExpenseTracker.Api.Authorization;
 using TaxExpenseTracker.Api.Models;
 using TaxExpenseTracker.Application.Common;
 using TaxExpenseTracker.Application.WorkLocation;
@@ -7,6 +9,7 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/work-locations")]
+[Authorize(Policy = AuthorizationPolicies.AllowedUser)]
 public class WorkLocationController(
     IWorkLocationService workLocationService,
     ILogger<WorkLocationController> logger) : ControllerBase

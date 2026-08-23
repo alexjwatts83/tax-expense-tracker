@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaxExpenseTracker.Api.Authorization;
 using TaxExpenseTracker.Api.Models;
 using TaxExpenseTracker.Application.Banks;
 
@@ -6,6 +8,7 @@ namespace TaxExpenseTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/banks")]
+[Authorize(Policy = AuthorizationPolicies.AllowedUser)]
 public class BanksController(IBankService bankService) : ControllerBase
 {
     [HttpGet]

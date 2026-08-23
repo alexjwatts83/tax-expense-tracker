@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S2-04` - Apply authorization policies to every controller and document intentionally anonymous endpoints.
+**Task:** `S2-07` - Add authenticated and administrator route guards plus role-aware navigation.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Apply the allowed-user policy to every normal API controller.
-- Apply the named DataTransfer policy to the DataTransfer controller.
-- Keep local and deferred Azure workflows available through the disabled-mode permissive policy behavior.
-- Inventory and explicitly document any endpoint intentionally left anonymous; do not leave accidental gaps.
-- Add reflection or integration coverage proving every controller has the expected policy.
+- Add an authenticated guard for normal application routes when authentication is enabled.
+- Add an administrator guard for DataTransfer using the configured owner identity contract.
+- Keep all routes available when authentication is disabled.
+- Hide or show navigation destinations from the same authorization state used by guards.
+- Add focused guard and navigation tests for disabled, anonymous, authenticated owner, and non-owner states.
 
-**Immediate validation:** Run focused controller-policy coverage, then the complete backend unit and integration suites. `S2-05` follows with 401, 403, authenticated-user, and DataTransfer authorization integration tests.
+**Immediate validation:** Run focused guard and navigation tests, then the complete Angular test suite and production build. `S2-08` follows with login, logout, loading, expired-session, access-denied, and deep-link behavior.
 
 ## Work Order
 

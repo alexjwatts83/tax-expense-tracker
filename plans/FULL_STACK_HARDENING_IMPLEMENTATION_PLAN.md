@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 27% Complete
+- **Status:** In Progress - 31% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 20 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 3 of 10, and Stages 3 through 8 have not started.
+- **Evidence:** 23 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 6 of 10, and Stages 3 through 8 have not started.
 - **Remaining gate:** Implement and validate the coordinated Stage 2 authentication and authorization capability before beginning dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 20/74 tasks (27%)
+Overall Progress: 23/74 tasks (31%)
 Current Stage: Stage 2 - Authentication and Authorization
-Next Task: S2-04
+Next Task: S2-07
 
 ## Purpose
 
@@ -49,14 +49,14 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
-| 2 | Authentication and authorization | 3 | 10 | 30% | In Progress | Stages 0-1 |
+| 2 | Authentication and authorization | 6 | 10 | 60% | In Progress | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **20** | **74** | **27%** | **In Progress** |  |
+| **Total** |  | **23** | **74** | **31%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -153,9 +153,9 @@ Start this stage immediately after the Stage 1 shared error contract is complete
 - [x] **S2-01** Add validated single-tenant Entra options, including tenant, API audience, and allowed user object ID.
 - [x] **S2-02** Register JWT bearer validation and place `UseAuthentication()` before authorization.
 - [x] **S2-03** Add an allowed-user policy and a named DataTransfer policy; both authorize the sole configured identity without introducing application roles.
-- [ ] **S2-04** Apply policies to every controller and document intentionally anonymous endpoints.
-- [ ] **S2-05** Add backend 401/403/authenticated/admin integration tests.
-- [ ] **S2-06** Add MSAL Angular using authorization code with PKCE, in-memory token caching, and an API-scope interceptor.
+- [x] **S2-04** Apply policies to every controller and document intentionally anonymous endpoints. No API endpoints are intentionally anonymous.
+- [x] **S2-05** Add backend 401/403/authenticated/admin integration tests.
+- [x] **S2-06** Add MSAL Angular using authorization code with PKCE, in-memory token caching, and an API-scope interceptor.
 - [ ] **S2-07** Add authenticated and administrator route guards plus role-aware navigation.
 - [ ] **S2-08** Add login, logout, loading, expired-session, access-denied, and deep-link behavior.
 - [ ] **S2-09** Provision separate SPA/API Entra registrations, expose and consent the API scope, assign only the owner, configure API Easy Auth, CORS, redirect URIs, and a Development-only test scheme.
@@ -474,6 +474,13 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S2-02 | Backend tests and solution build | Pass: 150 | Complete suite remains green with authentication disabled by default and conditional middleware ordering |
 | 2026-08-23 | S2-03 | Authorization policy tests | Pass: 8 | Both policies allow disabled mode and enforce authenticated matching `oid` claims when enabled |
 | 2026-08-23 | S2-03 | Backend tests and solution build | Pass: 158 | Complete suite remains green before controller policy application |
+| 2026-08-23 | S2-04 | Controller authorization coverage | Pass: 1 | All eight controllers carry the expected named policy and no controller or action allows anonymous access |
+| 2026-08-23 | S2-04 | Backend tests and solution build | Pass: 159 | Complete suite remains green with class-level policies and authentication disabled by default |
+| 2026-08-23 | S2-05 | HTTP authorization integration tests | Pass: 6 | Normal and DataTransfer endpoints return 401 anonymously, 403 for missing/different owner IDs, and 200 for the configured owner |
+| 2026-08-23 | S2-05 | Backend tests and solution build | Pass: 165 | Complete suite includes 43 integration tests and preserves disabled-mode workflows |
+| 2026-08-23 | S2-06 | Frontend authentication tests | Pass: 7 | Runtime config validation, enabled/disabled interception, API scope acquisition, and same-origin API URL matching covered |
+| 2026-08-23 | S2-06 | Frontend tests | Pass: 22 | Complete Angular suite remains green with authentication disabled by default |
+| 2026-08-23 | S2-06 | Frontend production build | Pass with 2 warnings | Initial bundle is 799.97 kB after MSAL; existing initial-bundle and calendar day-cell style budgets remain warnings |
 
 ## Progress Update Procedure
 
