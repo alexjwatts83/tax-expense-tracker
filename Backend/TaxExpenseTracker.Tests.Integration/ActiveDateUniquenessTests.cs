@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TaxExpenseTracker.Application.Common;
+using TaxExpenseTracker.Application.Leave;
 using TaxExpenseTracker.Domain.Entities;
 using TaxExpenseTracker.Infrastructure.Data;
 
@@ -58,5 +60,21 @@ public class ActiveDateUniquenessTests
         var saved = db.SaveChanges();
 
         Assert.Equal(1, saved);
+    }
+
+    [Fact]
+    public async Task UniqueConstraintRace_ThroughRepository_IsTranslatedToConflict()
+    {
+        using var factory = new TaxExpenseTrackerApiFactory();
+        using var _ = factory.CreateClient();
+        using var scope = factory.Services.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<ILeaveRepository>();
+        var date = new DateOnly(2032, 5, 5);
+
+        await repository.AddAsync(LeaveEntry.Create(date, DayEntryType.FullDay, null, null, TimeProvider.System));
+        await repository.SaveChangesAsync();
+        await repository.AddAsync(LeaveEntry.Create(date, DayEntryType.HalfDay, null, null, TimeProvider.System));
+
+        await Assert.ThrowsAsync<ApplicationConflictException>(() => repository.SaveChangesAsync());
     }
 }

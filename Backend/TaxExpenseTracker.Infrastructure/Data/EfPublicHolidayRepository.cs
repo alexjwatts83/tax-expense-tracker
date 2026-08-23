@@ -84,6 +84,6 @@ public sealed class EfPublicHolidayRepository : IPublicHolidayRepository
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        return _dbContext.SaveChangesTranslatingConflictsAsync(cancellationToken);
     }
 }

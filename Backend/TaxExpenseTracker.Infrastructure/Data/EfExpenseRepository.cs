@@ -175,7 +175,7 @@ public sealed class EfExpenseRepository : IExpenseRepository
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        return _dbContext.SaveChangesTranslatingConflictsAsync(cancellationToken);
     }
 
     public Task<decimal> GetTotalSpentAsync(CancellationToken cancellationToken = default)

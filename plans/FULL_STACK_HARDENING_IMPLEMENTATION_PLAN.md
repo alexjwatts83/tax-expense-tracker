@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 45% Complete
+- **Status:** In Progress - 47% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 33 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 3 is 8 of 10, and Stages 4 through 8 have not started.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked; Stage 3 continues under a gate override. Active-date unique indexes and existing-data normalization are in place; uniqueness-race conflict mapping (S3-09) and the stage gate (S3-10) remain.
+- **Evidence:** 35 of 74 tasks are complete. Stages 0, 1, and 3 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stages 4 through 8 have not started.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 3 is complete for the SQLite target; the filtered-index `HasFilter` SQL must be reviewed for the planned Azure SQL provider when it is added.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 33/74 tasks (45%)
-Current Stage: Stage 3 - Date Integrity and Restore Safety
-Next Task: S3-09
+Overall Progress: 35/74 tasks (47%)
+Current Stage: Stage 4 - Expense References and Aggregate Ownership
+Next Task: S4-01
 
 ## Purpose
 
@@ -50,13 +50,13 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
 | 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
-| 3 | Date integrity and restore safety | 8 | 10 | 80% | In Progress | Stages 0-1 |
+| 3 | Date integrity and restore safety | 10 | 10 | 100% | Complete | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **33** | **74** | **45%** | **In Progress** |  |
+| **Total** |  | **35** | **74** | **47%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -194,9 +194,8 @@ Goal: make date-only rules consistent from Angular through the domain and databa
 - [x] **S3-06** Add restore conflict checks for work-location and leave entries.
 - [x] **S3-07** Add filtered unique indexes for active work-location and leave dates.
 - [x] **S3-08** Create migration normalization, duplicate preflight, repair, and rollback steps.
-- [ ] **S3-09** Translate database uniqueness races to the agreed conflict response and frontend UX.
-- [ ] **S3-10** Validate upgrade, roundtrip, timezone, restore, batch, and import behavior and pass the stage gate.
-
+- [x] **S3-09** Translate database uniqueness races to the agreed conflict response and frontend UX.
+- [x] **S3-10** Validate upgrade, roundtrip, timezone, restore, batch, and import behavior and pass the stage gate.
 ### Backend First
 
 Frontend date types/utilities can land before the migration because the wire format remains stable. Apply the backend migration only after frontend compatibility tests are green.
@@ -406,7 +405,7 @@ If a running API locks build outputs, stop it through the repository script befo
 |---|---|---|---|
 | R1 | 0-1 | Tested contracts, correlated errors, immediate frontend fixes | Not Started |
 | R2 | 2 | End-to-end authenticated application and admin authorization | Not Started |
-| R3 | 3 | Date-safe work/leave workflows and database uniqueness | Not Started |
+| R3 | 3 | Date-safe work/leave workflows and database uniqueness | Complete |
 | R4 | 4-5 | Strict expense references and maintainable calendar workflow | Not Started |
 | R5 | 6-7 | Encapsulated domain and hardened DataTransfer | Not Started |
 | R6 | 8 | CI-enforced, operationally ready hardening release | Not Started |
@@ -494,6 +493,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S3-05 | EF migration `ConvertCalendarDatesToDateOnly` | Generated and script builds | SQLite stores dates as TEXT so no column alter is emitted; existing non-midnight normalization and preflight remain S3-08 |
 | 2026-08-23 | S3-07/S3-08 | Active-date uniqueness integration tests | Pass: 3 | Duplicate active work-location and leave dates are rejected by the database; soft-deleted rows do not block a new active entry |
 | 2026-08-23 | S3-07/S3-08 | Backend suite and migration script | Pass: 104 unit, 53 integration | `AddActiveDateUniqueIndexes` normalizes legacy values, soft-deletes duplicate active entries deterministically, and creates filtered unique indexes |
+| 2026-08-23 | S3-09 | Unique-constraint race translation test | Pass: 1 | A duplicate active-date insert via the repository surfaces as `ApplicationConflictException` and the 409 conflict response |
+| 2026-08-23 | Stage 3 gate | Backend, frontend, and production build | Pass: 104 unit, 54 integration, 48 frontend, build ok | Date-only contracts, restore conflicts, active-date uniqueness, race conflict mapping, and timezone-safe calendar dates validated |
 
 ## Progress Update Procedure
 

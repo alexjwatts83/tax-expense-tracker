@@ -69,6 +69,6 @@ public abstract class EfSoftDeleteRepository<T> : ISoftDeleteRepository<T> where
 
     public virtual Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return DbContext.SaveChangesAsync(cancellationToken);
+        return DbContext.SaveChangesTranslatingConflictsAsync(cancellationToken);
     }
 }

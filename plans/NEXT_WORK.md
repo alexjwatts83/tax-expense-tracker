@@ -6,24 +6,22 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S3-09` - Translate database uniqueness races to the agreed conflict response and frontend UX, then `S3-10` runs the Stage 3 validation gate.
+**Task:** `S4-01` - Add backend tests for missing, duplicate, and stale expense tag IDs on create/update. Stage 4 (Expense References and Aggregate Ownership) depends on Stages 1 and 3, which are complete.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
-**Current stage:** Stage 3 - Date Integrity and Restore Safety
+**Current stage:** Stage 4 - Expense References and Aggregate Ownership
 
 **Required outcome:**
 
-- Catch the unique-index `DbUpdateException` on create, update, restore, batch, and import paths.
-- Map it to the agreed `409 conflict` ProblemDetails response instead of a 500.
-- Surface the conflict clearly in the affected frontend workflows.
-- Add coverage for the race path and pass the Stage 3 gate (upgrade, roundtrip, timezone, restore, batch, import).
+- Add characterization tests for how expense create/update handles missing, duplicate, and stale tag IDs today.
+- Establish the baseline before rejecting missing references (S4-02) and encapsulating the aggregate (S4-06..S4-08).
 
-**Immediate validation:** Run the full backend suite, the EF migration script, the Angular suite, and the production build.
+**Immediate validation:** Run the backend unit and integration suites.
 
-**Done in this session:** S3-07 and S3-08 are complete. Filtered unique indexes enforce one active entry per date at the database level; the `AddActiveDateUniqueIndexes` migration normalizes legacy values and deterministically repairs duplicates with a rollback. Backend 104 unit / 53 integration pass.
+**Done in this session:** Stage 3 is complete. Calendar dates are `DateOnly` end to end, restore conflicts are enforced, active-date uniqueness is guaranteed by filtered indexes, and unique-constraint races map to the 409 conflict response. Backend 104 unit / 54 integration and frontend 48 pass; production build ok.
 
-**Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
+**Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning. The Stage 3 filtered-index SQL should also be reviewed for the Azure SQL provider when it is added.
 
 ## Work Order
 
