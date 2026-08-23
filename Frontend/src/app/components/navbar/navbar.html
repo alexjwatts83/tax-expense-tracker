@@ -3,6 +3,7 @@
 
 	<span class="spacer"></span>
 
+	@if (session.isAuthenticated()) {
 	<nav class="nav-links" aria-label="Primary navigation">
 		<a mat-button routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
 		<a mat-button routerLink="/expenses" routerLinkActive="active-link">Expenses</a>
@@ -15,8 +16,20 @@
 				<a routerLink="/trackers" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Trackers</a>
 				<a routerLink="/tags" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Tags</a>
 				<a routerLink="/banks" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Banks</a>
-				<a routerLink="/data-transfer" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Data Transfer</a>
+				@if (session.isAdministrator()) {
+					<a routerLink="/data-transfer" routerLinkActive="active-menu-item" (click)="closeMenu(manageMenu)">Data Transfer</a>
+				}
 			</nav>
 		</details>
 	</nav>
+	}
+
+	@if (session.enabled) {
+		@if (session.isAuthenticated()) {
+			<span class="identity">{{ session.displayName() }}</span>
+			<button mat-button type="button" (click)="session.logout()">Sign out</button>
+		} @else {
+			<a mat-button routerLink="/login">Sign in</a>
+		}
+	}
 </mat-toolbar>

@@ -6,6 +6,7 @@ export interface AuthConfig {
   clientId: string;
   apiScope: string;
   apiBasePath: string;
+  allowedUserObjectId: string;
 }
 
 export const AUTH_CONFIG = new InjectionToken<AuthConfig>('AUTH_CONFIG');
@@ -16,6 +17,7 @@ export const disabledAuthConfig: AuthConfig = {
   clientId: '',
   apiScope: '',
   apiBasePath: '/api',
+  allowedUserObjectId: '',
 };
 
 export async function loadAuthConfig(): Promise<AuthConfig> {
@@ -36,10 +38,11 @@ export function parseAuthConfig(value: unknown): AuthConfig {
     clientId: readString(value, 'clientId'),
     apiScope: readString(value, 'apiScope'),
     apiBasePath: readString(value, 'apiBasePath') || '/api',
+    allowedUserObjectId: readString(value, 'allowedUserObjectId'),
   };
 
   if (config.enabled) {
-    const missingKeys = (['tenantId', 'clientId', 'apiScope'] as const)
+    const missingKeys = (['tenantId', 'clientId', 'apiScope', 'allowedUserObjectId'] as const)
       .filter((key) => !config[key]);
     if (missingKeys.length > 0)
       throw new Error(`Enabled authentication requires: ${missingKeys.join(', ')}.`);

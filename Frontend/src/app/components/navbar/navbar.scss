@@ -15,6 +15,15 @@
 	flex: 1;
 }
 
+.identity {
+	max-width: 14rem;
+	margin-inline: 0.75rem 0.25rem;
+	overflow: hidden;
+	font-size: 0.875rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 a[mat-button].active-link {
 	background-color: rgb(255 255 255 / 18%);
 	font-weight: 600;

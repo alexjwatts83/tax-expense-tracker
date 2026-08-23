@@ -3,5 +3,6 @@
   "tenantId": "",
   "clientId": "",
   "apiScope": "",
-  "apiBasePath": "/api"
+  "apiBasePath": "/api",
+  "allowedUserObjectId": ""
 }

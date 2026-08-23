@@ -1,3 +1,11 @@
+.startup-status {
+  display: grid;
+  min-height: 100vh;
+  margin: 0;
+  place-items: center;
+  color: #3f4948;
+  font: 500 1rem Roboto, sans-serif;
+}
 html {
   height: 100%;
 }

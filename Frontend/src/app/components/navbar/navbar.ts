@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { AuthSession } from '../../auth/auth-session';
 
 @Component({
   selector: 'app-navbar',
@@ -10,6 +11,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   styleUrl: './navbar.scss',
 })
 export class Navbar {
+  readonly session = inject(AuthSession);
+
   closeMenu(menu: HTMLDetailsElement): void {
     menu.open = false;
   }

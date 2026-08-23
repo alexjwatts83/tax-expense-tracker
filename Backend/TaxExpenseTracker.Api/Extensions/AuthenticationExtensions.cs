@@ -1,11 +1,15 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using TaxExpenseTracker.Api.Authentication;
 using TaxExpenseTracker.Api.Options;
 
 namespace TaxExpenseTracker.Api.Extensions;
 
 public static class AuthenticationExtensions
 {
+    public const string DevelopmentSchemeConfigKey = "Authentication:UseDevelopmentTestScheme";
+
     public static bool AddEntraAuthentication(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -36,6 +40,34 @@ public static class AuthenticationExtensions
                     ClockSkew = TimeSpan.FromMinutes(2),
                 };
             });
+
+        return true;
+    }
+
+    public static bool AddDevelopmentAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
+    {
+        if (!environment.IsDevelopment() || !configuration.GetValue<bool>(DevelopmentSchemeConfigKey))
+            return false;
+
+        if (!configuration.GetValue<bool>("Entra:Enabled"))
+        {
+            throw new InvalidOperationException(
+                $"{DevelopmentSchemeConfigKey} requires Entra:Enabled=true so owner policies remain enforced.");
+        }
+
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = DevelopmentAuthenticationHandler.SchemeName;
+                options.DefaultChallengeScheme = DevelopmentAuthenticationHandler.SchemeName;
+                options.DefaultForbidScheme = DevelopmentAuthenticationHandler.SchemeName;
+            })
+            .AddScheme<AuthenticationSchemeOptions, DevelopmentAuthenticationHandler>(
+                DevelopmentAuthenticationHandler.SchemeName,
+                _ => { });
 
         return true;
     }

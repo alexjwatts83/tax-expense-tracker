@@ -8,6 +8,7 @@ import { MSAL_INSTANCE, MsalService } from '@azure/msal-angular';
 import { routes } from './app.routes';
 import { AUTH_CONFIG, AuthConfig } from './auth/auth.config';
 import { authInterceptor } from './auth/auth.interceptor';
+import { AuthSession } from './auth/auth-session';
 
 export function createAppConfig(authConfig: AuthConfig): ApplicationConfig {
   const authProviders = authConfig.enabled
@@ -26,7 +27,6 @@ export function createAppConfig(authConfig: AuthConfig): ApplicationConfig {
           }),
         },
         MsalService,
-        provideAppInitializer(() => inject(MSAL_INSTANCE).initialize()),
       ]
     : [];
 
@@ -38,6 +38,7 @@ export function createAppConfig(authConfig: AuthConfig): ApplicationConfig {
       provideAnimationsAsync(),
       { provide: AUTH_CONFIG, useValue: authConfig },
       ...authProviders,
+      provideAppInitializer(() => inject(AuthSession).initialize()),
     ],
   };
 }

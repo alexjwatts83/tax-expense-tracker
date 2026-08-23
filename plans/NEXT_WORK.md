@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S2-07` - Add authenticated and administrator route guards plus role-aware navigation.
+**Task:** `S2-09` / `S2-10` - Provision the Azure Entra resources and run the deployed role matrix. This work is blocked until the target Azure tenant and registration values are available.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Add an authenticated guard for normal application routes when authentication is enabled.
-- Add an administrator guard for DataTransfer using the configured owner identity contract.
-- Keep all routes available when authentication is disabled.
-- Hide or show navigation destinations from the same authorization state used by guards.
-- Add focused guard and navigation tests for disabled, anonymous, authenticated owner, and non-owner states.
+- Create separate single-tenant SPA and API Entra registrations.
+- Expose and consent the API scope, configure SPA redirect URIs, and assign the configured owner.
+- Configure API Easy Auth, CORS, and matching backend/frontend runtime values.
+- Deploy to Azure dev and run anonymous, non-owner, owner, expired-session, and DataTransfer checks.
+- Keep `Authentication:UseDevelopmentTestScheme` disabled in Azure and Production.
 
-**Immediate validation:** Run focused guard and navigation tests, then the complete Angular test suite and production build. `S2-08` follows with login, logout, loading, expired-session, access-denied, and deep-link behavior.
+**Immediate validation:** The local matrix is complete: backend 172/172, frontend 35/35, and the production frontend build pass. Finish with the Azure dev matrix, then close S2-09, S2-10, Stage 2, and release checkpoint R2.
 
 ## Work Order
 

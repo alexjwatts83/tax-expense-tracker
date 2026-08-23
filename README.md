@@ -342,11 +342,14 @@ The Angular application reads `Frontend/public/auth-config.json` at startup. It 
 	"tenantId": "<tenant-guid>",
 	"clientId": "<spa-app-registration-guid>",
 	"apiScope": "api://<api-app-registration-guid>/access_as_user",
-	"apiBasePath": "/api"
+	"apiBasePath": "/api",
+	"allowedUserObjectId": "<user-object-guid>"
 }
 ```
 
 Enable the frontend and backend settings together. MSAL uses authorization code with PKCE, keeps tokens in memory, and attaches the configured API scope only to same-origin requests under `apiBasePath`. Do not put a client secret or any other credential in browser configuration. The deployed `auth-config.json` can be replaced per environment without rebuilding the Angular bundles.
+
+For local role testing without Entra, run the API in the `Development` environment with valid Entra identifiers, `Entra__Enabled=true`, and `Authentication__UseDevelopmentTestScheme=true`. Send `X-Development-Object-Id: <user-object-guid>` to authenticate as that object ID. Missing headers receive 401 and non-owner IDs receive 403. The scheme cannot register outside `Development`, is disabled by default, and must never be exposed publicly.
 
 ## EF Migrations
 

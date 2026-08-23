@@ -10,6 +10,7 @@ describe('parseAuthConfig', () => {
       clientId: '',
       apiScope: '',
       apiBasePath: '/api',
+      allowedUserObjectId: '',
     });
   });
 
@@ -20,11 +21,12 @@ describe('parseAuthConfig', () => {
       clientId: 'client',
       apiScope: 'api://client/access_as_user',
       apiBasePath: '/api',
+      allowedUserObjectId: 'owner',
     }).enabled).toBe(true);
   });
 
   it('rejects incomplete enabled configuration', () => {
     expect(() => parseAuthConfig({ enabled: true, tenantId: 'tenant' }))
-      .toThrow('clientId, apiScope');
+      .toThrow('clientId, apiScope, allowedUserObjectId');
   });
 });

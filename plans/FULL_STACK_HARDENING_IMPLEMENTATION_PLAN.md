@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 31% Complete
+- **Status:** In Progress - 34% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 23 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 6 of 10, and Stages 3 through 8 have not started.
+- **Evidence:** 25 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 8 of 10, and Stages 3 through 8 have not started.
 - **Remaining gate:** Implement and validate the coordinated Stage 2 authentication and authorization capability before beginning dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 23/74 tasks (31%)
+Overall Progress: 25/74 tasks (34%)
 Current Stage: Stage 2 - Authentication and Authorization
-Next Task: S2-07
+Next Task: S2-09 (blocked on Azure/Entra provisioning)
 
 ## Purpose
 
@@ -49,14 +49,14 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
-| 2 | Authentication and authorization | 6 | 10 | 60% | In Progress | Stages 0-1 |
+| 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **23** | **74** | **31%** | **In Progress** |  |
+| **Total** |  | **25** | **74** | **34%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -156,10 +156,10 @@ Start this stage immediately after the Stage 1 shared error contract is complete
 - [x] **S2-04** Apply policies to every controller and document intentionally anonymous endpoints. No API endpoints are intentionally anonymous.
 - [x] **S2-05** Add backend 401/403/authenticated/admin integration tests.
 - [x] **S2-06** Add MSAL Angular using authorization code with PKCE, in-memory token caching, and an API-scope interceptor.
-- [ ] **S2-07** Add authenticated and administrator route guards plus role-aware navigation.
-- [ ] **S2-08** Add login, logout, loading, expired-session, access-denied, and deep-link behavior.
-- [ ] **S2-09** Provision separate SPA/API Entra registrations, expose and consent the API scope, assign only the owner, configure API Easy Auth, CORS, redirect URIs, and a Development-only test scheme.
-- [ ] **S2-10** Run the anonymous/user/admin end-to-end matrix and pass the stage validation gate.
+- [x] **S2-07** Add authenticated and administrator route guards plus role-aware navigation.
+- [x] **S2-08** Add login, logout, loading, expired-session, access-denied, and deep-link behavior.
+- [!] **S2-09** Provision separate SPA/API Entra registrations, expose and consent the API scope, assign only the owner, configure API Easy Auth, CORS, redirect URIs, and a Development-only test scheme. Local scheme and configuration are complete; Azure resources are not provisioned.
+- [!] **S2-10** Run the anonymous/user/admin end-to-end matrix and pass the stage validation gate. Local matrix passes; Azure dev matrix awaits S2-09.
 
 ### Rollout Constraint
 
@@ -427,6 +427,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | Date | Task | Blocker | Owner | Resolution/Next Step | Status |
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
+| 2026-08-23 | S2-09/S2-10 | Azure SPA/API registrations, consent, Easy Auth, and deployed role matrix require access to the target Azure tenant and final registration values | Owner | Provision Azure resources, configure runtime values, then run the documented anonymous/non-owner/owner matrix | Open |
 
 ## Validation Log
 
@@ -481,6 +482,11 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S2-06 | Frontend authentication tests | Pass: 7 | Runtime config validation, enabled/disabled interception, API scope acquisition, and same-origin API URL matching covered |
 | 2026-08-23 | S2-06 | Frontend tests | Pass: 22 | Complete Angular suite remains green with authentication disabled by default |
 | 2026-08-23 | S2-06 | Frontend production build | Pass with 2 warnings | Initial bundle is 799.97 kB after MSAL; existing initial-bundle and calendar day-cell style budgets remain warnings |
+| 2026-08-23 | S2-07/S2-08 | Frontend authentication experience tests | Pass: 22 | Guards, owner navigation, session initialization, login/logout, deep links, loading, 401 recovery, expired tokens, and non-looping 403 behavior covered |
+| 2026-08-23 | S2-09/S2-10 local | Development authentication and HTTP role matrix | Pass: 7 | Development-only registration gate plus anonymous 401, non-owner 403, owner 200, and DataTransfer owner 200 covered |
+| 2026-08-23 | S2-07/S2-08 | Frontend tests | Pass: 35 | Complete Angular suite remains green with authentication disabled by default |
+| 2026-08-23 | S2-07/S2-08 | Frontend production build | Pass with 2 warnings | Initial bundle is 804.35 kB; initial-bundle and calendar day-cell style budgets remain warnings |
+| 2026-08-23 | S2-09/S2-10 local | Backend tests and solution build | Pass: 172 | Complete suite includes 50 integration tests and proves Production cannot select the Development scheme |
 
 ## Progress Update Procedure
 

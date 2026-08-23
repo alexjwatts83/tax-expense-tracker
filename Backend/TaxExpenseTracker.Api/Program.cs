@@ -50,6 +50,10 @@ builder.Services
     .ValidateOnStart();
 builder.Services.AddSingleton<IValidateOptions<EntraOptions>, EntraOptionsValidator>();
 var authenticationEnabled = builder.Services.AddEntraAuthentication(builder.Configuration);
+var developmentAuthenticationEnabled = builder.Services.AddDevelopmentAuthentication(
+    builder.Configuration,
+    builder.Environment);
+authenticationEnabled |= developmentAuthenticationEnabled;
 builder.Services.AddApplicationAuthorization(builder.Configuration);
 
 var allowedOrigins = builder.Configuration
@@ -108,6 +112,8 @@ var app = builder.Build();
 
 if (!authenticationEnabled)
     app.Logger.LogWarning("Authentication is disabled. Set Entra:Enabled to true before exposing the API publicly.");
+else if (developmentAuthenticationEnabled)
+    app.Logger.LogWarning("Development test authentication is enabled. Do not expose this Development environment publicly.");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
