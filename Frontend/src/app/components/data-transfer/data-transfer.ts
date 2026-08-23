@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
-import { finalize, take } from 'rxjs';
+import { Subscription, finalize, take } from 'rxjs';
 import {
 	DataTransferExportKind,
 	DataTransferImportKind,
@@ -44,9 +44,11 @@ interface SelectOption<T> {
 	templateUrl: './data-transfer.html',
 	styleUrl: './data-transfer.scss',
 })
-export class DataTransfer {
+export class DataTransfer implements OnDestroy {
 	private readonly dataTransferService = inject(DataTransferService);
 	private readonly cdr = inject(ChangeDetectorRef);
+	private exportSubscription: Subscription | null = null;
+	private importSubscription: Subscription | null = null;
 
 	readonly exportOptions: SelectOption<DataTransferExportKind>[] = [
 		{ value: 'reference', label: 'Reference data backup' },
@@ -96,14 +98,15 @@ export class DataTransfer {
 
 		this.isExporting = true;
 		this.errorMessage = '';
-		this.infoMessage = '';
+		this.infoMessage = 'Downloading export...';
 
-		this.dataTransferService
+		this.exportSubscription = this.dataTransferService
 			.export(this.exportKind, this.includeSoftDeleted)
 			.pipe(
 				take(1),
 				finalize(() => {
 					this.isExporting = false;
+					this.exportSubscription = null;
 					this.cdr.detectChanges();
 				}),
 			)
@@ -116,6 +119,15 @@ export class DataTransfer {
 					void this.showApiError(error, 'Unable to export data.');
 				},
 			});
+	}
+
+	cancelExport(): void {
+		if (!this.exportSubscription)
+			return;
+
+		this.exportSubscription.unsubscribe();
+		this.infoMessage = 'Export cancelled.';
+		this.cdr.detectChanges();
 	}
 
 	async selectFile(event: Event): Promise<void> {
@@ -165,10 +177,10 @@ export class DataTransfer {
 
 		this.isImporting = true;
 		this.errorMessage = '';
-		this.infoMessage = '';
+		this.infoMessage = this.dryRun ? 'Validating import...' : 'Importing data...';
 		this.result = null;
 
-		this.dataTransferService
+		this.importSubscription = this.dataTransferService
 			.import(
 				this.importKind,
 				this.parsedPayload,
@@ -180,6 +192,7 @@ export class DataTransfer {
 				take(1),
 				finalize(() => {
 					this.isImporting = false;
+					this.importSubscription = null;
 					this.cdr.detectChanges();
 				}),
 			)
@@ -202,6 +215,21 @@ export class DataTransfer {
 					void this.showApiError(error, 'Unable to process the import.');
 				},
 			});
+	}
+
+	cancelImport(): void {
+		if (!this.importSubscription)
+			return;
+
+		this.importSubscription.unsubscribe();
+		this.validationPassed = false;
+		this.infoMessage = this.dryRun ? 'Validation cancelled.' : 'Import cancelled.';
+		this.cdr.detectChanges();
+	}
+
+	ngOnDestroy(): void {
+		this.exportSubscription?.unsubscribe();
+		this.importSubscription?.unsubscribe();
 	}
 
 	settingsChanged(): void {

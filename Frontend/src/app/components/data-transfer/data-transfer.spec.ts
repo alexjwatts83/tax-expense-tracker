@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { DataTransferService } from '../../services/data-transfer';
 import { DataTransfer } from './data-transfer';
 
@@ -64,6 +64,45 @@ describe('DataTransfer', () => {
 		expect((fixture.nativeElement as HTMLElement).querySelector('[role="alert"]')?.textContent).toContain(
 			'The import conflicts with existing data.',
 		);
+	});
+
+	it('cancels an active export request', () => {
+		const teardown = vi.fn();
+		dataTransferService.export.mockReturnValue(new Observable(() => teardown));
+		const fixture = TestBed.createComponent(DataTransfer);
+		fixture.detectChanges();
+
+		fixture.componentInstance.downloadExport();
+
+		expect(fixture.componentInstance.isExporting).toBe(true);
+		expect(fixture.componentInstance.infoMessage).toBe('Downloading export...');
+
+		fixture.componentInstance.cancelExport();
+
+		expect(teardown).toHaveBeenCalledOnce();
+		expect(fixture.componentInstance.isExporting).toBe(false);
+		expect(fixture.componentInstance.infoMessage).toBe('Export cancelled.');
+	});
+
+	it('cancels an active validation request', () => {
+		const teardown = vi.fn();
+		dataTransferService.import.mockReturnValue(new Observable(() => teardown));
+		const fixture = TestBed.createComponent(DataTransfer);
+		fixture.componentInstance.parsedPayload = {};
+		fixture.componentInstance.validationPassed = true;
+		fixture.detectChanges();
+
+		fixture.componentInstance.runImport();
+
+		expect(fixture.componentInstance.isImporting).toBe(true);
+		expect(fixture.componentInstance.infoMessage).toBe('Validating import...');
+
+		fixture.componentInstance.cancelImport();
+
+		expect(teardown).toHaveBeenCalledOnce();
+		expect(fixture.componentInstance.isImporting).toBe(false);
+		expect(fixture.componentInstance.validationPassed).toBe(false);
+		expect(fixture.componentInstance.infoMessage).toBe('Validation cancelled.');
 	});
 
 	it('rejects a file larger than 10 MiB without reading it', async () => {

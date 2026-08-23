@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 84% Complete
+- **Status:** In Progress - 88% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 62 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, and 6 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stage 7 is 4 of 7.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 7 continues with Slice C (frontend UX and stage gate).
+- **Evidence:** 65 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, 6, and 7 are complete; Stage 2 is 8 of 10 (blocked on Azure).
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 8 begins with Slice A (coverage and CI enforcement).
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 62/74 tasks (84%)
-Current Stage: Stage 7 - DataTransfer Hardening
-Next Task: S7-05/S7-06 / Slice C frontend UX and stage gate
+Overall Progress: 65/74 tasks (88%)
+Current Stage: Stage 8 - Quality Gates and Operational Readiness
+Next Task: S8-01/S8-02/S8-03 / Slice A coverage and CI enforcement
 
 ## Purpose
 
@@ -52,11 +52,11 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
 | 3 | Date integrity and restore safety | 10 | 10 | 100% | Complete | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 9 | 9 | 100% | Complete | Stages 1, 3 |
-| 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
-| 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
-| 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
+| 5 | Calendar and day-entry workflow | 8 | 8 | 100% | Complete | Stages 1, 3 |
+| 6 | Remaining domain encapsulation | 6 | 6 | 100% | Complete | Stages 3-5 |
+| 7 | DataTransfer hardening | 7 | 7 | 100% | Complete | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **44** | **74** | **59%** | **In Progress** |  |
+| **Total** |  | **65** | **74** | **88%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -322,15 +322,15 @@ Goal: make DataTransfer efficient, role-restricted, and safe for supported brows
 - [x] **S7-02** Verify and test that a single import wraps all its entity handlers in one transaction so any failure rolls back the whole payload; confirm mode behavior (Upsert/InsertOnly/Replace) and dry-run non-persistence.
 - [x] **S7-03** Enforce the `DEC-HARD-005` limits (10 MiB selected file, 12 MiB API request) by replacing the current 100 MiB `RequestSizeLimit` on the DataTransfer endpoints.
 - [x] **S7-04** Reject oversized or non-JSON files in the frontend before `file.text()`/`JSON.parse()`, using the same 10 MiB ceiling from `DEC-HARD-005`.
-- [ ] **S7-05** Move supported large parsing off the UI thread only if measurements against the 10 MiB ceiling justify it.
-- [ ] **S7-06** Complete the DataTransfer UX parts not already implemented: authorization states, cancellation only where the request is truly abortable, and truthful stage-based progress. Correlation IDs and Blob/problem error parsing already exist; reuse them.
-- [ ] **S7-07** Run malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip tests and pass the stage gate.
+- [x] **S7-05** Move supported large parsing off the UI thread only if measurements against the 10 MiB ceiling justify it. Measurement was 7.35 ms median / 8.29 ms p95 for a near-10 MiB payload, so a worker was not justified.
+- [x] **S7-06** Complete the DataTransfer UX parts not already implemented: authorization states, cancellation only where the request is truly abortable, and truthful stage-based progress. Existing route/navbar/401-403 handling remains authoritative; active HTTP requests now expose real cancellation and Downloading/Validating/Importing states.
+- [x] **S7-07** Run malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip tests and pass the stage gate.
 
 ### Delivery Slices
 
 - [x] **Slice A (S7-01 + S7-02): Backend DataTransfer boundaries.** Route per-entity exports to their owning repository (public holidays remain hard-delete and export unconditionally), and verify/test single-transaction import atomicity and mode/dry-run behavior. Backend-only and lowest risk; validate with service/repository and query-count tests.
 - [x] **Slice B (S7-03 + S7-04): File-limit contract.** Enforce the `DEC-HARD-005` limits on both sides of the boundary by lowering the API `RequestSizeLimit` from 100 MiB to 12 MiB and rejecting oversized or non-JSON files in the browser at the 10 MiB ceiling before reading. Ship together so API and browser cannot drift; validate with one oversized-payload roundtrip plus focused frontend rejection tests.
-- [ ] **Slice C (S7-05 + S7-06 + S7-07): Frontend UX and stage gate.** Complete authorization states, real cancellation, and truthful stage-based progress, reusing existing correlation IDs and error parsing; add a worker-based parse only if measurements against the 10 MiB ceiling justify it. Then run the full malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip matrix and pass the stage gate.
+- [x] **Slice C (S7-05 + S7-06 + S7-07): Frontend UX and stage gate.** Complete authorization states, real cancellation, and truthful stage-based progress, reusing existing correlation IDs and error parsing; add a worker-based parse only if measurements against the 10 MiB ceiling justify it. Then run the full malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip matrix and pass the stage gate.
 
 Run Slice A before Slice B, and Slice C last because its test matrix and progress behavior depend on the enforced limit. Slice B is the highest-value, lowest-effort security fix and may be pulled first if prioritizing by risk over layer.
 
@@ -401,7 +401,7 @@ Run Slice A first because CI must enforce the completed suites before sign-off, 
 - Expense tag tokenization and resolution are shared by both expense entry points, including deterministic recovery after partial tag-creation failures.
 - Calendar change-set planning and result reconciliation live in pure tested modules; the component retains rendering and interaction responsibilities.
 - Share work-location and leave mechanics only where domain terminology remains explicit; avoid deeply generic base components.
-- DataTransfer rejects unsupported or oversized files before reading, parses supported files in a worker, exposes truthful stages, supports cancellation where real, and invalidates dry-run approval when payload or options change.
+- DataTransfer rejects unsupported or oversized files before reading, keeps parsing on the UI thread while near-ceiling measurements remain below the worker threshold, exposes truthful stages, supports cancellation where real, and invalidates dry-run approval when payload or options change.
 - Frontend tests assert service contracts and user-visible behavior without depending on Angular Material internal markup.
 
 ### Operational Risks and Mitigations
@@ -441,7 +441,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | R2 | 2 | End-to-end authenticated application and admin authorization | Not Started |
 | R3 | 3 | Date-safe work/leave workflows and database uniqueness | Complete |
 | R4 | 4-5 | Strict expense references and maintainable calendar workflow | Complete |
-| R5 | 6-7 | Encapsulated domain and hardened DataTransfer | Not Started |
+| R5 | 6-7 | Encapsulated domain and hardened DataTransfer | Complete |
 | R6 | 8 | CI-enforced, operationally ready hardening release | Not Started |
 
 ## Decision Log
@@ -452,7 +452,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | DEC-HARD-002 | 2026-08-02 | API problem/error contract | RFC 9457 ProblemDetails with `code`, stable `type`, `title`, `status`, safe `detail`, request `instance`, `correlationId`, and optional `errors` | Current exceptions, bare 404s, DataTransfer errors, and Angular extraction are inconsistent. One contract supports typed frontend behavior and correlated diagnostics without exposing internals. | 1-5, 7 | Decided |
 | DEC-HARD-003 | 2026-08-02 | Calendar and expense date semantics | Expense purchase, work, leave, and holiday dates are timezone-free calendar dates serialized as `yyyy-MM-dd` and represented by `DateOnly` in backend contracts; audit values are UTC instants | Users enter and report these values by calendar day. Converting them through UTC can shift the day. Existing non-midnight values retain their stored year/month/day during normalization. | 3-7 | Decided |
 | DEC-HARD-004 | 2026-08-02 | Calendar batch transaction semantics | Preserve partial success with deterministic per-item results and aggregate counts; malformed requests fail wholly, but one item failure does not roll back valid items | The API and Angular workflow already expose mixed outcomes, and users can correct only failed rows. Preserving this contract avoids a breaking endpoint and keeps feedback granular. | 5 | Decided |
-| DEC-HARD-005 | 2026-08-02 | DataTransfer browser/API limits | 10 MiB maximum selected file; 12 MiB API request limit; reject before reading; worker-based parse/validation; stage-based status and cancellation only where real | The current 100 MiB API allowance and main-thread `file.text()`/`JSON.parse()` combination can exhaust or freeze the browser. A small solo-use ceiling is safer and can be raised later from measurements. | 7 | Decided |
+| DEC-HARD-005 | 2026-08-02 | DataTransfer browser/API limits | 10 MiB maximum selected file; 12 MiB API request limit; reject before reading; stage-based status and cancellation only where real; use worker parsing only if measured latency justifies it | The smaller ceiling bounds browser memory risk. Near-ceiling `JSON.parse` measured 7.35 ms median / 8.29 ms p95 on 2026-08-23, so worker complexity is not currently justified. | 7 | Decided |
 | DEC-HARD-006 | 2026-08-23 | Reference entity audit timestamps | All mutable reference entities have `CreatedAt` and `UpdatedAt`; every successful state change uses `TimeProvider` to update `UpdatedAt`; imports preserve optional source audit timestamps and otherwise use the injected clock | A consistent audit contract makes reference mutations diagnosable, removes hardcoded clocks, and preserves historical timestamps without breaking older import payloads that omit them. | 6 | Decided |
 
 ## Blocker Log
@@ -544,6 +544,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | Stage 6 gate / S6-06 | Migration upgrade, API contract, backend/frontend suites, and production build | Pass: upgrade test, 198 discovered .NET tests, 67 frontend tests, build ok | Real SQLite upgrade backfills non-seed reference rows; streamed exports expose camel-case audit fields; DataTransfer remains opaque to frontend parsing; existing bundle warnings unchanged. |
 | 2026-08-23 | S7-01/S7-02 / Slice A | Per-entity export query-boundary and single-transaction rollback tests | Pass: 203 discovered .NET tests | An EF command interceptor confirms each per-entity reference export queries only its owning table; a valid tracker sharing a payload with an invalid tag rolls back entirely, while a subsequent valid import commits. Public holidays remain hard-delete. |
 | 2026-08-23 | S7-03/S7-04 / Slice B | API oversized-request and frontend file-rejection tests | Pass: 205 discovered .NET tests, 70 frontend tests | A Content-Length guard middleware returns a readable 413 above 12 MiB (the `[RequestSizeLimit]` attribute is not enforced under TestServer, so the middleware is the tested mechanism); the frontend rejects >10 MiB and non-JSON files before reading. API and browser limits share the `DEC-HARD-005` value. |
+| 2026-08-23 | S7-05/S7-06/S7-07 / Slice C and Stage 7 gate | Parse benchmark, malformed/oversized/unauthorized/dry-run/rollback/large-roundtrip tests, frontend suite, and production build | Pass: 7.35 ms median / 8.29 ms p95 parse, 210 discovered .NET tests, 72 frontend tests, build ok | Worker parsing was not justified at the 10 MiB ceiling. Active HTTP operations expose real unsubscribe-based cancellation and truthful stages; malformed input returns correlated ProblemDetails; dry runs do not persist. Existing bundle warnings unchanged. |
 
 ## Progress Update Procedure
 

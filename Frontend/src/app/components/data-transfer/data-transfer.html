@@ -11,7 +11,7 @@
 	}
 
 	@if (infoMessage) {
-		<p class="info-message">{{ infoMessage }}</p>
+		<p class="info-message" aria-live="polite">{{ infoMessage }}</p>
 	}
 
 	<div class="transfer-grid">
@@ -34,6 +34,9 @@
 				<mat-checkbox [(ngModel)]="includeSoftDeleted">Include deleted records</mat-checkbox>
 			</mat-card-content>
 			<mat-card-actions align="end">
+				@if (isExporting) {
+					<button mat-stroked-button type="button" (click)="cancelExport()">Cancel</button>
+				}
 				<button mat-flat-button color="primary" type="button" (click)="downloadExport()" [disabled]="isExporting">
 					@if (isExporting) {
 						<mat-spinner diameter="18"></mat-spinner>
@@ -99,6 +102,9 @@
 				</div>
 			</mat-card-content>
 			<mat-card-actions align="end">
+				@if (isImporting) {
+					<button mat-stroked-button type="button" (click)="cancelImport()">Cancel</button>
+				}
 				<button
 					mat-flat-button
 					color="primary"

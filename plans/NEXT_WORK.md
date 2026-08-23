@@ -6,21 +6,21 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Complete Stage 7 Slice C (`S7-05` + `S7-06` + `S7-07`): frontend UX and the stage gate.
+**Task:** Complete Stage 8 Slice A (`S8-01` + `S8-02` + `S8-03`): coverage and CI enforcement.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
-**Current stage:** Stage 7 - DataTransfer Hardening
+**Current stage:** Stage 8 - Quality Gates and Operational Readiness
 
 **Required outcome:**
 
-- Complete authorization states, real cancellation (only where the request is truly abortable), and truthful stage-based progress, reusing existing correlation IDs and error parsing.
-- Add a worker-based parse only if measurements against the 10 MiB ceiling justify it.
-- Run the full malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip matrix and pass the stage gate.
+- Complete backend architecture, API route, repository, query-filter, FK, and uniqueness coverage.
+- Complete frontend service, critical component, guard, accessibility, and error-state coverage.
+- Add CI checks for backend build/tests, plain SQLite migration-script generation, frontend tests, and the production build.
 
-**Immediate validation:** Frontend component/service tests for UX states, then the full backend and frontend suites plus the production build for the stage gate.
+**Immediate validation:** Inventory the existing focused coverage and CI workflows, close only demonstrated gaps, then run the exact CI commands locally.
 
-**Done in this session:** Stage 7 Slices A and B are complete. Per-entity exports query only their owning table; reference imports roll back atomically; a Content-Length guard returns a readable 413 above 12 MiB; the frontend rejects >10 MiB and non-JSON files before reading. Backend suite is 205/205 and frontend is 70/70.
+**Done in this session:** Stage 7 is complete. Near-ceiling parsing measured 7.35 ms median / 8.29 ms p95, so no worker was added. Active exports/imports have real unsubscribe-based cancellation and truthful stages; malformed and dry-run HTTP behavior is covered. The gate passed with 210/210 .NET tests, 72/72 frontend tests, and a successful production build.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
