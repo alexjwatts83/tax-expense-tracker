@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Complete Stage 8 Slice B (`S8-04` + `S8-05`): measured performance work.
+**Task:** Complete Stage 8 task `S8-05`: profile expense paging/filtering and DataTransfer chunking before further optimization.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,12 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Measure reference-data request patterns and add frontend caching only if repeated requests justify it and invalidation is explicit.
 - Profile expense paging/filtering and DataTransfer export/import behavior at supported sizes.
-- Add caching, query, or chunking changes only when measurements identify a meaningful bottleneck.
+- Add query or chunking changes only when measurements identify a meaningful bottleneck.
 
-**Immediate validation:** Establish repeatable request-count and latency measurements for reference data, expense paging/filtering, and supported DataTransfer payloads before selecting any optimization.
+**Immediate validation:** Establish repeatable latency/query-count measurements for expense paging/filtering and supported DataTransfer payloads before selecting any optimization.
 
-**Done in this session:** Stage 8 Slice A is complete. Model metadata, repository registrations, and attributed API routes have direct regression coverage; DataTransfer service contracts and accessibility states are covered. CI now runs Release backend build/tests, plain SQLite migration generation, frontend tests, and the production build. The local CI-equivalent gate passed with 214/214 .NET tests and 74/74 frontend tests.
+**Done in this session:** S8-04 is complete. Expense list and form produced six bank/tracker/tag GETs in a normal workflow; singleton service caches reduce this to three shared responses and invalidate after successful mutations. The gate passed with 75/75 frontend tests and a successful production build.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 

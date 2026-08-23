@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 92% Complete
+- **Status:** In Progress - 93% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 68 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, 6, and 7 are complete; Stage 2 is 8 of 10 (blocked on Azure), and Stage 8 is 3 of 7.
+- **Evidence:** 69 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, 6, and 7 are complete; Stage 2 is 8 of 10 (blocked on Azure), and Stage 8 is 4 of 7.
 - **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 8 continues with Slice B (measured performance work).
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 68/74 tasks (92%)
+Overall Progress: 69/74 tasks (93%)
 Current Stage: Stage 8 - Quality Gates and Operational Readiness
-Next Task: S8-04/S8-05 / Slice B measured performance work
+Next Task: S8-05 / Profile expense paging and DataTransfer
 
 ## Purpose
 
@@ -55,8 +55,8 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 5 | Calendar and day-entry workflow | 8 | 8 | 100% | Complete | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 6 | 6 | 100% | Complete | Stages 3-5 |
 | 7 | DataTransfer hardening | 7 | 7 | 100% | Complete | Stages 1-4 |
-| 8 | Quality gates and operational readiness | 3 | 7 | 43% | In Progress | Stages 2-7 |
-| **Total** |  | **68** | **74** | **92%** | **In Progress** |  |
+| 8 | Quality gates and operational readiness | 4 | 7 | 57% | In Progress | Stages 2-7 |
+| **Total** |  | **69** | **74** | **93%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -356,7 +356,7 @@ Goal: make the hardened architecture and workflows enforceable in CI and diagnos
 - [x] **S8-01** Complete backend architecture, API route, repository, query-filter, FK, and uniqueness coverage.
 - [x] **S8-02** Complete frontend service, critical component, guard, accessibility, and error-state coverage.
 - [x] **S8-03** Add CI checks for backend build/tests, migration script, frontend tests, and production build.
-- [ ] **S8-04** Measure reference-data requests and add lightweight frontend caching only if justified.
+- [x] **S8-04** Measure reference-data requests and add lightweight frontend caching only if justified. Expense list and form each requested banks, trackers, and tags, producing six GETs in a normal list-to-form workflow; singleton service caches reduce this to three and invalidate after every successful mutation.
 - [ ] **S8-05** Profile expense paging/filtering and DataTransfer chunking before further optimization.
 - [ ] **S8-06** Finalize Production startup validation, migration execution policy, monitoring, and correlated logs, and confirm whether Azure SQL provider parity is in scope or SQLite remains the sole provider.
 - [ ] **S8-07** Run local and Azure smoke matrices, update all plans/docs, and pass final sign-off.
@@ -546,6 +546,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S7-03/S7-04 / Slice B | API oversized-request and frontend file-rejection tests | Pass: 205 discovered .NET tests, 70 frontend tests | A Content-Length guard middleware returns a readable 413 above 12 MiB (the `[RequestSizeLimit]` attribute is not enforced under TestServer, so the middleware is the tested mechanism); the frontend rejects >10 MiB and non-JSON files before reading. API and browser limits share the `DEC-HARD-005` value. |
 | 2026-08-23 | S7-05/S7-06/S7-07 / Slice C and Stage 7 gate | Parse benchmark, malformed/oversized/unauthorized/dry-run/rollback/large-roundtrip tests, frontend suite, and production build | Pass: 7.35 ms median / 8.29 ms p95 parse, 210 discovered .NET tests, 72 frontend tests, build ok | Worker parsing was not justified at the 10 MiB ceiling. Active HTTP operations expose real unsubscribe-based cancellation and truthful stages; malformed input returns correlated ProblemDetails; dry runs do not persist. Existing bundle warnings unchanged. |
 | 2026-08-23 | S8-01/S8-02/S8-03 / Slice A | Persistence/route/repository tests, DataTransfer service/accessibility tests, CI-equivalent suites, migration script, and production build | Pass: 4 focused backend tests, 9 focused frontend tests, 214 discovered .NET tests, 74 frontend tests, migration script generated, build ok | EF metadata now guards filters, FKs, and unique indexes; DI and MVC discovery guard repositories and attributed routes; DataTransfer HTTP contracts and announced cancel state are covered. CI now enforces all backend, migration, frontend test, and production build gates. Existing bundle warnings unchanged. |
+| 2026-08-23 | S8-04 | Reference request inventory, cache/invalidation tests, frontend suite, and production build | Pass: 2 focused tests, 75 frontend tests, build ok | Expense list-to-form navigation previously issued six reference GETs. Bank, tracker, and tag singleton caches reduce that to three shared responses and invalidate only after successful create/update/delete/restore operations. Existing bundle warnings unchanged. |
 
 ## Progress Update Procedure
 
