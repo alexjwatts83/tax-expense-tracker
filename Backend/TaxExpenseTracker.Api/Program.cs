@@ -124,6 +124,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ApiExceptionHandlingMiddleware>();
+app.UseMiddleware<DataTransferRequestSizeMiddleware>();
 app.UseStatusCodePages(async statusCodeContext =>
 {
     var context = statusCodeContext.HttpContext;

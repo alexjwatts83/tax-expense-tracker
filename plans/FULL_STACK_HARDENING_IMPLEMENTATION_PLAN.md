@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 81% Complete
+- **Status:** In Progress - 84% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 60 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, and 6 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stage 7 is 2 of 7.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 7 continues with Slice B (file-limit contract).
+- **Evidence:** 62 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, and 6 are complete, Stage 2 is 8 of 10 (blocked on Azure), and Stage 7 is 4 of 7.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 7 continues with Slice C (frontend UX and stage gate).
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 60/74 tasks (81%)
+Overall Progress: 62/74 tasks (84%)
 Current Stage: Stage 7 - DataTransfer Hardening
-Next Task: S7-03 / Slice B file-limit contract
+Next Task: S7-05/S7-06 / Slice C frontend UX and stage gate
 
 ## Purpose
 
@@ -320,8 +320,8 @@ Goal: make DataTransfer efficient, role-restricted, and safe for supported brows
 
 - [x] **S7-01** Route per-entity exports to only the owning repository. `PublicHoliday` is a hard-delete entity, so its export does not take `includeSoftDeleted`; trackers, tags, and banks continue to honor it.
 - [x] **S7-02** Verify and test that a single import wraps all its entity handlers in one transaction so any failure rolls back the whole payload; confirm mode behavior (Upsert/InsertOnly/Replace) and dry-run non-persistence.
-- [ ] **S7-03** Enforce the `DEC-HARD-005` limits (10 MiB selected file, 12 MiB API request) by replacing the current 100 MiB `RequestSizeLimit` on the DataTransfer endpoints.
-- [ ] **S7-04** Reject oversized or non-JSON files in the frontend before `file.text()`/`JSON.parse()`, using the same 10 MiB ceiling from `DEC-HARD-005`.
+- [x] **S7-03** Enforce the `DEC-HARD-005` limits (10 MiB selected file, 12 MiB API request) by replacing the current 100 MiB `RequestSizeLimit` on the DataTransfer endpoints.
+- [x] **S7-04** Reject oversized or non-JSON files in the frontend before `file.text()`/`JSON.parse()`, using the same 10 MiB ceiling from `DEC-HARD-005`.
 - [ ] **S7-05** Move supported large parsing off the UI thread only if measurements against the 10 MiB ceiling justify it.
 - [ ] **S7-06** Complete the DataTransfer UX parts not already implemented: authorization states, cancellation only where the request is truly abortable, and truthful stage-based progress. Correlation IDs and Blob/problem error parsing already exist; reuse them.
 - [ ] **S7-07** Run malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip tests and pass the stage gate.
@@ -329,7 +329,7 @@ Goal: make DataTransfer efficient, role-restricted, and safe for supported brows
 ### Delivery Slices
 
 - [x] **Slice A (S7-01 + S7-02): Backend DataTransfer boundaries.** Route per-entity exports to their owning repository (public holidays remain hard-delete and export unconditionally), and verify/test single-transaction import atomicity and mode/dry-run behavior. Backend-only and lowest risk; validate with service/repository and query-count tests.
-- [ ] **Slice B (S7-03 + S7-04): File-limit contract.** Enforce the `DEC-HARD-005` limits on both sides of the boundary by lowering the API `RequestSizeLimit` from 100 MiB to 12 MiB and rejecting oversized or non-JSON files in the browser at the 10 MiB ceiling before reading. Ship together so API and browser cannot drift; validate with one oversized-payload roundtrip plus focused frontend rejection tests.
+- [x] **Slice B (S7-03 + S7-04): File-limit contract.** Enforce the `DEC-HARD-005` limits on both sides of the boundary by lowering the API `RequestSizeLimit` from 100 MiB to 12 MiB and rejecting oversized or non-JSON files in the browser at the 10 MiB ceiling before reading. Ship together so API and browser cannot drift; validate with one oversized-payload roundtrip plus focused frontend rejection tests.
 - [ ] **Slice C (S7-05 + S7-06 + S7-07): Frontend UX and stage gate.** Complete authorization states, real cancellation, and truthful stage-based progress, reusing existing correlation IDs and error parsing; add a worker-based parse only if measurements against the 10 MiB ceiling justify it. Then run the full malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip matrix and pass the stage gate.
 
 Run Slice A before Slice B, and Slice C last because its test matrix and progress behavior depend on the enforced limit. Slice B is the highest-value, lowest-effort security fix and may be pulled first if prioritizing by risk over layer.
@@ -543,6 +543,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S6-03/S6-04/S6-05 / Slice C | Domain, DataTransfer, migration, SQLite roundtrip, and full backend tests | Pass: migration script generated, 197 discovered .NET tests | Reference and soft-delete state is encapsulated; all reference mutations use `TimeProvider`; optional source audit timestamps survive export/import/rematerialization; legacy payloads remain compatible; migration backfills `UpdatedAt` from `CreatedAt`. |
 | 2026-08-23 | Stage 6 gate / S6-06 | Migration upgrade, API contract, backend/frontend suites, and production build | Pass: upgrade test, 198 discovered .NET tests, 67 frontend tests, build ok | Real SQLite upgrade backfills non-seed reference rows; streamed exports expose camel-case audit fields; DataTransfer remains opaque to frontend parsing; existing bundle warnings unchanged. |
 | 2026-08-23 | S7-01/S7-02 / Slice A | Per-entity export query-boundary and single-transaction rollback tests | Pass: 203 discovered .NET tests | An EF command interceptor confirms each per-entity reference export queries only its owning table; a valid tracker sharing a payload with an invalid tag rolls back entirely, while a subsequent valid import commits. Public holidays remain hard-delete. |
+| 2026-08-23 | S7-03/S7-04 / Slice B | API oversized-request and frontend file-rejection tests | Pass: 205 discovered .NET tests, 70 frontend tests | A Content-Length guard middleware returns a readable 413 above 12 MiB (the `[RequestSizeLimit]` attribute is not enforced under TestServer, so the middleware is the tested mechanism); the frontend rejects >10 MiB and non-JSON files before reading. API and browser limits share the `DEC-HARD-005` value. |
 
 ## Progress Update Procedure
 

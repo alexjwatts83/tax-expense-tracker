@@ -19,6 +19,9 @@ public class DataTransferController(
     private static readonly JsonSerializerOptions StreamSerializerOptions = new(JsonSerializerDefaults.Web);
     private const string EnableEndpointsConfigKey = "Features:EnableDataTransferEndpoints";
 
+    // DEC-HARD-005: cap import request bodies at 12 MiB to match the 10 MiB browser file ceiling.
+    private const long MaxImportRequestBytes = Middleware.DataTransferRequestSizeMiddleware.MaxRequestBytes;
+
     [HttpGet("export")]
     public async Task<IActionResult> ExportReferenceData(
         bool includeSoftDeleted = true,
@@ -99,7 +102,7 @@ public class DataTransferController(
     }
 
     [HttpPost("import")]
-    [RequestSizeLimit(100 * 1024 * 1024)]
+    [RequestSizeLimit(MaxImportRequestBytes)]
     public async Task<IActionResult> ImportReferenceData(
         [FromBody] ReferenceDataImportPayloadDto payload,
         DataTransferImportMode mode = DataTransferImportMode.Upsert,
@@ -129,7 +132,7 @@ public class DataTransferController(
     }
 
     [HttpPost("import/{entityName}")]
-    [RequestSizeLimit(100 * 1024 * 1024)]
+    [RequestSizeLimit(MaxImportRequestBytes)]
     public async Task<IActionResult> ImportEntity(
         string entityName,
         [FromBody] JsonElement payload,
@@ -236,7 +239,7 @@ public class DataTransferController(
     }
 
     [HttpPost("import/expenses")]
-    [RequestSizeLimit(100 * 1024 * 1024)]
+    [RequestSizeLimit(MaxImportRequestBytes)]
     public async Task<IActionResult> ImportExpenses(
         [FromBody] ExpenseImportPayloadDto payload,
         DataTransferImportMode mode = DataTransferImportMode.Upsert,
@@ -266,7 +269,7 @@ public class DataTransferController(
     }
 
     [HttpPost("import/work-locations")]
-    [RequestSizeLimit(100 * 1024 * 1024)]
+    [RequestSizeLimit(MaxImportRequestBytes)]
     public async Task<IActionResult> ImportWorkLocations(
         [FromBody] WorkLocationImportPayloadDto payload,
         DataTransferImportMode mode = DataTransferImportMode.Upsert,
@@ -296,7 +299,7 @@ public class DataTransferController(
     }
 
     [HttpPost("import/leave")]
-    [RequestSizeLimit(100 * 1024 * 1024)]
+    [RequestSizeLimit(MaxImportRequestBytes)]
     public async Task<IActionResult> ImportLeave(
         [FromBody] LeaveImportPayloadDto payload,
         DataTransferImportMode mode = DataTransferImportMode.Upsert,

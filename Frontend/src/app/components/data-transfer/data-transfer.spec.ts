@@ -65,4 +65,45 @@ describe('DataTransfer', () => {
 			'The import conflicts with existing data.',
 		);
 	});
+
+	it('rejects a file larger than 10 MiB without reading it', async () => {
+		const fixture = TestBed.createComponent(DataTransfer);
+		fixture.detectChanges();
+		const file = new File(['{}'], 'big.json', { type: 'application/json' });
+		Object.defineProperty(file, 'size', { value: 10 * 1024 * 1024 + 1 });
+		const textSpy = vi.spyOn(file, 'text');
+
+		await fixture.componentInstance.selectFile({ target: { files: [file] } } as unknown as Event);
+
+		expect(textSpy).not.toHaveBeenCalled();
+		expect(fixture.componentInstance.parsedPayload).toBeNull();
+		expect(fixture.componentInstance.selectedFile).toBeNull();
+		expect(fixture.componentInstance.errorMessage).toBe('The selected file exceeds the 10 MiB limit.');
+	});
+
+	it('rejects a non-JSON file without reading it', async () => {
+		const fixture = TestBed.createComponent(DataTransfer);
+		fixture.detectChanges();
+		const file = new File(['plain text'], 'notes.txt', { type: 'text/plain' });
+		const textSpy = vi.spyOn(file, 'text');
+
+		await fixture.componentInstance.selectFile({ target: { files: [file] } } as unknown as Event);
+
+		expect(textSpy).not.toHaveBeenCalled();
+		expect(fixture.componentInstance.parsedPayload).toBeNull();
+		expect(fixture.componentInstance.selectedFile).toBeNull();
+		expect(fixture.componentInstance.errorMessage).toBe('Only .json files are supported.');
+	});
+
+	it('accepts a valid JSON file within the limit', async () => {
+		const fixture = TestBed.createComponent(DataTransfer);
+		fixture.detectChanges();
+		const file = new File(['{"data":{}}'], 'reference.json', { type: 'application/json' });
+
+		await fixture.componentInstance.selectFile({ target: { files: [file] } } as unknown as Event);
+
+		expect(fixture.componentInstance.parsedPayload).toEqual({ data: {} });
+		expect(fixture.componentInstance.selectedFile).toBe(file);
+		expect(fixture.componentInstance.errorMessage).toBe('');
+	});
 });

@@ -19,6 +19,9 @@ import {
 import { DataTransferService } from '../../services/data-transfer';
 import { parseApiError } from '../../utils/api-problem';
 
+// DEC-HARD-005: reject import files larger than 10 MiB before reading them into memory.
+const MAX_IMPORT_FILE_BYTES = 10 * 1024 * 1024;
+
 interface SelectOption<T> {
 	value: T;
 	label: string;
@@ -124,6 +127,20 @@ export class DataTransfer {
 		if (!file)
 			return;
 
+		if (!this.isJsonFile(file)) {
+			this.selectedFile = null;
+			this.errorMessage = 'Only .json files are supported.';
+			this.cdr.detectChanges();
+			return;
+		}
+
+		if (file.size > MAX_IMPORT_FILE_BYTES) {
+			this.selectedFile = null;
+			this.errorMessage = 'The selected file exceeds the 10 MiB limit.';
+			this.cdr.detectChanges();
+			return;
+		}
+
 		try {
 			this.parsedPayload = JSON.parse(await file.text()) as unknown;
 			this.infoMessage = `${file.name} is ready for validation.`;
@@ -133,6 +150,10 @@ export class DataTransfer {
 		} finally {
 			this.cdr.detectChanges();
 		}
+	}
+
+	private isJsonFile(file: File): boolean {
+		return file.type === 'application/json' || file.name.toLowerCase().endsWith('.json');
 	}
 
 	runImport(): void {

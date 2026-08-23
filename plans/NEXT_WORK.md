@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Continue Stage 7 with Slice B (`S7-03` + `S7-04`): enforce the `DEC-HARD-005` file-limit contract on API and browser.
+**Task:** Complete Stage 7 Slice C (`S7-05` + `S7-06` + `S7-07`): frontend UX and the stage gate.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,14 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Lower the DataTransfer endpoints' API `RequestSizeLimit` from 100 MiB to the `DEC-HARD-005` 12 MiB request limit.
-- Reject oversized (>10 MiB) or non-JSON files in the frontend before `file.text()`/`JSON.parse()`.
-- Keep API and browser limits in sync so neither can drift.
-- Validate with an oversized-payload roundtrip plus focused frontend rejection tests.
+- Complete authorization states, real cancellation (only where the request is truly abortable), and truthful stage-based progress, reusing existing correlation IDs and error parsing.
+- Add a worker-based parse only if measurements against the 10 MiB ceiling justify it.
+- Run the full malformed, oversized, unauthorized, dry-run, rollback, and large-roundtrip matrix and pass the stage gate.
 
-**Immediate validation:** Add an oversized API request test and frontend file-rejection tests; keep the full backend suite green.
+**Immediate validation:** Frontend component/service tests for UX states, then the full backend and frontend suites plus the production build for the stage gate.
 
-**Done in this session:** Stage 7 Slice A is complete. Per-entity reference exports query only their owning table (verified by an EF command interceptor), and reference imports roll back the whole payload in one transaction on any entity error. Public holidays are confirmed hard-delete. Backend suite is 203/203.
+**Done in this session:** Stage 7 Slices A and B are complete. Per-entity exports query only their owning table; reference imports roll back atomically; a Content-Length guard returns a readable 413 above 12 MiB; the frontend rejects >10 MiB and non-JSON files before reading. Backend suite is 205/205 and frontend is 70/70.
 
 **Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
