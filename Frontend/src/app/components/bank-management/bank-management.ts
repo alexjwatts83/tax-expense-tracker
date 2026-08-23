@@ -12,6 +12,7 @@ import { finalize, take } from 'rxjs';
 import { Bank } from '../../models/api.models';
 import { BankService } from '../../services/bank';
 import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
+import { parseApiError } from '../../utils/api-problem';
 
 @Component({
   selector: 'app-bank-management',
@@ -96,8 +97,8 @@ export class BankManagement implements OnInit {
         this.infoMessage = 'Bank created.';
         this.isSubmitting = false;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create bank.';
+      error: (error) => {
+        void this.showApiError(error, 'Unable to create bank.');
         this.isSubmitting = false;
       },
     });
@@ -118,9 +119,7 @@ export class BankManagement implements OnInit {
         this.banks = this.banks.filter((entry) => entry.id !== id);
         this.infoMessage = `Bank "${bank.name}" deleted.`;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete bank.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to delete bank.'),
     });
   }
 
@@ -139,9 +138,12 @@ export class BankManagement implements OnInit {
         this.lastDeletedBank = null;
         this.infoMessage = `Bank "${bank.name}" restored.`;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore bank.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to restore bank.'),
     });
+  }
+
+  private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+    this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+    this.cdr.detectChanges();
   }
 }

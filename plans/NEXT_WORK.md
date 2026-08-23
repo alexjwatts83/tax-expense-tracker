@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S1-06` - Replace duplicated component error extraction with the shared frontend utility.
+**Task:** `S1-07` - Fix the frontend zero-price expense filter and add a request-parameter regression test.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,13 +14,12 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Replace component-local `error?.error` extraction with `parseApiError`.
-- Ensure each async error path updates the component message and change detection correctly.
-- Preserve each workflow's existing user-facing fallback message.
-- Remove obsolete local error helpers and avoid displaying object values as messages.
-- Apply the shared parser to DataTransfer export errors so Blob ProblemDetails are decoded.
+- Preserve `0` as a valid expense price filter instead of treating it as an empty value.
+- Continue omitting the price parameter when the filter field is actually blank.
+- Add a regression test that verifies the request parameter sent for a zero-price filter.
+- Preserve filter deduplication, timeout handling, paging, and all other existing filter behavior.
 
-**Immediate validation:** Add focused component coverage where async parsing changes behavior, then run `npm run test:ci` and `npm run build`. `S1-07` follows with the zero-price expense filter regression fix.
+**Immediate validation:** Run the focused expense filter test, then `npm run test:ci` and `npm run build`. `S1-08` follows with end-to-end normal and Blob error validation and the Stage 1 gate.
 
 ## Work Order
 

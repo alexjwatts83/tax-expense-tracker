@@ -17,6 +17,7 @@ import {
 	DataTransferImportResult,
 } from '../../models/data-transfer.models';
 import { DataTransferService } from '../../services/data-transfer';
+import { parseApiError } from '../../utils/api-problem';
 
 interface SelectOption<T> {
 	value: T;
@@ -109,7 +110,7 @@ export class DataTransfer {
 					this.infoMessage = 'Export downloaded.';
 				},
 				error: (error) => {
-					this.errorMessage = this.resolveError(error, 'Unable to export data.');
+					void this.showApiError(error, 'Unable to export data.');
 				},
 			});
 	}
@@ -177,7 +178,7 @@ export class DataTransfer {
 				},
 				error: (error) => {
 					this.validationPassed = false;
-					this.errorMessage = this.resolveError(error, 'Unable to process the import.');
+					void this.showApiError(error, 'Unable to process the import.');
 				},
 			});
 	}
@@ -220,7 +221,8 @@ export class DataTransfer {
 		return new Date().toISOString().slice(0, 10);
 	}
 
-	private resolveError(error: any, fallback: string): string {
-		return error?.error?.detail ?? error?.error?.title ?? error?.error ?? fallback;
+	private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+		this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+		this.cdr.detectChanges();
 	}
 }

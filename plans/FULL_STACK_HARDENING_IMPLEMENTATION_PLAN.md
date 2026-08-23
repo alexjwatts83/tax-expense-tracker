@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 19% Complete
+- **Status:** In Progress - 20% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 14 of 74 tasks are complete. Stage 0 is complete, Stage 1 is 5 of 8, and Stages 2 through 8 have not started.
+- **Evidence:** 15 of 74 tasks are complete. Stage 0 is complete, Stage 1 is 6 of 8, and Stages 2 through 8 have not started.
 - **Remaining gate:** Finish Stage 1 frontend error handling and the zero-price defect before beginning authentication and dependent hardening stages.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 14/74 tasks (19%)
+Overall Progress: 15/74 tasks (20%)
 Current Stage: Stage 1 - Error Contract and Immediate Defects
-Next Task: S1-06
+Next Task: S1-07
 
 ## Purpose
 
@@ -48,7 +48,7 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | Stage | Scope | Done | Total | Progress | Status | Depends On |
 |---|---|---:|---:|---:|---|---|
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
-| 1 | Error contract and immediate defects | 5 | 8 | 63% | In Progress | Stage 0 |
+| 1 | Error contract and immediate defects | 6 | 8 | 75% | In Progress | Stage 0 |
 | 2 | Authentication and authorization | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 3 | Date integrity and restore safety | 0 | 10 | 0% | Not Started | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
@@ -56,7 +56,7 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **14** | **74** | **19%** | **In Progress** |  |
+| **Total** |  | **15** | **74** | **20%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -121,7 +121,7 @@ Goal: establish predictable errors before authentication and invariant changes, 
 - [x] **S1-03** Map backend errors to the agreed ProblemDetails contract and status codes.
 - [x] **S1-04** Add middleware/API integration tests for 400, 404, 409, and 500 responses.
 - [x] **S1-05** Add typed frontend `ApiProblem` parsing/classification for JSON, text, and Blob responses.
-- [ ] **S1-06** Replace duplicated component error extraction with the shared frontend utility.
+- [x] **S1-06** Replace duplicated component error extraction with the shared frontend utility.
 - [ ] **S1-07** Fix the frontend zero-price expense filter and add a request-parameter regression test.
 - [ ] **S1-08** Validate normal and Blob errors end to end and pass the stage validation gate.
 
@@ -460,6 +460,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S1-03/S1-04 | Backend integration suite | Pass: 17 | Full integration suite remains green after the shared error contract |
 | 2026-08-23 | S1-05 | Frontend tests | Pass: 11 | Typed parser covers JSON, text, malformed, Blob JSON/text, timeout, correlation ID, field-error, and code-first classification behavior |
 | 2026-08-23 | S1-05 | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
+| 2026-08-23 | S1-06 | Frontend tests | Pass: 12 | Component extraction migrated to the shared parser; DataTransfer verifies Blob ProblemDetails rendering after async decoding |
+| 2026-08-23 | S1-06 | Frontend production build | Pass with 2 existing warnings | Bundle and calendar day-cell style budgets unchanged |
 
 ## Progress Update Procedure
 

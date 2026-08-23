@@ -15,6 +15,7 @@ import { PublicHolidayService } from '../../services/public-holiday';
 import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
+import { parseApiError } from '../../utils/api-problem';
 
 @Component({
   selector: 'app-public-holiday-management',
@@ -136,9 +137,7 @@ export class PublicHolidayManagement implements OnInit {
           }
           this.loadHolidays();
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to import public holidays.';
-        },
+        error: (error) => void this.showApiError(error, 'Unable to import public holidays.'),
       });
   }
 
@@ -240,10 +239,13 @@ export class PublicHolidayManagement implements OnInit {
           this.cancelEditHoliday();
           this.infoMessage = `Updated holiday "${updated.name}".`;
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to update holiday.';
-        },
+        error: (error) => void this.showApiError(error, 'Unable to update holiday.'),
       });
+  }
+
+  private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+    this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+    this.cdr.detectChanges();
   }
 
   isEditingHoliday(holidayId: string): boolean {

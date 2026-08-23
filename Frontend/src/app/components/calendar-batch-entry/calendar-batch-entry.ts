@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { catchError, finalize, forkJoin, map, of, take } from 'rxjs';
+import { catchError, finalize, forkJoin, from, map, of, take } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -18,6 +18,7 @@ import {
 import { LeaveService } from '../../services/leave';
 import { PublicHolidayService } from '../../services/public-holiday';
 import { WorkLocationService } from '../../services/work-location';
+import { parseApiError } from '../../utils/api-problem';
 import { CalendarBatchDayCellComponent } from './calendar-batch-day-cell.component';
 
 type DayCategory = 'none' | 'wfh' | 'office' | 'annual' | 'sick';
@@ -321,18 +322,18 @@ export class CalendarBatchEntry implements OnInit {
       wfhCreate: workCreateOps.length === 0
         ? of<WorkLocationBatchCreateResult>(this.emptyWfhBatchResult())
         : this.workLocationService.createBatch({ items: workCreateOps.map((x) => x.payload) }).pipe(
-            catchError((err) =>
-              of<WorkLocationBatchCreateResult>(
-                this.failedWfhBatchResult(workCreateOps.length, err?.error?.detail ?? 'Work-location batch request failed.'),
+            catchError((error) =>
+              from(parseApiError(error, 'Work-location batch request failed.')).pipe(
+                map((parsedError) => this.failedWfhBatchResult(workCreateOps.length, parsedError.message)),
               ),
             ),
           ),
       leaveCreate: leaveCreateOps.length === 0
         ? of<LeaveBatchCreateResult>(this.emptyLeaveBatchResult())
         : this.leaveService.createBatch({ items: leaveCreateOps.map((x) => x.payload) }).pipe(
-            catchError((err) =>
-              of<LeaveBatchCreateResult>(
-                this.failedLeaveBatchResult(leaveCreateOps.length, err?.error?.detail ?? 'Leave batch request failed.'),
+            catchError((error) =>
+              from(parseApiError(error, 'Leave batch request failed.')).pipe(
+                map((parsedError) => this.failedLeaveBatchResult(leaveCreateOps.length, parsedError.message)),
               ),
             ),
           ),

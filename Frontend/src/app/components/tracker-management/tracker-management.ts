@@ -12,6 +12,7 @@ import { finalize, take } from 'rxjs';
 import { Tracker } from '../../models/api.models';
 import { TrackerService } from '../../services/tracker';
 import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
+import { parseApiError } from '../../utils/api-problem';
 
 @Component({
   selector: 'app-tracker-management',
@@ -103,8 +104,8 @@ export class TrackerManagement implements OnInit {
           this.infoMessage = 'Tracker created.';
           this.isSubmitting = false;
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create tracker.';
+        error: (error) => {
+          void this.showApiError(error, 'Unable to create tracker.');
           this.isSubmitting = false;
         },
       });
@@ -125,9 +126,7 @@ export class TrackerManagement implements OnInit {
         this.trackers = this.trackers.filter((tracker) => tracker.id !== id);
         this.infoMessage = `Tracker "${tracker.name}" deleted.`;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete tracker.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to delete tracker.'),
     });
   }
 
@@ -146,9 +145,12 @@ export class TrackerManagement implements OnInit {
         this.lastDeletedTracker = null;
         this.infoMessage = `Tracker "${tracker.name}" restored.`;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore tracker.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to restore tracker.'),
     });
+  }
+
+  private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+    this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+    this.cdr.detectChanges();
   }
 }

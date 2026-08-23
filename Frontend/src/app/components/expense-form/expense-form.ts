@@ -16,6 +16,7 @@ import { TagService } from '../../services/tag';
 import { TrackerService } from '../../services/tracker';
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
+import { parseApiError } from '../../utils/api-problem';
 
 @Component({
   selector: 'app-expense-form',
@@ -120,9 +121,7 @@ export class ExpenseForm implements OnInit {
           this.patchExpense(expense);
           this.cdr.detectChanges();
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to load expense.';
-        },
+        error: (error) => void this.showApiError(error, 'Unable to load expense.'),
       });
   }
 
@@ -159,8 +158,8 @@ export class ExpenseForm implements OnInit {
           this.isSubmitting = false;
           this.router.navigate(['/expenses']);
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to save expense.';
+        error: (error) => {
+          void this.showApiError(error, 'Unable to save expense.');
           this.isSubmitting = false;
         },
       });
@@ -173,10 +172,13 @@ export class ExpenseForm implements OnInit {
       next: (tagIds) => {
         this.form.patchValue({ tagIds, manualTags: '' });
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to apply manual tags.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to apply manual tags.'),
     });
+  }
+
+  private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+    this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+    this.cdr.detectChanges();
   }
 
   private parseManualTags(rawValue: string | null | undefined): string[] {

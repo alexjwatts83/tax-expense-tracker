@@ -16,6 +16,7 @@ import { DayEntrySummaryCardComponent } from '../../shared/day-entry-summary-car
 import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
+import { parseApiError } from '../../utils/api-problem';
 import { toLocalDateInputValue } from '../../utils/date';
 
 @Component({
@@ -196,9 +197,7 @@ export class LeaveManagement implements OnInit {
           this.infoMessage = 'Leave entry created.';
           this.loadSummary();
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create leave entry.';
-        },
+        error: (error) => void this.showApiError(error, 'Unable to create leave entry.'),
       });
   }
 
@@ -223,9 +222,7 @@ export class LeaveManagement implements OnInit {
         this.infoMessage = 'Leave entry deleted.';
         this.loadSummary();
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete leave entry.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to delete leave entry.'),
     });
   }
 
@@ -244,10 +241,13 @@ export class LeaveManagement implements OnInit {
         this.infoMessage = 'Leave entry restored.';
         this.loadSummary();
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore leave entry.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to restore leave entry.'),
     });
+  }
+
+  private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+    this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+    this.cdr.detectChanges();
   }
 
   formatEntryType(entryType: DayEntryType): string {

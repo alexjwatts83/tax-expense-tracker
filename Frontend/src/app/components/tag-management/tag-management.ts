@@ -13,6 +13,7 @@ import { finalize, take } from 'rxjs';
 import { Tag } from '../../models/api.models';
 import { TagService } from '../../services/tag';
 import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
+import { parseApiError } from '../../utils/api-problem';
 
 @Component({
   selector: 'app-tag-management',
@@ -110,8 +111,8 @@ export class TagManagement implements OnInit {
         this.infoMessage = 'Tag created.';
         this.isSubmitting = false;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create tag.';
+      error: (error) => {
+        void this.showApiError(error, 'Unable to create tag.');
         this.isSubmitting = false;
       },
     });
@@ -155,8 +156,8 @@ export class TagManagement implements OnInit {
         this.cancelEditTag();
         this.infoMessage = `Tag "${updated.name}" updated.`;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to update tag.';
+      error: (error) => {
+        void this.showApiError(error, 'Unable to update tag.');
         this.savingTagId = null;
       },
     });
@@ -185,9 +186,7 @@ export class TagManagement implements OnInit {
         this.tags = this.tags.filter((tag) => tag.id !== id);
         this.infoMessage = `Tag "${tag.name}" deleted.`;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete tag.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to delete tag.'),
     });
   }
 
@@ -206,10 +205,13 @@ export class TagManagement implements OnInit {
         this.lastDeletedTag = null;
         this.infoMessage = `Tag "${tag.name}" restored.`;
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore tag.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to restore tag.'),
     });
+  }
+
+  private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+    this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+    this.cdr.detectChanges();
   }
 
   getTagChipStyles(color: string | null | undefined): Record<string, string> {

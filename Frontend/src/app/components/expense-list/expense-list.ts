@@ -21,6 +21,7 @@ import { TrackerService } from '../../services/tracker';
 import { StandardDateDisplayPipe } from '../../shared/standard-date-display.pipe';
 import { DateInputDirective } from '../../shared/date-input.directive';
 import { DatePickerToggleComponent } from '../../shared/date-picker-toggle.component';
+import { parseApiError } from '../../utils/api-problem';
 
 @Component({
   selector: 'app-expense-list',
@@ -168,9 +169,7 @@ export class ExpenseList implements OnInit {
         }
         this.infoMessage = 'Expense deleted.';
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to delete expense.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to delete expense.'),
     });
   }
 
@@ -195,9 +194,7 @@ export class ExpenseList implements OnInit {
 
         this.infoMessage = 'Expense restored.';
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to restore expense.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to restore expense.'),
     });
   }
 
@@ -254,11 +251,13 @@ export class ExpenseList implements OnInit {
           this.totalCount = expenses.length;
           this.updatePagedExpenses();
         },
-        error: (err) => {
-          this.errorMessage =
-            err?.name === 'TimeoutError'
-              ? 'Filtering timed out. Please try again.'
-              : err?.error?.detail ?? 'Unable to apply filters.';
+        error: (error) => {
+          if (error instanceof Error && error.name === 'TimeoutError') {
+            this.errorMessage = 'Filtering timed out. Please try again.';
+            return;
+          }
+
+          void this.showApiError(error, 'Unable to apply filters.');
         },
       });
   }
@@ -316,9 +315,7 @@ export class ExpenseList implements OnInit {
           });
           this.infoMessage = 'Expense created.';
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to create expense.';
-        },
+        error: (error) => void this.showApiError(error, 'Unable to create expense.'),
       });
   }
 
@@ -330,10 +327,13 @@ export class ExpenseList implements OnInit {
       next: (tagIds) => {
         this.createForm.patchValue({ tagIds, manualTags: '' });
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.detail ?? err?.error ?? 'Unable to apply tags.';
-      },
+      error: (error) => void this.showApiError(error, 'Unable to apply tags.'),
     });
+  }
+
+  private async showApiError(error: unknown, fallbackMessage: string): Promise<void> {
+    this.errorMessage = (await parseApiError(error, fallbackMessage)).message;
+    this.cdr.detectChanges();
   }
 
   clearFilters(): void {
