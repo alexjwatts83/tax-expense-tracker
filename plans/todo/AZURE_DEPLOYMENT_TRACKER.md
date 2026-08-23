@@ -2,13 +2,13 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - Foundation Scaffold Only
-- **Assessed:** 2026-08-16T13:11:29+10:00
-- **Evidence:** 7 of 44 checklist items are complete. Terraform/Terragrunt modules and the dev scaffold exist, but no environment has been planned or applied.
-- **Remaining gate:** Complete remote state, Entra authentication, Key Vault and database provisioning, CI/CD, Azure dev validation, and production readiness.
+- **Status:** Blocked - Local Application Ready, Azure Not Provisioned
+- **Assessed:** 2026-08-23
+- **Evidence:** 11 of 44 checklist items are complete. Local Production startup, explicit SQLite migration policy, health monitoring, CORS configuration, CI, and correlated logs are validated; no Azure environment has been planned or applied.
+- **Remaining gate:** Authenticate Azure CLI, finalize live inputs, provision persistent SQLite-capable hosting and Entra resources, configure CI/CD, then run the deployed role and workflow matrix.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
-Last Updated: 2026-08-02
+Last Updated: 2026-08-23
 Owner: 
 Environment Scope: dev (single environment)
 
@@ -29,10 +29,10 @@ Track Azure deployment implementation progress, key decisions, risks, and rollou
 - [x] Confirm dev/prod subscription strategy
 
 ### 2. Application Readiness
-- [ ] Confirm env-var based configuration for backend/frontend
-- [ ] Confirm production CORS configuration
-- [ ] Confirm health checks and startup behavior
-- [ ] Confirm migration execution strategy for cloud
+- [x] Confirm env-var based configuration for backend/frontend
+- [x] Confirm production CORS configuration
+- [x] Confirm health checks and startup behavior
+- [x] Confirm migration execution strategy for cloud
 - [x] Decide production identity and browser credential flow
 
 ### 3. Infrastructure as Code
@@ -45,7 +45,7 @@ Track Azure deployment implementation progress, key decisions, risks, and rollou
 Terraform implementation mode: Terraform Lite (single environment, minimal modules).
 Scope for first pass:
 - `foundation` module: resource group, naming/tags locals, shared inputs.
-- `data` module: Azure SQL logical server + single database.
+- `data` module: dormant Azure SQL scaffold; not part of the current SQLite-only provider scope.
 - `app` module: API host, frontend host, Key Vault wiring.
 - Keep module boundaries practical; avoid over-abstraction until first deploy is stable.
 
@@ -63,15 +63,16 @@ Scope for first pass:
 - [ ] Access controls and least privilege reviewed
 
 ### 5. Database Cutover
-- [ ] Database instance provisioned in Azure
+- [ ] Persistent SQLite storage provisioned in Azure
 - [ ] Connection string validated from deployed API
 - [ ] EF migrations applied in dev
 - [ ] Seed/default data strategy validated
 - [ ] Backup/rollback process documented
 
 Execution note:
-- For local CLI migration commands in this repository, use Infrastructure as startup project.
-- Deployed API still runs `Database.Migrate()` at startup, so rollout should keep migration ordering explicit during release windows.
+- SQLite is the sole supported provider; Azure SQL parity requires a separate implementation and migration matrix.
+- For CLI migration commands, use Infrastructure as the migrations project and API as the startup project.
+- Production defaults to `Database__ApplyMigrationsOnStartup=false`; apply migrations before routing traffic.
 
 ### 6. CI/CD
 - [ ] GitHub OIDC federation configured
@@ -98,12 +99,13 @@ Use this section to record major decisions and rationale.
 
 | Decision ID | Date | Decision | Options Considered | Choice | Rationale | Impact | Owner | Status |
 |-------------|------|----------|--------------------|--------|-----------|--------|-------|--------|
-| DEC-001 | 2026-07-22 | Production DB engine | MSSQL, PostgreSQL | MSSQL | Best alignment with current .NET/EF workflow and straightforward managed Azure SQL path. | Affects EF provider, infra module design, connection strings, migration process, cost profile | You | Decided |
+| DEC-001 | 2026-07-22 | Production DB engine | MSSQL, PostgreSQL | MSSQL | Superseded by DEC-007 after provider-scope review. | Historical only | You | Superseded |
 | DEC-002 | 2026-07-22 | Primary Azure region | East US, Australia East | Australia East (Sydney) | Lower latency and operational proximity for your location near Sydney. | Affects resource placement, latency, failover strategy, and cost. | You | Decided |
 | DEC-003 | 2026-07-22 | Naming and tagging standard | Custom per team, Azure baseline standard | Azure baseline naming + mandatory tags | Keeps resource discovery, cost reporting, and policy automation consistent while moving quickly. | Affects all Terraform module inputs, resource naming, cost governance, and operations. | You | Decided |
 | DEC-004 | 2026-07-22 | Environment strategy | Separate dev/prod, single environment | Single environment (dev only) | Solo usage; lower operational overhead and faster setup. | Simplifies subscription/RG strategy, Terragrunt structure, and deployment workflow. | You | Decided |
 | DEC-005 | 2026-07-23 | UI testing strategy | Automated UI tests, manual UI validation | Manual UI validation only (no automated UI tests) | Solo project; faster delivery and lower maintenance overhead for now. | Validation relies on API automation plus manual frontend smoke/flow checks. | You | Decided |
 | DEC-006 | 2026-08-02 | Identity and session architecture | Same-origin Easy Auth cookies, app-owned login, split-origin Entra/MSAL | Single-tenant Entra with separate SPA/API registrations, MSAL code + PKCE, API Easy Auth, and ASP.NET Core JWT/owner validation | Planned Static Web App and API App Service use separate origins. This supplies a hosted sign-in without passwords in the app and restricts access to the sole owner. | Adds app registrations, delegated scope, CORS, redirect URIs, API audience validation, and an owner object-ID setting; no user-management feature is needed. | You | Decided |
+| DEC-007 | 2026-08-23 | Supported production database provider | SQLite, Azure SQL parity | SQLite only | The application, migrations, tests, and operational checks use EF Core SQLite. Azure SQL parity is unimplemented and cannot be inferred from a dormant Terraform module. | Requires persistent single-instance storage and explicit pre-deploy migrations; Azure SQL scaffold remains dormant. | You | Decided |
 
 ## Naming and Tag Standard (Baseline)
 
@@ -150,18 +152,20 @@ Track meaningful deployment changes and outcomes.
 | 2026-07-22 | Terraform Lite scaffold created (modules + live/dev Terragrunt) | dev | Done | Step 1 complete |
 | 2026-07-22 | Remote state strategy wired and bootstrap script added | dev | Done | Step 2 prepared; run bootstrap script to create backend |
 | 2026-08-02 | Single-user Entra architecture selected | dev | Planned | Implement immediately after the shared API error contract and before domain refactors |
+| 2026-08-23 | Local production readiness validated | local | Passed | Release build/tests, migration generation, frontend build/tests, SQLite health, and correlated API smoke passed; Azure CLI was not authenticated. |
 
 ## Risks and Blockers
 
 | Date | Risk/Blocker | Severity | Mitigation | Owner | Status |
 |------|--------------|----------|------------|-------|--------|
+| 2026-08-23 | Azure CLI is not authenticated; dev resources and Entra registrations are not provisioned; live owner/cost-center values remain placeholders | High | Run `az login`, finalize Terragrunt inputs, provision the dev stack, configure Entra, then execute anonymous/non-owner/owner and workflow smoke matrices | You | Open |
 
 ## Next Actions (Top 5)
-1. Complete the shared API error contract and frontend 401/403 classification.
-2. Create the SPA/API Entra registrations and record tenant, client, scope, and owner object IDs outside source control.
-3. Add API authentication, frontend MSAL, and Terraform App Service authentication/CORS configuration.
-4. Provision or update the Australia East dev stack and validate the sole owner login end to end.
-5. Resume date and domain hardening only after the Azure authentication smoke matrix passes.
+1. Run `az login` and finalize `infra/live/dev/terragrunt.hcl` owner, cost-center, and environment inputs.
+2. Align the app-hosting Terraform design with persistent SQLite storage; keep the Azure SQL module disabled.
+3. Create the SPA/API Entra registrations and record tenant, client, scope, and owner object IDs outside source control.
+4. Provision the Australia East dev stack, apply EF migrations explicitly, and configure `/health` readiness monitoring.
+5. Run anonymous/non-owner/owner, correlation-log, DataTransfer, and core workflow smoke matrices; then close S2-09/S2-10 and S8-07.
 
 ## Notes
 - Keep this file updated at least once per work session.

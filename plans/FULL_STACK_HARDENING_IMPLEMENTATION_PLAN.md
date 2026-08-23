@@ -5,14 +5,14 @@
 - **Status:** In Progress - 96% Complete
 - **Assessed:** 2026-08-23
 - **Evidence:** 71 of 74 tasks are complete. Stages 0, 1, 3, 4, 5, 6, and 7 are complete; Stage 2 is 8 of 10 (blocked on Azure), and Stage 8 is 6 of 7.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked. Stage 8 continues with Slice C (operational readiness and final sign-off).
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) and the Azure portion of S8-07 are externally blocked on tenant login, provisioned resources, and final registration values. The complete local S8-07 matrix passes.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
 Overall Progress: 71/74 tasks (96%)
 Current Stage: Stage 8 - Quality Gates and Operational Readiness
-Next Task: S8-07 / Final local and Azure sign-off
+Next Task: S8-07 / Azure sign-off (externally blocked)
 
 ## Purpose
 
@@ -359,13 +359,13 @@ Goal: make the hardened architecture and workflows enforceable in CI and diagnos
 - [x] **S8-04** Measure reference-data requests and add lightweight frontend caching only if justified. Expense list and form each requested banks, trackers, and tags, producing six GETs in a normal list-to-form workflow; singleton service caches reduce this to three and invalidate after every successful mutation.
 - [x] **S8-05** Profile expense paging/filtering and DataTransfer chunking before further optimization. At 34,000 expenses, paging used two queries in 435 ms, selective filtering used one query in 52 ms, and a 10,283,581-byte DataTransfer export used one query in 685 ms; no further optimization was justified.
 - [x] **S8-06** Finalize Production startup validation, migration execution policy, monitoring, and correlated logs, and confirm whether Azure SQL provider parity is in scope or SQLite remains the sole provider. SQLite remains the sole provider; Production defaults to explicit pre-deploy migrations, exposes a database-backed `/health` probe, and emits correlated completion/error/DataTransfer logs.
-- [ ] **S8-07** Run local and Azure smoke matrices, update all plans/docs, and pass final sign-off.
+- [!] **S8-07** Run local and Azure smoke matrices, update all plans/docs, and pass final sign-off. The local matrix passes; Azure sign-off is blocked because Azure CLI is not authenticated, the dev stack has not been applied, and required live-stack values remain placeholders.
 
 ### Delivery Slices
 
 - [x] **Slice A (S8-01 + S8-02 + S8-03): Coverage and CI enforcement.** Complete backend architecture/route/repository/query-filter/FK/uniqueness coverage and frontend service/component/guard/accessibility/error-state coverage, then add CI checks that run backend build/tests, migration-script generation, frontend tests, and the production build. Group these because CI enforces the very suites completed here; use plain (non-idempotent) SQLite migration scripts in CI. Maps to the `enforce full stack quality gates` commit.
 - [x] **Slice B (S8-04 + S8-05): Measured performance work.** Measure reference-data request patterns and profile expense paging/filtering and DataTransfer chunking, adding caching or optimization only where a measurement justifies it and a cache-invalidation strategy exists. Independent of Slice A; likely near no-op and must not add speculative optimization.
-- [ ] **Slice C (S8-06 + S8-07): Operational readiness and final sign-off.** Finalize Production startup validation, migration execution policy, monitoring, correlated logs, and the Azure SQL provider-scope decision, then run the local and Azure smoke matrices, update all plans/docs, and pass final sign-off.
+- [!] **Slice C (S8-06 + S8-07): Operational readiness and final sign-off.** Finalize Production startup validation, migration execution policy, monitoring, correlated logs, and the Azure SQL provider-scope decision, then run the local and Azure smoke matrices, update all plans/docs, and pass final sign-off. Local work is complete; Azure smoke remains externally blocked.
 
 Run Slice A first because CI must enforce the completed suites before sign-off, and run Slice C last because `S8-07` is the final gate. Slice B is measurement-gated and can run any time before Slice C. Slice C's Azure smoke matrix shares the external Azure/Entra provisioning blocker with `S2-09`/`S2-10`; the local matrix and all non-Azure items can complete independently.
 
@@ -461,6 +461,7 @@ If a running API locks build outputs, stop it through the repository script befo
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
 | 2026-08-23 | S2-09/S2-10 | Azure SPA/API registrations, consent, Easy Auth, and deployed role matrix require access to the target Azure tenant and final registration values | Owner | Provision Azure resources, configure runtime values, then run the documented anonymous/non-owner/owner matrix | Open |
+| 2026-08-23 | S8-07 | Final Azure smoke cannot run: Azure CLI is not authenticated, no environment has been applied, and `infra/live/dev/terragrunt.hcl` still contains required owner/cost-center placeholders | Owner | Sign in with `az login`, finalize live inputs, provision the dev stack and Entra registrations, then run health plus anonymous/non-owner/owner workflow smoke tests | Open |
 
 ## Validation Log
 
@@ -549,6 +550,7 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S8-04 | Reference request inventory, cache/invalidation tests, frontend suite, and production build | Pass: 2 focused tests, 75 frontend tests, build ok | Expense list-to-form navigation previously issued six reference GETs. Bank, tracker, and tag singleton caches reduce that to three shared responses and invalidate only after successful create/update/delete/restore operations. Existing bundle warnings unchanged. |
 | 2026-08-23 | S8-05 / Slice B gate | Repeatable expense paging/filtering/DataTransfer profile and full backend suite | Pass: 34,000-row profile, 215 discovered .NET tests | Paging: 2 queries / 435 ms. Selective filtering: 1 query / 52 ms. DataTransfer: 1 query / 10,283,581 bytes / 685 ms. No N+1 behavior or near-limit latency justified query or chunking changes; CI defaults to the same structural profile at 1,000 rows. |
 | 2026-08-23 | S8-06 | Startup validation, migration policy, database health, correlated completion logs, and backend suite | Pass: 4 focused tests, 219 discovered .NET tests | Blank connections fail with actionable configuration guidance; Production disables automatic migration by default; `/health` verifies SQLite connectivity; completion logs carry request method/path/status/elapsed/correlation ID. SQLite is the sole supported provider and the deployment runbook documents explicit migration and monitoring steps. |
+| 2026-08-23 | S8-07 local gate | Release build/tests, migration script, locked frontend install/tests/build, and live Production API smoke | Local pass: 219 .NET tests, 75 frontend tests, migration script generated, build ok; `/health` 200, trackers 200, correlated 404 ProblemDetails | Production smoke used Release binaries, disabled startup migration, and an explicitly migrated temporary SQLite database. Existing frontend budget warnings and 9 npm audit findings remain. Azure role/deployment matrix is blocked and was not claimed as passed. |
 
 ## Progress Update Procedure
 
