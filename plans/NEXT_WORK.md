@@ -22,7 +22,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Done in this session:** The full-stack hardening plan is complete at 74/74 local tasks. Azure provisioning and deployed validation were separated into the dedicated Azure hardening rollout plan so tenant-dependent work no longer blocks the completed application hardening record.
 
-**Hardening note:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md) is complete. Do not reopen it for deployment-only work.
+**Hardening note:** [archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md) is complete. Do not reopen it for deployment-only work.
 
 ## Work Order
 

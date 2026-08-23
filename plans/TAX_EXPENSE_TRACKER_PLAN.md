@@ -241,7 +241,7 @@ Current expense filter query parameters:
 - [~] Coverage expansion ongoing
 - [x] UI testing approach confirmed: manual UI validation only (no automated UI tests)
 
-Backend, frontend, and cross-layer hardening details, delivery order, decisions, and progress are tracked in [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md).
+Completed backend, frontend, and cross-layer hardening details, delivery order, decisions, and validation evidence are preserved in [archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md).
 
 ---
 

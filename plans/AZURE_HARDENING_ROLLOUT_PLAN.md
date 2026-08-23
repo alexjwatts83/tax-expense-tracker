@@ -65,10 +65,12 @@ Deploy the locally hardened application to Azure, configure single-tenant Entra 
 
 ## Relationship To Other Plans
 
-- [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md) is complete for local application hardening; do not reopen it for deployment-only work.
+- [archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md) is the completed local application hardening record; do not reopen it for deployment-only work.
 - [todo/AZURE_DEPLOYMENT_TRACKER.md](todo/AZURE_DEPLOYMENT_TRACKER.md) remains the broad infrastructure checklist. This plan controls the hardening-specific Azure closure sequence and validation evidence.
 - [NEXT_WORK.md](NEXT_WORK.md) points to this plan while Azure rollout is the active priority.
 
 ## Completion Rule
 
 Mark this plan complete only when all six tasks have deployed evidence. Local tests or mocks cannot substitute for Azure provisioning, identity, persistence, and role-matrix validation.
+
+After completion, update `NEXT_WORK.md`, the README, and the broad Azure deployment tracker with the final outcome, then move this plan to `plans/archive/AZURE_HARDENING_ROLLOUT_PLAN.md` and update all links to its archived location.
