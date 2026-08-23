@@ -219,8 +219,8 @@ public sealed class EfExpenseRepository : IExpenseRepository
 
         if (query.Date.HasValue)
         {
-            var filterDate = query.Date.Value.Date;
-            expenseQuery = expenseQuery.Where(x => x.Date.Date == filterDate);
+            var filterDate = query.Date.Value;
+            expenseQuery = expenseQuery.Where(x => x.Date == filterDate);
         }
 
         if (query.BankId.HasValue)

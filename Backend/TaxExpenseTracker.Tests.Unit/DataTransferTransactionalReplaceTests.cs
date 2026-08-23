@@ -12,8 +12,8 @@ public class DataTransferTransactionalReplaceTests
     public async Task WorkLocationImport_ReplaceDryRun_ReportsMissingWithoutMutation()
     {
         var repository = new WorkLocationRepository();
-        var kept = WorkLocationEntry.Create(new DateTime(2026, 7, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
-        var missing = WorkLocationEntry.Create(new DateTime(2026, 7, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var kept = WorkLocationEntry.Create(new DateOnly(2026, 7, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var missing = WorkLocationEntry.Create(new DateOnly(2026, 7, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.AddRange([kept, missing]);
         var handler = new DataTransferWorkLocationImportHandler(repository, TestTime.TimeProvider);
 
@@ -31,8 +31,8 @@ public class DataTransferTransactionalReplaceTests
     public async Task LeaveImport_ReplaceWithDeletes_SoftDeletesMissingEntry()
     {
         var repository = new LeaveRepository();
-        var kept = LeaveEntry.Create(new DateTime(2026, 7, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
-        var missing = LeaveEntry.Create(new DateTime(2026, 7, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var kept = LeaveEntry.Create(new DateOnly(2026, 7, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var missing = LeaveEntry.Create(new DateOnly(2026, 7, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.AddRange([kept, missing]);
         var handler = new DataTransferLeaveImportHandler(repository, TestTime.TimeProvider);
 
@@ -52,7 +52,7 @@ public class DataTransferTransactionalReplaceTests
     {
         var repository = new WorkLocationRepository();
         var handler = new DataTransferWorkLocationImportHandler(repository, TestTime.TimeProvider);
-        var workDate = new DateTime(2026, 7, 1);
+        var workDate = new DateOnly(2026, 7, 1);
 
         var result = await handler.ImportAsync(
             new WorkLocationImportPayloadDto(
@@ -71,7 +71,7 @@ public class DataTransferTransactionalReplaceTests
     {
         var repository = new LeaveRepository();
         var handler = new DataTransferLeaveImportHandler(repository, TestTime.TimeProvider);
-        var leaveDate = new DateTime(2026, 7, 1);
+        var leaveDate = new DateOnly(2026, 7, 1);
 
         var result = await handler.ImportAsync(
             new LeaveImportPayloadDto(
@@ -102,11 +102,11 @@ public class DataTransferTransactionalReplaceTests
         public Task<WorkLocationEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default) =>
             Task.FromResult(Entries.FirstOrDefault(x => x.Id == id));
 
-        public Task<IReadOnlyList<WorkLocationEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default) =>
+        public Task<IReadOnlyList<WorkLocationEntry>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<WorkLocationEntry>>(Entries.Where(x => !x.IsDeleted).ToList());
 
-        public Task<bool> ExistsForDateAsync(DateTime workDate, Guid? excludingId = null, CancellationToken cancellationToken = default) =>
-            Task.FromResult(Entries.Any(x => !x.IsDeleted && x.WorkDate.Date == workDate.Date && x.Id != excludingId));
+        public Task<bool> ExistsForDateAsync(DateOnly workDate, Guid? excludingId = null, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Entries.Any(x => !x.IsDeleted && x.WorkDate == workDate && x.Id != excludingId));
 
         public Task AddAsync(WorkLocationEntry entity, CancellationToken cancellationToken = default)
         {
@@ -138,11 +138,11 @@ public class DataTransferTransactionalReplaceTests
         public Task<LeaveEntry?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken cancellationToken = default) =>
             Task.FromResult(Entries.FirstOrDefault(x => x.Id == id));
 
-        public Task<IReadOnlyList<LeaveEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default) =>
+        public Task<IReadOnlyList<LeaveEntry>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<LeaveEntry>>(Entries.Where(x => !x.IsDeleted).ToList());
 
-        public Task<bool> ExistsForDateAsync(DateTime leaveDate, Guid? excludingId = null, CancellationToken cancellationToken = default) =>
-            Task.FromResult(Entries.Any(x => !x.IsDeleted && x.LeaveDate.Date == leaveDate.Date && x.Id != excludingId));
+        public Task<bool> ExistsForDateAsync(DateOnly leaveDate, Guid? excludingId = null, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Entries.Any(x => !x.IsDeleted && x.LeaveDate == leaveDate && x.Id != excludingId));
 
         public Task AddAsync(LeaveEntry entity, CancellationToken cancellationToken = default)
         {

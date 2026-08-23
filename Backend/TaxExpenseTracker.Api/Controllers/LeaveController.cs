@@ -16,8 +16,8 @@ public class LeaveController(
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LeaveDto>>> GetAll(
-        DateTime? fromDate,
-        DateTime? toDate,
+        DateOnly? fromDate,
+        DateOnly? toDate,
         CancellationToken cancellationToken)
     {
         var entries = fromDate.HasValue || toDate.HasValue
@@ -161,11 +161,11 @@ public class LeaveController(
     [HttpGet("summary")]
     public async Task<ActionResult<LeaveSummaryDto>> Summary(
         string view = "month",
-        DateTime? date = null,
+        DateOnly? date = null,
         CancellationToken cancellationToken = default)
     {
         var summaryView = ParseSummaryView(view);
-        var anchorDate = date?.Date ?? DateTime.UtcNow.Date;
+        var anchorDate = date ?? DateOnly.FromDateTime(DateTime.UtcNow);
 
         var summary = await leaveService.GetSummaryAsync(summaryView, anchorDate, cancellationToken);
 

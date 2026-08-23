@@ -14,7 +14,7 @@ public class LeaveServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, "  Annual leave  "));
+        var result = await service.CreateAsync(new CreateLeaveCommand(new DateOnly(2026, 3, 10), DayEntryType.FullDay, null, "  Annual leave  "));
 
         Assert.Equal(7.6m, result.HoursWorked);
         Assert.Equal("Annual leave", result.Notes);
@@ -29,7 +29,7 @@ public class LeaveServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, LeaveType.Sick));
+        var result = await service.CreateAsync(new CreateLeaveCommand(new DateOnly(2026, 3, 10), DayEntryType.FullDay, null, null, LeaveType.Sick));
 
         Assert.Equal(LeaveType.Sick, result.LeaveType);
         Assert.Single(repository.Entries);
@@ -40,18 +40,18 @@ public class LeaveServiceTests
     public async Task UpdateAsync_UsesProvidedLeaveType_WhenSpecified()
     {
         var repository = new InMemoryLeaveRepository();
-        var entry = LeaveEntry.Create(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var entry = LeaveEntry.Create(new DateOnly(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(entry);
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
         var updated = await service.UpdateAsync(
             entry.Id,
-            new UpdateLeaveCommand(new DateTime(2026, 3, 11), DayEntryType.HalfDay, null, null, LeaveType.Sick));
+            new UpdateLeaveCommand(new DateOnly(2026, 3, 11), DayEntryType.HalfDay, null, null, LeaveType.Sick));
 
         Assert.True(updated);
         Assert.Equal(LeaveType.Sick, entry.LeaveType);
-        Assert.Equal(new DateTime(2026, 3, 11), entry.LeaveDate);
+        Assert.Equal(new DateOnly(2026, 3, 11), entry.LeaveDate);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class LeaveServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 11), DayEntryType.HalfDay, null, null));
+        var result = await service.CreateAsync(new CreateLeaveCommand(new DateOnly(2026, 3, 11), DayEntryType.HalfDay, null, null));
 
         Assert.Equal(3.8m, result.HoursWorked);
     }
@@ -73,7 +73,7 @@ public class LeaveServiceTests
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.SpecificHours, 6.25m, null));
+        var result = await service.CreateAsync(new CreateLeaveCommand(new DateOnly(2026, 3, 12), DayEntryType.SpecificHours, 6.25m, null));
 
         Assert.Equal(6.25m, result.HoursWorked);
     }
@@ -82,12 +82,12 @@ public class LeaveServiceTests
     public async Task CreateAsync_Throws_WhenDateAlreadyExists()
     {
         var repository = new InMemoryLeaveRepository();
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 3, 12), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
         var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() =>
-            service.CreateAsync(new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.HalfDay, null, null)));
+            service.CreateAsync(new CreateLeaveCommand(new DateOnly(2026, 3, 12), DayEntryType.HalfDay, null, null)));
 
         Assert.Equal("A leave entry already exists for this date.", ex.Message);
     }
@@ -96,17 +96,17 @@ public class LeaveServiceTests
     public async Task GetByDateRangeAsync_ReturnsMatchingEntries()
     {
         var repository = new InMemoryLeaveRepository();
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 20), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 3, 20), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
 
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var result = await service.GetByDateRangeAsync(new DateTime(2026, 3, 10), new DateTime(2026, 3, 31));
+        var result = await service.GetByDateRangeAsync(new DateOnly(2026, 3, 10), new DateOnly(2026, 3, 31));
 
         Assert.Single(result);
-        Assert.Equal(new DateTime(2026, 3, 20), result[0].LeaveDate);
+        Assert.Equal(new DateOnly(2026, 3, 20), result[0].LeaveDate);
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class LeaveServiceTests
     public async Task RestoreAsync_RestoresSoftDeletedEntry()
     {
         var repository = new InMemoryLeaveRepository();
-        var entry = LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var entry = LeaveEntry.Create(new DateOnly(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         entry.SoftDelete(TestTime.TimeProvider);
         repository.Entries.Add(entry);
         var holidayRepository = new InMemoryPublicHolidayRepository();
@@ -143,9 +143,9 @@ public class LeaveServiceTests
     public async Task RestoreAsync_Throws_WhenActiveEntryExistsForDate()
     {
         var repository = new InMemoryLeaveRepository();
-        var deleted = LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var deleted = LeaveEntry.Create(new DateOnly(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         deleted.SoftDelete(TestTime.TimeProvider);
-        var active = LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
+        var active = LeaveEntry.Create(new DateOnly(2026, 4, 1), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(deleted);
         repository.Entries.Add(active);
         var holidayRepository = new InMemoryPublicHolidayRepository();
@@ -161,9 +161,9 @@ public class LeaveServiceTests
     public async Task RestoreAsync_Throws_WhenActiveEntryExistsForSameDateDifferentTime()
     {
         var repository = new InMemoryLeaveRepository();
-        var deleted = LeaveEntry.Create(new DateTime(2026, 4, 1, 8, 0, 0), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var deleted = LeaveEntry.Create(new DateOnly(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         deleted.SoftDelete(TestTime.TimeProvider);
-        var active = LeaveEntry.Create(new DateTime(2026, 4, 1, 19, 45, 0), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
+        var active = LeaveEntry.Create(new DateOnly(2026, 4, 1), DayEntryType.HalfDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(deleted);
         repository.Entries.Add(active);
         var holidayRepository = new InMemoryPublicHolidayRepository();
@@ -179,28 +179,28 @@ public class LeaveServiceTests
     public async Task UpdateAsync_Throws_WhenSpecificHoursMissingForSpecificHoursType()
     {
         var repository = new InMemoryLeaveRepository();
-        var entry = LeaveEntry.Create(new DateTime(2026, 4, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var entry = LeaveEntry.Create(new DateOnly(2026, 4, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(entry);
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-            service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateTime(2026, 4, 3), DayEntryType.SpecificHours, null, null)));
+            service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateOnly(2026, 4, 3), DayEntryType.SpecificHours, null, null)));
     }
 
     [Fact]
     public async Task UpdateAsync_Throws_WhenAnotherEntryExistsForDate()
     {
         var repository = new InMemoryLeaveRepository();
-        var entry = LeaveEntry.Create(new DateTime(2026, 4, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
-        var other = LeaveEntry.Create(new DateTime(2026, 4, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var entry = LeaveEntry.Create(new DateOnly(2026, 4, 2), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var other = LeaveEntry.Create(new DateOnly(2026, 4, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         repository.Entries.Add(entry);
         repository.Entries.Add(other);
         var holidayRepository = new InMemoryPublicHolidayRepository();
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
         var ex = await Assert.ThrowsAsync<ApplicationConflictException>(() =>
-            service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateTime(2026, 4, 3), DayEntryType.FullDay, null, null)));
+            service.UpdateAsync(entry.Id, new UpdateLeaveCommand(new DateOnly(2026, 4, 3), DayEntryType.FullDay, null, null)));
 
         Assert.Equal("A leave entry already exists for this date.", ex.Message);
     }
@@ -209,25 +209,25 @@ public class LeaveServiceTests
     public async Task GetSummaryAsync_Month_ReturnsTotalsWithinMonthWindow()
     {
         var repository = new InMemoryLeaveRepository();
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 20), DayEntryType.SpecificHours, 2.5m, null, TestTime.TimeProvider));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 3, 3), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 3, 20), DayEntryType.SpecificHours, 2.5m, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 4, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 10), "Labour Day", "Seed", false, TestTime.TimeProvider));
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 30), "Regional Holiday", "Seed", false, TestTime.TimeProvider));
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 4, 2), "Outside Range", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2026, 3, 10), "Labour Day", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2026, 3, 30), "Regional Holiday", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2026, 4, 2), "Outside Range", "Seed", false, TestTime.TimeProvider));
 
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var summary = await service.GetSummaryAsync(SummaryView.Month, new DateTime(2026, 3, 8));
+        var summary = await service.GetSummaryAsync(SummaryView.Month, new DateOnly(2026, 3, 8));
 
-        Assert.Equal(new DateTime(2026, 3, 1), summary.FromDate);
-        Assert.Equal(new DateTime(2026, 3, 31), summary.ToDate);
+        Assert.Equal(new DateOnly(2026, 3, 1), summary.FromDate);
+        Assert.Equal(new DateOnly(2026, 3, 31), summary.ToDate);
         Assert.Equal(10.1m, summary.TotalHours);
         Assert.Equal(2, summary.TotalDays);
         Assert.Equal(2, summary.EntryCount);
         Assert.Equal(2, summary.Holidays.Count);
-        Assert.Equal(new DateTime(2026, 3, 10), summary.Holidays[0].Date);
+        Assert.Equal(new DateOnly(2026, 3, 10), summary.Holidays[0].Date);
         Assert.Equal("Regional Holiday", summary.Holidays[1].Name);
     }
 
@@ -235,52 +235,52 @@ public class LeaveServiceTests
     public async Task BatchCreateAsync_ReturnsMixedResults_ForCreatedSkippedAndFailedItems()
     {
         var repository = new InMemoryLeaveRepository();
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2026, 3, 14), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2026, 3, 14), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 13), "Public Holiday", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2026, 3, 13), "Public Holiday", "Seed", false, TestTime.TimeProvider));
 
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.FullDay, null, null),
-            new CreateLeaveCommand(new DateTime(2026, 3, 12), DayEntryType.HalfDay, null, null),
-            new CreateLeaveCommand(new DateTime(2026, 3, 13), DayEntryType.FullDay, null, null),
-            new CreateLeaveCommand(new DateTime(2026, 3, 14), DayEntryType.FullDay, null, null),
-            new CreateLeaveCommand(new DateTime(2026, 3, 15), DayEntryType.SpecificHours, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 12), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 12), DayEntryType.HalfDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 13), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 14), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 15), DayEntryType.SpecificHours, null, null),
         ]);
 
         Assert.Equal(5, result.TotalRequested);
         Assert.Equal(1, result.CreatedCount);
         Assert.Equal(2, result.SkippedCount);
         Assert.Equal(2, result.FailedCount);
-        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate.Date == new DateTime(2026, 3, 12) && x.LeaveType == LeaveType.Annual);
-        Assert.Contains(result.Results, x => x.Status == "FailedConflict" && x.LeaveDate.Date == new DateTime(2026, 3, 13));
-        Assert.Contains(result.Results, x => x.Status == "FailedValidation" && x.LeaveDate.Date == new DateTime(2026, 3, 15));
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate == new DateOnly(2026, 3, 12) && x.LeaveType == LeaveType.Annual);
+        Assert.Contains(result.Results, x => x.Status == "FailedConflict" && x.LeaveDate == new DateOnly(2026, 3, 13));
+        Assert.Contains(result.Results, x => x.Status == "FailedValidation" && x.LeaveDate == new DateOnly(2026, 3, 15));
     }
 
     [Fact]
     public async Task GetSummaryAsync_Month_LeapYear_IncludesLeapDayAndRespectsBounds()
     {
         var repository = new InMemoryLeaveRepository();
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2028, 2, 28), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2028, 2, 29), DayEntryType.HalfDay, null, null, TestTime.TimeProvider));
-        repository.Entries.Add(LeaveEntry.Create(new DateTime(2028, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2028, 2, 28), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2028, 2, 29), DayEntryType.HalfDay, null, null, TestTime.TimeProvider));
+        repository.Entries.Add(LeaveEntry.Create(new DateOnly(2028, 3, 1), DayEntryType.FullDay, null, null, TestTime.TimeProvider));
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2028, 2, 29), "Leap Day Holiday", "Seed", false, TestTime.TimeProvider));
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2028, 3, 1), "Outside Range", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2028, 2, 29), "Leap Day Holiday", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2028, 3, 1), "Outside Range", "Seed", false, TestTime.TimeProvider));
 
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
-        var summary = await service.GetSummaryAsync(SummaryView.Month, new DateTime(2028, 2, 10));
+        var summary = await service.GetSummaryAsync(SummaryView.Month, new DateOnly(2028, 2, 10));
 
-        Assert.Equal(new DateTime(2028, 2, 1), summary.FromDate);
-        Assert.Equal(new DateTime(2028, 2, 29), summary.ToDate);
+        Assert.Equal(new DateOnly(2028, 2, 1), summary.FromDate);
+        Assert.Equal(new DateOnly(2028, 2, 29), summary.ToDate);
         Assert.Equal(11.4m, summary.TotalHours);
         Assert.Equal(2, summary.TotalDays);
         Assert.Equal(2, summary.EntryCount);
         Assert.Single(summary.Holidays);
-        Assert.Equal(new DateTime(2028, 2, 29), summary.Holidays[0].Date);
+        Assert.Equal(new DateOnly(2028, 2, 29), summary.Holidays[0].Date);
     }
 
     [Fact]
@@ -292,15 +292,15 @@ public class LeaveServiceTests
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateLeaveCommand(new DateTime(2026, 3, 17, 8, 0, 0), DayEntryType.FullDay, null, null),
-            new CreateLeaveCommand(new DateTime(2026, 3, 17, 14, 0, 0), DayEntryType.HalfDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 17), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 17), DayEntryType.HalfDay, null, null),
         ]);
 
         Assert.Equal(2, result.TotalRequested);
         Assert.Equal(1, result.CreatedCount);
         Assert.Equal(1, result.SkippedCount);
         Assert.Equal(0, result.FailedCount);
-        Assert.Contains(result.Results, x => x.Status == "SkippedDuplicate" && x.LeaveDate == new DateTime(2026, 3, 17));
+        Assert.Contains(result.Results, x => x.Status == "SkippedDuplicate" && x.LeaveDate == new DateOnly(2026, 3, 17));
     }
 
     [Fact]
@@ -308,13 +308,13 @@ public class LeaveServiceTests
     {
         var repository = new InMemoryLeaveRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 30), "Public Holiday", "Seed", false, TestTime.TimeProvider));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2026, 3, 30), "Public Holiday", "Seed", false, TestTime.TimeProvider));
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateLeaveCommand(new DateTime(2026, 3, 30, 8, 0, 0), DayEntryType.FullDay, null, null),
-            new CreateLeaveCommand(new DateTime(2026, 3, 30, 12, 0, 0), DayEntryType.HalfDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 30), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 30), DayEntryType.HalfDay, null, null),
         ]);
 
         Assert.Equal(2, result.TotalRequested);
@@ -329,18 +329,18 @@ public class LeaveServiceTests
     {
         var repository = new InMemoryLeaveRepository();
         var holidayRepository = new InMemoryPublicHolidayRepository();
-        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 3, 30), "Optional Work Day", "Seed", false, TestTime.TimeProvider, true));
+        holidayRepository.Holidays.Add(PublicHoliday.Create(new DateOnly(2026, 3, 30), "Optional Work Day", "Seed", false, TestTime.TimeProvider, true));
         var service = new LeaveService(repository, holidayRepository, TestTime.TimeProvider);
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateLeaveCommand(new DateTime(2026, 3, 30), DayEntryType.FullDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 3, 30), DayEntryType.FullDay, null, null),
         ]);
 
         Assert.Equal(1, result.TotalRequested);
         Assert.Equal(1, result.CreatedCount);
         Assert.Equal(0, result.FailedCount);
-        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate.Date == new DateTime(2026, 3, 30));
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate == new DateOnly(2026, 3, 30));
     }
 
     [Fact]
@@ -368,7 +368,7 @@ public class LeaveServiceTests
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateLeaveCommand(new DateTime(2026, 4, 9), DayEntryType.FullDay, null, null, LeaveType.Sick),
+            new CreateLeaveCommand(new DateOnly(2026, 4, 9), DayEntryType.FullDay, null, null, LeaveType.Sick),
         ]);
 
         Assert.Single(result.Results);
@@ -382,7 +382,7 @@ public class LeaveServiceTests
     public async Task BatchCreateAsync_CreatesEntry_WhenOnlyExistingEntryForDateIsSoftDeleted()
     {
         var repository = new InMemoryLeaveRepository();
-        var existing = LeaveEntry.Create(new DateTime(2026, 4, 8), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var existing = LeaveEntry.Create(new DateOnly(2026, 4, 8), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
         existing.SoftDelete(TestTime.TimeProvider);
         repository.Entries.Add(existing);
         var holidayRepository = new InMemoryPublicHolidayRepository();
@@ -390,14 +390,14 @@ public class LeaveServiceTests
 
         var result = await service.BatchCreateAsync(
         [
-            new CreateLeaveCommand(new DateTime(2026, 4, 8), DayEntryType.HalfDay, null, null),
+            new CreateLeaveCommand(new DateOnly(2026, 4, 8), DayEntryType.HalfDay, null, null),
         ]);
 
         Assert.Equal(1, result.TotalRequested);
         Assert.Equal(1, result.CreatedCount);
         Assert.Equal(0, result.SkippedCount);
         Assert.Equal(0, result.FailedCount);
-        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate == new DateTime(2026, 4, 8));
+        Assert.Contains(result.Results, x => x.Status == "Created" && x.LeaveDate == new DateOnly(2026, 4, 8));
     }
 
     private sealed class InMemoryPublicHolidayRepository : IPublicHolidayRepository
@@ -431,18 +431,18 @@ public class LeaveServiceTests
             return Task.CompletedTask;
         }
 
-        public Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
         {
             var query = Holidays.AsEnumerable();
 
             if (fromDate.HasValue)
             {
-                query = query.Where(x => x.HolidayDate.Date >= fromDate.Value.Date);
+                query = query.Where(x => x.HolidayDate >= fromDate.Value);
             }
 
             if (toDate.HasValue)
             {
-                query = query.Where(x => x.HolidayDate.Date <= toDate.Value.Date);
+                query = query.Where(x => x.HolidayDate <= toDate.Value);
             }
 
             return Task.FromResult<IReadOnlyList<PublicHoliday>>(query.ToList());
@@ -469,27 +469,26 @@ public class LeaveServiceTests
             return Task.FromResult(Entries.FirstOrDefault(x => x.Id == id && !x.IsDeleted));
         }
 
-        public Task<IReadOnlyList<LeaveEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<LeaveEntry>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
         {
             var query = Entries.Where(x => !x.IsDeleted);
 
             if (fromDate.HasValue)
             {
-                query = query.Where(x => x.LeaveDate >= fromDate.Value.Date);
+                query = query.Where(x => x.LeaveDate >= fromDate.Value);
             }
 
             if (toDate.HasValue)
             {
-                query = query.Where(x => x.LeaveDate <= toDate.Value.Date);
+                query = query.Where(x => x.LeaveDate <= toDate.Value);
             }
 
             return Task.FromResult<IReadOnlyList<LeaveEntry>>(query.ToList());
         }
 
-        public Task<bool> ExistsForDateAsync(DateTime leaveDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
+        public Task<bool> ExistsForDateAsync(DateOnly leaveDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
         {
-            var date = leaveDate.Date;
-            var exists = Entries.Any(x => !x.IsDeleted && x.LeaveDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value));
+            var exists = Entries.Any(x => !x.IsDeleted && x.LeaveDate == leaveDate && (!excludingId.HasValue || x.Id != excludingId.Value));
             return Task.FromResult(exists);
         }
 

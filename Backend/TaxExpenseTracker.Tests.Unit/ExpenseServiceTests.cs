@@ -20,7 +20,7 @@ public class ExpenseServiceTests
         var exception = await Assert.ThrowsAsync<MissingReferenceException>(() =>
             service.CreateAsync(new CreateExpenseCommand(
                 "Work machine",
-                TestTime.FixedUtcNow.UtcDateTime,
+                DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
                 repository.BankId,
                 1200m,
                 Guid.NewGuid(),
@@ -43,7 +43,7 @@ public class ExpenseServiceTests
 
         var result = await service.CreateAsync(new CreateExpenseCommand(
             "  Work machine  ",
-            TestTime.FixedUtcNow.UtcDateTime,
+            DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
             repository.BankId,
             1200m,
             repository.SourceId,
@@ -68,7 +68,7 @@ public class ExpenseServiceTests
 
         var result = await service.UpdateAsync(Guid.NewGuid(), new UpdateExpenseCommand(
             "Desc",
-            TestTime.FixedUtcNow.UtcDateTime,
+            DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
             repository.BankId,
             10m,
             repository.SourceId,
@@ -99,7 +99,7 @@ public class ExpenseServiceTests
 
         var expense = TaxExpense.Create(
             "Desc",
-            TestTime.FixedUtcNow.UtcDateTime,
+            DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
             repository.BankId,
             100m,
             repository.SourceId,
@@ -120,7 +120,7 @@ public class ExpenseServiceTests
     public async Task GetSummaryAsync_ReturnsGroupedTotals()
     {
         var repository = new InMemoryExpenseRepository { SourceExistsResult = true, BankExistsResult = true };
-        var now = TestTime.FixedUtcNow.UtcDateTime;
+        var now = DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime);
 
         var first = TaxExpense.Create("Desc", now, repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
         first.Bank = Bank.Create("ANZ", TestTime.TimeProvider);
@@ -172,7 +172,7 @@ public class ExpenseServiceTests
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.CreateAsync(new CreateExpenseCommand(
                 "Keyboard",
-                TestTime.FixedUtcNow.UtcDateTime,
+                DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
                 repository.BankId,
                 80m,
                 repository.SourceId,
@@ -192,7 +192,7 @@ public class ExpenseServiceTests
 
         var existing = TaxExpense.Create(
             "Desk",
-            TestTime.FixedUtcNow.UtcDateTime,
+            DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
             repository.BankId,
             300m,
             repository.SourceId,
@@ -205,7 +205,7 @@ public class ExpenseServiceTests
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.UpdateAsync(existing.Id, new UpdateExpenseCommand(
                 "Desk Updated",
-                TestTime.FixedUtcNow.UtcDateTime,
+                DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
                 repository.BankId,
                 320m,
                 repository.SourceId,

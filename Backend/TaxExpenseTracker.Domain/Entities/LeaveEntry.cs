@@ -2,14 +2,14 @@ namespace TaxExpenseTracker.Domain.Entities;
 
 public class LeaveEntry : AuditableSoftDeletableEntity
 {
-    public DateTime LeaveDate { get; set; }
+    public DateOnly LeaveDate { get; set; }
     public LeaveType LeaveType { get; set; } = LeaveType.Annual;
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }
     public string? Notes { get; set; }
 
     public static LeaveEntry Create(
-        DateTime leaveDate,
+        DateOnly leaveDate,
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
@@ -34,7 +34,7 @@ public class LeaveEntry : AuditableSoftDeletableEntity
     }
 
     public void Update(
-        DateTime leaveDate,
+        DateOnly leaveDate,
         DayEntryType entryType,
         decimal? specificHours,
         string? notes,
@@ -70,7 +70,7 @@ public class LeaveEntry : AuditableSoftDeletableEntity
         return entryType;
     }
 
-    private static DateTime ValidateDate(DateTime date)
+    private static DateOnly ValidateDate(DateOnly date)
     {
         ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;

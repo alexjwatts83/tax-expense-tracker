@@ -2,17 +2,17 @@
 
 ## Plan Status Snapshot
 
-- **Status:** In Progress - 39% Complete
+- **Status:** In Progress - 42% Complete
 - **Assessed:** 2026-08-23
-- **Evidence:** 29 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 3 is 4 of 10, and Stages 4 through 8 have not started.
-- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked; Stage 3 code-only work began under an explicit gate override while the wire format stays stable.
+- **Evidence:** 31 of 74 tasks are complete. Stages 0 and 1 are complete, Stage 2 is 8 of 10 (blocked on Azure), Stage 3 is 6 of 10, and Stages 4 through 8 have not started.
+- **Remaining gate:** Stage 2's Azure verification (S2-09/S2-10) is externally blocked; Stage 3 continues under a gate override. The `DateOnly` type migration is generated, but active-date unique indexes (S3-07) and existing-data normalization/preflight (S3-08) are still required before real-data deployment.
 - **Authority:** This snapshot supersedes older progress text below until the next dated assessment.
 
 Last Updated: 2026-08-23
 Status: In Progress
-Overall Progress: 29/74 tasks (39%)
+Overall Progress: 31/74 tasks (42%)
 Current Stage: Stage 3 - Date Integrity and Restore Safety
-Next Task: S3-05 (with migration S3-07/S3-08)
+Next Task: S3-07 (with migration S3-08)
 
 ## Purpose
 
@@ -50,13 +50,13 @@ Progress counts only `[x]` tasks. A stage is complete only when its validation g
 | 0 | Baseline and contract decisions | 9 | 9 | 100% | Complete | None |
 | 1 | Error contract and immediate defects | 8 | 8 | 100% | Complete | Stage 0 |
 | 2 | Authentication and authorization | 8 | 10 | 80% | Blocked | Stages 0-1 |
-| 3 | Date integrity and restore safety | 4 | 10 | 40% | In Progress | Stages 0-1 |
+| 3 | Date integrity and restore safety | 6 | 10 | 60% | In Progress | Stages 0-1 |
 | 4 | Expense references and aggregate ownership | 0 | 9 | 0% | Not Started | Stages 1, 3 |
 | 5 | Calendar and day-entry workflow | 0 | 8 | 0% | Not Started | Stages 1, 3 |
 | 6 | Remaining domain encapsulation | 0 | 6 | 0% | Not Started | Stages 3-5 |
 | 7 | DataTransfer hardening | 0 | 7 | 0% | Not Started | Stages 1-4 |
 | 8 | Quality gates and operational readiness | 0 | 7 | 0% | Not Started | Stages 2-7 |
-| **Total** |  | **29** | **74** | **39%** | **In Progress** |  |
+| **Total** |  | **31** | **74** | **42%** | **In Progress** |  |
 
 ## Delivery Rules
 
@@ -189,8 +189,8 @@ Goal: make date-only rules consistent from Angular through the domain and databa
 - [x] **S3-01** Add backend regression tests for restore conflicts and non-midnight date behavior.
 - [x] **S3-02** Add frontend date utility/contract tests including invalid dates, leap days, and timezones.
 - [x] **S3-03** Introduce frontend calendar-date and UTC-timestamp types and strict utilities.
-- [ ] **S3-04** Preserve `yyyy-MM-dd` calendar-date JSON across forms, filters, summaries, and DataTransfer.
-- [ ] **S3-05** Convert backend date-only domain/application contracts to `DateOnly` where agreed.
+- [x] **S3-04** Preserve `yyyy-MM-dd` calendar-date JSON across forms, filters, summaries, and DataTransfer.
+- [x] **S3-05** Convert backend date-only domain/application contracts to `DateOnly` where agreed.
 - [x] **S3-06** Add restore conflict checks for work-location and leave entries.
 - [ ] **S3-07** Add filtered unique indexes for active work-location and leave dates.
 - [ ] **S3-08** Create migration normalization, duplicate preflight, repair, and rollback steps.
@@ -490,6 +490,8 @@ If a running API locks build outputs, stop it through the repository script befo
 | 2026-08-23 | S3-01/S3-06 | Restore conflict and non-midnight date tests | Pass: 4 | Restoring leave or work-location entries onto an occupied date is rejected, including same-date different-time values |
 | 2026-08-23 | S3-02/S3-03 | Frontend calendar-date utility tests | Pass: 13 | Invalid dates, leap days, month/day bounds, ISO truncation, and timezone-stable round-trips covered |
 | 2026-08-23 | S3-01/S3-02/S3-03/S3-06 | Backend and frontend suites | Pass: 176 backend, 48 frontend | Stage 3 code-only slice green; `DateOnly` conversion and calendar-date JSON deferred to the migration batch |
+| 2026-08-23 | S3-04/S3-05 | Full backend and frontend suites | Pass: 104 unit, 50 integration, 48 frontend | Calendar dates are `DateOnly` end to end and serialize as `yyyy-MM-dd`; wire format preserved for the frontend |
+| 2026-08-23 | S3-05 | EF migration `ConvertCalendarDatesToDateOnly` | Generated and script builds | SQLite stores dates as TEXT so no column alter is emitted; existing non-midnight normalization and preflight remain S3-08 |
 
 ## Progress Update Procedure
 

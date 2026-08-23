@@ -18,7 +18,7 @@ public class DataTransferExpenseImportHandlerTests
             new ExpenseImportPayloadDto(
                 [new ExpenseImportItemDto(
                     expenseId,
-                    TestTime.FixedUtcNow.UtcDateTime,
+                    DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
                     "Laptop",
                     1200m,
                     repository.BankId,
@@ -113,7 +113,7 @@ public class DataTransferExpenseImportHandlerTests
     public async Task ImportAsync_Upsert_UpdatesAndRestoresExistingExpense()
     {
         var repository = new DataTransferExpenseRepository();
-        var existing = TaxExpense.Create("Old", new DateTime(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
+        var existing = TaxExpense.Create("Old", new DateOnly(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
         existing.SoftDelete(TestTime.TimeProvider);
         repository.Expenses.Add(existing);
         var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
@@ -134,7 +134,7 @@ public class DataTransferExpenseImportHandlerTests
     public async Task ImportAsync_InsertOnly_SkipsExistingExpenseWithoutMutation()
     {
         var repository = new DataTransferExpenseRepository();
-        var existing = TaxExpense.Create("Original", new DateTime(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
+        var existing = TaxExpense.Create("Original", new DateOnly(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
         repository.Expenses.Add(existing);
         var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
 
@@ -157,8 +157,8 @@ public class DataTransferExpenseImportHandlerTests
         var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
         var payload = new ExpenseImportPayloadDto(
             [
-                new ExpenseImportItemDto(Guid.NewGuid(), new DateTime(2026, 7, 1), "One", 10m, repository.BankId, repository.SourceId, null, null, false),
-                new ExpenseImportItemDto(Guid.NewGuid(), new DateTime(2026, 7, 2), "Two", 20m, repository.BankId, repository.SourceId, null, null, false),
+                new ExpenseImportItemDto(Guid.NewGuid(), new DateOnly(2026, 7, 1), "One", 10m, repository.BankId, repository.SourceId, null, null, false),
+                new ExpenseImportItemDto(Guid.NewGuid(), new DateOnly(2026, 7, 2), "Two", 20m, repository.BankId, repository.SourceId, null, null, false),
             ],
             []);
 
@@ -176,8 +176,8 @@ public class DataTransferExpenseImportHandlerTests
     public async Task ImportAsync_ReplaceWithDeletes_SoftDeletesExpenseMissingFromPayload()
     {
         var repository = new DataTransferExpenseRepository();
-        var kept = TaxExpense.Create("Kept", new DateTime(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
-        var missing = TaxExpense.Create("Missing", new DateTime(2026, 7, 2), repository.BankId, 20m, repository.SourceId, TestTime.TimeProvider);
+        var kept = TaxExpense.Create("Kept", new DateOnly(2026, 7, 1), repository.BankId, 10m, repository.SourceId, TestTime.TimeProvider);
+        var missing = TaxExpense.Create("Missing", new DateOnly(2026, 7, 2), repository.BankId, 20m, repository.SourceId, TestTime.TimeProvider);
         kept.TaxExpenseTags.Add(TaxExpenseTag.Create(kept.Id, repository.TagId));
         repository.Expenses.AddRange([kept, missing]);
         var handler = new DataTransferExpenseImportHandler(repository, TestTime.TimeProvider);
@@ -230,7 +230,7 @@ public class DataTransferExpenseImportHandlerTests
         return new ExpenseImportPayloadDto(
             [new ExpenseImportItemDto(
                 resolvedExpenseId,
-                TestTime.FixedUtcNow.UtcDateTime,
+                DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime),
                 "Laptop",
                 1200m,
                 bankId ?? repository.BankId,

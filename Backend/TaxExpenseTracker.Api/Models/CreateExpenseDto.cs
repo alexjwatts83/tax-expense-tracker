@@ -3,7 +3,7 @@ namespace TaxExpenseTracker.Api.Models;
 public class CreateExpenseDto
 {
     public string Description { get; set; } = string.Empty;
-    public DateTime Date { get; set; }
+    public DateOnly Date { get; set; }
     public Guid BankId { get; set; }
     public decimal Price { get; set; }
     public Guid SourceId { get; set; }

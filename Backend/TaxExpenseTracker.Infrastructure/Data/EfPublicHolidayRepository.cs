@@ -43,7 +43,7 @@ public sealed class EfPublicHolidayRepository : IPublicHolidayRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
     {
         var query = _dbContext.PublicHolidays
             .AsNoTracking()
@@ -51,12 +51,12 @@ public sealed class EfPublicHolidayRepository : IPublicHolidayRepository
 
         if (fromDate.HasValue)
         {
-            query = query.Where(x => x.HolidayDate >= fromDate.Value.Date);
+            query = query.Where(x => x.HolidayDate >= fromDate.Value);
         }
 
         if (toDate.HasValue)
         {
-            query = query.Where(x => x.HolidayDate <= toDate.Value.Date);
+            query = query.Where(x => x.HolidayDate <= toDate.Value);
         }
 
         return await query.ToListAsync(cancellationToken);

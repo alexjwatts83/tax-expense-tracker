@@ -4,7 +4,7 @@ namespace TaxExpenseTracker.Application.Leave;
 
 public sealed record LeaveReadDto(
     Guid Id,
-    DateTime LeaveDate,
+    DateOnly LeaveDate,
     LeaveType LeaveType,
     DayEntryType EntryType,
     decimal HoursWorked,
@@ -13,14 +13,14 @@ public sealed record LeaveReadDto(
     DateTime UpdatedAt);
 
 public sealed record CreateLeaveCommand(
-    DateTime LeaveDate,
+    DateOnly LeaveDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,
     LeaveType LeaveType = LeaveType.Annual);
 
 public sealed record UpdateLeaveCommand(
-    DateTime LeaveDate,
+    DateOnly LeaveDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,
@@ -34,7 +34,7 @@ public sealed record BatchCreateLeaveResult(
     IReadOnlyList<BatchCreateLeaveItemResult> Results);
 
 public sealed record BatchCreateLeaveItemResult(
-    DateTime LeaveDate,
+    DateOnly LeaveDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,

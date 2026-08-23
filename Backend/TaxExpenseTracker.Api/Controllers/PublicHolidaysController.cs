@@ -13,8 +13,8 @@ public class PublicHolidaysController(IPublicHolidayService publicHolidayService
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PublicHolidayDto>>> GetAll(
-        DateTime? fromDate,
-        DateTime? toDate,
+        DateOnly? fromDate,
+        DateOnly? toDate,
         CancellationToken cancellationToken)
     {
         var holidays = fromDate.HasValue || toDate.HasValue

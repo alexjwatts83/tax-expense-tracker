@@ -3,7 +3,7 @@ namespace TaxExpenseTracker.Domain.Entities;
 public class TaxExpense : AuditableSoftDeletableEntity
 {
     public string Description { get; set; } = string.Empty;
-    public DateTime Date { get; set; }
+    public DateOnly Date { get; set; }
     public Guid BankId { get; set; }
     public decimal Price { get; set; }
     public Guid SourceId { get; set; }
@@ -14,7 +14,7 @@ public class TaxExpense : AuditableSoftDeletableEntity
 
     public static TaxExpense Create(
         string? description,
-        DateTime date,
+        DateOnly date,
         Guid bankId,
         decimal price,
         Guid sourceId,
@@ -39,7 +39,7 @@ public class TaxExpense : AuditableSoftDeletableEntity
 
     public void UpdateDetails(
         string? description,
-        DateTime date,
+        DateOnly date,
         Guid bankId,
         decimal price,
         Guid sourceId,
@@ -69,7 +69,7 @@ public class TaxExpense : AuditableSoftDeletableEntity
         return price;
     }
 
-    private static DateTime ValidateDate(DateTime date)
+    private static DateOnly ValidateDate(DateOnly date)
     {
         ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;

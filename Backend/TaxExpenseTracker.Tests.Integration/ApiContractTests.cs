@@ -49,7 +49,7 @@ public class ApiContractTests
     {
         using var factory = new TaxExpenseTrackerApiFactory();
         using var client = factory.CreateClient();
-        var workDate = new DateTime(2030, 2, 11);
+        var workDate = new DateOnly(2030, 2, 11);
         var request = new CreateWorkLocationBatchDto
         {
             Items =

@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** `S3-04` / `S3-05` with migration `S3-07` / `S3-08` - Convert backend date-only contracts to `DateOnly`, preserve `yyyy-MM-dd` JSON, and add the active-date uniqueness migration. This batch changes the persisted schema, so it must be a separate reviewable migration commit.
+**Task:** `S3-07` with migration `S3-08` - Add filtered unique indexes for active work-location and leave dates, then normalization, duplicate preflight, repair, and rollback for existing data. Keep the migration a separate reviewable commit.
 
 **Authoritative plan:** [FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
@@ -14,14 +14,16 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Convert domain/application date-only contracts (`LeaveDate`, `WorkDate`, expense `Date`, `HolidayDate`) to `DateOnly` where agreed.
-- Keep `yyyy-MM-dd` JSON stable across forms, filters, summaries, and DataTransfer.
-- Add filtered unique indexes for active work-location and leave dates plus migration normalization, duplicate preflight, repair, and rollback.
-- Apply the migration only after frontend compatibility tests are green, and keep it as its own commit.
+- Add filtered unique indexes for active (non-deleted) work-location and leave dates.
+- Normalize existing non-midnight stored date values to their calendar day.
+- Run a duplicate preflight and document deterministic repair before creating indexes.
+- Provide a rollback path and review the migration against SQLite and the planned Azure SQL provider.
 
-**Immediate validation:** Run the full backend suite, the EF migration script, the complete Angular suite, and the production build. `S3-09`/`S3-10` follow with uniqueness-race conflict mapping and the stage gate.
+**Immediate validation:** Run the full backend suite, the EF migration script, the Angular suite, and the production build. `S3-09`/`S3-10` follow with uniqueness-race conflict mapping and the stage gate.
 
-**Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning; Stage 3 started under an explicit gate override because the wire format stays stable.
+**Done in this session:** S3-04 and S3-05 are complete. Calendar dates are `DateOnly` end to end and serialize as `yyyy-MM-dd`. The `ConvertCalendarDatesToDateOnly` migration is generated (type change and holiday re-seed only). Backend 104 unit / 50 integration and frontend 48 tests pass.
+
+**Stage 2 note:** S2-09/S2-10 remain blocked on Azure/Entra provisioning.
 
 ## Work Order
 

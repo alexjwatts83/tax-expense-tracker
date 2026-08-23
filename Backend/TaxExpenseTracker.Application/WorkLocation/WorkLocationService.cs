@@ -35,7 +35,7 @@ public sealed class WorkLocationService : IWorkLocationService
             .ToList();
     }
 
-    public async Task<IReadOnlyList<WorkLocationReadDto>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WorkLocationReadDto>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
     {
         var entries = await _workLocationRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
 
@@ -77,22 +77,22 @@ public sealed class WorkLocationService : IWorkLocationService
             return new BatchCreateWorkLocationResult(0, 0, 0, 0, []);
         }
 
-        var minDate = commands.Min(x => x.WorkDate).Date;
-        var maxDate = commands.Max(x => x.WorkDate).Date;
+        var minDate = commands.Min(x => x.WorkDate);
+        var maxDate = commands.Max(x => x.WorkDate);
         var holidays = await _publicHolidayRepository.GetByDateRangeAsync(minDate, maxDate, cancellationToken);
         var holidayDates = holidays
             .Where(x => !x.CanBeWorkedOn)
-            .Select(x => x.HolidayDate.Date)
+            .Select(x => x.HolidayDate)
             .ToHashSet();
 
-        var seenDates = new HashSet<DateTime>();
+        var seenDates = new HashSet<DateOnly>();
         var results = new List<BatchCreateWorkLocationItemResult>(commands.Count);
         var createdCount = 0;
         var skippedCount = 0;
 
         foreach (var command in commands)
         {
-            var workDate = command.WorkDate.Date;
+            var workDate = command.WorkDate;
 
             if (holidayDates.Contains(workDate))
             {
@@ -242,7 +242,7 @@ public sealed class WorkLocationService : IWorkLocationService
         return true;
     }
 
-    public async Task<DayEntrySummaryDto> GetSummaryAsync(SummaryView view, DateTime date, CancellationToken cancellationToken = default)
+    public async Task<DayEntrySummaryDto> GetSummaryAsync(SummaryView view, DateOnly date, CancellationToken cancellationToken = default)
     {
         var (fromDate, toDate) = SummaryPeriod.GetBounds(date, view);
 
@@ -253,12 +253,12 @@ public sealed class WorkLocationService : IWorkLocationService
             fromDate,
             toDate,
             entries.Sum(x => x.HoursWorked),
-            entries.Select(x => x.WorkDate.Date).Distinct().Count(),
+            entries.Select(x => x.WorkDate).Distinct().Count(),
             entries.Count,
             holidays
                 .OrderBy(x => x.HolidayDate)
                 .ThenBy(x => x.Name)
-                .Select(x => new HolidayMarkerDto(x.HolidayDate.Date, x.Name, x.CanBeWorkedOn))
+                .Select(x => new HolidayMarkerDto(x.HolidayDate, x.Name, x.CanBeWorkedOn))
                 .ToList());
     }
 

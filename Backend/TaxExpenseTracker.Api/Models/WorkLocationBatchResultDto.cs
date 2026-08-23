@@ -13,7 +13,7 @@ public sealed class WorkLocationBatchResultDto
 
 public sealed class WorkLocationBatchItemResultDto
 {
-    public DateTime WorkDate { get; set; }
+    public DateOnly WorkDate { get; set; }
     public WorkLocationType WorkLocation { get; set; }
     public DayEntryType EntryType { get; set; }
     public decimal? SpecificHours { get; set; }

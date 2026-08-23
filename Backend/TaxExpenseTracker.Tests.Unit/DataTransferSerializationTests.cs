@@ -53,7 +53,7 @@ public class DataTransferSerializationTests
             {
               "expenses": [{
                 "id": "{{expenseId}}",
-                "date": "2026-07-24T00:00:00Z",
+                "date": "2026-07-24",
                 "description": "Laptop",
                 "price": 1200.50,
                 "bankId": "{{bankId}}",
@@ -76,7 +76,7 @@ public class DataTransferSerializationTests
         var expense = Assert.Single(payload.Expenses!);
         Assert.Equal(expenseId, expense.Id);
         Assert.Equal(1200.50m, expense.Price);
-        Assert.Equal(DateTimeKind.Utc, expense.Date.Kind);
+        Assert.Equal(new DateOnly(2026, 7, 24), expense.Date);
         Assert.Equal(tagId, Assert.Single(payload.ExpenseTags!).TagId);
     }
 
@@ -86,7 +86,7 @@ public class DataTransferSerializationTests
         var payload = new WorkLocationImportPayloadDto(
             [new WorkLocationEntryImportItemDto(
                 Guid.NewGuid(),
-                new DateTime(2026, 7, 24),
+                new DateOnly(2026, 7, 24),
                 DayEntryType.SpecificHours,
                 4.5m,
                 "Morning",
@@ -112,7 +112,7 @@ public class DataTransferSerializationTests
         var payload = new LeaveImportPayloadDto(
             [new LeaveEntryImportItemDto(
                 Guid.NewGuid(),
-                new DateTime(2026, 7, 24),
+                new DateOnly(2026, 7, 24),
                 DayEntryType.HalfDay,
                 null,
                 "Appointment",

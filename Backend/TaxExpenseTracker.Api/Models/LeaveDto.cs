@@ -5,7 +5,7 @@ namespace TaxExpenseTracker.Api.Models;
 public sealed class LeaveDto
 {
     public Guid Id { get; set; }
-    public DateTime LeaveDate { get; set; }
+    public DateOnly LeaveDate { get; set; }
     public LeaveType LeaveType { get; set; } = LeaveType.Annual;
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }

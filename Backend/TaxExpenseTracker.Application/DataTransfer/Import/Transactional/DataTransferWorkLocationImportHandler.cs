@@ -33,8 +33,8 @@ public sealed class DataTransferWorkLocationImportHandler
             : await _workLocationRepository.GetByIdsForUpdateIncludingDeletedAsync(items.Select(x => x.Id).ToList(), cancellationToken);
         var existingById = existingItems.ToDictionary(x => x.Id);
         var entriesOnRequestedDates = await _workLocationRepository.GetByDatesAsync(items.Select(x => x.WorkDate).ToList(), cancellationToken);
-        var existingIdByDate = entriesOnRequestedDates.ToDictionary(x => x.WorkDate.Date, x => x.Id);
-        var acceptedIdByDate = new Dictionary<DateTime, Guid>();
+        var existingIdByDate = entriesOnRequestedDates.ToDictionary(x => x.WorkDate, x => x.Id);
+        var acceptedIdByDate = new Dictionary<DateOnly, Guid>();
 
         foreach (var item in items)
         {
@@ -51,7 +51,7 @@ public sealed class DataTransferWorkLocationImportHandler
             }
 
             existingById.TryGetValue(item.Id, out var existing);
-            var workDate = item.WorkDate.Date;
+            var workDate = item.WorkDate;
             var conflictsWithExisting = existingIdByDate.TryGetValue(workDate, out var existingId) && existingId != item.Id;
             var conflictsWithinPayload = acceptedIdByDate.TryGetValue(workDate, out var acceptedId) && acceptedId != item.Id;
             if (conflictsWithExisting || conflictsWithinPayload)

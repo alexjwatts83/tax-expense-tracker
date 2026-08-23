@@ -10,7 +10,7 @@ public class PublicHolidayServiceTests
     public async Task ImportAsync_ImportsRows_AndSkipsDuplicates()
     {
         var repository = new InMemoryPublicHolidayRepository();
-        repository.Holidays.Add(PublicHoliday.Create(new DateTime(2026, 1, 1), "New Year's Day", "Seed", false, TestTime.TimeProvider));
+        repository.Holidays.Add(PublicHoliday.Create(new DateOnly(2026, 1, 1), "New Year's Day", "Seed", false, TestTime.TimeProvider));
 
         var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
@@ -53,7 +53,7 @@ public class PublicHolidayServiceTests
     public async Task SetWorkableAsync_UpdatesExistingHoliday()
     {
         var repository = new InMemoryPublicHolidayRepository();
-        var holiday = PublicHoliday.Create(new DateTime(2026, 1, 1), "New Year's Day", "Seed", false, TestTime.TimeProvider);
+        var holiday = PublicHoliday.Create(new DateOnly(2026, 1, 1), "New Year's Day", "Seed", false, TestTime.TimeProvider);
         repository.Holidays.Add(holiday);
         var service = new PublicHolidayService(repository, TestTime.TimeProvider);
 
@@ -125,18 +125,18 @@ public class PublicHolidayServiceTests
             return Task.CompletedTask;
         }
 
-        public Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
         {
             var query = Holidays.AsEnumerable();
 
             if (fromDate.HasValue)
             {
-                query = query.Where(x => x.HolidayDate.Date >= fromDate.Value.Date);
+                query = query.Where(x => x.HolidayDate >= fromDate.Value);
             }
 
             if (toDate.HasValue)
             {
-                query = query.Where(x => x.HolidayDate.Date <= toDate.Value.Date);
+                query = query.Where(x => x.HolidayDate <= toDate.Value);
             }
 
             return Task.FromResult<IReadOnlyList<PublicHoliday>>(query.ToList());

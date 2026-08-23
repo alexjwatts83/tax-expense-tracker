@@ -35,7 +35,7 @@ public sealed class LeaveService : ILeaveService
             .ToList();
     }
 
-    public async Task<IReadOnlyList<LeaveReadDto>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<LeaveReadDto>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
     {
         var entries = await _leaveRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
 
@@ -77,22 +77,22 @@ public sealed class LeaveService : ILeaveService
             return new BatchCreateLeaveResult(0, 0, 0, 0, []);
         }
 
-        var minDate = commands.Min(x => x.LeaveDate).Date;
-        var maxDate = commands.Max(x => x.LeaveDate).Date;
+        var minDate = commands.Min(x => x.LeaveDate);
+        var maxDate = commands.Max(x => x.LeaveDate);
         var holidays = await _publicHolidayRepository.GetByDateRangeAsync(minDate, maxDate, cancellationToken);
         var holidayDates = holidays
             .Where(x => !x.CanBeWorkedOn)
-            .Select(x => x.HolidayDate.Date)
+            .Select(x => x.HolidayDate)
             .ToHashSet();
 
-        var seenDates = new HashSet<DateTime>();
+        var seenDates = new HashSet<DateOnly>();
         var results = new List<BatchCreateLeaveItemResult>(commands.Count);
         var createdCount = 0;
         var skippedCount = 0;
 
         foreach (var command in commands)
         {
-            var leaveDate = command.LeaveDate.Date;
+            var leaveDate = command.LeaveDate;
 
             if (holidayDates.Contains(leaveDate))
             {
@@ -242,7 +242,7 @@ public sealed class LeaveService : ILeaveService
         return true;
     }
 
-    public async Task<DayEntrySummaryDto> GetSummaryAsync(SummaryView view, DateTime date, CancellationToken cancellationToken = default)
+    public async Task<DayEntrySummaryDto> GetSummaryAsync(SummaryView view, DateOnly date, CancellationToken cancellationToken = default)
     {
         var (fromDate, toDate) = SummaryPeriod.GetBounds(date, view);
 
@@ -253,12 +253,12 @@ public sealed class LeaveService : ILeaveService
             fromDate,
             toDate,
             entries.Sum(x => x.HoursWorked),
-            entries.Select(x => x.LeaveDate.Date).Distinct().Count(),
+            entries.Select(x => x.LeaveDate).Distinct().Count(),
             entries.Count,
             holidays
                 .OrderBy(x => x.HolidayDate)
                 .ThenBy(x => x.Name)
-                .Select(x => new HolidayMarkerDto(x.HolidayDate.Date, x.Name, x.CanBeWorkedOn))
+                .Select(x => new HolidayMarkerDto(x.HolidayDate, x.Name, x.CanBeWorkedOn))
                 .ToList());
     }
 

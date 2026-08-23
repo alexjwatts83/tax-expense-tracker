@@ -4,7 +4,7 @@ namespace TaxExpenseTracker.Application.WorkLocation;
 
 public sealed record WorkLocationReadDto(
     Guid Id,
-    DateTime WorkDate,
+    DateOnly WorkDate,
     DayEntryType EntryType,
     decimal HoursWorked,
     string? Notes,
@@ -13,14 +13,14 @@ public sealed record WorkLocationReadDto(
     WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
 public sealed record CreateWorkLocationCommand(
-    DateTime WorkDate,
+    DateOnly WorkDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,
     WorkLocationType WorkLocation = WorkLocationType.Wfh);
 
 public sealed record UpdateWorkLocationCommand(
-    DateTime WorkDate,
+    DateOnly WorkDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,
@@ -34,7 +34,7 @@ public sealed record BatchCreateWorkLocationResult(
     IReadOnlyList<BatchCreateWorkLocationItemResult> Results);
 
 public sealed record BatchCreateWorkLocationItemResult(
-    DateTime WorkDate,
+    DateOnly WorkDate,
     WorkLocationType WorkLocation,
     DayEntryType EntryType,
     decimal? SpecificHours,

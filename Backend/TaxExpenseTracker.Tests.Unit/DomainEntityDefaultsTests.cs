@@ -1,4 +1,4 @@
-﻿using TaxExpenseTracker.Domain.Entities;
+using TaxExpenseTracker.Domain.Entities;
 
 namespace TaxExpenseTracker.Tests.Unit;
 
@@ -41,7 +41,7 @@ public class DomainEntityDefaultsTests
     public void TaxExpense_Create_Throws_WhenPriceNegative()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            TaxExpense.Create("Desc", TestTime.FixedUtcNow.UtcDateTime, Guid.NewGuid(), -1m, Guid.NewGuid(), TestTime.TimeProvider));
+            TaxExpense.Create("Desc", DateOnly.FromDateTime(TestTime.FixedUtcNow.UtcDateTime), Guid.NewGuid(), -1m, Guid.NewGuid(), TestTime.TimeProvider));
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class DomainEntityDefaultsTests
     [Fact]
     public void LeaveEntry_Create_Defaults_ToAnnualLeaveType()
     {
-        var entry = LeaveEntry.Create(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
+        var entry = LeaveEntry.Create(new DateOnly(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider);
 
         Assert.Equal(LeaveType.Annual, entry.LeaveType);
     }
@@ -63,6 +63,6 @@ public class DomainEntityDefaultsTests
     public void LeaveEntry_Create_Throws_WhenLeaveTypeInvalid()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            LeaveEntry.Create(new DateTime(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider, (LeaveType)99));
+            LeaveEntry.Create(new DateOnly(2026, 3, 10), DayEntryType.FullDay, null, null, TestTime.TimeProvider, (LeaveType)99));
     }
 }

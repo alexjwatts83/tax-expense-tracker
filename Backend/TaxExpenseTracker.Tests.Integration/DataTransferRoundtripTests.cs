@@ -55,7 +55,7 @@ public class DataTransferRoundtripTests
         var expenseId = Guid.NewGuid();
         var expenseResult = await destinationService.ImportExpensesAsync(
             new ExpenseImportPayloadDto(
-                [new ExpenseImportItemDto(expenseId, new DateTime(2026, 8, 1), "Roundtrip expense", 42.50m, bankId, trackerId, null, null, false)],
+                [new ExpenseImportItemDto(expenseId, new DateOnly(2026, 8, 1), "Roundtrip expense", 42.50m, bankId, trackerId, null, null, false)],
                 [new ExpenseTagImportItemDto(Guid.NewGuid(), expenseId, tagId)]),
             new DataTransferImportOptions());
 

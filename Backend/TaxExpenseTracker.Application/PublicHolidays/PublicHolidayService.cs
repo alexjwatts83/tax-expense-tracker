@@ -26,7 +26,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
             .ToList();
     }
 
-    public async Task<IReadOnlyList<PublicHolidayReadDto>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PublicHolidayReadDto>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
     {
         var holidays = await _publicHolidayRepository.GetByDateRangeAsync(fromDate, toDate, cancellationToken);
 
@@ -58,8 +58,8 @@ public sealed class PublicHolidayService : IPublicHolidayService
             return new PublicHolidayImportResultDto(0, 0, ["CSV contained no data rows."]);
         }
 
-        DateTime minDate = parseResult.Rows.Min(x => x.Date);
-        DateTime maxDate = parseResult.Rows.Max(x => x.Date);
+        DateOnly minDate = parseResult.Rows.Min(x => x.Date);
+        DateOnly maxDate = parseResult.Rows.Max(x => x.Date);
 
         var existingInRange = await _publicHolidayRepository.GetByDateRangeAsync(minDate, maxDate, cancellationToken);
         var existingKeys = existingInRange
@@ -123,7 +123,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
 
         ArgumentOutOfRangeException.ThrowIfEqual(command.HolidayDate, default, nameof(command.HolidayDate));
 
-        holiday.HolidayDate = command.HolidayDate.Date;
+        holiday.HolidayDate = command.HolidayDate;
         holiday.Rename(command.Name);
         holiday.Source = string.IsNullOrWhiteSpace(command.Source) ? null : command.Source.Trim();
         holiday.SetWorkable(command.CanBeWorkedOn);
@@ -133,9 +133,9 @@ public sealed class PublicHolidayService : IPublicHolidayService
         return ToReadDto(holiday);
     }
 
-    private static string ToKey(DateTime date, string name)
+    private static string ToKey(DateOnly date, string name)
     {
-        return $"{date.Date:yyyy-MM-dd}|{name.Trim()}";
+        return $"{date:yyyy-MM-dd}|{name.Trim()}";
     }
 
     private static PublicHolidayReadDto ToReadDto(PublicHoliday holiday)
@@ -261,11 +261,11 @@ public sealed class PublicHolidayService : IPublicHolidayService
         return index >= 0 && index < values.Count ? values[index] : null;
     }
 
-    private static bool TryParseDate(string value, out DateTime date)
+    private static bool TryParseDate(string value, out DateOnly date)
     {
         string[] formats = ["yyyy-MM-dd", "dd/MM/yyyy", "d/M/yyyy", "yyyy/M/d"];
-        return DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out date)
-            || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+        return DateOnly.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out date)
+            || DateOnly.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
     }
 
     private static bool TryParseWorkableValue(string? value, bool columnExists, out bool canBeWorkedOn)
@@ -330,7 +330,7 @@ public sealed class PublicHolidayService : IPublicHolidayService
         return values;
     }
 
-    private sealed record CsvHolidayRow(DateTime Date, string Name, bool CanBeWorkedOn);
+    private sealed record CsvHolidayRow(DateOnly Date, string Name, bool CanBeWorkedOn);
 
     private sealed record CsvParseResult(IReadOnlyList<CsvHolidayRow> Rows, IReadOnlyList<string> Errors);
 }

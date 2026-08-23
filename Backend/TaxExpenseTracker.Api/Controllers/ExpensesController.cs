@@ -119,7 +119,7 @@ public class ExpensesController(IExpenseService expenseService) : ControllerBase
 
     [HttpGet("filter")]
     public async Task<ActionResult<IEnumerable<ExpenseResponseDto>>> Filter(
-        DateTime? date,
+        DateOnly? date,
         Guid? bankId,
         decimal? price,
         Guid? sourceId,

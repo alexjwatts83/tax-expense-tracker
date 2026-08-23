@@ -2,7 +2,7 @@ namespace TaxExpenseTracker.Application.PublicHolidays;
 
 public sealed record PublicHolidayReadDto(
     Guid Id,
-    DateTime HolidayDate,
+    DateOnly HolidayDate,
     string Name,
     string? Source,
     bool IsImported,
@@ -15,7 +15,7 @@ public sealed record PublicHolidayImportResultDto(
     IReadOnlyList<string> Warnings);
 
 public sealed record UpdatePublicHolidayCommand(
-    DateTime HolidayDate,
+    DateOnly HolidayDate,
     string Name,
     string? Source,
     bool CanBeWorkedOn);

@@ -9,7 +9,7 @@ public sealed record ExpenseTagDto(Guid Id, string Name, string Color, DateTime 
 public sealed record ExpenseReadDto(
     Guid Id,
     string Description,
-    DateTime Date,
+    DateOnly Date,
     Guid BankId,
     ExpenseBankDto? Bank,
     decimal Price,
@@ -21,7 +21,7 @@ public sealed record ExpenseReadDto(
 
 public sealed record CreateExpenseCommand(
     string Description,
-    DateTime Date,
+    DateOnly Date,
     Guid BankId,
     decimal Price,
     Guid SourceId,
@@ -29,14 +29,14 @@ public sealed record CreateExpenseCommand(
 
 public sealed record UpdateExpenseCommand(
     string Description,
-    DateTime Date,
+    DateOnly Date,
     Guid BankId,
     decimal Price,
     Guid SourceId,
     IReadOnlyList<Guid> TagIds);
 
 public sealed record ExpenseFilterQuery(
-    DateTime? Date,
+    DateOnly? Date,
     Guid? BankId,
     decimal? Price,
     Guid? SourceId,

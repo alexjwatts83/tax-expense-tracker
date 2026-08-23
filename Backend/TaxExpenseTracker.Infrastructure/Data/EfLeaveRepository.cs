@@ -11,40 +11,38 @@ public sealed class EfLeaveRepository : EfSoftDeleteRepository<LeaveEntry>, ILea
     {
     }
 
-    public async Task<IReadOnlyList<LeaveEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<LeaveEntry>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
 
         if (fromDate.HasValue)
         {
-            query = query.Where(x => x.LeaveDate >= fromDate.Value.Date);
+            query = query.Where(x => x.LeaveDate >= fromDate.Value);
         }
 
         if (toDate.HasValue)
         {
-            query = query.Where(x => x.LeaveDate <= toDate.Value.Date);
+            query = query.Where(x => x.LeaveDate <= toDate.Value);
         }
 
         return await query.ToListAsync(cancellationToken);
     }
 
-    public Task<bool> ExistsForDateAsync(DateTime leaveDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsForDateAsync(DateOnly leaveDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
     {
-        var date = leaveDate.Date;
-
         return DbSet.AnyAsync(
-            x => x.LeaveDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value),
+            x => x.LeaveDate == leaveDate && (!excludingId.HasValue || x.Id != excludingId.Value),
             cancellationToken);
     }
 
     public async Task<IReadOnlyList<LeaveEntry>> GetByDatesAsync(
-        IReadOnlyCollection<DateTime> leaveDates,
+        IReadOnlyCollection<DateOnly> leaveDates,
         CancellationToken cancellationToken = default)
     {
         if (leaveDates.Count == 0)
             return [];
 
-        var dates = leaveDates.Select(x => x.Date).Distinct().ToList();
+        var dates = leaveDates.Distinct().ToList();
         return await DbSet
             .AsNoTracking()
             .Where(x => dates.Contains(x.LeaveDate))

@@ -5,7 +5,7 @@ namespace TaxExpenseTracker.Application.PublicHolidays;
 
 public interface IPublicHolidayRepository : IRepository<PublicHoliday>
 {
-    Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<PublicHoliday>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default);
     Task RemoveByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default);
 
     async Task<IReadOnlyList<PublicHoliday>> GetAllForUpdateAsync(CancellationToken cancellationToken = default)

@@ -31,7 +31,7 @@ public sealed record ReferenceBankDto(Guid Id, string Name, DateTime CreatedAt);
 
 public sealed record ReferencePublicHolidayDto(
     Guid Id,
-    DateTime HolidayDate,
+    DateOnly HolidayDate,
     string Name,
     string? Source,
     bool IsImported,
@@ -54,7 +54,7 @@ public sealed record ReferenceBankImportItemDto(Guid Id, string Name);
 
 public sealed record ReferencePublicHolidayImportItemDto(
     Guid Id,
-    DateTime HolidayDate,
+    DateOnly HolidayDate,
     string Name,
     string? Source,
     bool CanBeWorkedOn);
@@ -65,7 +65,7 @@ public sealed record ExpenseImportPayloadDto(
 
 public sealed record ExpenseImportItemDto(
     Guid Id,
-    DateTime Date,
+    DateOnly Date,
     string Description,
     decimal Price,
     Guid BankId,
@@ -80,7 +80,7 @@ public sealed record WorkLocationImportPayloadDto(IReadOnlyList<WorkLocationEntr
 
 public sealed record WorkLocationEntryImportItemDto(
     Guid Id,
-    DateTime WorkDate,
+    DateOnly WorkDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,
@@ -93,7 +93,7 @@ public sealed record LeaveImportPayloadDto(IReadOnlyList<LeaveEntryImportItemDto
 
 public sealed record LeaveEntryImportItemDto(
     Guid Id,
-    DateTime LeaveDate,
+    DateOnly LeaveDate,
     DayEntryType EntryType,
     decimal? SpecificHours,
     string? Notes,

@@ -2,7 +2,7 @@ namespace TaxExpenseTracker.Domain.Entities;
 
 public class PublicHoliday : Entity
 {
-    public DateTime HolidayDate { get; set; }
+    public DateOnly HolidayDate { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Source { get; set; }
     public bool IsImported { get; set; }
@@ -10,7 +10,7 @@ public class PublicHoliday : Entity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public static PublicHoliday Create(
-        DateTime holidayDate,
+        DateOnly holidayDate,
         string name,
         string? source,
         bool isImported,
@@ -40,7 +40,7 @@ public class PublicHoliday : Entity
         CanBeWorkedOn = canBeWorkedOn;
     }
 
-    private static DateTime ValidateDate(DateTime date)
+    private static DateOnly ValidateDate(DateOnly date)
     {
         ArgumentOutOfRangeException.ThrowIfEqual(date, default, nameof(date));
         return date;

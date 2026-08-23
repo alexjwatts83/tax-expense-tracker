@@ -5,7 +5,7 @@ namespace TaxExpenseTracker.Api.Models;
 public sealed class WorkLocationDto
 {
     public Guid Id { get; set; }
-    public DateTime WorkDate { get; set; }
+    public DateOnly WorkDate { get; set; }
     public WorkLocationType WorkLocation { get; set; }
     public DayEntryType EntryType { get; set; }
     public decimal HoursWorked { get; set; }

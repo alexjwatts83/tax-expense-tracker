@@ -77,7 +77,7 @@ public sealed class DataTransferPublicHolidayImportHandler
 
             if (!options.DryRun)
             {
-                existing.HolidayDate = item.HolidayDate.Date;
+                existing.HolidayDate = item.HolidayDate;
                 existing.Rename(item.Name);
                 existing.Source = string.IsNullOrWhiteSpace(item.Source) ? null : item.Source.Trim();
                 existing.IsImported = true;

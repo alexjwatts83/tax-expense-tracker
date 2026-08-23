@@ -33,8 +33,8 @@ public sealed class DataTransferLeaveImportHandler
             : await _leaveRepository.GetByIdsForUpdateIncludingDeletedAsync(items.Select(x => x.Id).ToList(), cancellationToken);
         var existingById = existingItems.ToDictionary(x => x.Id);
         var entriesOnRequestedDates = await _leaveRepository.GetByDatesAsync(items.Select(x => x.LeaveDate).ToList(), cancellationToken);
-        var existingIdByDate = entriesOnRequestedDates.ToDictionary(x => x.LeaveDate.Date, x => x.Id);
-        var acceptedIdByDate = new Dictionary<DateTime, Guid>();
+        var existingIdByDate = entriesOnRequestedDates.ToDictionary(x => x.LeaveDate, x => x.Id);
+        var acceptedIdByDate = new Dictionary<DateOnly, Guid>();
 
         foreach (var item in items)
         {
@@ -51,7 +51,7 @@ public sealed class DataTransferLeaveImportHandler
             }
 
             existingById.TryGetValue(item.Id, out var existing);
-            var leaveDate = item.LeaveDate.Date;
+            var leaveDate = item.LeaveDate;
             var conflictsWithExisting = existingIdByDate.TryGetValue(leaveDate, out var existingId) && existingId != item.Id;
             var conflictsWithinPayload = acceptedIdByDate.TryGetValue(leaveDate, out var acceptedId) && acceptedId != item.Id;
             if (conflictsWithExisting || conflictsWithinPayload)

@@ -11,40 +11,38 @@ public sealed class EfWorkLocationRepository : EfSoftDeleteRepository<WorkLocati
     {
     }
 
-    public async Task<IReadOnlyList<WorkLocationEntry>> GetByDateRangeAsync(DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<WorkLocationEntry>> GetByDateRangeAsync(DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
 
         if (fromDate.HasValue)
         {
-            query = query.Where(x => x.WorkDate >= fromDate.Value.Date);
+            query = query.Where(x => x.WorkDate >= fromDate.Value);
         }
 
         if (toDate.HasValue)
         {
-            query = query.Where(x => x.WorkDate <= toDate.Value.Date);
+            query = query.Where(x => x.WorkDate <= toDate.Value);
         }
 
         return await query.ToListAsync(cancellationToken);
     }
 
-    public Task<bool> ExistsForDateAsync(DateTime workDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsForDateAsync(DateOnly workDate, Guid? excludingId = null, CancellationToken cancellationToken = default)
     {
-        var date = workDate.Date;
-
         return DbSet.AnyAsync(
-            x => x.WorkDate.Date == date && (!excludingId.HasValue || x.Id != excludingId.Value),
+            x => x.WorkDate == workDate && (!excludingId.HasValue || x.Id != excludingId.Value),
             cancellationToken);
     }
 
     public async Task<IReadOnlyList<WorkLocationEntry>> GetByDatesAsync(
-        IReadOnlyCollection<DateTime> workDates,
+        IReadOnlyCollection<DateOnly> workDates,
         CancellationToken cancellationToken = default)
     {
         if (workDates.Count == 0)
             return [];
 
-        var dates = workDates.Select(x => x.Date).Distinct().ToList();
+        var dates = workDates.Distinct().ToList();
         return await DbSet
             .AsNoTracking()
             .Where(x => dates.Contains(x.WorkDate))

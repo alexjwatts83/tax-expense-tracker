@@ -7,13 +7,13 @@ public enum SummaryView
 }
 
 public sealed record HolidayMarkerDto(
-    DateTime Date,
+    DateOnly Date,
     string Name,
     bool CanBeWorkedOn);
 
 public sealed record DayEntrySummaryDto(
-    DateTime FromDate,
-    DateTime ToDate,
+    DateOnly FromDate,
+    DateOnly ToDate,
     decimal TotalHours,
     int TotalDays,
     int EntryCount,
@@ -21,19 +21,17 @@ public sealed record DayEntrySummaryDto(
 
 public static class SummaryPeriod
 {
-    public static (DateTime FromDate, DateTime ToDate) GetBounds(DateTime anchorDate, SummaryView view)
+    public static (DateOnly FromDate, DateOnly ToDate) GetBounds(DateOnly anchorDate, SummaryView view)
     {
-        var date = anchorDate.Date;
-
         return view switch
         {
-            SummaryView.Week => GetWeekBounds(date),
-            SummaryView.Month => GetMonthBounds(date),
+            SummaryView.Week => GetWeekBounds(anchorDate),
+            SummaryView.Month => GetMonthBounds(anchorDate),
             _ => throw new ArgumentOutOfRangeException(nameof(view), view, "Unsupported summary view."),
         };
     }
 
-    private static (DateTime FromDate, DateTime ToDate) GetWeekBounds(DateTime date)
+    private static (DateOnly FromDate, DateOnly ToDate) GetWeekBounds(DateOnly date)
     {
         var offset = ((int)date.DayOfWeek + 6) % 7;
         var fromDate = date.AddDays(-offset);
@@ -41,9 +39,9 @@ public static class SummaryPeriod
         return (fromDate, toDate);
     }
 
-    private static (DateTime FromDate, DateTime ToDate) GetMonthBounds(DateTime date)
+    private static (DateOnly FromDate, DateOnly ToDate) GetMonthBounds(DateOnly date)
     {
-        var fromDate = new DateTime(date.Year, date.Month, 1);
+        var fromDate = new DateOnly(date.Year, date.Month, 1);
         var toDate = fromDate.AddMonths(1).AddDays(-1);
         return (fromDate, toDate);
     }
