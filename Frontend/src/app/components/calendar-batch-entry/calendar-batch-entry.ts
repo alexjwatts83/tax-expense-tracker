@@ -415,8 +415,9 @@ export class CalendarBatchEntry implements OnInit {
       this.infoMessage = '';
     }
 
-    const fromDate = this.toDateIso(this.monthAnchor);
-    const toDate = this.toDateIso(this.endOfMonth(this.monthAnchor));
+    const { start, end } = this.getCalendarRange(this.monthAnchor);
+    const fromDate = this.toDateIso(start);
+    const toDate = this.toDateIso(end);
 
     forkJoin({
       holidays: this.publicHolidayService.getAll({ fromDate, toDate }).pipe(
@@ -472,13 +473,10 @@ export class CalendarBatchEntry implements OnInit {
     wfhByDate: Map<string, WorkLocationEntry>,
   ): CalendarDayRowVm[] {
     const rows: CalendarDayRowVm[] = [];
-    const year = anchor.getFullYear();
-    const month = anchor.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const { start, end } = this.getCalendarRange(anchor);
     const today = this.toDateIso(new Date());
 
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      const date = new Date(year, month, day);
+    for (let date = start; date <= end; date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)) {
       const weekDay = date.getDay();
 
       if (weekDay === 0 || weekDay === 6) {
@@ -535,6 +533,18 @@ export class CalendarBatchEntry implements OnInit {
 
   private endOfMonth(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  }
+
+  private getCalendarRange(anchor: Date): { start: Date; end: Date } {
+    const start = this.getWeekStart(this.startOfMonth(anchor));
+    const lastDayWeekStart = this.getWeekStart(this.endOfMonth(anchor));
+    const end = new Date(
+      lastDayWeekStart.getFullYear(),
+      lastDayWeekStart.getMonth(),
+      lastDayWeekStart.getDate() + 4,
+    );
+
+    return { start, end };
   }
 
   private toDateIso(date: Date): string {
