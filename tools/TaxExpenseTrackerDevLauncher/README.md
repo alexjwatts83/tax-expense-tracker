@@ -30,6 +30,23 @@ The launcher locates the repository by searching parent directories for `TaxExpe
 
 Only one launcher instance runs per repository in the current Windows session. Opening it again restores and activates the existing window, then exits the duplicate without starting or stopping managed services.
 
+## Launcher Settings
+
+On first launch, the app saves defaults to `%LOCALAPPDATA%\TaxExpenseTrackerDevLauncher\settings.json` and shows a notice. Missing JSON properties use their defaults. Invalid JSON or values cause the whole file to fall back to defaults with a visible warning; the invalid file is preserved for correction. Storage errors also produce a warning rather than preventing startup.
+
+```json
+{
+	"startupTimeoutSeconds": 60,
+	"gracefulStopTimeoutSeconds": 2,
+	"apiLogFolder": "C:\\logs\\TaxExpenseTracker.Api",
+	"maximumLogLines": 5000
+}
+```
+
+Startup timeout must be 1-600 seconds, graceful-stop timeout 1-60 seconds, and maximum log lines 100-100,000. The API log folder must be an absolute path. Do not store secrets in this file.
+
+The persistence and validation foundation is complete. Applying these values to service timeouts, log readers, and output limits is tracked separately as `DL-03`; editing them does not yet change those operational values.
+
 ## Managed services
 
 | Service | Command | Ports | URL |

@@ -37,6 +37,9 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public MainViewModel()
     {
         _dispatcher = Application.Current.Dispatcher;
+        var settingsResult = new LauncherSettingsStore().Load();
+        Settings = settingsResult.Settings;
+        SettingsWarning = settingsResult.Warning;
         RepositoryRoot = RepositoryLocator.FindRepositoryRoot();
         var definitions = ServiceRegistry.Create(RepositoryRoot);
         _supervisor = new ProcessSupervisor(definitions);
@@ -75,6 +78,9 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         _ = _apiLogFileReader.InitializeAsync();
     }
 
+    public LauncherSettings Settings { get; }
+    public string SettingsWarning { get; }
+    public bool HasSettingsWarning => !string.IsNullOrEmpty(SettingsWarning);
     public string RepositoryRoot { get; }
     public ObservableCollection<ServiceViewModel> Services { get; }
     public ServiceViewModel WebService => Services.First(service => service.Id == "web");

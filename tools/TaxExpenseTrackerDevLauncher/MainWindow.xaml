@@ -27,6 +27,12 @@
             <StackPanel>
                 <TextBlock FontFamily="Segoe UI Variable Display" FontSize="25" FontWeight="SemiBold" Text="Tax Expense Tracker" />
                 <TextBlock Margin="0,3,0,0" Foreground="{StaticResource MutedTextBrush}" Text="Local development launcher" />
+                <TextBlock Margin="0,8,16,0"
+                           Foreground="{StaticResource ErrorBrush}"
+                           Text="{Binding SettingsWarning}"
+                           TextWrapping="Wrap"
+                           AutomationProperties.AutomationId="SettingsNotice"
+                           Visibility="{Binding HasSettingsWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                 <Button Command="{Binding StartAllCommand}" Content="Start all" Style="{StaticResource PrimaryButtonStyle}" />

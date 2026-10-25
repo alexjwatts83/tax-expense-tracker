@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Begin dev launcher task `DL-02`: add persistent validated launcher settings.
+**Task:** Begin dev launcher task `DL-03`: apply persisted settings to timeouts and log configuration.
 
 **Authoritative plan:** [todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md](todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Persist per-user launcher settings under `%LOCALAPPDATA%\TaxExpenseTrackerDevLauncher\settings.json`.
-- Use current defaults when values are missing and fall back safely with a visible warning when the settings file is invalid.
-- Cover defaults, validation bounds, and invalid-file fallback with focused tests.
+- Replace hardcoded startup and graceful-stop timeouts with validated settings.
+- Configure the API log folder and output line limits from the loaded settings.
+- Preserve existing behavior with defaults and verify custom values are consumed by the owning services.
 
-**Immediate validation:** Run settings-focused tests and the launcher build/test suite; manually verify missing and invalid settings files.
+**Immediate validation:** Run focused supervisor/log-reader tests and the launcher build/test suite; verify custom values and safe defaults in the desktop launcher.
 
-**Last completed:** `DL-01` single-instance protection passed 25 launcher tests and desktop double-launch validation, including restoring and activating the original window.
+**Last completed:** `DL-02` persistent validated settings passed 19 focused tests and 44 total launcher tests. Desktop checks confirmed default-file creation, visible invalid-file fallback, file preservation, and warning-free valid startup.
 
 **Priority decision (2026-10-25):** All Azure-related work is deferred to much later, until explicitly requested. Do not attempt Azure sign-in, provisioning, or deployed validation as part of local improvements. Complete dev launcher improvements next, followed by frontend quality improvements.
 

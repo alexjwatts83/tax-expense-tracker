@@ -4,12 +4,12 @@
 
 - **Status:** In Progress
 - **Assessed:** 2026-10-25
-- **Progress:** 1 of 15 tasks complete
-- **Evidence:** The launcher builds, runs, and passes its focused test project. Service commands, ports, readiness signals, timeouts, log folder, and log line limits are currently hardcoded.
+- **Progress:** 2 of 15 tasks complete
+- **Evidence:** Single-instance protection and per-user settings persistence are validated. All 44 launcher tests pass; desktop missing/invalid settings and clean restart checks pass. Operational timeouts, log folder, and log limits remain hardcoded until DL-03.
 - **Authority:** This plan is the sole tracker for TaxExpenseTrackerDevLauncher enhancements. It does not change the API or frontend.
 
 Last Updated: 2026-10-25
-Current Task: DL-02 / Persistent validated launcher settings
+Current Task: DL-03 / Apply settings to timeouts and log configuration
 
 ## Goal
 
@@ -36,18 +36,18 @@ Make the launcher more reliable, configurable, and useful for daily development 
 
 | Stage | Scope | Done | Total | Status | Depends On |
 |---|---|---:|---:|---|---|
-| 1 | Foundations: single instance and settings | 1 | 3 | In Progress | None |
+| 1 | Foundations: single instance and settings | 2 | 3 | In Progress | None |
 | 2 | Readiness and resilience | 0 | 3 | Not Started | Stage 1 |
 | 3 | Developer workflow | 0 | 6 | Not Started | Stage 1 |
 | 4 | Log usability | 0 | 3 | Not Started | Stage 1 |
-| **Total** |  | **1** | **15** | **In Progress** |  |
+| **Total** |  | **2** | **15** | **In Progress** |  |
 
 ## Stage 1: Foundations
 
 Goal: prevent competing launcher instances and remove hardcoded operational values.
 
 - [x] **DL-01** Enforce a single launcher instance per repository using a named mutex derived from the repository root. A second start activates the existing window and exits.
-- [ ] **DL-02** Add a validated launcher settings model persisted per user under `%LOCALAPPDATA%\TaxExpenseTrackerDevLauncher\settings.json`. Missing values use current defaults; an invalid file falls back to defaults and shows a visible warning rather than failing startup.
+- [x] **DL-02** Add a validated launcher settings model persisted per user under `%LOCALAPPDATA%\TaxExpenseTrackerDevLauncher\settings.json`. Missing values use current defaults; an invalid file falls back to defaults and shows a visible warning rather than failing startup.
 - [ ] **DL-03** Move startup timeout (60 s), graceful stop timeout (2 s), API log folder, and output line limit (5,000) from constants into settings.
 
 ### Acceptance Criteria
@@ -133,6 +133,7 @@ Then run the launcher with the `build-run-dev-launcher` skill and manually verif
 | Date | Task | Validation | Result | Notes |
 |---|---|---|---|---|
 | 2026-10-25 | DL-01 | Focused coordinator tests, full launcher tests/build, and desktop double-launch check | Pass: 3 focused tests; 25 total tests; build succeeded | Duplicate exits 0 before creating a window or supervisor; original minimized window restores and gains foreground focus; one instance remains. Different repository keys and restart after disposal covered. |
+| 2026-10-25 | DL-02 | Settings store tests, full launcher build/tests, and desktop UI Automation checks | Pass: 19 focused tests; 44 total tests; build succeeded | Missing file creates defaults with visible notice; invalid values fall back with visible warning without overwriting the file; restored defaults load without notice. Partial JSON, numeric bounds, round-trip persistence, and storage failure covered. |
 
 ## Completion Rule
 
