@@ -49,6 +49,8 @@ At the end of each work session:
 ## Deferred Work
 
 - [JSON import/export follow-up](todo/JSON_IMPORT_EXPORT_PLAN.md)
+- [Dev launcher improvements](todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md)
+- [Frontend quality improvements](todo/FRONTEND_QUALITY_IMPROVEMENTS_PLAN.md)
 
 ## Completed Records
 

@@ -48,6 +48,8 @@ Completed delivery notes for work-location (WFH/Office), leave, and public-holid
 - Product roadmap and backlog tracked in [plans/TAX_EXPENSE_TRACKER_PLAN.md](plans/TAX_EXPENSE_TRACKER_PLAN.md)
 - Azure hardening rollout tracked in [plans/todo/AZURE_HARDENING_ROLLOUT_PLAN.md](plans/todo/AZURE_HARDENING_ROLLOUT_PLAN.md), with the broad infrastructure checklist in [plans/todo/AZURE_DEPLOYMENT_TRACKER.md](plans/todo/AZURE_DEPLOYMENT_TRACKER.md)
 - JSON import/export approach tracked in [plans/todo/JSON_IMPORT_EXPORT_PLAN.md](plans/todo/JSON_IMPORT_EXPORT_PLAN.md)
+- Dev launcher improvements tracked in [plans/todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md](plans/todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md)
+- Frontend quality improvements tracked in [plans/todo/FRONTEND_QUALITY_IMPROVEMENTS_PLAN.md](plans/todo/FRONTEND_QUALITY_IMPROVEMENTS_PLAN.md)
 - Completed backend, frontend, and full-stack hardening record archived in [plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](plans/archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md)
 
 ## Tech Stack
