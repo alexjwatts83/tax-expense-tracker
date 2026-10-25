@@ -14,6 +14,8 @@ public sealed class ServiceViewModel : ObservableObject
     private DateTimeOffset? _startedAt;
     private int? _exitCode;
     private string _uptime = "--";
+    private string _crashDetails = string.Empty;
+    private string _crashSummary = string.Empty;
     private IReadOnlyList<PortOwner> _portConflicts = [];
 
     public ServiceViewModel(ServiceDefinition definition, ProcessSupervisor supervisor)
@@ -77,6 +79,21 @@ public sealed class ServiceViewModel : ObservableObject
     }
 
     public IAsyncRelayCommand StartCommand { get; }
+    public string CrashSummary
+    {
+        get => _crashSummary;
+        private set => SetProperty(ref _crashSummary, value);
+    }
+    public string CrashDetails
+    {
+        get => _crashDetails;
+        private set
+        {
+            if (SetProperty(ref _crashDetails, value))
+                OnPropertyChanged(nameof(HasCrashDetails));
+        }
+    }
+    public bool HasCrashDetails => !string.IsNullOrEmpty(CrashDetails);
     public IAsyncRelayCommand StopCommand { get; }
     public IAsyncRelayCommand RestartCommand { get; }
     public IAsyncRelayCommand ForceFreePortCommand { get; }
@@ -110,6 +127,11 @@ public sealed class ServiceViewModel : ObservableObject
         ProcessId = status.State is ServiceState.Stopped ? null : status.ProcessId ?? ProcessId;
         _startedAt = status.StartedAt ?? _startedAt;
         ExitCode = status.ExitCode;
+        var exitText = $"Exit code: {status.ExitCode?.ToString() ?? "unknown"}";
+        CrashDetails = status.State == ServiceState.Crashed
+            ? $"{exitText}{Environment.NewLine}{string.Join(Environment.NewLine, status.LastOutput)}" : string.Empty;
+        CrashSummary = status.State == ServiceState.Crashed
+            ? $"{exitText}{Environment.NewLine}{string.Join(Environment.NewLine, status.LastOutput.TakeLast(3))}" : string.Empty;
 
         if (status.State is ServiceState.Stopped or ServiceState.Crashed)
         {
@@ -136,7 +158,7 @@ public sealed class ServiceViewModel : ObservableObject
     }
 
     private bool CanStart() => State is ServiceState.Stopped or ServiceState.Crashed;
-    private bool CanStop() => State is ServiceState.Starting or ServiceState.Running
+    private bool CanStop() => State is ServiceState.Starting or ServiceState.Running or ServiceState.Crashed
         or ServiceState.HealthTimeout or ServiceState.Unhealthy or ServiceState.CertificateError;
     private bool CanRestart() => State is ServiceState.Running or ServiceState.Crashed
         or ServiceState.HealthTimeout or ServiceState.Unhealthy or ServiceState.CertificateError;

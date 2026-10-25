@@ -19,6 +19,9 @@ public sealed class LauncherSettingsStoreTests : IDisposable
         Assert.Equal(60, result.Settings.StartupTimeoutSeconds);
         Assert.Equal(2, result.Settings.GracefulStopTimeoutSeconds);
         Assert.Equal(5000, result.Settings.MaximumLogLines);
+        Assert.False(result.Settings.AutoRestartEnabled);
+        Assert.Equal(3, result.Settings.MaximumRestartAttempts);
+        Assert.Equal(2, result.Settings.RestartBackoffSeconds);
         Assert.Equal(@"C:\logs\TaxExpenseTracker.Api", result.Settings.ApiLogFolder);
         Assert.NotEmpty(result.Warning);
         Assert.True(File.Exists(store.FilePath));
@@ -34,7 +37,10 @@ public sealed class LauncherSettingsStoreTests : IDisposable
             StartupTimeoutSeconds = 120,
             GracefulStopTimeoutSeconds = 10,
             MaximumLogLines = 10000,
-            ApiLogFolder = _directory
+            ApiLogFolder = _directory,
+            AutoRestartEnabled = true,
+            MaximumRestartAttempts = 2,
+            RestartBackoffSeconds = 1
         };
 
         store.Save(settings);
@@ -70,6 +76,10 @@ public sealed class LauncherSettingsStoreTests : IDisposable
     [InlineData("{\"apiLogFolder\":null}")]
     [InlineData("{\"apiLogFolder\":\"relative/path\"}")]
     [InlineData("{\"startupTimeoutSeconds\":\"slow\"}")]
+    [InlineData("{\"maximumRestartAttempts\":0}")]
+    [InlineData("{\"maximumRestartAttempts\":11}")]
+    [InlineData("{\"restartBackoffSeconds\":0}")]
+    [InlineData("{\"restartBackoffSeconds\":61}")]
     public void InvalidFile_FallsBackWithWarningAndPreservesOriginal(string content)
     {
         var store = CreateStore();

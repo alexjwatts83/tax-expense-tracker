@@ -11,6 +11,7 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 {
     private readonly Dictionary<string, ServiceRuntime> _services;
     private readonly HttpClient _healthClient;
+    private readonly LauncherSettings _settings;
     private bool _isDisposing;
 
     public ProcessSupervisor(IEnumerable<ServiceDefinition> definitions, LauncherSettings? settings = null,
@@ -18,6 +19,7 @@ public sealed class ProcessSupervisor : IAsyncDisposable
     {
         settings ??= new LauncherSettings();
         settings.Validate();
+        _settings = settings;
         StartupTimeout = TimeSpan.FromSeconds(settings.StartupTimeoutSeconds);
         GracefulStopTimeout = TimeSpan.FromSeconds(settings.GracefulStopTimeoutSeconds);
         _services = definitions.ToDictionary(
@@ -37,15 +39,28 @@ public sealed class ProcessSupervisor : IAsyncDisposable
     public event Action<ServiceStatusChangedEventArgs>? StatusChanged;
     public event Action<string, IReadOnlyList<PortOwner>>? PortConflictDetected;
 
-    public async Task StartAsync(string serviceId)
+    public Task StartAsync(string serviceId) => StartCoreAsync(serviceId);
+
+    private async Task StartCoreAsync(string serviceId, bool automatic = false, CancellationToken cancellationToken = default)
     {
         var runtime = GetRuntime(serviceId);
-        await runtime.OperationGate.WaitAsync();
+        await runtime.OperationGate.WaitAsync(cancellationToken);
 
         try
         {
+            if (_isDisposing || cancellationToken.IsCancellationRequested)
+                return;
+
             if (runtime.Process is { HasExited: false } || runtime.State is ServiceState.Starting or ServiceState.Running)
                 return;
+
+            if (!automatic)
+            {
+                runtime.RestartCancellation.Cancel();
+                runtime.RestartCancellation.Dispose();
+                runtime.RestartCancellation = new CancellationTokenSource();
+                runtime.RestartAttempts = 0;
+            }
 
             var portOwners = PortInspector.GetOwners(runtime.Definition.Ports);
             if (portOwners.Count > 0)
@@ -60,6 +75,8 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 
             runtime.IntentionalStop = false;
             runtime.ReadyLogSeen = false;
+            lock (runtime.RecentOutput)
+                runtime.RecentOutput.Clear();
             runtime.ReadinessCancellation?.Dispose();
             runtime.ReadinessCancellation = new CancellationTokenSource();
             SetStatus(runtime, ServiceState.Starting);
@@ -89,11 +106,12 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 
             process.OutputDataReceived += (_, args) => ReceiveOutput(runtime, "stdout", args.Data);
             process.ErrorDataReceived += (_, args) => ReceiveOutput(runtime, "stderr", args.Data);
-            process.Exited += (_, _) => HandleExit(runtime, process);
+            process.Exited += (_, _) => runtime.ExitTask = HandleExitAsync(runtime, process);
 
             if (!process.Start())
                 throw new InvalidOperationException($"The {runtime.Definition.DisplayName} process did not start.");
 
+            runtime.Process?.Dispose();
             runtime.Process = process;
             runtime.StartedAt = DateTimeOffset.Now;
             SetStatus(runtime, ServiceState.Starting, process.Id, runtime.StartedAt);
@@ -102,7 +120,7 @@ public sealed class ProcessSupervisor : IAsyncDisposable
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            _ = MonitorReadinessAsync(runtime, process, runtime.ReadinessCancellation.Token);
+            runtime.ReadinessTask = MonitorReadinessAsync(runtime, process, runtime.ReadinessCancellation.Token);
         }
         catch (Exception exception)
         {
@@ -118,11 +136,14 @@ public sealed class ProcessSupervisor : IAsyncDisposable
     public async Task StopAsync(string serviceId)
     {
         var runtime = GetRuntime(serviceId);
+        runtime.RestartCancellation.Cancel();
         await runtime.OperationGate.WaitAsync();
 
         try
         {
             var process = runtime.Process;
+            runtime.IntentionalStop = true;
+            runtime.RestartCancellation.Cancel();
             if (process is null || process.HasExited)
             {
                 SetStatus(runtime, ServiceState.Stopped);
@@ -183,6 +204,10 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 
         foreach (var runtime in _services.Values)
         {
+            await runtime.ExitTask;
+            await runtime.RestartTask;
+            await runtime.ReadinessTask;
+            runtime.RestartCancellation.Dispose();
             runtime.ReadinessCancellation?.Dispose();
             runtime.Process?.Dispose();
             runtime.OperationGate.Dispose();
@@ -282,24 +307,68 @@ public sealed class ProcessSupervisor : IAsyncDisposable
         if (string.IsNullOrEmpty(text))
             return;
 
+        lock (runtime.RecentOutput)
+        {
+            runtime.RecentOutput.Enqueue(text);
+            while (runtime.RecentOutput.Count > 20)
+                runtime.RecentOutput.Dequeue();
+        }
+
         if (text.Contains(runtime.Definition.ReadyLogPattern, StringComparison.OrdinalIgnoreCase))
             runtime.ReadyLogSeen = true;
 
         Emit(runtime.Definition.Id, stream, text);
     }
 
-    private void HandleExit(ServiceRuntime runtime, Process process)
+    private async Task HandleExitAsync(ServiceRuntime runtime, Process process)
     {
-        if (!ReferenceEquals(runtime.Process, process))
-            return;
+        await runtime.OperationGate.WaitAsync();
+        try
+        {
+            if (!ReferenceEquals(runtime.Process, process))
+                return;
 
-        var exitCode = TryGetExitCode(process);
-        var finalState = runtime.IntentionalStop || _isDisposing
-            ? ServiceState.Stopped
-            : ServiceState.Crashed;
+            runtime.ReadinessCancellation?.Cancel();
+            await runtime.ReadinessTask;
+            await process.WaitForExitAsync();
+            var exitCode = TryGetExitCode(process);
+            var finalState = runtime.IntentionalStop || _isDisposing ? ServiceState.Stopped : ServiceState.Crashed;
+            string[] lastOutput;
+            lock (runtime.RecentOutput)
+                lastOutput = runtime.RecentOutput.ToArray();
 
-        Emit(runtime.Definition.Id, finalState == ServiceState.Crashed ? "stderr" : "launcher", $"Process exited with code {exitCode?.ToString() ?? "unknown"}.");
-        SetStatus(runtime, finalState, exitCode: exitCode);
+            Emit(runtime.Definition.Id, finalState == ServiceState.Crashed ? "stderr" : "launcher", $"Process exited with code {exitCode?.ToString() ?? "unknown"}.");
+            SetStatus(runtime, finalState, exitCode: exitCode, lastOutput: lastOutput);
+            if (finalState != ServiceState.Crashed || !_settings.AutoRestartEnabled || runtime.RestartCancellation.IsCancellationRequested)
+                return;
+
+            if (runtime.RestartAttempts >= _settings.MaximumRestartAttempts)
+            {
+                Emit(runtime.Definition.Id, "stderr", $"Automatic restart limit reached ({_settings.MaximumRestartAttempts} attempts). Use Start or Restart to reset the retry budget.");
+                return;
+            }
+
+            runtime.RestartAttempts++;
+            var delay = TimeSpan.FromSeconds(Math.Min(60, _settings.RestartBackoffSeconds * Math.Pow(2, runtime.RestartAttempts - 1)));
+            Emit(runtime.Definition.Id, "launcher", $"Automatic restart {runtime.RestartAttempts}/{_settings.MaximumRestartAttempts} in {delay.TotalSeconds:0} seconds.");
+            runtime.RestartTask = RestartAfterDelayAsync(runtime, delay, runtime.RestartCancellation.Token);
+        }
+        finally
+        {
+            runtime.OperationGate.Release();
+        }
+    }
+
+    private async Task RestartAfterDelayAsync(ServiceRuntime runtime, TimeSpan delay, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(delay, cancellationToken);
+            await StartCoreAsync(runtime.Definition.Id, automatic: true, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 
     private void SetStatus(
@@ -307,7 +376,8 @@ public sealed class ProcessSupervisor : IAsyncDisposable
         ServiceState state,
         int? processId = null,
         DateTimeOffset? startedAt = null,
-        int? exitCode = null)
+        int? exitCode = null,
+        IReadOnlyList<string>? lastOutput = null)
     {
         runtime.State = state;
         StatusChanged?.Invoke(new ServiceStatusChangedEventArgs(
@@ -315,7 +385,8 @@ public sealed class ProcessSupervisor : IAsyncDisposable
             state,
             processId,
             startedAt,
-            exitCode));
+            exitCode,
+            lastOutput));
     }
 
     private void Emit(string serviceId, string stream, string text) =>
@@ -361,5 +432,11 @@ public sealed class ProcessSupervisor : IAsyncDisposable
         public ServiceState State { get; set; } = ServiceState.Stopped;
         public bool ReadyLogSeen { get; set; }
         public bool IntentionalStop { get; set; }
+        public Queue<string> RecentOutput { get; } = new();
+        public Task ExitTask { get; set; } = Task.CompletedTask;
+        public CancellationTokenSource RestartCancellation { get; set; } = new();
+        public int RestartAttempts { get; set; }
+        public Task RestartTask { get; set; } = Task.CompletedTask;
+        public Task ReadinessTask { get; set; } = Task.CompletedTask;
     }
 }

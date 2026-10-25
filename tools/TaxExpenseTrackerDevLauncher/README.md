@@ -39,11 +39,16 @@ On first launch, the app saves defaults to `%LOCALAPPDATA%\TaxExpenseTrackerDevL
 	"startupTimeoutSeconds": 60,
 	"gracefulStopTimeoutSeconds": 2,
 	"apiLogFolder": "C:\\logs\\TaxExpenseTracker.Api",
-	"maximumLogLines": 5000
+	"maximumLogLines": 5000,
+	"autoRestartEnabled": false,
+	"maximumRestartAttempts": 3,
+	"restartBackoffSeconds": 2
 }
 ```
 
 Startup timeout must be 1-600 seconds, graceful-stop timeout 1-60 seconds, and maximum log lines 100-100,000. The API log folder must be an absolute path. Do not store secrets in this file.
+
+Automatic restart is disabled by default. Set `autoRestartEnabled` to `true` to retry unexpected process exits. `maximumRestartAttempts` accepts 1-10 retries after the initial start; `restartBackoffSeconds` accepts 1-60 seconds. Delays double per retry, capped at 60 seconds. The per-service retry budget resets only on explicit **Start** or **Restart**, not when a retry reaches Running. **Stop** cancels pending retries, and closing the launcher never restarts services. Port ownership and API readiness checks still apply on every attempt.
 
 Settings take effect when the launcher restarts. The timeouts control service startup and graceful-stop waits. `maximumLogLines` caps retained process output and API file-log lines, including the initial tail and live updates. `apiLogFolder` controls log discovery and **Open log folder**; it does not change the API's NLog output destination, which must be configured separately if moved.
 
@@ -60,6 +65,7 @@ A service is reported as **Running** only after its expected startup output is d
 
 - Start, stop, or restart the API and Web services independently or together.
 - View service state, process ID, uptime, ports, exit code, and local URL.
+- Inspect unexpected exits as **Crashed**, with an exit code and the last three output lines; hover over the summary for the last 20 lines. Intentional stops remain **Stopped**.
 - Filter combined API and frontend output, enable auto-scroll, clear the view, or save logs to a file.
 - Use the dedicated **Frontend Output** tab for npm and Angular output.
 - Follow API log files from the configured `apiLogFolder` (default `C:\logs\TaxExpenseTracker.Api`) in the **API Log Files** tab.
@@ -113,6 +119,10 @@ Check the service state and **Logs** tab:
 - **Health timeout:** Startup output, listening ports, and a successful health response were not all observed before `startupTimeoutSeconds`. Check connectivity and API logs, or increase the timeout if startup is legitimately slow.
 
 The failed-health process remains owned by the launcher for inspection. Use **Stop** or **Restart** after correcting the problem; **Start** stays disabled to prevent a duplicate process. These are startup readiness checks, not continuous health monitoring.
+
+### A service keeps crashing
+
+Check the crash summary and service output. If automatic restart is enabled, the **Logs** tab reports each retry delay and when the retry budget is exhausted. Use **Stop** to cancel a queued retry. After fixing the cause, use **Start** or **Restart** to begin a fresh retry budget. Automatic restart applies to unexpected exits, not health-check failures where the process is still alive.
 
 ### API log files are not listed
 

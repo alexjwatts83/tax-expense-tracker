@@ -4,12 +4,12 @@
 
 - **Status:** In Progress
 - **Assessed:** 2026-10-25
-- **Progress:** 4 of 15 tasks complete
-- **Evidence:** Stage 1 is complete. API health readiness is validated with 67 passing launcher tests, real HTTP/TLS probes, and desktop healthy/unhealthy database checks. Normal TLS validation and process ownership safeguards remain enabled.
+- **Progress:** 5 of 15 tasks complete
+- **Evidence:** Stage 1 is complete. Health readiness and bounded, default-off restart are validated with 77 passing launcher tests and desktop unexpected-exit, intentional-stop, crash-output, and retry-exhaustion checks. TLS validation and process ownership safeguards remain enabled.
 - **Authority:** This plan is the sole tracker for TaxExpenseTrackerDevLauncher enhancements. It does not change the API or frontend.
 
 Last Updated: 2026-10-25
-Current Task: DL-05 / Unexpected exits and optional bounded restart
+Current Task: DL-06 / API launch profile and build configuration selection
 
 ## Goal
 
@@ -37,10 +37,10 @@ Make the launcher more reliable, configurable, and useful for daily development 
 | Stage | Scope | Done | Total | Status | Depends On |
 |---|---|---:|---:|---|---|
 | 1 | Foundations: single instance and settings | 3 | 3 | Complete | None |
-| 2 | Readiness and resilience | 1 | 3 | In Progress | Stage 1 |
+| 2 | Readiness and resilience | 2 | 3 | In Progress | Stage 1 |
 | 3 | Developer workflow | 0 | 6 | Not Started | Stage 1 |
 | 4 | Log usability | 0 | 3 | Not Started | Stage 1 |
-| **Total** |  | **4** | **15** | **In Progress** |  |
+| **Total** |  | **5** | **15** | **In Progress** |  |
 
 ## Stage 1: Foundations
 
@@ -61,7 +61,7 @@ Goal: prevent competing launcher instances and remove hardcoded operational valu
 Goal: report service health accurately and make failures visible.
 
 - [x] **DL-04** After the API startup signal and port check succeed, require `GET /health` to return 200 before reporting **Running**. Report timeout, unhealthy response, and untrusted certificate as distinct states with actionable messages.
-- [ ] **DL-05** Distinguish user-initiated stops from unexpected exits. Show a **Crashed** state with exit code and last output lines. Add optional automatic restart, disabled by default, with bounded retries and backoff.
+- [x] **DL-05** Distinguish user-initiated stops from unexpected exits. Show a **Crashed** state with exit code and last output lines. Add optional automatic restart, disabled by default, with bounded retries and backoff.
 - [ ] **DL-06** Allow selecting the API launch profile (`https` or `http`) and build configuration (`Debug` or `Release`). Read ports for the selected profile from `Backend/TaxExpenseTracker.Api/Properties/launchSettings.json` instead of duplicating them.
 
 ### Acceptance Criteria
@@ -136,6 +136,8 @@ Then run the launcher with the `build-run-dev-launcher` skill and manually verif
 | 2026-10-25 | DL-02 | Settings store tests, full launcher build/tests, and desktop UI Automation checks | Pass: 19 focused tests; 44 total tests; build succeeded | Missing file creates defaults with visible notice; invalid values fall back with visible warning without overwriting the file; restored defaults load without notice. Partial JSON, numeric bounds, round-trip persistence, and storage failure covered. |
 | 2026-10-25 | DL-03 | Supervisor/log-reader tests, full launcher build/tests, and desktop UI Automation checks | Pass: 16 focused tests; 52 total tests; build succeeded | Configured one-second startup timeout stops an unready owned process; default/custom timeout values covered. Loaded capacities below/above 5,000 and appended-line limits covered. Desktop custom folder and 100-line live retention confirmed (lines 007-106); original defaults restored and launcher restarted without warning. API/frontend services were not started. |
 | 2026-10-25 | DL-04 | Supervisor/view-model/registry tests, real loopback HTTP/TLS probes, full launcher suite, and desktop API checks | Pass: 67 total tests; Debug build succeeded; desktop healthy/unhealthy checks passed | Exact HTTP 200 required; non-200/redirect, untrusted self-signed certificate, deadline, startup-signal gating, duplicate-start prevention, and stop cancellation covered. Desktop with in-memory SQLite showed Running and HTTPS 200; nonexistent read-only database showed Unhealthy (not Running), disabled Start, and HTTPS 503. Temporary environment restored, smoke launchers closed gracefully, API ports released; normal database untouched. |
+
+| 2026-10-25 | DL-05 | Focused settings/exit tests, full suite, Debug build, and desktop UI Automation | Pass: 23 settings tests; 6 exit-policy tests; 77 total tests; build succeeded | Fast exits, bounded output tail, default-off behavior, exponential backoff, retry exhaustion/reset, and Stop/shutdown cancellation covered. Desktop verified Crashed with signed exit code/output after terminating only the verified smoke-owned API tree, intentional Stopped, and two-retry exhaustion. Original settings/environment restored; smoke processes closed gracefully, API ports released, normal database untouched. |
 
 ## Completion Rule
 

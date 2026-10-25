@@ -6,7 +6,7 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Begin dev launcher task `DL-05`: distinguish unexpected exits and add optional bounded automatic restart.
+**Task:** Begin dev launcher task `DL-06`: select the API launch profile and build configuration, deriving ports from launch settings.
 
 **Authoritative plan:** [todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md](todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md)
 
@@ -14,13 +14,13 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 **Required outcome:**
 
-- Distinguish user-initiated stops from unexpected exits, reporting Crashed with the exit code and last output lines.
-- Add optional automatic restart, disabled by default, with bounded retries and backoff.
-- Preserve process ownership safeguards and prevent automatic restart after intentional stops or launcher shutdown.
+- Allow selecting the API launch profile (`https` or `http`) and build configuration (`Debug` or `Release`).
+- Read selected-profile ports from the API's `Properties/launchSettings.json` rather than duplicating them.
+- Keep service commands, local URLs, health readiness, and ownership checks consistent with the selected profile.
 
-**Immediate validation:** Run focused exit/restart tests and the launcher build/test suite; verify intentional stops, unexpected exits, and retry limits in the desktop launcher.
+**Immediate validation:** Run focused launch-profile tests and the launcher build/test suite; verify selected commands, ports, and readiness in the desktop launcher.
 
-**Last completed:** `DL-04` API health readiness passed all 67 launcher tests and the Debug build. Desktop checks confirmed Running with HTTPS 200 and Unhealthy with HTTPS 503 using isolated database configuration. TLS validation remained enabled, smoke services were cleaned up, and the normal database was untouched.
+**Last completed:** `DL-05` unexpected-exit reporting and default-off bounded restart passed all 77 launcher tests and the Debug build. Desktop checks confirmed signed crash exit codes/output, intentional Stopped state, and opt-in retry exhaustion. Original settings/environment were restored and smoke services cleaned up without touching the normal database.
 
 **Priority decision (2026-10-25):** All Azure-related work is deferred to much later, until explicitly requested. Do not attempt Azure sign-in, provisioning, or deployed validation as part of local improvements. Complete dev launcher improvements next, followed by frontend quality improvements.
 

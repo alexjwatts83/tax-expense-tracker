@@ -270,6 +270,138 @@ public sealed class ProcessSupervisorIntegrationTests
         Assert.Empty(PortInspector.GetOwners([port]));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExitPolicy_CapturesFastCrashAndEnforcesRetryBudget(bool enabled)
+    {
+        await using var supervisor = new ProcessSupervisor([CreateExitingDefinition()], new LauncherSettings
+        {
+            AutoRestartEnabled = enabled, MaximumRestartAttempts = 2, RestartBackoffSeconds = 1
+        });
+        var crashed = new TaskCompletionSource<ServiceStatusChangedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var exhausted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var extraStart = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var messages = new System.Collections.Concurrent.ConcurrentQueue<string>();
+        var budgetReset = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var firstRetries = 0;
+        var starts = 0;
+        supervisor.StatusChanged += status =>
+        {
+            if (status.State == ServiceState.Starting && status.ProcessId is not null && Interlocked.Increment(ref starts) > (enabled ? 3 : 1))
+                extraStart.TrySetResult();
+            if (status.State == ServiceState.Crashed)
+                crashed.TrySetResult(status);
+        };
+        supervisor.LogReceived += line =>
+        {
+            messages.Enqueue(line.Text);
+            if (line.Text == "Automatic restart 1/2 in 1 seconds." && Interlocked.Increment(ref firstRetries) == 2)
+                budgetReset.TrySetResult();
+            if (line.Text.StartsWith("Automatic restart limit reached", StringComparison.Ordinal))
+                exhausted.TrySetResult();
+        };
+
+        await supervisor.StartAsync("exit-test");
+        var result = await crashed.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.Equal(7, result.ExitCode);
+        Assert.Equal(20, result.LastOutput.Count);
+        Assert.Equal("exit-line 6", result.LastOutput[0]);
+        Assert.Equal("exit-line 25", result.LastOutput[^1]);
+        if (enabled)
+        {
+            await exhausted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            Assert.Contains("Automatic restart 1/2 in 1 seconds.", messages);
+            Assert.Contains("Automatic restart 2/2 in 2 seconds.", messages);
+        }
+        await Assert.ThrowsAsync<TimeoutException>(() => extraStart.Task.WaitAsync(TimeSpan.FromMilliseconds(1500)));
+        Assert.Equal(enabled ? 3 : 1, starts);
+        if (enabled)
+        {
+            await supervisor.StartAsync("exit-test");
+            await budgetReset.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await supervisor.StopAsync("exit-test");
+            Assert.Equal(4, starts);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExitPolicy_StopOrShutdownCancelsPendingRestart(bool shutdown)
+    {
+        await using var supervisor = new ProcessSupervisor([CreateExitingDefinition()], new LauncherSettings
+        {
+            AutoRestartEnabled = true, RestartBackoffSeconds = 1
+        });
+        var scheduled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var restarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var starts = 0;
+        supervisor.StatusChanged += status =>
+        {
+            if (status.State == ServiceState.Starting && status.ProcessId is not null && Interlocked.Increment(ref starts) > 1)
+                restarted.TrySetResult();
+        };
+        supervisor.LogReceived += line =>
+        {
+            if (line.Text.StartsWith("Automatic restart 1/", StringComparison.Ordinal))
+                scheduled.TrySetResult();
+        };
+        await supervisor.StartAsync("exit-test");
+        await scheduled.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        if (shutdown)
+            await supervisor.DisposeAsync();
+        else
+            await supervisor.StopAsync("exit-test");
+
+        await Assert.ThrowsAsync<TimeoutException>(() => restarted.Task.WaitAsync(TimeSpan.FromMilliseconds(1500)));
+        Assert.Equal(1, starts);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExitPolicy_ExternalTerminationIsCrashedButUserStopIsStopped(bool intentional)
+    {
+        var definition = CreateExitingDefinition() with
+        {
+            ReadyLogPattern = "EXIT_TEST_READY",
+            Arguments = ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+                "Write-Output 'EXIT_TEST_READY'; [System.Threading.ManualResetEvent]::new($false).WaitOne() | Out-Null"]
+        };
+        await using var supervisor = new ProcessSupervisor([definition]);
+        var running = new TaskCompletionSource<ServiceStatusChangedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finished = new TaskCompletionSource<ServiceStatusChangedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+        supervisor.StatusChanged += status =>
+        {
+            if (status.State == ServiceState.Running)
+                running.TrySetResult(status);
+            if (status.State == (intentional ? ServiceState.Stopped : ServiceState.Crashed))
+                finished.TrySetResult(status);
+        };
+        await supervisor.StartAsync("exit-test");
+        var started = await running.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        if (intentional)
+            await supervisor.StopAsync("exit-test");
+        else
+        {
+            using var ownedProcess = System.Diagnostics.Process.GetProcessById(started.ProcessId!.Value);
+            ownedProcess.Kill();
+        }
+        var result = await finished.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        if (!intentional)
+        {
+            Assert.NotNull(result.ExitCode);
+            Assert.Contains("EXIT_TEST_READY", result.LastOutput);
+        }
+    }
+
+    private static ServiceDefinition CreateExitingDefinition() => new(
+        "exit-test", "Exit test", "powershell.exe",
+        ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+            "1..25 | ForEach-Object { Write-Output ('exit-line ' + $_) }; exit 7"],
+        Environment.CurrentDirectory, [], "NEVER_READY", new Uri("http://localhost"));
+
     private sealed class HealthHandler(int responseCode, Uri healthUri, int port) : HttpMessageHandler
     {
         public bool Requested { get; private set; }

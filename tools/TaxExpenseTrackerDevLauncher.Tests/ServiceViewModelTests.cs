@@ -49,10 +49,12 @@ public sealed class ServiceViewModelTests
         viewModel.ApplyStatus(new ServiceStatusChangedEventArgs("test", ServiceState.Crashed, 456, DateTimeOffset.UtcNow, 7));
 
         Assert.True(viewModel.StartCommand.CanExecute(null));
-        Assert.False(viewModel.StopCommand.CanExecute(null));
         Assert.True(viewModel.RestartCommand.CanExecute(null));
+        Assert.True(viewModel.StopCommand.CanExecute(null));
         Assert.Equal(7, viewModel.ExitCode);
         Assert.Equal("--", viewModel.Uptime);
+        Assert.Contains("Exit code: 7", viewModel.CrashDetails);
+        Assert.True(viewModel.HasCrashDetails);
     }
 
     [Theory]
