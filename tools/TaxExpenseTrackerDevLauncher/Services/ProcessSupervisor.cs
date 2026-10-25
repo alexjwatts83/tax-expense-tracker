@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Text;
 using TaxExpenseTrackerDevLauncher.Models;
@@ -8,9 +10,11 @@ namespace TaxExpenseTrackerDevLauncher.Services;
 public sealed class ProcessSupervisor : IAsyncDisposable
 {
     private readonly Dictionary<string, ServiceRuntime> _services;
+    private readonly HttpClient _healthClient;
     private bool _isDisposing;
 
-    public ProcessSupervisor(IEnumerable<ServiceDefinition> definitions, LauncherSettings? settings = null)
+    public ProcessSupervisor(IEnumerable<ServiceDefinition> definitions, LauncherSettings? settings = null,
+        HttpMessageHandler? healthHandler = null)
     {
         settings ??= new LauncherSettings();
         settings.Validate();
@@ -20,6 +24,10 @@ public sealed class ProcessSupervisor : IAsyncDisposable
             definition => definition.Id,
             definition => new ServiceRuntime(definition),
             StringComparer.OrdinalIgnoreCase);
+            _healthClient = new HttpClient(healthHandler ?? new HttpClientHandler { AllowAutoRedirect = false })
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
     }
 
             public TimeSpan StartupTimeout { get; }
@@ -36,7 +44,7 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 
         try
         {
-            if (runtime.State is ServiceState.Starting or ServiceState.Running)
+            if (runtime.Process is { HasExited: false } || runtime.State is ServiceState.Starting or ServiceState.Running)
                 return;
 
             var portOwners = PortInspector.GetOwners(runtime.Definition.Ports);
@@ -179,6 +187,8 @@ public sealed class ProcessSupervisor : IAsyncDisposable
             runtime.Process?.Dispose();
             runtime.OperationGate.Dispose();
         }
+
+        _healthClient.Dispose();
     }
 
     private async Task MonitorReadinessAsync(ServiceRuntime runtime, Process process, CancellationToken cancellationToken)
@@ -191,6 +201,52 @@ public sealed class ProcessSupervisor : IAsyncDisposable
             {
                 if (runtime.ReadyLogSeen && ArePortsListening(runtime.Definition.Ports))
                 {
+                    if (runtime.Definition.HealthUri is { } healthUri)
+                    {
+                        using var healthTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                        var remaining = deadline - DateTimeOffset.UtcNow;
+                        if (remaining <= TimeSpan.Zero)
+                            break;
+
+                        healthTimeout.CancelAfter(remaining);
+                        try
+                        {
+                            using var response = await _healthClient.GetAsync(healthUri,
+                                HttpCompletionOption.ResponseHeadersRead, healthTimeout.Token);
+                            if (cancellationToken.IsCancellationRequested || process.HasExited)
+                                return;
+
+                            if (response.StatusCode != HttpStatusCode.OK)
+                            {
+                                SetStatus(runtime, ServiceState.Unhealthy, process.Id, runtime.StartedAt);
+                                Emit(runtime.Definition.Id, "stderr", $"Health check {healthUri} returned HTTP {(int)response.StatusCode}. Check API/database configuration and logs, then restart.");
+                                return;
+                            }
+                        }
+                        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+                        catch (HttpRequestException exception) when (exception.HttpRequestError == HttpRequestError.SecureConnectionError)
+                        {
+                            if (cancellationToken.IsCancellationRequested || process.HasExited)
+                                return;
+
+                            SetStatus(runtime, ServiceState.CertificateError, process.Id, runtime.StartedAt);
+                            Emit(runtime.Definition.Id, "stderr", $"Health check {healthUri}: HTTPS certificate validation or TLS negotiation failed. Run 'dotnet dev-certs https --check --trust', check the certificate hostname/expiry, then restart. {exception.Message}");
+                            return;
+                        }
+                        catch (HttpRequestException exception)
+                        {
+                            Emit(runtime.Definition.Id, "stderr", $"Health check {healthUri} could not connect: {exception.Message}");
+                            await Task.Delay(400, cancellationToken);
+                            continue;
+                        }
+                    }
+
+                    if (cancellationToken.IsCancellationRequested || process.HasExited)
+                        return;
+
                     SetStatus(runtime, ServiceState.Running, process.Id, runtime.StartedAt);
                     Emit(runtime.Definition.Id, "launcher", $"Ready on port(s) {string.Join(", ", runtime.Definition.Ports)}.");
                     return;
@@ -201,6 +257,13 @@ public sealed class ProcessSupervisor : IAsyncDisposable
 
             if (cancellationToken.IsCancellationRequested || process.HasExited)
                 return;
+
+            if (runtime.Definition.HealthUri is { } timedOutUri)
+            {
+                SetStatus(runtime, ServiceState.HealthTimeout, process.Id, runtime.StartedAt);
+                Emit(runtime.Definition.Id, "stderr", $"API readiness timed out after {StartupTimeout.TotalSeconds:0} seconds waiting for startup output, listening ports, and HTTP 200 from {timedOutUri}. Check API logs/connectivity or increase startupTimeoutSeconds, then restart.");
+                return;
+            }
 
             Emit(runtime.Definition.Id, "stderr", $"Startup timed out after {StartupTimeout.TotalSeconds:0} seconds.");
             process.Kill(entireProcessTree: true);

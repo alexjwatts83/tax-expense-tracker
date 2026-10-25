@@ -31,6 +31,8 @@ public sealed class LauncherFoundationTests
         Assert.Equal("api", services[0].Id);
         Assert.Equal([7152, 5158], api.Ports);
         Assert.Equal([4200], web.Ports);
+        Assert.Equal(new Uri("https://localhost:7152/health"), api.HealthUri);
+        Assert.Null(web.HealthUri);
         Assert.Equal(Path.Combine(directory.Path, "Frontend"), web.WorkingDirectory);
     }
 

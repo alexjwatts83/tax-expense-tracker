@@ -8,4 +8,5 @@ public sealed record ServiceDefinition(
     string WorkingDirectory,
     IReadOnlyList<int> Ports,
     string ReadyLogPattern,
-    Uri LocalUri);
+    Uri LocalUri,
+    Uri? HealthUri = null);

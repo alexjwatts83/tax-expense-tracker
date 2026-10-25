@@ -19,7 +19,8 @@ public static class ServiceRegistry
                 repositoryRoot,
                 [7152, 5158],
                 "Now listening on:",
-                new Uri("https://localhost:7152/swagger")),
+                new Uri("https://localhost:7152/swagger"),
+                new Uri("https://localhost:7152/health")),
             new ServiceDefinition(
                 "web",
                 "Web",

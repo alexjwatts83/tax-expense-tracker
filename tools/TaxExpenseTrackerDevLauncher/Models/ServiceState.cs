@@ -6,5 +6,8 @@ public enum ServiceState
     Starting,
     Running,
     Stopping,
-    Crashed
+    Crashed,
+    HealthTimeout,
+    Unhealthy,
+    CertificateError
 }

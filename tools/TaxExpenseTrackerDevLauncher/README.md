@@ -54,7 +54,7 @@ Settings take effect when the launcher restarts. The timeouts control service st
 | API | `dotnet run --project Backend/TaxExpenseTracker.Api --launch-profile https` | 7152, 5158 | https://localhost:7152/swagger |
 | Web | `npm.cmd start` in `Frontend` | 4200 | http://localhost:4200 |
 
-A service is reported as **Running** only after its expected startup output is detected and its configured ports are listening.
+A service is reported as **Running** only after its expected startup output is detected and its configured ports are listening. The API additionally requires HTTP 200 from `https://localhost:7152/health` within the configured startup timeout. HTTPS certificate validation remains enabled, and redirects are not followed. Frontend readiness is unchanged.
 
 ## Features
 
@@ -103,6 +103,16 @@ Check the **Logs** tab for configuration, certificate, database, or port errors.
 ```powershell
 dotnet run --project Backend/TaxExpenseTracker.Api --launch-profile https
 ```
+
+### The API listens but is not Running
+
+Check the service state and **Logs** tab:
+
+- **Unhealthy:** `/health` returned a non-200 response. Check the API/database configuration and logs; a listening API with an unreachable database is not ready.
+- **Certificate error:** HTTPS certificate validation or TLS negotiation failed. Run `dotnet dev-certs https --check --trust` and check the certificate hostname and expiry. The launcher never bypasses certificate validation.
+- **Health timeout:** Startup output, listening ports, and a successful health response were not all observed before `startupTimeoutSeconds`. Check connectivity and API logs, or increase the timeout if startup is legitimately slow.
+
+The failed-health process remains owned by the launcher for inspection. Use **Stop** or **Restart** after correcting the problem; **Start** stays disabled to prevent a duplicate process. These are startup readiness checks, not continuous health monitoring.
 
 ### API log files are not listed
 

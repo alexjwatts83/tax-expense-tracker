@@ -55,6 +55,25 @@ public sealed class ServiceViewModelTests
         Assert.Equal("--", viewModel.Uptime);
     }
 
+    [Theory]
+    [InlineData(ServiceState.HealthTimeout, "Health timeout")]
+    [InlineData(ServiceState.Unhealthy, "Unhealthy")]
+    [InlineData(ServiceState.CertificateError, "Certificate error")]
+    public async Task ApplyStatus_HealthFailureKeepsOwnedProcessStoppableAndRestartable(ServiceState state, string text)
+    {
+        var definition = CreateDefinition();
+        await using var supervisor = new ProcessSupervisor([definition]);
+        var viewModel = new ServiceViewModel(definition, supervisor);
+
+        viewModel.ApplyStatus(new ServiceStatusChangedEventArgs("test", state, 456, DateTimeOffset.UtcNow, null));
+
+        Assert.Equal(text, viewModel.StateText);
+        Assert.Equal(456, viewModel.ProcessId);
+        Assert.False(viewModel.StartCommand.CanExecute(null));
+        Assert.True(viewModel.StopCommand.CanExecute(null));
+        Assert.True(viewModel.RestartCommand.CanExecute(null));
+    }
+
     private static ServiceDefinition CreateDefinition() => new(
         "test",
         "Test",

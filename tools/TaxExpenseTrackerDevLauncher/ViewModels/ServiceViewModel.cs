@@ -45,7 +45,12 @@ public sealed class ServiceViewModel : ObservableObject
         }
     }
 
-    public string StateText => State.ToString();
+    public string StateText => State switch
+    {
+        ServiceState.HealthTimeout => "Health timeout",
+        ServiceState.CertificateError => "Certificate error",
+        _ => State.ToString()
+    };
 
     public int? ProcessId
     {
@@ -131,8 +136,10 @@ public sealed class ServiceViewModel : ObservableObject
     }
 
     private bool CanStart() => State is ServiceState.Stopped or ServiceState.Crashed;
-    private bool CanStop() => State is ServiceState.Starting or ServiceState.Running;
-    private bool CanRestart() => State is ServiceState.Running or ServiceState.Crashed;
+    private bool CanStop() => State is ServiceState.Starting or ServiceState.Running
+        or ServiceState.HealthTimeout or ServiceState.Unhealthy or ServiceState.CertificateError;
+    private bool CanRestart() => State is ServiceState.Running or ServiceState.Crashed
+        or ServiceState.HealthTimeout or ServiceState.Unhealthy or ServiceState.CertificateError;
 
     private void NotifyCommandStates()
     {
