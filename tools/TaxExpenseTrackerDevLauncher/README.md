@@ -28,6 +28,8 @@ dotnet run --project tools/TaxExpenseTrackerDevLauncher/TaxExpenseTrackerDevLaun
 
 The launcher locates the repository by searching parent directories for `TaxExpenseTracker.sln`. Starting it from outside the repository will fail.
 
+Only one launcher instance runs per repository in the current Windows session. Opening it again restores and activates the existing window, then exits the duplicate without starting or stopping managed services.
+
 ## Managed services
 
 | Service | Command | Ports | URL |

@@ -2,14 +2,15 @@
 
 ## Plan Status Snapshot
 
-- **Status:** Blocked - Azure access and live inputs required
-- **Assessed:** 2026-08-23
+- **Status:** Deferred - Much Later
+- **Deferral decision (2026-10-25):** All Azure-related improvements are postponed until explicitly requested. Existing access and input blockers remain recorded; they do not block local launcher or frontend work.
+- **Assessed:** 2026-10-25
 - **Progress:** 0 of 6 tasks complete
 - **Evidence:** All local application hardening, Release validation, migration generation, and Production API smoke checks pass. Azure CLI is not authenticated, no dev stack has been applied, and required Terragrunt inputs remain placeholders.
 - **Authority:** This plan is the sole tracker for Azure work transferred from hardening tasks S2-09, S2-10, and the deployed portion of S8-07.
 
-Last Updated: 2026-08-23
-Current Task: AZH-01 / Establish Azure access and final inputs
+Last Updated: 2026-10-25
+Current Task: None - deferred; resume with AZH-01 only on explicit request
 
 ## Goal
 
@@ -33,7 +34,7 @@ Deploy the locally hardened application to Azure, configure single-tenant Entra 
 
 ## Tasks
 
-- [ ] **AZH-01** Authenticate Azure CLI, confirm subscription/tenant access, replace required owner/cost-center placeholders, and record non-secret environment identifiers outside source control as appropriate.
+- [!] **AZH-01** Authenticate Azure CLI, confirm subscription/tenant access, replace required owner/cost-center placeholders, and record non-secret environment identifiers outside source control as appropriate. Attempted 2026-10-25; blocked on interactive sign-in and approved tag values.
 - [ ] **AZH-02** Align and validate the dev infrastructure plan for Static Web App/API hosting, persistent SQLite storage, Key Vault references, CORS, `/health` probing, and correlated standard-output log collection; keep Azure SQL resources disabled.
 - [ ] **AZH-03** Create separate single-tenant SPA and API Entra registrations, expose and consent the delegated API scope, require assignment, assign only the owner, and configure redirect/logout URIs and API Easy Auth.
 - [ ] **AZH-04** Provision the dev stack, configure application settings, apply EF migrations explicitly, deploy API/frontend artifacts, and verify `/health` before routing user traffic.
@@ -59,15 +60,21 @@ Deploy the locally hardened application to Azure, configure single-tenant Entra 
 
 | Date | Blocker | Resolution | Status |
 |---|---|---|---|
-| 2026-08-23 | `az account show` requires `az login` | Authenticate interactively with the target tenant/subscription | Open |
-| 2026-08-23 | `infra/live/dev/terragrunt.hcl` contains owner and cost-center placeholders | Supply approved non-secret values before planning | Open |
+| 2026-10-25 | `az account show` still requires `az login` | Authenticate interactively with the target tenant/subscription | Open |
+| 2026-10-25 | `infra/live/dev/terragrunt.hcl` still contains owner and cost-center placeholders | Supply approved non-secret values before planning | Open |
 | 2026-08-23 | No Azure dev environment or Entra registrations exist | Complete AZH-01 through AZH-04 before deployed validation | Open |
+
+## Validation Log
+
+| Date | Task | Check | Result |
+|---|---|---|---|
+| 2026-10-25 | AZH-01 | Azure CLI account access and dev Terragrunt inputs | Blocked: CLI requests `az login`; owner and cost-center tags remain `TODO`. No infrastructure changes made. |
 
 ## Relationship To Other Plans
 
 - [../archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md](../archive/FULL_STACK_HARDENING_IMPLEMENTATION_PLAN.md) is the completed local application hardening record; do not reopen it for deployment-only work.
 - [AZURE_DEPLOYMENT_TRACKER.md](AZURE_DEPLOYMENT_TRACKER.md) remains the broad infrastructure checklist. This plan controls the hardening-specific Azure closure sequence and validation evidence.
-- [../NEXT_WORK.md](../NEXT_WORK.md) points to this plan while Azure rollout is the active priority.
+- [../NEXT_WORK.md](../NEXT_WORK.md) records this plan as deferred while local improvements take priority.
 
 ## Completion Rule
 
