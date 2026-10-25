@@ -1,4 +1,5 @@
 using TaxExpenseTrackerDevLauncher.Models;
+using TaxExpenseTrackerDevLauncher.Services;
 
 namespace TaxExpenseTrackerDevLauncher.Tests;
 
@@ -25,6 +26,32 @@ public sealed class LauncherLogPolicyTests
         Assert.False(LauncherLogFilter.Include(apiError, showApiLogs: false, showWebLogs: true, "error"));
         Assert.True(LauncherLogFilter.Include(webError, showApiLogs: false, showWebLogs: true, "ERROR"));
         Assert.False(LauncherLogFilter.Include(webError, showApiLogs: true, showWebLogs: true, "warning"));
+    }
+
+    [Theory]
+    [InlineData(100)]
+    [InlineData(6000)]
+    public void LogLineCollection_UsesLoadedSettingsCapacity(int capacity)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"LauncherLogPolicy-{Guid.NewGuid():N}");
+        try
+        {
+            var store = new LauncherSettingsStore(Path.Combine(directory, "settings.json"));
+            store.Save(new LauncherSettings { MaximumLogLines = capacity });
+            var lines = new LogLineCollection(store.Load().Settings.MaximumLogLines);
+
+            for (var index = 1; index <= capacity + 1; index++)
+                lines.Add(CreateLine("api", $"line {index}"));
+
+            Assert.Equal(capacity, lines.Count);
+            Assert.Equal("line 2", lines[0].Text);
+            Assert.Equal($"line {capacity + 1}", lines[^1].Text);
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+                Directory.Delete(directory, recursive: true);
+        }
     }
 
     [Fact]

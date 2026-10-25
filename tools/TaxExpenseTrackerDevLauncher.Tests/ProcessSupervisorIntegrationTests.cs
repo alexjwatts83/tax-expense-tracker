@@ -8,6 +8,53 @@ namespace TaxExpenseTrackerDevLauncher.Tests;
 public sealed class ProcessSupervisorIntegrationTests
 {
     [Fact]
+    public async Task Constructor_UsesDefaultTimeouts()
+    {
+        await using var supervisor = new ProcessSupervisor([]);
+
+        Assert.Equal(TimeSpan.FromSeconds(60), supervisor.StartupTimeout);
+        Assert.Equal(TimeSpan.FromSeconds(2), supervisor.GracefulStopTimeout);
+    }
+
+    [Fact]
+    public async Task Constructor_UsesConfiguredTimeouts()
+    {
+        var settings = new LauncherSettings { StartupTimeoutSeconds = 120, GracefulStopTimeoutSeconds = 7 };
+        await using var supervisor = new ProcessSupervisor([], settings);
+
+        Assert.Equal(TimeSpan.FromSeconds(120), supervisor.StartupTimeout);
+        Assert.Equal(TimeSpan.FromSeconds(7), supervisor.GracefulStopTimeout);
+    }
+
+    [Fact]
+    public async Task StartupTimeout_UsesConfiguredLimitAndStopsUnreadyProcess()
+    {
+        var definition = new ServiceDefinition(
+            "test", "Unready service", "powershell.exe",
+            ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+                "[System.Threading.ManualResetEvent]::new($false).WaitOne() | Out-Null"],
+            Environment.CurrentDirectory, [], "NEVER_READY", new Uri("http://localhost"));
+        await using var supervisor = new ProcessSupervisor([definition], new LauncherSettings { StartupTimeoutSeconds = 1 });
+        var timeout = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var crashed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        supervisor.LogReceived += line =>
+        {
+            if (line.Text.StartsWith("Startup timed out", StringComparison.Ordinal))
+                timeout.TrySetResult(line.Text);
+        };
+        supervisor.StatusChanged += status =>
+        {
+            if (status.State == ServiceState.Crashed)
+                crashed.TrySetResult();
+        };
+
+        await supervisor.StartAsync("test");
+
+        Assert.Equal("Startup timed out after 1 seconds.", await timeout.Task.WaitAsync(TimeSpan.FromSeconds(15)));
+        await crashed.Task.WaitAsync(TimeSpan.FromSeconds(10));
+    }
+
+    [Fact]
     public async Task StartAndStop_TransitionsThroughReadinessAndReleasesPort()
     {
         var port = ReserveAvailablePort();

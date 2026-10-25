@@ -45,7 +45,7 @@ On first launch, the app saves defaults to `%LOCALAPPDATA%\TaxExpenseTrackerDevL
 
 Startup timeout must be 1-600 seconds, graceful-stop timeout 1-60 seconds, and maximum log lines 100-100,000. The API log folder must be an absolute path. Do not store secrets in this file.
 
-The persistence and validation foundation is complete. Applying these values to service timeouts, log readers, and output limits is tracked separately as `DL-03`; editing them does not yet change those operational values.
+Settings take effect when the launcher restarts. The timeouts control service startup and graceful-stop waits. `maximumLogLines` caps retained process output and API file-log lines, including the initial tail and live updates. `apiLogFolder` controls log discovery and **Open log folder**; it does not change the API's NLog output destination, which must be configured separately if moved.
 
 ## Managed services
 
@@ -62,13 +62,13 @@ A service is reported as **Running** only after its expected startup output is d
 - View service state, process ID, uptime, ports, exit code, and local URL.
 - Filter combined API and frontend output, enable auto-scroll, clear the view, or save logs to a file.
 - Use the dedicated **Frontend Output** tab for npm and Angular output.
-- Follow API log files from `C:\logs\TaxExpenseTracker.Api` in the **API Log Files** tab.
+- Follow API log files from the configured `apiLogFolder` (default `C:\logs\TaxExpenseTracker.Api`) in the **API Log Files** tab.
 - Preview the frontend in the **App** tab using desktop or known Android and iPhone viewport sizes.
 - Open the frontend in the system browser.
 - Detect processes already using required ports and display their process IDs.
 - Stop launcher-owned child process trees when the launcher closes.
 
-The launcher retains the newest 5,000 output lines in memory.
+The launcher retains the newest lines up to `maximumLogLines` in memory (default 5,000).
 
 ## Port conflicts
 
@@ -106,7 +106,7 @@ dotnet run --project Backend/TaxExpenseTracker.Api --launch-profile https
 
 ### API log files are not listed
 
-The **API Log Files** tab reads `C:\logs\TaxExpenseTracker.Api`. Start the API so it can create logs, then select **Refresh**. The launcher only reads these files; it does not modify them.
+The **API Log Files** tab reads the configured `apiLogFolder` (default `C:\logs\TaxExpenseTracker.Api`). Ensure it matches the API's NLog output destination. Start the API so it can create logs, then select **Refresh**. The launcher only reads these files; it does not modify them.
 
 ## Development
 

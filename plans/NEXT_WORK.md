@@ -6,21 +6,21 @@ Use this file as the starting point when resuming work or asking "what's next?".
 
 ## Current Priority
 
-**Task:** Begin dev launcher task `DL-03`: apply persisted settings to timeouts and log configuration.
+**Task:** Begin dev launcher task `DL-04`: require API health readiness before reporting Running.
 
 **Authoritative plan:** [todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md](todo/DEV_LAUNCHER_IMPROVEMENTS_PLAN.md)
 
-**Current stage:** Dev Launcher Stage 1 - Foundations
+**Current stage:** Dev Launcher Stage 2 - Readiness and Resilience
 
 **Required outcome:**
 
-- Replace hardcoded startup and graceful-stop timeouts with validated settings.
-- Configure the API log folder and output line limits from the loaded settings.
-- Preserve existing behavior with defaults and verify custom values are consumed by the owning services.
+- After the API startup signal and port check succeed, require `GET /health` to return 200 before reporting Running.
+- Distinguish timeout, unhealthy response, and untrusted certificate failures with actionable messages.
+- Keep TLS certificate validation enabled and preserve process ownership safeguards.
 
-**Immediate validation:** Run focused supervisor/log-reader tests and the launcher build/test suite; verify custom values and safe defaults in the desktop launcher.
+**Immediate validation:** Run focused readiness tests and the launcher build/test suite; verify healthy and failed health checks in the desktop launcher.
 
-**Last completed:** `DL-02` persistent validated settings passed 19 focused tests and 44 total launcher tests. Desktop checks confirmed default-file creation, visible invalid-file fallback, file preservation, and warning-free valid startup.
+**Last completed:** `DL-03` operational settings passed 16 focused tests and 52 total launcher tests. Desktop checks confirmed the custom log folder, 100-line live retention, and warning-free restart with restored defaults. Stage 1 is complete.
 
 **Priority decision (2026-10-25):** All Azure-related work is deferred to much later, until explicitly requested. Do not attempt Azure sign-in, provisioning, or deployed validation as part of local improvements. Complete dev launcher improvements next, followed by frontend quality improvements.
 

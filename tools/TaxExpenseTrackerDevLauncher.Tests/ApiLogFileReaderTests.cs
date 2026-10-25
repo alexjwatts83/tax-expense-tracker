@@ -115,6 +115,50 @@ public sealed class ApiLogFileReaderTests : IDisposable
         Assert.Equal("line 5001", lines[^1]);
     }
 
+    [Theory]
+    [InlineData(100)]
+    [InlineData(6000)]
+    public async Task ConfiguredSettings_ApplyFolderAndTailLimit(int limit)
+    {
+        var path = Path.Combine(_directory, "custom.log");
+        await File.WriteAllLinesAsync(path, Enumerable.Range(1, limit + 1).Select(index => $"line {index}"));
+        var settings = new LauncherSettings { ApiLogFolder = _directory, MaximumLogLines = limit };
+        using var reader = new ApiLogFileReader(watchForChanges: false, settings: settings);
+        IReadOnlyList<ApiLogFileInfo>? files = null;
+        IReadOnlyList<string>? lines = null;
+        reader.FilesChanged += value => files = value;
+        reader.LinesReset += value => lines = value;
+
+        await reader.RefreshFilesAsync();
+        await reader.SelectFileAsync(Assert.Single(files!).FullPath);
+
+        Assert.Equal(_directory, reader.LogDirectory);
+        Assert.NotNull(lines);
+        Assert.Equal(limit, lines.Count);
+        Assert.Equal("line 2", lines[0]);
+        Assert.Equal($"line {limit + 1}", lines[^1]);
+    }
+
+    [Fact]
+    public async Task ConfiguredLimit_AppliesToAppendedLines()
+    {
+        var path = Path.Combine(_directory, "custom.log");
+        await File.WriteAllTextAsync(path, "initial\n");
+        using var reader = new ApiLogFileReader(watchForChanges: false,
+            settings: new LauncherSettings { ApiLogFolder = _directory, MaximumLogLines = 100 });
+        IReadOnlyList<string>? appended = null;
+        reader.LinesAppended += lines => appended = lines;
+        await reader.SelectFileAsync(path);
+
+        await File.AppendAllLinesAsync(path, Enumerable.Range(1, 150).Select(index => $"line {index}"));
+        await reader.ReadUpdatesAsync();
+
+        Assert.NotNull(appended);
+        Assert.Equal(100, appended.Count);
+        Assert.Equal("line 51", appended[0]);
+        Assert.Equal("line 150", appended[^1]);
+    }
+
     [Fact]
     public async Task DisposeAsync_IsSafeWhileReadIsQueued()
     {

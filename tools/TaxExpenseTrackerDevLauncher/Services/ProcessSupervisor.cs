@@ -7,18 +7,23 @@ namespace TaxExpenseTrackerDevLauncher.Services;
 
 public sealed class ProcessSupervisor : IAsyncDisposable
 {
-    private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(60);
-    private static readonly TimeSpan GracefulStopTimeout = TimeSpan.FromSeconds(2);
     private readonly Dictionary<string, ServiceRuntime> _services;
     private bool _isDisposing;
 
-    public ProcessSupervisor(IEnumerable<ServiceDefinition> definitions)
+    public ProcessSupervisor(IEnumerable<ServiceDefinition> definitions, LauncherSettings? settings = null)
     {
+        settings ??= new LauncherSettings();
+        settings.Validate();
+        StartupTimeout = TimeSpan.FromSeconds(settings.StartupTimeoutSeconds);
+        GracefulStopTimeout = TimeSpan.FromSeconds(settings.GracefulStopTimeoutSeconds);
         _services = definitions.ToDictionary(
             definition => definition.Id,
             definition => new ServiceRuntime(definition),
             StringComparer.OrdinalIgnoreCase);
     }
+
+            public TimeSpan StartupTimeout { get; }
+            public TimeSpan GracefulStopTimeout { get; }
 
     public event Action<LogLine>? LogReceived;
     public event Action<ServiceStatusChangedEventArgs>? StatusChanged;

@@ -6,9 +6,9 @@ namespace TaxExpenseTrackerDevLauncher.Services;
 
 public sealed class ApiLogFileReader : IDisposable, IAsyncDisposable
 {
-    public const string DefaultLogDirectory = @"C:\logs\TaxExpenseTracker.Api";
-    private const int MaximumLines = 5000;
+    public static string DefaultLogDirectory => new LauncherSettings().ApiLogFolder;
     private const int TailScanBufferSize = 64 * 1024;
+    private readonly int _maximumLines;
     private readonly SemaphoreSlim _readGate = new(1, 1);
     private readonly bool _watchForChanges;
     private FileSystemWatcher? _watcher;
@@ -17,9 +17,12 @@ public sealed class ApiLogFileReader : IDisposable, IAsyncDisposable
     private long _position;
     private bool _disposed;
 
-    public ApiLogFileReader(string? logDirectory = null, bool watchForChanges = true)
+    public ApiLogFileReader(string? logDirectory = null, bool watchForChanges = true, LauncherSettings? settings = null)
     {
-        LogDirectory = logDirectory ?? DefaultLogDirectory;
+        settings ??= new LauncherSettings();
+        settings.Validate();
+        LogDirectory = logDirectory ?? settings.ApiLogFolder;
+        _maximumLines = settings.MaximumLogLines;
         _watchForChanges = watchForChanges;
     }
 
@@ -246,7 +249,7 @@ public sealed class ApiLogFileReader : IDisposable, IAsyncDisposable
 
         stream.Seek(-1, SeekOrigin.End);
         var endsWithNewLine = stream.ReadByte() == '\n';
-        var newLinesNeeded = MaximumLines + (endsWithNewLine ? 1 : 0);
+        var newLinesNeeded = _maximumLines + (endsWithNewLine ? 1 : 0);
         var buffer = new byte[TailScanBufferSize];
         var position = stream.Length;
         var newLinesFound = 0;
@@ -287,7 +290,7 @@ public sealed class ApiLogFileReader : IDisposable, IAsyncDisposable
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .Select(line => line.TrimEnd('\r'))
             .Where(line => line.Length > 0)
-            .TakeLast(MaximumLines)
+            .TakeLast(_maximumLines)
             .ToArray();
     }
 

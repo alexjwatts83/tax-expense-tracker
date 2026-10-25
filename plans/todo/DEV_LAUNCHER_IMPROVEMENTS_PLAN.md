@@ -4,12 +4,12 @@
 
 - **Status:** In Progress
 - **Assessed:** 2026-10-25
-- **Progress:** 2 of 15 tasks complete
-- **Evidence:** Single-instance protection and per-user settings persistence are validated. All 44 launcher tests pass; desktop missing/invalid settings and clean restart checks pass. Operational timeouts, log folder, and log limits remain hardcoded until DL-03.
+- **Progress:** 3 of 15 tasks complete
+- **Evidence:** Stage 1 is complete: single-instance protection, validated per-user settings, and operational settings consumption are validated. All 52 launcher tests pass; desktop custom-folder/live-retention and restored-default restart checks pass.
 - **Authority:** This plan is the sole tracker for TaxExpenseTrackerDevLauncher enhancements. It does not change the API or frontend.
 
 Last Updated: 2026-10-25
-Current Task: DL-03 / Apply settings to timeouts and log configuration
+Current Task: DL-04 / Require API health readiness
 
 ## Goal
 
@@ -36,11 +36,11 @@ Make the launcher more reliable, configurable, and useful for daily development 
 
 | Stage | Scope | Done | Total | Status | Depends On |
 |---|---|---:|---:|---|---|
-| 1 | Foundations: single instance and settings | 2 | 3 | In Progress | None |
+| 1 | Foundations: single instance and settings | 3 | 3 | Complete | None |
 | 2 | Readiness and resilience | 0 | 3 | Not Started | Stage 1 |
 | 3 | Developer workflow | 0 | 6 | Not Started | Stage 1 |
 | 4 | Log usability | 0 | 3 | Not Started | Stage 1 |
-| **Total** |  | **2** | **15** | **In Progress** |  |
+| **Total** |  | **3** | **15** | **In Progress** |  |
 
 ## Stage 1: Foundations
 
@@ -48,7 +48,7 @@ Goal: prevent competing launcher instances and remove hardcoded operational valu
 
 - [x] **DL-01** Enforce a single launcher instance per repository using a named mutex derived from the repository root. A second start activates the existing window and exits.
 - [x] **DL-02** Add a validated launcher settings model persisted per user under `%LOCALAPPDATA%\TaxExpenseTrackerDevLauncher\settings.json`. Missing values use current defaults; an invalid file falls back to defaults and shows a visible warning rather than failing startup.
-- [ ] **DL-03** Move startup timeout (60 s), graceful stop timeout (2 s), API log folder, and output line limit (5,000) from constants into settings.
+- [x] **DL-03** Move startup timeout (60 s), graceful stop timeout (2 s), API log folder, and output line limit (5,000) from constants into settings.
 
 ### Acceptance Criteria
 
@@ -134,6 +134,7 @@ Then run the launcher with the `build-run-dev-launcher` skill and manually verif
 |---|---|---|---|---|
 | 2026-10-25 | DL-01 | Focused coordinator tests, full launcher tests/build, and desktop double-launch check | Pass: 3 focused tests; 25 total tests; build succeeded | Duplicate exits 0 before creating a window or supervisor; original minimized window restores and gains foreground focus; one instance remains. Different repository keys and restart after disposal covered. |
 | 2026-10-25 | DL-02 | Settings store tests, full launcher build/tests, and desktop UI Automation checks | Pass: 19 focused tests; 44 total tests; build succeeded | Missing file creates defaults with visible notice; invalid values fall back with visible warning without overwriting the file; restored defaults load without notice. Partial JSON, numeric bounds, round-trip persistence, and storage failure covered. |
+| 2026-10-25 | DL-03 | Supervisor/log-reader tests, full launcher build/tests, and desktop UI Automation checks | Pass: 16 focused tests; 52 total tests; build succeeded | Configured one-second startup timeout stops an unready owned process; default/custom timeout values covered. Loaded capacities below/above 5,000 and appended-line limits covered. Desktop custom folder and 100-line live retention confirmed (lines 007-106); original defaults restored and launcher restarted without warning. API/frontend services were not started. |
 
 ## Completion Rule
 

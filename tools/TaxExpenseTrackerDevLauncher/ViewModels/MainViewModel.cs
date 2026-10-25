@@ -15,7 +15,6 @@ namespace TaxExpenseTrackerDevLauncher.ViewModels;
 
 public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 {
-    private const int MaximumLogLines = 5000;
     private readonly ProcessSupervisor _supervisor;
     private readonly ApiLogFileReader _apiLogFileReader;
     private readonly Dispatcher _dispatcher;
@@ -42,8 +41,9 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         SettingsWarning = settingsResult.Warning;
         RepositoryRoot = RepositoryLocator.FindRepositoryRoot();
         var definitions = ServiceRegistry.Create(RepositoryRoot);
-        _supervisor = new ProcessSupervisor(definitions);
-        _apiLogFileReader = new ApiLogFileReader();
+        _supervisor = new ProcessSupervisor(definitions, Settings);
+        _apiLogFileReader = new ApiLogFileReader(settings: Settings);
+        LogLines = new LogLineCollection(Settings.MaximumLogLines);
         Services = new ObservableCollection<ServiceViewModel>(
             definitions.Select(definition => new ServiceViewModel(definition, _supervisor)));
 
@@ -84,7 +84,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public string RepositoryRoot { get; }
     public ObservableCollection<ServiceViewModel> Services { get; }
     public ServiceViewModel WebService => Services.First(service => service.Id == "web");
-    public ObservableCollection<LogLine> LogLines { get; } = new LogLineCollection(MaximumLogLines);
+    public ObservableCollection<LogLine> LogLines { get; }
     public ICollectionView LogsView { get; }
     public ICollectionView FrontendLogsView { get; }
     public ObservableCollection<ApiLogFileInfo> ApiLogFiles { get; } = [];
@@ -327,7 +327,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         foreach (var line in lines)
             ApiLogFileLines.Add(new ApiLogFileLine(line));
 
-        while (ApiLogFileLines.Count > MaximumLogLines)
+        while (ApiLogFileLines.Count > Settings.MaximumLogLines)
             ApiLogFileLines.RemoveAt(0);
     }
 
@@ -359,11 +359,11 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         Process.Start(new ProcessStartInfo("http://localhost:4200") { UseShellExecute = true });
     }
 
-    private static void OpenApiLogFolder()
+    private void OpenApiLogFolder()
     {
-        if (!Directory.Exists(ApiLogFileReader.DefaultLogDirectory))
+        if (!Directory.Exists(_apiLogFileReader.LogDirectory))
             return;
 
-        Process.Start(new ProcessStartInfo("explorer.exe", ApiLogFileReader.DefaultLogDirectory) { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo("explorer.exe", _apiLogFileReader.LogDirectory) { UseShellExecute = true });
     }
 }
